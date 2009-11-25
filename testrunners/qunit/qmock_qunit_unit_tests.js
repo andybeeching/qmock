@@ -1008,7 +1008,7 @@ test("mock with single & multiple primitive parameter expectation - default type
 	
 	// Test multiple parameter value expectations, no return value
 	var jedi = new Mock();
-	jedi
+	/*jedi
 		.expects(1)
 		.method('setForceLevel')
 		.accepts({
@@ -1016,10 +1016,9 @@ test("mock with single & multiple primitive parameter expectation - default type
 		}, {
 			params: [9] // 2nd presentation to interface
 		})
-		.required(1);
+		.required(1);*/
 	
 	// Alternative syntax
-	/*
 	jedi
 		.expects(1)
 		.method('setForceLevel')
@@ -1037,7 +1036,6 @@ test("mock with single & multiple primitive parameter expectation - default type
 			{accepts: [3], returns: true}, // 1st presentation to interface
 			{accepts: [9], returns: false} // 2nd presentation to interface
 		]
-	*/
 		
 	// Bad Exercises
 		
@@ -2437,12 +2435,11 @@ test("mock with single / multiple parameters and matched return values", functio
 	expect(13);
 	
 	var ninja = new Mock();
-	
 	ninja
 		.expects(1)
 			.method("swing")
-			.accepts(
-				{params: ["hard"], returns: "hit"} // presentation
+			.interface(
+				{accepts: ["hard"], returns: "hit"} // presentation 1
 			);
 			
 	// Bad Exercises
@@ -2491,24 +2488,18 @@ test("mock with single / multiple parameters and matched return values", functio
 			returns : 'Foo bar baz'
 		}
 	});
-	
 	// mock there being no .tt or .haml template, but there being a .tash template
 	var fs = new Mock({
 		isFile : {
-			accepts: [{
-				params: ['templates/index.tt'],
-				returns: false
-			},{
-				params: ['templates/index.haml'],
-				returns: false
-			},{
-				params: ['templates/index.tash'],
-				returns: true
-			}],
-			calls: 3
+			interface: [
+				{accepts: ['templates/index.tt'], returns: false},
+				{accepts: ['templates/index.haml'], returns: false},
+				{accepts: ['templates/index.tash'], returns: true},
+			],
+			calls: 3 // Only use if bothered about strict number of calls.
 		},
 		rawOpen : {
-			accepts: ['templates/index.tash'],
+			accepts: ['templates/index.tash'], // alternative declaration of expectations without interface()
 			returns: fileMock,
 			calls: 1
 		}
