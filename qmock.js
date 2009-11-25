@@ -332,6 +332,8 @@ var Mock = (function () {
 		arguments.callee._assertArray = assertArray;
 		arguments.callee._assertObject = assertObject;
 		arguments.callee._buildException = buildException;
+		
+		
 
 	    // On my command, unleash the mock! :-)
 	    return mock;
