@@ -8,7 +8,6 @@
  * @dependencies None - free as a bird
  * @example var mock = new Mock();
  *
- * TODO: Support easy mock creation, e.g. take JSON tree of data to map? {"html": {expects: 1, args: ["<div />"], returns: "self"}};
  * TODO: Support multiple callbacks with correlating arguments
  * TODO: Optional strict method ordering flag? e.g. {ordered: true}
  * TODO: Document Mock object (plus Method) API
@@ -50,178 +49,203 @@
 	// So Dmitry Baranovskiy doesn't shout at me ([O:O]) http://sitepoint.com/blogs/2009/11/12/google-closure-how-not-to-write-javascript/
 	// Really this is ultra defensive but since undefined is used in parameter verification code let's be sure it actually is typeof "undefined".
 	var undefined,
-	// slice() alias - Need to check support for older browsers, can always custom roll if not available.
 		slice = Array.prototype.slice;
+		
+	// Allow pass-through argument checking - declares objects of type 'Variable' in global namespace.
+	container.Variable = container.Selector = new function Variable () {} ();
+	
+	// PRIVATE static methods
+	
+	function expose (obj, context, key) {
+		var cachedObj = obj; // can this part be improved by one cache for all or many atomic caches?
+		context[key] = {
+			get: function() {
+				return obj;
+			},
+			set: function() {
+				obj = arguments[0] || null; 
+			},
+			reset: function() {
+				obj = cachedObj;
+			}
+		}
+	}
+	
+	// Function to strict type check length & elements of an array, returns Boolean to callee (assertCollection)
+	function assertArray (expected, actual, opt_strictValueChecking) {		
+		return ( expected && actual 
+			&& expected.constructor === Array 
+			&& actual.constructor === Array 
+			&& expected.length === actual.length ) ?
+				( assertCollection ({
+					expected			: expected,
+					actual				: actual,
+					strictValueChecking: ( opt_strictValueChecking !== undefined ) ? opt_strictValueChecking : false,
+					name				: "",
+					exceptions			: [],
+					isConstuctor		: false,
+					exceptionType		: ""			
+				}) ) ? true : false
+			: false; // Bad Arguments
+	}
+
+	// Function to strict type check members of an object, returns Boolean to callee (assertCollection)
+	function assertObject (expected, actual, opt_strictValueChecking) {
+		var result = true; 
+		if ( expected && actual ) {
+			for ( var property in expected ) {
+				if ( !assertCollection({
+						expected		: [expected[property]],
+						actual			: [actual[property]],
+						strictValueChecking: ( opt_strictValueChecking !== undefined ) ? opt_strictValueChecking : false,
+						name			: "",
+						exceptions		: [],
+						isConstructor	: false,
+						exceptionType	: ""
+					})
+				) { result = false; }
+			} 
+		} else {
+			result = false;
+		}
+		return result;
+	}
+
+	// Delegate function that asserts elements of a collection
+	function assertCollection (config) {
+	
+		// Used to push errors into correct array
+		function throwException () {
+			config.exceptions.push(
+				buildException.apply(undefined, arguments)
+			);
+		}
+	
+		// params === object literal with associated properties - used for readability
+		with ( config ) {			
+	
+			// Only assert on absolute number of params declared in method signature as expectations don't exist for overloaded interfaces
+			testingArgumentTypes: for (var i = 0, len = actual.length; i < len; i++) {
+				
+				// hack in support for native object types (aside from null // undefined)
+				var nativeTypes = [Number, String, Boolean, Date, Function, Object, Array, RegExp],
+					parameter = expected[i] && expected[i].constructor;
+					
+				assertType: 
+					for (var j = 0, _len = nativeTypes.length; j < _len; j++) {
+						if ( expected[i] === nativeTypes[j] ) {
+							parameter = expected[i];
+							break assertType;
+						}
+					}
+				
+				switch(parameter) {
+					// Pass-through
+					case container.Variable.constructor	:
+						continue testingArgumentTypes;
+					// Primitives  - compare by constructor unless strictValue flag is true (where compare by identity).
+					case Number				:
+					case 0					:
+						if ( ( strictValueChecking === true ) && ( expected[i] !== actual[i] ) ) {
+							throwException("IncorrectArgumentValueException", name, expected[i], actual[i]);
+						} else if ( ( ( (actual[i] === 0) ? true : actual[i] )
+						 	&& actual[i].constructor ) !== Number ) {
+								throwException(exceptionType, name, "Number", actual[i]);
+						}
+						continue testingArgumentTypes;
+					case String				:
+					case ""					:
+						if ( ( strictValueChecking === true ) && ( expected[i] !== actual[i] ) ) {
+							throwException("IncorrectArgumentValueException", name, expected[i], actual[i]);
+						} else if  ( ( ( (actual[i] === "") ? true : actual[i] )
+						 	&& actual[i].constructor ) !== String ) {
+							throwException(exceptionType, name, "String", actual[i]);
+						}
+						continue testingArgumentTypes;
+					case Boolean			:
+					case false				:
+						if ( ( strictValueChecking === true ) && ( expected[i] !== actual[i] ) ) {
+							throwException("IncorrectArgumentValueException", name, expected[i], actual[i]);
+						} else if  ( ( ( (actual[i] === false) ? true : actual[i] )
+						 	&& actual[i].constructor ) !== Boolean ) {
+							throwException(exceptionType, name, "Boolean", actual[i]);
+						}
+						continue testingArgumentTypes;
+					case Date				:						
+						if ( (actual[i] && actual[i].constructor) !== Date ) {
+							throwException("IncorrectArgumentValueException", name, "Date", actual[i]);
+						} else if ( ( strictValueChecking === true ) 
+							&& ( expected[i].toUTCString() !== actual[i].toUTCString() ) ) {
+							throwException(exceptionType, name, expected[i].toUTCString(), actual[i].toUTCString());
+						}
+						continue testingArgumentTypes;
+					// Composites - compare by constructor
+					case Function			: 
+						if ( (actual[i] && actual[i].constructor) !== Function ) {
+							throwException(exceptionType, name, "Function", actual[i]); }
+							continue testingArgumentTypes;
+					case Object				: 
+						if ( !assertObject(expected[i], actual[i], strictValueChecking ) ) {
+							throwException(exceptionType, name, "Object", actual[i]); }
+							continue testingArgumentTypes;
+					case Array				: 
+						if ( !assertArray(expected[i], actual[i], strictValueChecking ) ) { 
+							throwException(exceptionType, name, expected[i], actual[i]); }
+							continue testingArgumentTypes;
+					case RegExp				:
+						if ( (actual[i] && actual[i].constructor) !== RegExp ) {
+							throwException(exceptionType, name, "RegExp", actual[i]); }
+							continue testingArgumentTypes;
+					// Falsy - compare by type
+					case null				:
+					case undefined			:
+						if ( expected[i] !== actual[i] ) {
+							throwException(exceptionType, name, expected[i], actual[i]); }
+							continue testingArgumentTypes;
+					// Custom Object - compare by constructor
+					default					: 
+						if ( expected[i].constructor !== (actual[i] && actual[i].constructor) ) {
+							throwException(exceptionType, name, "Custom Object", actual[i]); }
+				};
+			}
+
+			// Can just return a Boolean for recursive calls, ignored by assertArguments call.
+			return ( exceptions.length === 0 ) ? true : false;
+		}
+	}
+
+	// Function to build pretty exception objects
+    function buildException (exceptionType, name, expected, actual) {
+	 	var e = {
+				type : exceptionType
+			},
+			name = "'" + name + "'";
+		
+		switch (true) {
+			case "IncorrectNumberOfArgumentsException" === exceptionType 	:
+				e.message = name + " expected: " + expected + " arguments, actual number was: " + actual;
+				break;
+			case "IncorrectNumberOfMethodCallsException" === exceptionType	:
+				e.message = name + " expected: " + expected + " method calls, actual number was: " + actual;
+				break;
+			default:
+				e.message = name + " expected: " + expected + ", actual was: " + actual;
+		}
+		
+		return e;
+	}
 	
 	Mock = (function createMockConstructor () {
 	
-		// PRIVATE static methods
-	
-		// Allow pass-through argument checking - declares objects of type 'Variable' in global namespace.
-		container.Variable = container.Selector = new function Variable () {} ();
-		
-		// Function to strict type check length & elements of an array, returns Boolean to callee (assertCollection)
-		function assertArray (expected, actual, opt_strictValueChecking) {		
-			return ( expected && actual 
-				&& expected.constructor === Array 
-				&& actual.constructor === Array 
-				&& expected.length === actual.length ) ?
-					( assertCollection ({
-						expected			: expected,
-						actual				: actual,
-						strictValueChecking: ( opt_strictValueChecking !== undefined ) ? opt_strictValueChecking : false,
-						name				: "",
-						exceptions			: [],
-						isConstuctor		: false,
-						exceptionType		: ""			
-					}) ) ? true : false
-				: false; // Bad Arguments
-		}
-	
-		// Function to strict type check members of an object, returns Boolean to callee (assertCollection)
-		function assertObject (expected, actual, opt_strictValueChecking) {
-			var result = true; 
-			if ( expected && actual ) {
-				for ( var property in expected ) {
-					if ( !assertCollection({
-							expected		: [expected[property]],
-							actual			: [actual[property]],
-							strictValueChecking: ( opt_strictValueChecking !== undefined ) ? opt_strictValueChecking : false,
-							name			: "",
-							exceptions		: [],
-							isConstructor	: false,
-							exceptionType	: ""
-						})
-					) { result = false; }
-				} 
-			} else {
-				result = false;
-			}
-			return result;
-		}
-	
-		// Delegate function that asserts elements of a collection
-		function assertCollection (params) {
-		
-			// Used to push errors into correct array
-			function throwException () {
-				params.exceptions.push(
-					buildException.apply(undefined, arguments)
-				);
-			}
-		
-			// params === object literal with associated properties - used for readability
-			with ( params ) {			
-		
-				// Only assert on absolute number of params declared in method signature as expectations don't exist for overloaded interfaces
-				testingArgumentTypes: for (var i = 0, len = actual.length; i < len; i++) {
-					
-					switch(expected[i] && expected[i].constructor) {
-						// Pass-through
-						case container.Variable.constructor	:
-							continue testingArgumentTypes;
-						// Primitives  - compare by constructor unless strictValue flag is true (where compare by identity).
-						case Number				:
-						case 0					:
-							if ( ( strictValueChecking === true ) && ( expected[i] !== actual[i] ) ) {
-								throwException("IncorrectArgumentValueException", name, expected[i], actual[i]);
-							} else if ( ( ( (actual[i] === 0) ? true : actual[i] )
-							 	&& actual[i].constructor ) !== Number ) {
-									throwException(exceptionType, name, "Number", actual[i]);
-							}
-							continue testingArgumentTypes;
-						case String				:
-						case ""					:
-							if ( ( strictValueChecking === true ) && ( expected[i] !== actual[i] ) ) {
-								throwException("IncorrectArgumentValueException", name, expected[i], actual[i]);
-							} else if  ( ( ( (actual[i] === "") ? true : actual[i] )
-							 	&& actual[i].constructor ) !== String ) {
-								throwException(exceptionType, name, "String", actual[i]);
-							}
-							continue testingArgumentTypes;
-						case Boolean			:
-						case false				:
-							if ( ( strictValueChecking === true ) && ( expected[i] !== actual[i] ) ) {
-								throwException("IncorrectArgumentValueException", name, expected[i], actual[i]);
-							} else if  ( ( ( (actual[i] === false) ? true : actual[i] )
-							 	&& actual[i].constructor ) !== Boolean ) {
-								throwException(exceptionType, name, "Boolean", actual[i]);
-							}
-							continue testingArgumentTypes;
-						case Date				:						
-							if ( (actual[i] && actual[i].constructor) !== Date ) {
-								throwException("IncorrectArgumentValueException", name, "Date", actual[i]);
-							} else if ( ( strictValueChecking === true ) 
-								&& ( expected[i].toUTCString() !== actual[i].toUTCString() ) ) {
-								throwException(exceptionType, name, expected[i].toUTCString(), actual[i].toUTCString());
-							}
-							continue testingArgumentTypes;
-						// Composites - compare by constructor
-						case Function			: 
-							if ( (actual[i] && actual[i].constructor) !== Function ) {
-								throwException(exceptionType, name, "Function", actual[i]); }
-								continue testingArgumentTypes;
-						case Object				: 
-							if ( !assertObject(expected[i], actual[i], strictValueChecking ) ) {
-								throwException(exceptionType, name, "Object", actual[i]); }
-								continue testingArgumentTypes;
-						case Array				: 
-							if ( !assertArray(expected[i], actual[i], strictValueChecking ) ) { 
-								throwException(exceptionType, name, expected[i], actual[i]); }
-								continue testingArgumentTypes;
-						case RegExp				:
-							if ( (actual[i] && actual[i].constructor) !== RegExp ) {
-								throwException(exceptionType, name, "RegExp", actual[i]); }
-								continue testingArgumentTypes;
-						// Falsy - compare by type
-						case null				:
-						case undefined			:
-							if ( expected[i] !== actual[i] ) {
-								throwException(exceptionType, name, expected[i], actual[i]); }
-								continue testingArgumentTypes;
-						// Custom Object - compare by constructor
-						default					: 
-							if ( expected[i].constructor !== (actual[i] && actual[i].constructor) ) {
-								throwException(exceptionType, name, "Custom Object", actual[i]); }
-					};
-				}
-
-				// Can just return a Boolean for recursive calls, ignored by assertArguments call.
-				return ( exceptions.length === 0 ) ? true : false;
-			}
-		}
-	
-		// Function to build pretty exception objects
-	    function buildException (exceptionType, name, expected, actual) {
-		 	var e = {
-					type : exceptionType
-				},
-				name = "'" + name + "'";
-			
-			switch (true) {
-				case "IncorrectNumberOfArgumentsException" === exceptionType 	:
-					e.message = name + " expected: " + expected + " arguments, actual number was: " + actual;
-					break;
-				case "IncorrectNumberOfMethodCallsException" === exceptionType	:
-					e.message = name + " expected: " + expected + " method calls, actual number was: " + actual;
-					break;
-				default:
-					e.message = name + " expected: " + expected + ", actual was: " + actual;
-			}
-			
-			return e;
-		}
 	
 		// PUBLIC MOCK OBJECT CONSTRUCTOR
 		return function MockConstructor () {
 
-			function MockObject () {
-				// Can't use MockObject fn name, dies in IE <<< Changed to be ES5 compatible - test in IE!!
-		       	MockObject.actualArguments = arguments;
-				return MockObject;
-			}
-
-		    var mock = MockObject,
+		    var mock = function MockObject () {
+					// Can't use MockObject fn name, dies in IE <<< Changed to be ES5 compatible - test in IE!!
+			       	MockObject.actualArguments = arguments;
+					return MockObject;
+				},
 				methods = [], // List of MockedMember method instances declared on mock
 		        exceptions = []; // List of exceptions thrown by verify/verifyMethod functions
 		
@@ -350,6 +374,11 @@
 					// Add in per presentation strict argument length unless already set either globally or locally (recommendation to keep it consistent locally - don't let mocks change behaviour in test group too much)
 					// This should probably be part of the refactor... feels messy!
 					if (this.requiredNumberofArguments === false) {
+						
+						// Set minimum expectations
+						this.requiredNumberofArguments = arguments[0]["accepts"].length; 
+						
+						// Assign explicit expectation if exist
 						for(var i = 0, len = arguments.length; i < len; i++) {
 							if(!arguments[i]["required"]) {
 								arguments[i]["required"] = arguments[i]["accepts"].length;
@@ -360,7 +389,8 @@
 					return this;
 				},
 		        accepts: function setSingleInterfaceExpectation () {
-					this.expectedArgs = [{"accepts": slice.call(arguments, 0)}]
+					this.requiredNumberofArguments = arguments.length;
+					this.expectedArgs = [{"accepts": slice.call(arguments, 0)}];
 					return this;
 		        },
 				returns: function (stub) {
@@ -617,9 +647,10 @@
 			})(arguments[0]);
 			
 			// Expose internal methods for unit tests
-			MockConstructor._assertArray = assertArray;
-			MockConstructor._assertObject = assertObject;
-			MockConstructor._buildException = buildException;
+			expose( assertArray, MockConstructor, "_assertArray" );
+			expose( assertObject, MockConstructor, "_assertObject" );
+			expose( assertCollection, MockConstructor, "_assertObject" );
+			expose( buildException, MockConstructor, "_buildException" );
 
 		    // On my command, unleash the mock! :-)
 		    return mock;
@@ -629,7 +660,6 @@
 	// PUBLIC static members on Mock class
 	
 	Mock.prototype = {
-		//exposeObject: exposeObject,
 		// Version number
 		QMock : "0.2"
 	};

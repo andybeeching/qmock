@@ -868,60 +868,860 @@ test("w/ JSON: mock with no parameters, return values", function () {
 	
 });
 
-test("mock with single & multiple primitive parameter expectation - default type check", function () {
-    
-	expect(21);
+test("mocked method interface with single (Number) primitive parameter expectation >> default type check and required", function () {
+
+	expect(124);
 	
-	// Test single 'Number' primitive type
+	// refactor to use pdoc syntax
+	// See also mdc for conventional interface declarations
+	
+	/**
+	*
+	* @description Setup mock with single method 'swing'.
+	* @param swing() {String} mock expects argument of type (String) to be passed.
+	*
+	**/
+	
+	/**
+	*
+	* Re-run tests with mocked method interface declared with a Constructor and with typed parameter assertion.
+	*
+	**/
+	var ninja = new Mock();
+	ninja
+		.expects(1)
+			.method("swing")
+			.accepts(Number);
+	
+	// BAD EXERCISES
+	
+	ninja.swing(); // Test no arguments
+
+	try {
+		ninja.verify();	
+	    fail("verify() should throw exception when swing() interface passed No parameters");
+	} catch (error) {	
+	    equals(error.length, 1, "verify() should return 1 error when swing() passed no parameters");
+	    equals(error[0].type, "IncorrectNumberOfArgumentsException", "verify() error type should be IncorrectNumberOfArgumentsException for (String)");
+	}
+
+	ninja.reset();
+	
+	// Test invalid argument type - Constructors
+
+	ninja.swing(String);
+
+	try {
+		ninja.verify();	
+	    fail("verify() should throw exception when swing() interface passed incorrect parameter type [constructor obj: (String)]");
+	} catch (error) {	
+	    equals(error.length, 1, "verify() should return 1 error when swing() passed incorrect parameter type [constructor obj: (String)]");
+	    equals(error[0].type, "IncorrectArgumentTypeException", "verify() error type should be IncorrectArgumentTypeException for (String)");
+	}
+
+	ninja.reset(); 
+	
+	ninja.swing(Boolean);
+
+	try {
+		ninja.verify();	
+	    fail("verify() should throw exception when swing() interface passed incorrect parameter type [constructor obj: (Boolean)]");
+	} catch (error) {	
+	    equals(error.length, 1, "verify() should return 1 error when swing() passed incorrect parameter type [constructor obj: (Boolean)]");
+	    equals(error[0].type, "IncorrectArgumentTypeException", "verify() error type should be IncorrectArgumentTypeException for (Boolean)");
+	}
+	
+	ninja.reset();
+	
+	ninja.swing(Array);
+
+	try {
+		ninja.verify();	
+	    fail("verify() should throw exception when swing() interface passed incorrect parameter type [constructor obj: (Array)]");
+	} catch (error) {	
+	    equals(error.length, 1, "verify() should return 1 error when swing() passed incorrect parameter type [constructor obj: (Array)]");
+	    equals(error[0].type, "IncorrectArgumentTypeException", "verify() error type should be IncorrectArgumentTypeException for (Array)");
+	}
+	
+	ninja.reset();
+	
+	ninja.swing(Object);
+
+	try {
+		ninja.verify();	
+	    fail("verify() should throw exception when swing() interface passed incorrect parameter type [constructor obj: (Object)]");
+	} catch (error) {	
+	    equals(error.length, 1, "verify() should return 1 error when swing() passed incorrect parameter type [constructor obj: (Object)]");
+	    equals(error[0].type, "IncorrectArgumentTypeException", "verify() error type should be IncorrectArgumentTypeException for (Object)");
+	}
+	
+	ninja.reset();
+	
+	ninja.swing(Function);
+	
+	try {
+		ninja.verify();	
+	    fail("verify() should throw exception when swing() interface passed incorrect parameter type [constructor obj: (Function)]");
+	} catch (error) {	
+	    equals(error.length, 1, "verify() should return 1 error when swing() passed incorrect parameter type [constructor obj: (Function)]");
+	    equals(error[0].type, "IncorrectArgumentTypeException", "verify() error type should be IncorrectArgumentTypeException for (Function)");
+	}
+	
+	ninja.reset();
+	
+	ninja.swing(RegExp);
+
+	try {
+		ninja.verify();	
+	    fail("verify() should throw exception when swing() interface passed incorrect parameter type [constructor obj: (RegExp)]");
+	} catch (error) {	
+	    equals(error.length, 1, "verify() should return 1 error when swing() passed incorrect parameter type [constructor obj: (RegExp)]");
+	    equals(error[0].type, "IncorrectArgumentTypeException", "verify() error type should be IncorrectArgumentTypeException for (RegExp)");
+	}
+
+	ninja.reset();
+	
+	// Test invalid argument type - values
+	
+	ninja.swing("string");
+
+	try {
+		ninja.verify();	
+	    fail("verify() should throw exception when swing() interface passed incorrect parameter type (String: string)");
+	} catch (error) {	
+	    equals(error.length, 1, "verify() should return 1 error when swing() passed incorrect parameter type (String: string)");
+	    equals(error[0].type, "IncorrectArgumentTypeException", "verify() error type should be IncorrectArgumentTypeException for (String: string)");
+	}
+
+	ninja.reset(); 
+	
+	ninja.swing(false);
+
+	try {
+		ninja.verify();	
+	    fail("verify() should throw exception when swing() interface passed incorrect parameter type (Boolean: false)");
+	} catch (error) {	
+	    equals(error.length, 1, "verify() should return 1 error when swing() passed incorrect parameter type (Boolean: false)");
+	    equals(error[0].type, "IncorrectArgumentTypeException", "verify() error type should be IncorrectArgumentTypeException for (Boolean: false)");
+	}
+	
+	ninja.reset();
+	
+	ninja.swing([]);
+
+	try {
+		ninja.verify();	
+	    fail("verify() should throw exception when swing() interface passed incorrect parameter type (Array: [])");
+	} catch (error) {	
+	    equals(error.length, 1, "verify() should return 1 error when swing() passed incorrect parameter type (Array: [])");
+	    equals(error[0].type, "IncorrectArgumentTypeException", "verify() error type should be IncorrectArgumentTypeException for (Array: [])");
+	}
+	
+	ninja.reset();
+	
+	ninja.swing({});
+
+	try {
+		ninja.verify();	
+	    fail("verify() should throw exception when swing() interface passed incorrect parameter type (Object: {})");
+	} catch (error) {	
+	    equals(error.length, 1, "verify() should return 1 error when swing() passed incorrect parameter type (Object: {})");
+	    equals(error[0].type, "IncorrectArgumentTypeException", "verify() error type should be IncorrectArgumentTypeException for (Object: {})");
+	}
+	
+	ninja.reset();
+	
+	ninja.swing(function(){});
+	
+	try {
+		ninja.verify();	
+	    fail("verify() should throw exception when swing() interface passed incorrect parameter type (Function: function(){})");
+	} catch (error) {	
+	    equals(error.length, 1, "verify() should return 1 error when swing() passed incorrect parameter type (Function: function(){})");
+	    equals(error[0].type, "IncorrectArgumentTypeException", "verify() error type should be IncorrectArgumentTypeException for (Function: function(){})");
+	}
+	
+	ninja.reset();
+	
+	ninja.swing(/test/);
+
+	try {
+		ninja.verify();	
+	    fail("verify() should throw exception when swing() interface passed incorrect parameter type (RegExp: /test/)");
+	} catch (error) {	
+	    equals(error.length, 1, "verify() should return 1 error when swing() passed incorrect parameter type (RegExp: /test/)");
+	    equals(error[0].type, "IncorrectArgumentTypeException", "verify() error type should be IncorrectArgumentTypeException for (RegExp: /test/)");
+	}
+
+	ninja.reset();
+
+	// Test false positive
+
+	ninja.swing("1");
+
+	try {
+		ninja.verify();	
+	    fail("verify() should throw exception when swing() interface passed incorrect parameter type (String: 1)");
+	} catch (error) {	
+	    equals(error.length, 1, "verify() should return 1 error when swing() passed incorrect parameter type (String: 1)");
+	    equals(error[0].type, "IncorrectArgumentTypeException", "verify() error type should be IncorrectArgumentTypeException for (String: 1)");
+	}
+
+	ninja.reset();
+
+	// GOOD Exercises
+
+	ninja.swing(0); // Test same argument type - falsy value
+	
+	ok( ninja.verify(), "verify() should pass after swing was called once with (Number: 0) - right type, non-matching value" );
+
+	ninja.reset();
+
+	// Test same argument type
+
+	ninja.swing(2);
+	ok( ninja.verify(), "verify() should pass after swing was called once with (Number: 2) - right type, non-matching value" );
+
+	ninja.reset();
+
+	// Test same argument AND value
+
+	ninja.swing(1);
+	ok( ninja.verify(), "verify() should pass after swing was called once with (Number: 1) - right type, matching value" );
+	
+	/**
+	*
+	* Re-run tests with mocked method interface declared with a value and with typed parameter assertion.
+	*
+	**/
+	
     var ninja = new Mock();
 	ninja
 		.expects(1)
 			.method('swing')
 			.accepts(1);
-			
-	// Bad exercise
-			
-	// Test invalid argument type
-			
-	ninja.swing("one");
-			
+
+	// BAD EXERCISES
+
+	ninja.swing(); // Test no arguments
+
 	try {
-	       ninja.verify();	
-	       fail("verify() should throw exception when swing called with incorrect argument type");
-	   } catch (e) {	
-	       equals(e.length, 1, "verify() should return an array of 1 errors when not passed a paramter of type 'Number'");
-	       equals(e[0].type, "IncorrectArgumentTypeException", "verify() error type should be IncorrectArgumentTypeException");
-	   }
-    
-	ninja.reset();
-			
-	// Good Exercise
-	
-	// Test same argument type - falsy value
-	
-	ninja.swing(0);
-	ok( ninja.verify(), "verify() should pass after swing was called once with number primitive type - falsy value 0" );
+		ninja.verify();	
+	    fail("verify() should throw exception when swing() interface passed no parameters");
+	} catch (error) {	
+	    equals(error.length, 1, "verify() should return 1 error when swing() passed no parameters");
+	    equals(error[0].type, "IncorrectNumberOfArgumentsException", "verify() error type should be IncorrectNumberOfArgumentsException for (String)");
+	}
 
 	ninja.reset();
-	
+
+	// Test invalid argument type - Constructors
+
+	ninja.swing(String);
+
+	try {
+		ninja.verify();	
+	    fail("verify() should throw exception when swing() interface passed incorrect parameter type [constructor obj: (String)]");
+	} catch (error) {	
+	    equals(error.length, 1, "verify() should return 1 error when swing() passed incorrect parameter type [constructor obj: (String)]");
+	    equals(error[0].type, "IncorrectArgumentTypeException", "verify() error type should be IncorrectArgumentTypeException for (String)");
+	}
+
+	ninja.reset(); 
+
+	ninja.swing(Boolean);
+
+	try {
+		ninja.verify();	
+	    fail("verify() should throw exception when swing() interface passed incorrect parameter type [constructor obj: (Boolean)]");
+	} catch (error) {	
+	    equals(error.length, 1, "verify() should return 1 error when swing() passed incorrect parameter type [constructor obj: (Boolean)]");
+	    equals(error[0].type, "IncorrectArgumentTypeException", "verify() error type should be IncorrectArgumentTypeException for (Boolean)");
+	}
+
+	ninja.reset();
+
+	ninja.swing(Array);
+
+	try {
+		ninja.verify();	
+	    fail("verify() should throw exception when swing() interface passed incorrect parameter type [constructor obj: (Array)]");
+	} catch (error) {	
+	    equals(error.length, 1, "verify() should return 1 error when swing() passed incorrect parameter type [constructor obj: (Array)]");
+	    equals(error[0].type, "IncorrectArgumentTypeException", "verify() error type should be IncorrectArgumentTypeException for (Array)");
+	}
+
+	ninja.reset();
+
+	ninja.swing(Object);
+
+	try {
+		ninja.verify();	
+	    fail("verify() should throw exception when swing() interface passed incorrect parameter type [constructor obj: (Object)]");
+	} catch (error) {	
+	    equals(error.length, 1, "verify() should return 1 error when swing() passed incorrect parameter type [constructor obj: (Object)]");
+	    equals(error[0].type, "IncorrectArgumentTypeException", "verify() error type should be IncorrectArgumentTypeException for (Object)");
+	}
+
+	ninja.reset();
+
+	ninja.swing(Function);
+
+	try {
+		ninja.verify();	
+	    fail("verify() should throw exception when swing() interface passed incorrect parameter type [constructor obj: (Function)]");
+	} catch (error) {	
+	    equals(error.length, 1, "verify() should return 1 error when swing() passed incorrect parameter type [constructor obj: (Function)]");
+	    equals(error[0].type, "IncorrectArgumentTypeException", "verify() error type should be IncorrectArgumentTypeException for (Function)");
+	}
+
+	ninja.reset();
+
+	ninja.swing(RegExp);
+
+	try {
+		ninja.verify();	
+	    fail("verify() should throw exception when swing() interface passed incorrect parameter type [constructor obj: (RegExp)]");
+	} catch (error) {	
+	    equals(error.length, 1, "verify() should return 1 error when swing() passed incorrect parameter type [constructor obj: (RegExp)]");
+	    equals(error[0].type, "IncorrectArgumentTypeException", "verify() error type should be IncorrectArgumentTypeException for (RegExp)");
+	}
+
+	ninja.reset();
+
+	// Test invalid argument type - values
+
+	ninja.swing("string");
+
+	try {
+		ninja.verify();	
+	    fail("verify() should throw exception when swing() interface passed incorrect parameter type (String: string)");
+	} catch (error) {	
+	    equals(error.length, 1, "verify() should return 1 error when swing() passed incorrect parameter type (String: string)");
+	    equals(error[0].type, "IncorrectArgumentTypeException", "verify() error type should be IncorrectArgumentTypeException for (String: string)");
+	}
+
+	ninja.reset(); 
+
+	ninja.swing(false);
+
+	try {
+		ninja.verify();	
+	    fail("verify() should throw exception when swing() interface passed incorrect parameter type (Boolean: false)");
+	} catch (error) {	
+	    equals(error.length, 1, "verify() should return 1 error when swing() passed incorrect parameter type (Boolean: false)");
+	    equals(error[0].type, "IncorrectArgumentTypeException", "verify() error type should be IncorrectArgumentTypeException for (Boolean: false)");
+	}
+
+	ninja.reset();
+
+	ninja.swing([]);
+
+	try {
+		ninja.verify();	
+	    fail("verify() should throw exception when swing() interface passed incorrect parameter type (Array: [])");
+	} catch (error) {	
+	    equals(error.length, 1, "verify() should return 1 error when swing() passed incorrect parameter type (Array: [])");
+	    equals(error[0].type, "IncorrectArgumentTypeException", "verify() error type should be IncorrectArgumentTypeException for (Array: [])");
+	}
+
+	ninja.reset();
+
+	ninja.swing({});
+
+	try {
+		ninja.verify();	
+	    fail("verify() should throw exception when swing() interface passed incorrect parameter type (Object: {})");
+	} catch (error) {	
+	    equals(error.length, 1, "verify() should return 1 error when swing() passed incorrect parameter type (Object: {})");
+	    equals(error[0].type, "IncorrectArgumentTypeException", "verify() error type should be IncorrectArgumentTypeException for (Object: {})");
+	}
+
+	ninja.reset();
+
+	ninja.swing(function(){});
+
+	try {
+		ninja.verify();	
+	    fail("verify() should throw exception when swing() interface passed incorrect parameter type (Function: function(){})");
+	} catch (error) {	
+	    equals(error.length, 1, "verify() should return 1 error when swing() passed incorrect parameter type (Function: function(){})");
+	    equals(error[0].type, "IncorrectArgumentTypeException", "verify() error type should be IncorrectArgumentTypeException for (Function: function(){})");
+	}
+
+	ninja.reset();
+
+	ninja.swing(/test/);
+
+	try {
+		ninja.verify();	
+	    fail("verify() should throw exception when swing() interface passed incorrect parameter type (RegExp: /test/)");
+	} catch (error) {	
+	    equals(error.length, 1, "verify() should return 1 error when swing() passed incorrect parameter type (RegExp: /test/)");
+	    equals(error[0].type, "IncorrectArgumentTypeException", "verify() error type should be IncorrectArgumentTypeException for (RegExp: /test/)");
+	}
+
+	ninja.reset();
+
+	// Test false positive
+
+	ninja.swing("1");
+
+	try {
+		ninja.verify();	
+	    fail("verify() should throw exception when swing() interface passed incorrect parameter type (String: 1)");
+	} catch (error) {	
+	    equals(error.length, 1, "verify() should return 1 error when swing() passed incorrect parameter type (String: 1)");
+	    equals(error[0].type, "IncorrectArgumentTypeException", "verify() error type should be IncorrectArgumentTypeException for (String: 1)");
+	}
+
+	ninja.reset();
+
+	// GOOD Exercises
+
+	ninja.swing(0); // Test same argument type - falsy value
+
+	ok( ninja.verify(), "verify() should pass after swing was called once with (Number: 0) - right type, non-matching value" );
+
+	ninja.reset();
+
 	// Test same argument type
-			
+
 	ninja.swing(2);
-	ok( ninja.verify(), "verify() should pass after swing was called once with number primitive type, but wrong value" );
+	ok( ninja.verify(), "verify() should pass after swing was called once with (Number: 2) - right type, non-matching value" );
 
 	ninja.reset();
-	
+
 	// Test same argument AND value
-			
+
 	ninja.swing(1);
-	ok( ninja.verify(), "verify() should pass after swing was called once with number primitive type and exact expected value" );
+	ok( ninja.verify(), "verify() should pass after swing was called once with (Number: 1) - right type, matching value" );
 	
-	// Update accepted argument to primitive type for interface declarations
+	/**
+	*
+	* Re-run tests with mocked method interface declared via interface() helper function with a Constructor and with typed parameter assertion.
+	*
+	**/
 	
-	ninja.accepts(Number);
-	
+	// Test single parameter value expectations, no return value
+	var ninja = new Mock();
+	ninja
+		.expects(1)
+		.method('swing')
+		.interface(
+			{accepts: [Number]}
+		);
+		
+	// BAD EXERCISES
+	ninja.swing(); // Test no arguments
+
+	try {
+		ninja.verify();	
+	    fail("verify() should throw exception when swing() interface passed no parameters");
+	} catch (error) {	
+	    equals(error.length, 1, "verify() should return 1 error when swing() passed no parameters");
+	    equals(error[0].type, "IncorrectNumberOfArgumentsException", "verify() error type should be IncorrectNumberOfArgumentsException for (String)");
+	}
+
+	ninja.reset();
+
+	// Test invalid argument type - Constructors
+
+	ninja.swing(String);
+
+	try {
+		ninja.verify();	
+	    fail("verify() should throw exception when swing() interface passed incorrect parameter type [constructor obj: (String)]");
+	} catch (error) {	
+	    equals(error.length, 1, "verify() should return 1 error when swing() passed incorrect parameter type [constructor obj: (String)]");
+	    equals(error[0].type, "IncorrectArgumentTypeException", "verify() error type should be IncorrectArgumentTypeException for (String)");
+	}
+
+	ninja.reset(); 
+
+	ninja.swing(Boolean);
+
+	try {
+		ninja.verify();	
+	    fail("verify() should throw exception when swing() interface passed incorrect parameter type [constructor obj: (Boolean)]");
+	} catch (error) {	
+	    equals(error.length, 1, "verify() should return 1 error when swing() passed incorrect parameter type [constructor obj: (Boolean)]");
+	    equals(error[0].type, "IncorrectArgumentTypeException", "verify() error type should be IncorrectArgumentTypeException for (Boolean)");
+	}
+
+	ninja.reset();
+
+	ninja.swing(Array);
+
+	try {
+		ninja.verify();	
+	    fail("verify() should throw exception when swing() interface passed incorrect parameter type [constructor obj: (Array)]");
+	} catch (error) {	
+	    equals(error.length, 1, "verify() should return 1 error when swing() passed incorrect parameter type [constructor obj: (Array)]");
+	    equals(error[0].type, "IncorrectArgumentTypeException", "verify() error type should be IncorrectArgumentTypeException for (Array)");
+	}
+
+	ninja.reset();
+
+	ninja.swing(Object);
+
+	try {
+		ninja.verify();	
+	    fail("verify() should throw exception when swing() interface passed incorrect parameter type [constructor obj: (Object)]");
+	} catch (error) {	
+	    equals(error.length, 1, "verify() should return 1 error when swing() passed incorrect parameter type [constructor obj: (Object)]");
+	    equals(error[0].type, "IncorrectArgumentTypeException", "verify() error type should be IncorrectArgumentTypeException for (Object)");
+	}
+
+	ninja.reset();
+
+	ninja.swing(Function);
+
+	try {
+		ninja.verify();	
+	    fail("verify() should throw exception when swing() interface passed incorrect parameter type [constructor obj: (Function)]");
+	} catch (error) {	
+	    equals(error.length, 1, "verify() should return 1 error when swing() passed incorrect parameter type [constructor obj: (Function)]");
+	    equals(error[0].type, "IncorrectArgumentTypeException", "verify() error type should be IncorrectArgumentTypeException for (Function)");
+	}
+
+	ninja.reset();
+
+	ninja.swing(RegExp);
+
+	try {
+		ninja.verify();	
+	    fail("verify() should throw exception when swing() interface passed incorrect parameter type [constructor obj: (RegExp)]");
+	} catch (error) {	
+	    equals(error.length, 1, "verify() should return 1 error when swing() passed incorrect parameter type [constructor obj: (RegExp)]");
+	    equals(error[0].type, "IncorrectArgumentTypeException", "verify() error type should be IncorrectArgumentTypeException for (RegExp)");
+	}
+
+	ninja.reset();
+
+	// Test invalid argument type - values
+
+	ninja.swing("string");
+
+	try {
+		ninja.verify();	
+	    fail("verify() should throw exception when swing() interface passed incorrect parameter type (String: string)");
+	} catch (error) {	
+	    equals(error.length, 1, "verify() should return 1 error when swing() passed incorrect parameter type (String: string)");
+	    equals(error[0].type, "IncorrectArgumentTypeException", "verify() error type should be IncorrectArgumentTypeException for (String: string)");
+	}
+
+	ninja.reset(); 
+
+	ninja.swing(false);
+
+	try {
+		ninja.verify();	
+	    fail("verify() should throw exception when swing() interface passed incorrect parameter type (Boolean: false)");
+	} catch (error) {	
+	    equals(error.length, 1, "verify() should return 1 error when swing() passed incorrect parameter type (Boolean: false)");
+	    equals(error[0].type, "IncorrectArgumentTypeException", "verify() error type should be IncorrectArgumentTypeException for (Boolean: false)");
+	}
+
+	ninja.reset();
+
+	ninja.swing([]);
+
+	try {
+		ninja.verify();	
+	    fail("verify() should throw exception when swing() interface passed incorrect parameter type (Array: [])");
+	} catch (error) {	
+	    equals(error.length, 1, "verify() should return 1 error when swing() passed incorrect parameter type (Array: [])");
+	    equals(error[0].type, "IncorrectArgumentTypeException", "verify() error type should be IncorrectArgumentTypeException for (Array: [])");
+	}
+
+	ninja.reset();
+
+	ninja.swing({});
+
+	try {
+		ninja.verify();	
+	    fail("verify() should throw exception when swing() interface passed incorrect parameter type (Object: {})");
+	} catch (error) {	
+	    equals(error.length, 1, "verify() should return 1 error when swing() passed incorrect parameter type (Object: {})");
+	    equals(error[0].type, "IncorrectArgumentTypeException", "verify() error type should be IncorrectArgumentTypeException for (Object: {})");
+	}
+
+	ninja.reset();
+
+	ninja.swing(function(){});
+
+	try {
+		ninja.verify();	
+	    fail("verify() should throw exception when swing() interface passed incorrect parameter type (Function: function(){})");
+	} catch (error) {	
+	    equals(error.length, 1, "verify() should return 1 error when swing() passed incorrect parameter type (Function: function(){})");
+	    equals(error[0].type, "IncorrectArgumentTypeException", "verify() error type should be IncorrectArgumentTypeException for (Function: function(){})");
+	}
+
+	ninja.reset();
+
+	ninja.swing(/test/);
+
+	try {
+		ninja.verify();	
+	    fail("verify() should throw exception when swing() interface passed incorrect parameter type (RegExp: /test/)");
+	} catch (error) {	
+	    equals(error.length, 1, "verify() should return 1 error when swing() passed incorrect parameter type (RegExp: /test/)");
+	    equals(error[0].type, "IncorrectArgumentTypeException", "verify() error type should be IncorrectArgumentTypeException for (RegExp: /test/)");
+	}
+
+	ninja.reset();
+
+	// Test false positive
+
+	ninja.swing("1");
+
+	try {
+		ninja.verify();	
+	    fail("verify() should throw exception when swing() interface passed incorrect parameter type (String: 1)");
+	} catch (error) {	
+	    equals(error.length, 1, "verify() should return 1 error when swing() passed incorrect parameter type (String: 1)");
+	    equals(error[0].type, "IncorrectArgumentTypeException", "verify() error type should be IncorrectArgumentTypeException for (String: 1)");
+	}
+
+	ninja.reset();
+
+	// GOOD Exercises
+
+	ninja.swing(0); // Test same argument type - falsy value
+
+	ok( ninja.verify(), "verify() should pass after swing was called once with (Number: 0) - right type, non-matching value" );
+
+	ninja.reset();
+
+	// Test same argument type
+
+	ninja.swing(2);
+	ok( ninja.verify(), "verify() should pass after swing was called once with (Number: 2) - right type, non-matching value" );
+
+	ninja.reset();
+
+	// Test same argument AND value
+
 	ninja.swing(1);
-	//ok( ninja.verify(), "verify() should pass after swing was called once with number primitive type and exact expected value" );
+	ok( ninja.verify(), "verify() should pass after swing was called once with (Number: 1) - right type, matching value" );
+
+	/**
+	*
+	* Re-run tests with mocked method interface declared via interface() helper function with a value and with typed parameter assertion.
+	*
+	**/
+	
+	// Test single parameter value expectations, no return value
+	var ninja = new Mock();
+	ninja
+		.expects(1)
+		.method('swing')
+		.interface(
+			{accepts: [1]}
+		)
+		.required(1);
+		
+	// BAD EXERCISES
+
+	ninja.swing(); // Test no arguments
+
+	try {
+		ninja.verify();	
+	    fail("verify() should throw exception when swing() interface passed no parameters");
+	} catch (error) {	
+	    equals(error.length, 1, "verify() should return 1 error when swing() passed no parameters");
+	    equals(error[0].type, "IncorrectNumberOfArgumentsException", "verify() error type should be IncorrectNumberOfArgumentsException for NO parameters");
+	}
+
+	ninja.reset();
+
+	// Test invalid argument type - Constructors
+
+	ninja.swing(String);
+
+	try {
+		ninja.verify();	
+	    fail("verify() should throw exception when swing() interface passed incorrect parameter type [constructor obj: (String)]");
+	} catch (error) {	
+	    equals(error.length, 1, "verify() should return 1 error when swing() passed incorrect parameter type [constructor obj: (String)]");
+	    equals(error[0].type, "IncorrectArgumentTypeException", "verify() error type should be IncorrectArgumentTypeException for (String)");
+	}
+
+	ninja.reset(); 
+
+	ninja.swing(Boolean);
+
+	try {
+		ninja.verify();	
+	    fail("verify() should throw exception when swing() interface passed incorrect parameter type [constructor obj: (Boolean)]");
+	} catch (error) {	
+	    equals(error.length, 1, "verify() should return 1 error when swing() passed incorrect parameter type [constructor obj: (Boolean)]");
+	    equals(error[0].type, "IncorrectArgumentTypeException", "verify() error type should be IncorrectArgumentTypeException for (Boolean)");
+	}
+
+	ninja.reset();
+
+	ninja.swing(Array);
+
+	try {
+		ninja.verify();	
+	    fail("verify() should throw exception when swing() interface passed incorrect parameter type [constructor obj: (Array)]");
+	} catch (error) {	
+	    equals(error.length, 1, "verify() should return 1 error when swing() passed incorrect parameter type [constructor obj: (Array)]");
+	    equals(error[0].type, "IncorrectArgumentTypeException", "verify() error type should be IncorrectArgumentTypeException for (Array)");
+	}
+
+	ninja.reset();
+
+	ninja.swing(Object);
+
+	try {
+		ninja.verify();	
+	    fail("verify() should throw exception when swing() interface passed incorrect parameter type [constructor obj: (Object)]");
+	} catch (error) {	
+	    equals(error.length, 1, "verify() should return 1 error when swing() passed incorrect parameter type [constructor obj: (Object)]");
+	    equals(error[0].type, "IncorrectArgumentTypeException", "verify() error type should be IncorrectArgumentTypeException for (Object)");
+	}
+
+	ninja.reset();
+
+	ninja.swing(Function);
+
+	try {
+		ninja.verify();	
+	    fail("verify() should throw exception when swing() interface passed incorrect parameter type [constructor obj: (Function)]");
+	} catch (error) {	
+	    equals(error.length, 1, "verify() should return 1 error when swing() passed incorrect parameter type [constructor obj: (Function)]");
+	    equals(error[0].type, "IncorrectArgumentTypeException", "verify() error type should be IncorrectArgumentTypeException for (Function)");
+	}
+
+	ninja.reset();
+
+	ninja.swing(RegExp);
+
+	try {
+		ninja.verify();	
+	    fail("verify() should throw exception when swing() interface passed incorrect parameter type [constructor obj: (RegExp)]");
+	} catch (error) {	
+	    equals(error.length, 1, "verify() should return 1 error when swing() passed incorrect parameter type [constructor obj: (RegExp)]");
+	    equals(error[0].type, "IncorrectArgumentTypeException", "verify() error type should be IncorrectArgumentTypeException for (RegExp)");
+	}
+
+	ninja.reset();
+
+	// Test invalid argument type - values
+
+	ninja.swing("string");
+
+	try {
+		ninja.verify();	
+	    fail("verify() should throw exception when swing() interface passed incorrect parameter type (String: string)");
+	} catch (error) {	
+	    equals(error.length, 1, "verify() should return 1 error when swing() passed incorrect parameter type (String: string)");
+	    equals(error[0].type, "IncorrectArgumentTypeException", "verify() error type should be IncorrectArgumentTypeException for (String: string)");
+	}
+
+	ninja.reset(); 
+
+	ninja.swing(false);
+
+	try {
+		ninja.verify();	
+	    fail("verify() should throw exception when swing() interface passed incorrect parameter type (Boolean: false)");
+	} catch (error) {	
+	    equals(error.length, 1, "verify() should return 1 error when swing() passed incorrect parameter type (Boolean: false)");
+	    equals(error[0].type, "IncorrectArgumentTypeException", "verify() error type should be IncorrectArgumentTypeException for (Boolean: false)");
+	}
+
+	ninja.reset();
+
+	ninja.swing([]);
+
+	try {
+		ninja.verify();	
+	    fail("verify() should throw exception when swing() interface passed incorrect parameter type (Array: [])");
+	} catch (error) {	
+	    equals(error.length, 1, "verify() should return 1 error when swing() passed incorrect parameter type (Array: [])");
+	    equals(error[0].type, "IncorrectArgumentTypeException", "verify() error type should be IncorrectArgumentTypeException for (Array: [])");
+	}
+
+	ninja.reset();
+
+	ninja.swing({});
+
+	try {
+		ninja.verify();	
+	    fail("verify() should throw exception when swing() interface passed incorrect parameter type (Object: {})");
+	} catch (error) {	
+	    equals(error.length, 1, "verify() should return 1 error when swing() passed incorrect parameter type (Object: {})");
+	    equals(error[0].type, "IncorrectArgumentTypeException", "verify() error type should be IncorrectArgumentTypeException for (Object: {})");
+	}
+
+	ninja.reset();
+
+	ninja.swing(function(){});
+
+	try {
+		ninja.verify();	
+	    fail("verify() should throw exception when swing() interface passed incorrect parameter type (Function: function(){})");
+	} catch (error) {	
+	    equals(error.length, 1, "verify() should return 1 error when swing() passed incorrect parameter type (Function: function(){})");
+	    equals(error[0].type, "IncorrectArgumentTypeException", "verify() error type should be IncorrectArgumentTypeException for (Function: function(){})");
+	}
+
+	ninja.reset();
+
+	ninja.swing(/test/);
+
+	try {
+		ninja.verify();	
+	    fail("verify() should throw exception when swing() interface passed incorrect parameter type (RegExp: /test/)");
+	} catch (error) {	
+	    equals(error.length, 1, "verify() should return 1 error when swing() passed incorrect parameter type (RegExp: /test/)");
+	    equals(error[0].type, "IncorrectArgumentTypeException", "verify() error type should be IncorrectArgumentTypeException for (RegExp: /test/)");
+	}
+
+	ninja.reset();
+
+	// Test false positive
+
+	ninja.swing("1");
+
+	try {
+		ninja.verify();	
+	    fail("verify() should throw exception when swing() interface passed incorrect parameter type (String: 1)");
+	} catch (error) {	
+	    equals(error.length, 1, "verify() should return 1 error when swing() passed incorrect parameter type (String: 1)");
+	    equals(error[0].type, "IncorrectArgumentTypeException", "verify() error type should be IncorrectArgumentTypeException for (String: 1)");
+	}
+
+	ninja.reset();
+
+	// GOOD Exercises
+
+	ninja.swing(0); // Test same argument type - falsy value
+
+	ok( ninja.verify(), "verify() should pass after swing was called once with (Number: 0) - right type, non-matching value" );
+
+	ninja.reset();
+
+	// Test same argument type
+
+	ninja.swing(2);
+	ok( ninja.verify(), "verify() should pass after swing was called once with (Number: 2) - right type, non-matching value" );
+
+	ninja.reset();
+
+	// Test same argument AND value
+
+	ninja.swing(1);
+	ok( ninja.verify(), "verify() should pass after swing was called once with (Number: 1) - right type, matching value" );
+	
+});
+
+test("mock with single & multiple (String) primitive parameter expectation - default type check", function () {
 	
 	// Test String primitive
 	
@@ -966,6 +1766,10 @@ test("mock with single & multiple primitive parameter expectation - default type
 	samurai.run("fast");
 	ok( samurai.verify(), "verify() should pass after swing was called once with string primitive type and exact expected value" );
 	
+});
+
+test("mock with single & multiple (Boolean) primitive parameter expectation - default type check", function () {
+	
 	// Test Boolean primitive
 	
 	var wizard = new Mock();
@@ -1006,83 +1810,6 @@ test("mock with single & multiple primitive parameter expectation - default type
 			
 	ok( wizard.verify(), "verify() should pass after fireball was called once with boolean primitive type and exact expected value" );
 	
-	// Test multiple parameter value expectations, no return value
-	var jedi = new Mock();
-	/*jedi
-		.expects(1)
-		.method('setForceLevel')
-		.accepts({
-			params: [3] // 1st presentation to interface
-		}, {
-			params: [9] // 2nd presentation to interface
-		})
-		.required(1);*/
-	
-	// Alternative syntax
-	jedi
-		.expects(1)
-		.method('setForceLevel')
-		.interface(
-			{accepts: [3], returns: true}, // 1st presentation to interface
-			{accepts: [9], returns: false} // 2nd presentation to interface
-		)
-		.required(1);
-		
-	// Alternative JSON
-	
-	// Alternative syntax
-	/* ...
-		interface: [
-			{accepts: [3], returns: true}, // 1st presentation to interface
-			{accepts: [9], returns: false} // 2nd presentation to interface
-		]
-		
-	// Bad Exercises
-		
-	// Test no argument type
-	
-	jedi.setForceLevel();
-	try {
-	   jedi.verify();	
-       fail("verify() should throw exception when 'setForceLevel' called with no arguments");
-    } catch (e) {	
-       equals(e.length, 1, "verify() should return an array of 1 errors");
-       equals(e[0].type, "IncorrectNumberOfArgumentsException", "verify() error type should be IncorrectNumberOfArgumentsException");
-    }
-
-	jedi.reset();
-	
-	// Test invalid argument types
-	
-	jedi.setForceLevel("one");
-	try {
-	   jedi.verify();	
-       fail("verify() should throw exception when 'setForceLevel' called with incorrect argument type");
-    } catch (e) {	
-       equals(e.length, 2, "verify() should return an array of 2 errors");
-       equals(e[0].type, "IncorrectArgumentTypeException", "verify() error type should be IncorrectArgumentTypeException");
-    }
-
-	jedi.reset();
-	
-	// Good exercises
-	// Test overloaded method with correct parameter type but wrong value
-	jedi.setForceLevel(2, "overloaded");
-	ok( jedi.verify(), "verify() should pass after 'setForceLevel' was called once with Number primitive type but wrong exact expected value" );
-	jedi.reset();
-	
-	// Test method with correct parameter type and exact value ('first presentation')
-	
-	jedi.setForceLevel(3);
-	ok( jedi.verify(), "verify() should pass after 'setForceLevel' was called once with Number primitive type and first exact expected value" );
-	jedi.reset();
-	
-	// Test method with correct parameter type and exact value ('second presentation')
-	
-	jedi.setForceLevel(9);
-	ok( jedi.verify(), "verify() should pass after 'setForceLevel' was called once with Number primitive type and second exact expected value" );
-	jedi.reset();
-
 });
 
 test("mock with single & multiple primitive parameter expectation - strict value check", function () {
