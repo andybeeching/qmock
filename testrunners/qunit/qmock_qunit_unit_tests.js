@@ -30,11 +30,9 @@
 	 */
 
 	module("qMock Implementation");
-
-	test("assertCollection() - (Number) primitive - typed checking only", function() {
-
-	  // FALSE ASSERTIONS
 	
+	test("assertCollection() - MissingConfigObjectException thrown with bad parameters", function () {
+		
 		// Test no arguments
 	  try {
 			assertCollection();
@@ -42,7 +40,13 @@
 	  } catch (exception) {  
 	    equals(exception.type, "MissingConfigObjectException", "assertCollection() exception type should be MissingConfigObjectException for no parameters");
 	  }
-  
+		
+	});
+
+	test("assertCollection() - (Number: Constructor) primitive - typed checking only", function() {
+
+	  // FALSE ASSERTIONS
+	
 	  // Test invalid argument type - Constructors
 		
 		equals( assertCollection( _stubParams(Number, String) ), false, "assertCollection() should return false with expected: (Number) and actual: (String)" );
@@ -69,7 +73,6 @@
 	
 		equals( assertCollection( _stubParams(Number, null) ), false, "assertCollection() should return false with expected: (Number) and actual: (null)" );
 		equals( assertCollection( _stubParams(Number, undefined) ), false, "assertCollection() should return false with expected: (Number) and actual: (undefined)" );
-		
 		// TRUE ASSERTIONS
 		equals( assertCollection( _stubParams(Number, Number) ), true, "assertCollection() should return true with expected: (Number) and actual: (Number)" );
 		equals( assertCollection( _stubParams(Number, 1) ), true, "assertCollection() should return true with expected: (Number) and actual: (Number: 1)" );
@@ -77,18 +80,10 @@
 		
 	});
 	
-	test("assertCollection() - (Number) primitive - strict value checking", function() {
+	test("assertCollection() - (Number: Constructor) primitive - strict value checking", function() {
 
 	  // FALSE ASSERTIONS
-	
-		// Test no arguments
-	  try {
-			assertCollection();
-	    ok(false, "assertCollection() should throw exception when passed No parameters");
-	  } catch (exception) {  
-	    equals(exception.type, "MissingConfigObjectException", "assertCollection() exception type should be MissingConfigObjectException for no parameters");
-	  }
-  
+	  
 	  // Test invalid argument type - Constructors
 		
 		equals( assertCollection( _stubParams(Number, String, true ) ), false, "assertCollection() should return false with expected: (Number) and actual: (String)" );
@@ -123,18 +118,96 @@
 		
 	});
 
-	test("assertCollection() - (String) primitive - typed checking only", function() {
+	test("assertCollection() - (Number: 1) primitive - typed checking only", function() {
 
 	  // FALSE ASSERTIONS
 	
-		// Test no arguments
-	  try {
-			assertCollection();
-	    ok(false, "assertCollection() should throw exception when passed No parameters");
-	  } catch (exception) {  
-	    equals(exception.type, "MissingConfigObjectException", "assertCollection() exception type should be MissingConfigObjectException for no parameters");
-	  }
+	  // Test invalid argument type - Constructors
+		
+		equals( assertCollection( _stubParams(1, String) ), false, "assertCollection() should return false with expected: (Number: 1) and actual: (String)" );
+		equals( assertCollection( _stubParams(1, Boolean) ), false, "assertCollection() should return false with expected: (Number: 1) and actual: (Boolean)" );
+		equals( assertCollection( _stubParams(1, Array) ), false, "assertCollection() should return false with expected: (Number: 1) and actual: (Array)" );
+		equals( assertCollection( _stubParams(1, Object) ), false, "assertCollection() should return false with expected: (Number: 1) and actual: (Object)" );
+		equals( assertCollection( _stubParams(1, Function) ), false, "assertCollection() should return false with expected: (Number: 1) and actual: (Function)" );
+		equals( assertCollection( _stubParams(1, RegExp) ), false, "assertCollection() should return false with expected: (Number: 1) and actual: (RegExp)" );
+		equals( assertCollection( _stubParams(1, Date) ), false, "assertCollection() should return false with expected: (Number: 1) and actual: (Date)" );
+		equals( assertCollection( _stubParams(1, Custom) ), false, "assertCollection() should return false with expected: (Number: 1) and actual: (Custom)" );
+		
+		// Test invalid argument type - Values (truthy)
+		
+		equals( assertCollection( _stubParams(1, "string") ), false, "assertCollection() should return false with expected: (Number: 1) and actual: (String: string)" );
+		equals( assertCollection( _stubParams(1, true) ), false, "assertCollection() should return false with expected: (Number: 1) and actual: (Boolean: true)" );
+		equals( assertCollection( _stubParams(1, []) ), false, "assertCollection() should return false with expected: (Number: 1) and actual: (Array: [])" );
+		equals( assertCollection( _stubParams(1, {}) ), false, "assertCollection() should return false with expected: (Number: 1) and actual: (Object: {})" );
+		equals( assertCollection( _stubParams(1, function(){}) ), false, "assertCollection() should return false with expected: (Number: 1) and actual: (Function: function(){})" );
+		equals( assertCollection( _stubParams(1, /test/) ), false, "assertCollection() should return false with expected: (Number: 1) and actual: (RegExp: /test/)" );
+		equals( assertCollection( _stubParams(1, new Date()) ), false, "assertCollection() should return false with expected: (Number: 1) and actual: (Date: new instance)" );
+		equals( assertCollection( _stubParams(1, new Custom()) ), false, "assertCollection() should return false with expected: (Number: 1) and actual: (Custom: new instance)" );
   
+	  // Test invalid argument types - false values
+	
+		equals( assertCollection( _stubParams(1, null) ), false, "assertCollection() should return false with expected: (Number: 1) and actual: (null)" );
+		equals( assertCollection( _stubParams(1, undefined) ), false, "assertCollection() should return false with expected: (Number: 1) and actual: (undefined)" );
+
+		// TRUE ASSERTIONS
+		equals( assertCollection( _stubParams(1, Number) ), true, "assertCollection() should return true with expected: (Number: 1) and actual: (Number)" );
+		equals( assertCollection( _stubParams(1, 1) ), true, "assertCollection() should return true with expected: (Number: 1) and actual: (Number: 1)" );
+		equals( assertCollection( _stubParams(1, 0) ), true, "assertCollection() should return true with expected: (Number: 1) and actual: (Number: 0)" );
+		
+		// Expect Falsy Value
+		equals( assertCollection( _stubParams(0, Number ) ), true, "assertCollection() should return true with expected: (Number: 0) and actual: (Number)" );
+		equals( assertCollection( _stubParams(0, 1 ) ), true, "assertCollection() should return true with expected: (Number: 0) and actual: (Number: 1)" );
+		equals( assertCollection( _stubParams(0, 0 ) ), true, "assertCollection() should return true with expected: (Number: 0) and actual: (Number: 0)" );
+		
+	});
+	
+	test("assertCollection() - (Number: 1) primitive - strict value checking", function() {
+
+	  // FALSE ASSERTIONS
+	
+	  // Test invalid argument type - Constructors
+		
+		equals( assertCollection( _stubParams(1, String, true ) ), false, "assertCollection() should return false with expected: (Number: 1) and actual: (String)" );
+		equals( assertCollection( _stubParams(1, Boolean, true ) ), false, "assertCollection() should return false with expected: (Number: 1) and actual: (Boolean)" );
+		equals( assertCollection( _stubParams(1, Array, true ) ), false, "assertCollection() should return false with expected: (Number: 1) and actual: (Array)" );
+		equals( assertCollection( _stubParams(1, Object, true ) ), false, "assertCollection() should return false with expected: (Number: 1) and actual: (Object)" );
+		equals( assertCollection( _stubParams(1, Function, true ) ), false, "assertCollection() should return false with expected: (Number: 1) and actual: (Function)" );
+		equals( assertCollection( _stubParams(1, RegExp, true ) ), false, "assertCollection() should return false with expected: (Number: 1) and actual: (RegExp)" );
+		equals( assertCollection( _stubParams(1, Date, true ) ), false, "assertCollection() should return false with expected: (Number: 1) and actual: (Date)" );
+		equals( assertCollection( _stubParams(1, Custom, true ) ), false, "assertCollection() should return false with expected: (Number: 1) and actual: (Custom)" );
+		
+		// Test invalid argument type - Values (truthy)
+		
+		equals( assertCollection( _stubParams(1, "string", true ) ), false, "assertCollection() should return false with expected: (Number: 1) and actual: (String: string)" );
+		equals( assertCollection( _stubParams(1, true, true ) ), false, "assertCollection() should return false with expected: (Number: 1) and actual: (Boolean: true)" );
+		equals( assertCollection( _stubParams(1, [], true ) ), false, "assertCollection() should return false with expected: (Number: 1) and actual: (Array: [])" );
+		equals( assertCollection( _stubParams(1, {}, true ) ), false, "assertCollection() should return false with expected: (Number: 1) and actual: (Object: {})" );
+		equals( assertCollection( _stubParams(1, function(){}, true ) ), false, "assertCollection() should return false with expected: (Number: 1) and actual: (Function: function(){})" );
+		equals( assertCollection( _stubParams(1, /test/, true ) ), false, "assertCollection() should return false with expected: (Number: 1) and actual: (RegExp: /test/)" );
+		equals( assertCollection( _stubParams(1, new Date(), true ) ), false, "assertCollection() should return false with expected: (Number: 1) and actual: (Date: new instance)" );
+		equals( assertCollection( _stubParams(1, new Custom(), true ) ), false, "assertCollection() should return false with expected: (Number: 1) and actual: (Custom: new instance)" );
+  
+	  // Test invalid argument types - false values
+	
+		equals( assertCollection( _stubParams(1, null, true ) ), false, "assertCollection() should return false with expected: (Number: 1) and actual: (null)" );
+		equals( assertCollection( _stubParams(1, undefined, true ) ), false, "assertCollection() should return false with expected: (Number: 1) and actual: (undefined)" );
+		
+		// TRUE ASSERTIONS
+		equals( assertCollection( _stubParams(1, Number, true ) ), false, "assertCollection() should return false with expected: (Number: 1) and actual: (Number)" );
+		equals( assertCollection( _stubParams(1, 1, true ) ), true, "assertCollection() should return true with expected: (Number: 1) and actual: (Number: 1)" );
+		equals( assertCollection( _stubParams(1, 0, true ) ), false, "assertCollection() should return false with expected: (Number: 1) and actual: (Number: 0)" );
+		
+		// Expect Falsy Value
+		equals( assertCollection( _stubParams(0, Number, true ) ), false, "assertCollection() should return false with expected: (Number: 0) and actual: (Number)" );
+		equals( assertCollection( _stubParams(0, 1, true ) ), false, "assertCollection() should return false with expected: (Number: 0) and actual: (Number: 1)" );
+		equals( assertCollection( _stubParams(0, 0, true ) ), true, "assertCollection() should return true with expected: (Number: 0) and actual: (Number: 0)" );
+		
+	});
+
+	test("assertCollection() - (String: Constructor) primitive - typed checking only", function() {
+
+	  // FALSE ASSERTIONS
+	  
 	  // Test invalid argument type - Constructors
 		
 		equals( assertCollection( _stubParams(String, Number) ), false, "assertCollection() should return false with expected: (String) and actual: (Number)" );
@@ -169,18 +242,10 @@
 		
 	});
 	
-	test("assertCollection() - (String) primitive - strict value checking", function() {
+	test("assertCollection() - (String: Constructor) primitive - strict value checking", function() {
 
 	  // FALSE ASSERTIONS
-	
-		// Test no arguments
-	  try {
-			assertCollection();
-	    ok(false, "assertCollection() should throw exception when passed No parameters");
-	  } catch (exception) {  
-	    equals(exception.type, "MissingConfigObjectException", "assertCollection() exception type should be MissingConfigObjectException for no parameters");
-	  }
-  
+	  
 	  // Test invalid argument type - Constructors
 		
 		equals( assertCollection( _stubParams(String, Number, true ) ), false, "assertCollection() should return false with expected: (String) and actual: (Number)" );
@@ -214,19 +279,97 @@
 		equals( assertCollection( _stubParams(String, "", true ) ), false, "assertCollection() should return true with expected: (String) and actual: (String: '')" );
 		
 	});
+	
+	test("assertCollection() - (String: 'string') primitive - typed checking only", function() {
 
-	test("assertCollection() - (Boolean) primitive - typed checking only", function() {
+	  // FALSE ASSERTIONS
+	  
+	  // Test invalid argument type - Constructors
+		
+		equals( assertCollection( _stubParams('string', Number) ), false, "assertCollection() should return false with expected: (String: 'string') and actual: (Number)" );
+		equals( assertCollection( _stubParams('string', Boolean) ), false, "assertCollection() should return false with expected: (String: 'string') and actual: (Boolean)" );
+		equals( assertCollection( _stubParams('string', Array) ), false, "assertCollection() should return false with expected: (String: 'string') and actual: (Array)" );
+		equals( assertCollection( _stubParams('string', Object) ), false, "assertCollection() should return false with expected: (String: 'string') and actual: (Object)" );
+		equals( assertCollection( _stubParams('string', Function) ), false, "assertCollection() should return false with expected: (String: 'string') and actual: (Function)" );
+		equals( assertCollection( _stubParams('string', RegExp) ), false, "assertCollection() should return false with expected: (String: 'string') and actual: (RegExp)" );
+		equals( assertCollection( _stubParams('string', Date) ), false, "assertCollection() should return false with expected: (String: 'string') and actual: (Date)" );
+		equals( assertCollection( _stubParams('string', Custom) ), false, "assertCollection() should return false with expected: (String: 'string') and actual: (Custom)" );
+		
+		// Test invalid argument type - Values (truthy)
+		
+		equals( assertCollection( _stubParams('string', 1) ), false, "assertCollection() should return false with expected: (String: 'string') and actual: (Number: 1)" );
+		equals( assertCollection( _stubParams('string', true) ), false, "assertCollection() should return false with expected: (String: 'string') and actual: (Boolean: true)" );
+		equals( assertCollection( _stubParams('string', []) ), false, "assertCollection() should return false with expected: (String: 'string') and actual: (Array: [])" );
+		equals( assertCollection( _stubParams('string', {}) ), false, "assertCollection() should return false with expected: (String: 'string') and actual: (Object: {})" );
+		equals( assertCollection( _stubParams('string', function(){}) ), false, "assertCollection() should return false with expected: (String: 'string') and actual: (Function: function(){})" );
+		equals( assertCollection( _stubParams('string', /test/) ), false, "assertCollection() should return false with expected: (String: 'string') and actual: (RegExp: /test/)" );
+		equals( assertCollection( _stubParams('string', new Date()) ), false, "assertCollection() should return false with expected: (String: 'string') and actual: (Date: new instance)" );
+		equals( assertCollection( _stubParams('string', new Custom()) ), false, "assertCollection() should return false with expected: (String: 'string') and actual: (Custom: new instance)" );
+  
+	  // Test invalid argument types - false values
+	
+		equals( assertCollection( _stubParams('string', null) ), false, "assertCollection() should return false with expected: (String: 'string') and actual: (null)" );
+		equals( assertCollection( _stubParams('string', undefined) ), false, "assertCollection() should return false with expected: (String: 'string') and actual: (undefined)" );
+		
+		// TRUE ASSERTIONS
+		equals( assertCollection( _stubParams('string', String) ), true, "assertCollection() should return true with expected: (String: 'string') and actual: (String)" );
+		equals( assertCollection( _stubParams('string', "string") ), true, "assertCollection() should return true with expected: (String: 'string') and actual: (String: 'string')" );
+		equals( assertCollection( _stubParams('string', "") ), true, "assertCollection() should return true with expected: (String: 'string') and actual: (String: '')" );
+		
+		// Expect Falsy Value
+		equals( assertCollection( _stubParams('', String) ), true, "assertCollection() should return true with expected: (String: '') and actual: (String)" );
+		equals( assertCollection( _stubParams('', "string") ), true, "assertCollection() should return true with expected: (String: '') and actual: (String: 'string')" );
+		equals( assertCollection( _stubParams('', "") ), true, "assertCollection() should return true with expected: (String: '') and actual: (String: '')" );
+		
+	});
+	
+	test("assertCollection() - (String: 'string') primitive - strict value checking", function() {
 
 	  // FALSE ASSERTIONS
 	
-		// Test no arguments
-	  try {
-			assertCollection();
-	    ok(false, "assertCollection() should throw exception when passed No parameters");
-	  } catch (exception) {  
-	    equals(exception.type, "MissingConfigObjectException", "assertCollection() exception type should be MissingConfigObjectException for no parameters");
-	  }
+	  // Test invalid argument type - Constructors
+		
+		equals( assertCollection( _stubParams('string', Number, true ) ), false, "assertCollection() should return false with expected: (String: 'string') and actual: (Number)" );
+		equals( assertCollection( _stubParams('string', Boolean, true ) ), false, "assertCollection() should return false with expected: (String: 'string') and actual: (Boolean)" );
+		equals( assertCollection( _stubParams('string', Array, true ) ), false, "assertCollection() should return false with expected: (String: 'string') and actual: (Array)" );
+		equals( assertCollection( _stubParams('string', Object, true ) ), false, "assertCollection() should return false with expected: (String: 'string') and actual: (Object)" );
+		equals( assertCollection( _stubParams('string', Function, true ) ), false, "assertCollection() should return false with expected: (String: 'string') and actual: (Function)" );
+		equals( assertCollection( _stubParams('string', RegExp, true ) ), false, "assertCollection() should return false with expected: (String: 'string') and actual: (RegExp)" );
+		equals( assertCollection( _stubParams('string', Date, true ) ), false, "assertCollection() should return false with expected: (String: 'string') and actual: (Date)" );
+		equals( assertCollection( _stubParams('string', Custom, true ) ), false, "assertCollection() should return false with expected: (String: 'string') and actual: (Custom)" );
+		
+		// Test invalid argument type - Values (truthy)
+		
+		equals( assertCollection( _stubParams('string', 1, true ) ), false, "assertCollection() should return false with expected: (String: 'string') and actual: (Number: 1)" );
+		equals( assertCollection( _stubParams('string', true, true ) ), false, "assertCollection() should return false with expected: (String: 'string') and actual: (Boolean: true)" );
+		equals( assertCollection( _stubParams('string', [], true ) ), false, "assertCollection() should return false with expected: (String: 'string') and actual: (Array: [])" );
+		equals( assertCollection( _stubParams('string', {}, true ) ), false, "assertCollection() should return false with expected: (String: 'string') and actual: (Object: {})" );
+		equals( assertCollection( _stubParams('string', function(){}, true ) ), false, "assertCollection() should return false with expected: (String: 'string') and actual: (Function: function(){})" );
+		equals( assertCollection( _stubParams('string', /test/, true ) ), false, "assertCollection() should return false with expected: (String: 'string') and actual: (RegExp: /test/)" );
+		equals( assertCollection( _stubParams('string', new Date(), true ) ), false, "assertCollection() should return false with expected: (String: 'string') and actual: (Date: new instance)" );
+		equals( assertCollection( _stubParams('string', new Custom(), true ) ), false, "assertCollection() should return false with expected: (String: 'string') and actual: (Custom: new instance)" );
   
+	  // Test invalid argument types - false values
+	
+		equals( assertCollection( _stubParams('string', null, true ) ), false, "assertCollection() should return false with expected: (String: 'string') and actual: (null)" );
+		equals( assertCollection( _stubParams('string', undefined, true ) ), false, "assertCollection() should return false with expected: (String: 'string') and actual: (undefined)" );
+		
+		// TRUE ASSERTIONS
+		equals( assertCollection( _stubParams('string', String, true ) ), false, "assertCollection() should return false with expected: (String: 'string') and actual: (String)" );
+		equals( assertCollection( _stubParams('string', "string", true ) ), true, "assertCollection() should return true with expected: (String: 'string') and actual: (String: 'string')" );
+		equals( assertCollection( _stubParams('string', "", true ) ), false, "assertCollection() should return false with expected: (String: 'string') and actual: (String: '')" );
+
+		// Expect Falsy Value
+		equals( assertCollection( _stubParams('', String, true) ), false, "assertCollection() should return false with expected: (String: '') and actual: (String)" );
+		equals( assertCollection( _stubParams('', "string", true) ), false, "assertCollection() should return false with expected: (String: '') and actual: (String: 'string')" );
+		equals( assertCollection( _stubParams('', "", true) ), true, "assertCollection() should return true with expected: (String: '') and actual: (String: '')" );
+		
+	});
+
+	test("assertCollection() - (Boolean: Constructor) primitive - typed checking only", function() {
+
+	  // FALSE ASSERTIONS
+	  
 	  // Test invalid argument type - Constructors
 		
 		equals( assertCollection( _stubParams(Boolean, Number) ), false, "assertCollection() should return false with expected: (Boolean) and actual: (Number)" );
@@ -261,17 +404,9 @@
 		
 	});
 	
-	test("assertCollection() - (Boolean) primitive - strict value checking", function() {
+	test("assertCollection() - (Boolean: Constructor) primitive - strict value checking", function() {
 
 	  // FALSE ASSERTIONS
-	
-		// Test no arguments
-	  try {
-			assertCollection();
-	    ok(false, "assertCollection() should throw exception when passed No parameters");
-	  } catch (exception) {  
-	    equals(exception.type, "MissingConfigObjectException", "assertCollection() exception type should be MissingConfigObjectException for no parameters");
-	  }
   
 	  // Test invalid argument type - Constructors
 		
@@ -304,6 +439,93 @@
 		equals( assertCollection( _stubParams(Boolean, Boolean, true ) ), true, "assertCollection() should return true with expected: (Boolean) and actual: (Boolean)" );
 		equals( assertCollection( _stubParams(Boolean, true, true ) ), false, "assertCollection() should return true with expected: (Boolean) and actual: (Boolean: true)" );
 		equals( assertCollection( _stubParams(Boolean, false, true ) ), false, "assertCollection() should return true with expected: (Boolean) and actual: (Boolean: false)" );
+		
+	});
+	
+	test("assertCollection() - (Boolean: true) primitive - typed checking only", function() {
+
+	  // FALSE ASSERTIONS
+	  
+	  // Test invalid argument type - Constructors
+		
+		equals( assertCollection( _stubParams(true, Number) ), false, "assertCollection() should return false with expected: (Boolean: true) and actual: (Number)" );
+		equals( assertCollection( _stubParams(true, String) ), false, "assertCollection() should return false with expected: (Boolean: true) and actual: (String)" );
+		equals( assertCollection( _stubParams(true, Array) ), false, "assertCollection() should return false with expected: (Boolean: true) and actual: (Array)" );
+		equals( assertCollection( _stubParams(true, Object) ), false, "assertCollection() should return false with expected: (Boolean: true) and actual: (Object)" );
+		equals( assertCollection( _stubParams(true, Function) ), false, "assertCollection() should return false with expected: (Boolean: true) and actual: (Function)" );
+		equals( assertCollection( _stubParams(true, RegExp) ), false, "assertCollection() should return false with expected: (Boolean: true) and actual: (RegExp)" );
+		equals( assertCollection( _stubParams(true, Date) ), false, "assertCollection() should return false with expected: (Boolean: true) and actual: (Date)" );
+		equals( assertCollection( _stubParams(true, Custom) ), false, "assertCollection() should return false with expected: (Boolean: true) and actual: (Custom)" );
+		
+		// Test invalid argument type - Values (truthy)
+		
+		equals( assertCollection( _stubParams(true, 1) ), false, "assertCollection() should return false with expected: (Boolean: true) and actual: (Number: 1)" );
+		equals( assertCollection( _stubParams(true, "string") ), false, "assertCollection() should return false with expected: (Boolean: true) and actual: (String: string)" );
+		equals( assertCollection( _stubParams(true, []) ), false, "assertCollection() should return false with expected: (Boolean: true) and actual: (Array: [])" );
+		equals( assertCollection( _stubParams(true, {}) ), false, "assertCollection() should return false with expected: (Boolean: true) and actual: (Object: {})" );
+		equals( assertCollection( _stubParams(true, function(){}) ), false, "assertCollection() should return false with expected: (Boolean: true) and actual: (Function: function(){})" );
+		equals( assertCollection( _stubParams(true, /test/) ), false, "assertCollection() should return false with expected: (Boolean: true) and actual: (RegExp: /test/)" );
+		equals( assertCollection( _stubParams(true, new Date()) ), false, "assertCollection() should return false with expected: (Boolean: true) and actual: (Date: new instance)" );
+		equals( assertCollection( _stubParams(true, new Custom()) ), false, "assertCollection() should return false with expected: (Boolean: true) and actual: (Custom: new instance)" );
+  
+	  // Test invalid argument types - false values
+	
+		equals( assertCollection( _stubParams(true, null) ), false, "assertCollection() should return false with expected: (Boolean: true) and actual: (null)" );
+		equals( assertCollection( _stubParams(true, undefined) ), false, "assertCollection() should return false with expected: (Boolean: true) and actual: (undefined)" );
+		
+		// TRUE ASSERTIONS
+		equals( assertCollection( _stubParams(true, Boolean) ), true, "assertCollection() should return true with expected: (Boolean: true) and actual: (Boolean)" );
+		equals( assertCollection( _stubParams(true, true) ), true, "assertCollection() should return true with expected: (Boolean: true) and actual: (Boolean: true)" );
+		equals( assertCollection( _stubParams(true, false) ), true, "assertCollection() should return true with expected: (Boolean: true) and actual: (Boolean: false)" );
+		
+		// Expect Falsy Value
+		equals( assertCollection( _stubParams(false, Boolean) ), true, "assertCollection() should return true with expected: (Boolean: false) and actual: (Boolean)" );
+		equals( assertCollection( _stubParams(false, true) ), true, "assertCollection() should return true with expected: (Boolean: false) and actual: (Boolean: true)" );
+		equals( assertCollection( _stubParams(false, false) ), true, "assertCollection() should return true with expected: (Boolean: false) and actual: (Boolean: false)" );
+		
+	});
+	
+	test("assertCollection() - (Boolean: true) primitive - strict value checking", function() {
+
+	  // FALSE ASSERTIONS
+  
+	  // Test invalid argument type - Constructors
+		
+		equals( assertCollection( _stubParams(true, Number, true ) ), false, "assertCollection() should return false with expected: (Boolean: true) and actual: (Number)" );
+		equals( assertCollection( _stubParams(true, String, true ) ), false, "assertCollection() should return false with expected: (Boolean: true) and actual: (String)" );
+		equals( assertCollection( _stubParams(true, Array, true ) ), false, "assertCollection() should return false with expected: (Boolean: true) and actual: (Array)" );
+		equals( assertCollection( _stubParams(true, Object, true ) ), false, "assertCollection() should return false with expected: (Boolean: true) and actual: (Object)" );
+		equals( assertCollection( _stubParams(true, Function, true ) ), false, "assertCollection() should return false with expected: (Boolean: true) and actual: (Function)" );
+		equals( assertCollection( _stubParams(true, RegExp, true ) ), false, "assertCollection() should return false with expected: (Boolean: true) and actual: (RegExp)" );
+		equals( assertCollection( _stubParams(true, Date, true ) ), false, "assertCollection() should return false with expected: (Boolean: true) and actual: (Date)" );
+		equals( assertCollection( _stubParams(true, Custom, true ) ), false, "assertCollection() should return false with expected: (Boolean: true) and actual: (Custom)" );
+		
+		// Test invalid argument type - Values (truthy)
+		
+		equals( assertCollection( _stubParams(true, 1, true ) ), false, "assertCollection() should return false with expected: (Boolean: true) and actual: (Number: 1)" );
+		equals( assertCollection( _stubParams(true, "string", true ) ), false, "assertCollection() should return false with expected: (Boolean: true) and actual: (String: string)" );
+		equals( assertCollection( _stubParams(true, [], true ) ), false, "assertCollection() should return false with expected: (Boolean: true) and actual: (Array: [])" );
+		equals( assertCollection( _stubParams(true, {}, true ) ), false, "assertCollection() should return false with expected: (Boolean: true) and actual: (Object: {})" );
+		equals( assertCollection( _stubParams(true, function(){}, true ) ), false, "assertCollection() should return false with expected: (Boolean: true) and actual: (Function: function(){})" );
+		equals( assertCollection( _stubParams(true, /test/, true ) ), false, "assertCollection() should return false with expected: (Boolean: true) and actual: (RegExp: /test/)" );
+		equals( assertCollection( _stubParams(true, new Date(), true ) ), false, "assertCollection() should return false with expected: (Boolean: true) and actual: (Date: new instance)" );
+		equals( assertCollection( _stubParams(true, new Custom(), true ) ), false, "assertCollection() should return false with expected: (Boolean: true) and actual: (Custom: new instance)" );
+  
+	  // Test invalid argument types - false values
+	
+		equals( assertCollection( _stubParams(true, null, true ) ), false, "assertCollection() should return false with expected: (Boolean: true) and actual: (null)" );
+		equals( assertCollection( _stubParams(true, undefined, true ) ), false, "assertCollection() should return false with expected: (Boolean: true) and actual: (undefined)" );
+		
+		// TRUE ASSERTIONS
+		debugger;
+		equals( assertCollection( _stubParams(true, Boolean, true ) ), false, "assertCollection() should return true with expected: (Boolean: true) and actual: (Boolean)" );
+		equals( assertCollection( _stubParams(true, true, true ) ), true, "assertCollection() should return true with expected: (Boolean: true) and actual: (Boolean: true)" );
+		equals( assertCollection( _stubParams(true, false, true ) ), false, "assertCollection() should return true with expected: (Boolean: true) and actual: (Boolean: false)" );
+		
+		// Expect Falsy Value
+		equals( assertCollection( _stubParams(false, Boolean, true) ), false, "assertCollection() should return false with expected: (Boolean: false) and actual: (Boolean)" );
+		equals( assertCollection( _stubParams(false, true, true) ), false, "assertCollection() should return false with expected: (Boolean: false) and actual: (Boolean: true)" );
+		equals( assertCollection( _stubParams(false, false, true) ), true, "assertCollection() should return true with expected: (Boolean: false) and actual: (Boolean: false)" );
 		
 	});
 
@@ -2287,42 +2509,27 @@
 	  var jedi = new Mock({
 	    "setForceLevel" : {
 	      calls: 1,
-	      accepts: [{
-	          params: [3] // 1st presentation to interface
-	        }, {
-	          params: [9] // 2nd presentation to interface
-	        }
+	      interface: [
+					{accepts: [3]}, // 1st presentation to interface
+					{accepts: [9]} // 2nd presentation to interface
 	      ],
 	      required: 1
 	    }
 	  });
-  
-  
-	/*  Proposed API - purty.
-  
-	  var jedi = new Mock({
-	    "setForceLevel" : {
-	      "calls": 1,
-	      "interface": [
-	        { accepts: [3, Object], returns: true },
-	        { accepts: [9, Object], returns: false}
-	      ],
-	      required: 1
-	    }
-	  }); */
     
 	  // Bad Exercises
     
 	  // Test no argument type
 
 	  jedi.setForceLevel();
+
 	  try {
-	     jedi.verify();  
-	       ok(false, "verify() should throw exception when 'setForceLevel' called with no arguments");
-	    } catch (e) {  
-	       equals(e.length, 1, "verify() should return an array of 1 exceptions");
-	       equals(e[0].type, "IncorrectNumberOfArgumentsException", "verify() exception type should be IncorrectNumberOfArgumentsException");
-	    }
+			jedi.verify();  
+		  ok(false, "verify() should throw exception when 'setForceLevel' called with no arguments");
+		} catch (e) {  
+		  equals(e.length, 1, "verify() should return an array of 1 exceptions");
+		  equals(e[0].type, "IncorrectNumberOfArgumentsException", "verify() exception type should be IncorrectNumberOfArgumentsException");
+		}
 
 	  jedi.reset();
   
@@ -2331,18 +2538,17 @@
 	  jedi.setForceLevel("one");
 	  try {
 	     jedi.verify();  
-	       ok(false, "verify() should throw exception when 'setForceLevel' called with incorrect argument type");
-	    } catch (e) {  
-	       equals(e.length, 2, "verify() should return an array of 2 exceptions correlating with two interface expectations");
-	       equals(e[0].type, "IncorrectArgumentTypeException", "verify() exception type should be IncorrectArgumentTypeException");
-	    }
+	     ok(false, "verify() should throw exception when 'setForceLevel' called with incorrect argument type");
+	  } catch (e) {  
+	     equals(e.length, 2, "verify() should return an array of 2 exceptions correlating with two interface expectations");
+	     equals(e[0].type, "IncorrectArgumentTypeException", "verify() exception type should be IncorrectArgumentTypeException");
+	  }
 
 	  jedi.reset();
   
 	  // Good exercises
 	  // Test overloaded method with correct parameter type but wrong value
 	  jedi.setForceLevel(2, "overloaded");
-  
 	  ok( jedi.verify(), "verify() should pass after 'setForceLevel' was called once with Number primitive type but wrong exact expected value" );
 	  jedi.reset();
   
@@ -2357,7 +2563,6 @@
 	  jedi.setForceLevel(9);
 	  ok( jedi.verify(), "verify() should pass after 'setForceLevel' was called once with Number primitive type and second exact expected value" );
 	  jedi.reset();
-  
 
 	});
 
@@ -3308,62 +3513,62 @@
 	    .expects(1)
 	      .method("testMultipleParameters")
 	      .accepts(1, "string", true, null, undefined, {}, [], new Date(), /RegExp/, Selector, new Custom() )
-	      .required(0); // Default is to assume required.
+	      .required(0); // Overwrite implict required of 11 (fn.length).
   
 	  // Bad Exercises
   
 	  // Single incorrect argument
 
 	  samurai.testMultipleParameters("string");
-	  try {
-	        samurai.verify();
-	        ok(false, "verify() should throw exception");
-	    } catch (e) {
-	        equals(e.length, 1, "verify() should return an array of 1 exceptions");
-	        equals(e[0].type, "IncorrectArgumentTypeException", "verify() exception type should be IncorrectArgumentTypeException");
-	   }
+		try {
+			samurai.verify();
+		  ok(false, "verify() should throw exception");
+		} catch (e) {
+		  equals(e.length, 1, "verify() should return an array of 1 exceptions");
+			equals(e[0].type, "IncorrectArgumentTypeException", "verify() exception type should be IncorrectArgumentTypeException");
+		}
   
 	  samurai.reset();
   
 	  // Some arguments - first two switched around to be incorrect
   
 	  samurai.testMultipleParameters("string", 1, true, null, undefined, {});
-	  try {
-	        samurai.verify();
-	        ok(false, "verify() should throw exception");
-	    } catch (e) {
-	        equals(e.length, 2, "verify() should return an array of 2 exceptions");
-	        equals(e[0].type, "IncorrectArgumentTypeException", "verify() exception type should be IncorrectArgumentTypeException");
-	        equals(e[1].type, "IncorrectArgumentTypeException", "verify() exception type should be IncorrectArgumentTypeException");
-	   }
+		try {
+		  samurai.verify();
+		  ok(false, "verify() should throw exception");
+		} catch (e) {
+		  equals(e.length, 2, "verify() should return an array of 2 exceptions");
+		  equals(e[0].type, "IncorrectArgumentTypeException", "verify() exception type should be IncorrectArgumentTypeException");
+		  equals(e[1].type, "IncorrectArgumentTypeException", "verify() exception type should be IncorrectArgumentTypeException");
+		}
   
 	  samurai.reset();
   
 	  // All arguments - last two switched around to be incorrect
   
 	  samurai.testMultipleParameters("string", 1, true, null, undefined, {}, [], new Date(), /RegExp/, Selector, new Custom() )
-	  try {
-	        samurai.verify();
-	        ok(false, "verify() should throw exception");
-	    } catch (e) {
-	        equals(e.length, 2, "verify() should return an array of 2 exceptions");
-	        equals(e[0].type, "IncorrectArgumentTypeException", "verify() exception type should be IncorrectArgumentTypeException");
-	        equals(e[1].type, "IncorrectArgumentTypeException", "verify() exception type should be IncorrectArgumentTypeException");
-	   }  
+		try {
+		  samurai.verify();
+		  ok(false, "verify() should throw exception");
+		} catch (e) {
+		  equals(e.length, 2, "verify() should return an array of 2 exceptions");
+		  equals(e[0].type, "IncorrectArgumentTypeException", "verify() exception type should be IncorrectArgumentTypeException");
+		  equals(e[1].type, "IncorrectArgumentTypeException", "verify() exception type should be IncorrectArgumentTypeException");
+		}  
 
 	  samurai.reset();
   
 	  // Too many arguments - method overloading - first two switched to be incorrect - overloaded arguments should be ignored
   
 	  samurai.testMultipleParameters("string", 1, true, null, undefined, {}, [], new Date(), /RegExp/, Selector, new Custom(), null );
-	  try {
-	        samurai.verify();
-	        ok(false, "verify() should throw exception");
-	    } catch (e) {
-	        equals(e.length, 2, "verify() should return an array of 2 exceptions");
-	        equals(e[0].type, "IncorrectArgumentTypeException", "verify() exception type should be IncorrectArgumentTypeException");
-	        equals(e[1].type, "IncorrectArgumentTypeException", "verify() exception type should be IncorrectArgumentTypeException");
-	   }
+		try {
+		  samurai.verify();
+		  ok(false, "verify() should throw exception");
+		} catch (e) {
+		  equals(e.length, 2, "verify() should return an array of 2 exceptions");
+		  equals(e[0].type, "IncorrectArgumentTypeException", "verify() exception type should be IncorrectArgumentTypeException");
+		  equals(e[1].type, "IncorrectArgumentTypeException", "verify() exception type should be IncorrectArgumentTypeException");
+		}
 
 	  samurai.reset();
   
@@ -3705,81 +3910,83 @@
 	            .accepts('hard')
 	            .andChain();
 
-	    // Invalid constructor param
+		// Invalid constructor param
     
-	    $(1);
-	    try {
-	        $.verify();
-	        ok(false, "verify() should throw exception");
-	    } catch (e) {
-	        equals(e.length, 3, "verify() should return an array of 3 exceptions");
-	        equals(e[0].type, "InvalidConstructorException", "verify() exception type should be InvalidConstructorException");
-	        equals(e[1].type, "IncorrectNumberOfMethodCallsException", "verify() exception type should be IncorrectNumberOfMethodCallsException");
-	        equals(e[2].type, "IncorrectNumberOfMethodCallsException", "verify() exception type should be IncorrectNumberOfMethodCallsException");
-	    }
+    $(1);
+		try {
+		  $.verify();
+		  ok(false, "verify() should throw exception");
+		} catch (e) {
+		  equals(e.length, 3, "verify() should return an array of 3 exceptions");
+		  equals(e[0].type, "InvalidConstructorException", "verify() exception type should be InvalidConstructorException");
+		  equals(e[1].type, "IncorrectNumberOfMethodCallsException", "verify() exception type should be IncorrectNumberOfMethodCallsException");
+		  equals(e[2].type, "IncorrectNumberOfMethodCallsException", "verify() exception type should be IncorrectNumberOfMethodCallsException");
+		}
+   
+    $.reset();
+   
+    // No constructor param
+
+    $().run('slow').fight('hard').run('again');
+		try {
+		  $.verify();
+		  ok(false, "verify() should throw exception");
+		} catch (e) {
+		  equals(e.length, 2, "verify() should return an array of 2 exception");
+		  equals(e[0].type, "InvalidConstructorException", "verify() exception type should be InvalidConstructorException");
+		  equals(e[1].type, "IncorrectNumberOfArgumentsException", "verify() exception type should be IncorrectNumberOfArgumentsException");
+		}
+   
+    $.reset();
+   
+    // Missed call to fight
+   
+    $(".ninja").run('at a canter');
     
-	    $.reset();
-    
-	    // No constructor param
-	    $().run('slow').fight('hard').run('again');
-	    try {
-	        $.verify();
-	        ok(false, "verify() should throw exception");
-	    } catch (e) {
-	        equals(e.length, 2, "verify() should return an array of 2 exception");
-	        equals(e[0].type, "InvalidConstructorException", "verify() exception type should be InvalidConstructorException");
-	        equals(e[1].type, "IncorrectNumberOfArgumentsException", "verify() exception type should be IncorrectNumberOfArgumentsException");
-	    }
-    
-	    $.reset();
-    
-	    // Missed call to fight
-    
-	    $(".ninja").run('at a canter');
-     
-	    try {
-	        $.verify();
-	        ok(false, "verify() should throw exception");
-	    } catch (e) {
-	        equals(e.length, 2, "verify() should return an array of 2 exception");
-	        equals(e[0].type, "IncorrectNumberOfMethodCallsException", "verify() exception type should be IncorrectNumberOfMethodCallsException");
-	    }
-    
-	    $.reset();
+		try {
+		  $.verify();
+		  ok(false, "verify() should throw exception");
+		} catch (e) {
+		  equals(e.length, 2, "verify() should return an array of 2 exception");
+		  equals(e[0].type, "IncorrectNumberOfMethodCallsException", "verify() exception type should be IncorrectNumberOfMethodCallsException");
+		}
+   
+    $.reset();
 
 	  // Good Exercises
 
 	  // Overloaded constructor param with incorrect parameter values
     
-	    $('.samauri').run('slow').fight('hard').run('again');
+    $('.samauri').run('slow').fight('hard').run('again');
      
 	  ok($.verify(), "verify() should be true");
     
-	    $.reset();
+    $.reset();
   
 	  // Flag strict argument value checking
+	
 	  $.strict();
   
 	  // Bad Exercise - invalid parameter value
   
 	  $('.samauri').run('slow').fight('hard').run('again');
   
-	    try {
-	        $.verify();
-	        ok(false, "verify() should throw exception");
-	    } catch (e) {
-	        equals(e.length, 1 /* should be 2*/, "verify() should return an array of 2 exception");
-	        equals(e[0].type, "IncorrectArgumentValueException", "verify() exception type should be IncorrectArgumentValueException");
-	        // equals(e[1].type, "IncorrectArgumentTypeException", "verify() exception type should be IncorrectArgumentTypeException");
-	    }
+		try {
+		  $.verify();
+		  ok(false, "verify() should throw exception");
+		} catch (e) {
+		  equals(e.length, 1 /* should be 2*/, "verify() should return an array of 2 exception");
+		  equals(e[0].type, "IncorrectArgumentValueException", "verify() exception type should be IncorrectArgumentValueException");
+		  // equals(e[1].type, "IncorrectArgumentTypeException", "verify() exception type should be IncorrectArgumentTypeException");
+		}
 
-	  $.reset();
+		$.reset();
 
-	    // Constuctor invocation with correct parameter type and exact value
+		// Constuctor invocation with correct parameter type and exact value
 
-	    $(".ninja").run('slow').fight('hard').run('again');
+		$(".ninja").run('slow').fight('hard').run('again');
 
-	    ok($.verify(), "verify() should be true");
+		ok($.verify(), "verify() should be true");
 
 	  // Mock jQuery with chaining
   
@@ -3827,32 +4034,32 @@
     
 	  var $ = new Mock();
     
-	    // Invalid callback
-    
-	    $.expects(1).method('get')
-	        .accepts('some/url', Function)
-	    .required(2)
-	        .callFunctionWith('data response');
+		// Invalid callback
 
-	    var called = false;
-	    $.get('some/url');
+		$.expects(1).method('get')
+		    .accepts('some/url', Function)
+		.required(2)
+		    .callFunctionWith('data response');
 
-	    try {
-	        $.verify();
-	        ok(false, "verify() should throw exception");
-	    } catch (e) {
-	        equals(e.length, 1, "verify() should return an array of 1 exception");
-	        equals(e[0].type, "IncorrectNumberOfArgumentsException", "verify() exception type should be IncorrectNumberOfArgumentsException");
-	    }
-    
-	    $.reset();
-    
-	    // Correct Usage
+		var called = false;
+		$.get('some/url');
 
-	    var called = false;    
+		try {
+			$.verify();
+			ok(false, "verify() should throw exception");
+		} catch (e) {
+			equals(e.length, 1, "verify() should return an array of 1 exception");
+			equals(e[0].type, "IncorrectNumberOfArgumentsException", "verify() exception type should be IncorrectNumberOfArgumentsException");
+		}
 
-	    $.get('some/url', function (data) { called = true });
-    
+		$.reset();
+
+		// Correct Usage
+
+		var called = false;    
+
+		$.get('some/url', function (data) { called = true });
+
 	  equals(called, true, "called should be set to true");
 
 	});
@@ -3907,6 +4114,7 @@
 	  ok(assertArray([10], [1]), "assertArray should be true (non-matching numbers)");
 	  ok(assertArray([""], [""]), "assertArray should be true (falsy matching empty strings)");
 	  ok(assertArray(["string"], ["string"]), "assertArray should be true (matching strings)");
+		debugger;
 	  ok(assertArray([""], ["different string"]), "assertArray should be true ([\"\"], [\"different string\"])");
 	  ok(assertArray([false], [false]), "assertArray should be true (matching false Booleans)");
 	  ok(assertArray([true], [false]), "assertArray should be true (matching true Booleans)");

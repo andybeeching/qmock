@@ -38,6 +38,7 @@
  * TODO: Protect against API collisions between QMock and Mocks through internal re-mapping
  * TODO: Extend callback parameter invocation to support multiple callback scenarios
  * TODO: Write simple helper function to test valid stuff in loops
+ * TODO: Early exclusions via returns
  */
 
 (function initialiseQMock (Mock, container) {
@@ -197,19 +198,19 @@
         
         // hack in support for native object types (aside from null // undefined)
         var nativeTypes = [Number, String, Boolean, Date, Function, Object, Array, RegExp],
-          parameter = expected[i] && expected[i].constructor,
+          expectation = (expected[i] !== null && expected[i] !== undefined) ? expected[i].constructor : expected[i], // falsy values 0,'',false still resolve constructor property
 					isKlass = false;
           
         assertType: 
           for (var j = 0, _len = nativeTypes.length; j < _len; j++) {
             if ( expected[i] === nativeTypes[j] ) {
-              parameter = expected[i];
+              expectation = expected[i];
 							isKlass = true;
               break assertType;
             }
           }
         
-        switch(parameter) {
+        switch(expectation) {
           // Pass-through
           case container.Variable.constructor:
             continue testingArgumentTypes;
@@ -218,13 +219,13 @@
           case 0:
 						// If strict then simply do an identity check
             if ( ( strictValueChecking === true ) && ( expected[i] !== actual[i] ) ) {
-              _throwException("IncorrectArgumentValueException", name, expected[i], actual[i]);
+              _throwException("IncorrectArgumentValueException", name, expectation, actual[i]);
 						// If not strict then check for falsy value and set to true
             } else if ( ( ( (actual[i] === 0) ? true : actual[i] )
  								// Or check truthy value's constructor.
-								&& actual[i].constructor ) !== parameter
+								&& actual[i].constructor ) !== expectation
 								// Or check truthy value isn't a constructor.
- 								&& expected[i] !== actual[i]) {
+ 								&& expectation !== actual[i]) {
 									// Otherwise throw exception
                 	_throwException(exceptionType, name, "Number", actual[i]);
             }
@@ -233,13 +234,13 @@
           case "":
 						// If strict then simply do an identity check
 	          if ( ( strictValueChecking === true ) && ( expected[i] !== actual[i] ) ) {
-	            _throwException("IncorrectArgumentValueException", name, expected[i], actual[i]);
+	            _throwException("IncorrectArgumentValueException", name, expectation, actual[i]);
 						// If not strict then check for falsy value and set to true
 	          } else if ( ( ( (actual[i] === "") ? true : actual[i] )
 								// Or check truthy value's constructor.
-								&& actual[i].constructor ) !== parameter
+								&& actual[i].constructor ) !== expectation
 								// Or check truthy value isn't a constructor.
-								&& expected[i] !== actual[i]) {
+								&& expectation !== actual[i]) {
 									// Otherwise throw exception
 	              	_throwException(exceptionType, name, "String", actual[i]);
 	          }
@@ -248,13 +249,13 @@
           case false:
 						// If strict then simply do an identity check
 	          if ( ( strictValueChecking === true ) && ( expected[i] !== actual[i] ) ) {
-	            _throwException("IncorrectArgumentValueException", name, expected[i], actual[i]);
+	            _throwException("IncorrectArgumentValueException", name, expectation, actual[i]);
 						// If not strict then check for falsy value and set to true
 	          } else if ( ( ( (actual[i] === false) ? true : actual[i] )
 								// Or check truthy value's constructor.
-								&& actual[i].constructor ) !== parameter
+								&& actual[i].constructor ) !== expectation
 								// Or check truthy value isn't a constructor.
-								&& expected[i] !== actual[i]) {
+								&& expectation !== actual[i]) {
 									// Otherwise throw exception
 	              	_throwException(exceptionType, name, "Boolean", actual[i]);
 	          }
@@ -303,8 +304,8 @@
   }
 
   // Function to build pretty exception objects
-    function createException (exceptionType, objName, expected, actual) {
-     var e = {
+	function createException (exceptionType, objName, expected, actual) {
+  	var e = {
         type : exceptionType
       },
       fn = "'" + objName + "'";
@@ -320,7 +321,7 @@
         e.message = fn + " expected: " + expected + ", actual was: " + actual;
     }
     return e;
-  }
+	}
   
   Mock = (function createMockConstructor () {
   
@@ -378,63 +379,64 @@
       MockedMember.prototype = {
         
 				method: function (name) {
-    
-	        	// Throw error if collision with mockMember API
-	         if (mock[name] !== undefined) {
-	           throwException("InvalidMethodNameException", "Constructor function", "unique method name", "was reserved method name '" + name + "'");
-	           throw exceptions;
-	         }
+
+					// Throw error if collision with mockMember API
+	        if (mock[name] !== undefined) {
+	          throwException("InvalidMethodNameException", "Constructor function", "unique method name", "was reserved method name '" + name + "'");
+	          throw exceptions;
+	        }
         
 	          // Register public interface to mocked method instance on mock klass, bind to curried function
 	          mock[name] = (function (method, name) {
           
 						method["name"] = name;
   
-	            // Invoked when mock is called within SUT object.
-	            return function updateMethodState () {
-                      
-	            // Normalise Arguments
-	            var parameters = slice.call(arguments, 0);
-                            
-	            // Track method invocations
-	            method.actualCalls++;
-            
-	            // Store method call params for verification
-	            method.actualArgs.push(parameters);
-                      
-	            // Execute any callback functions specified with associated args.
-	            for (i = 0, len = parameters.length; i < len; i++) {
-	                if (parameters[i] && parameters[i].constructor === Function) {
-	                    parameters[i].apply(undefined, method.callbackArgs);
-	                }
-	            }
-              
-	            // Assert arguments against expected presentations and return appropriate object
-	            return (function getReturnValue(presentation) {
-        
-	             // Make default return value the defualt method value (undefined || Object || self (mock - chained))
-	             var obj = method.returnValue;
+	          // Invoked when mock is called within SUT object.
+            return function updateMethodState () {
+                     
+            // Normalise Arguments
+            var parameters = slice.call(arguments, 0);
+                           
+            // Track method invocations
+            method.actualCalls++;
+           
+            // Store method call params for verification
+            method.actualArgs.push(parameters);
+                     
+            // Execute any callback functions specified with associated args.
+            for (var i = 0, len = parameters.length; i < len; i++) {
+                if (parameters[i] && parameters[i].constructor === Function) {
+                    parameters[i].apply(undefined, method.callbackArgs);
+                }
+            }
+             
+            // Assert arguments against expected presentations and return appropriate object
+            return (function getReturnValue(presentation) {
+       
+             // Make default return value the defualt method value (undefined || Object || self (mock - chained))
+             var obj = method.returnValue;
 
-	             // Compare actual with expected arguments and if true return correct object
-	             for (var i = 0, len = method.expectedArgs.length; i < len; i++) {
-	               if ( 
-	                 assertArray (
-	                   method.expectedArgs[i]["accepts"], // 'expected' inputs
-	                   presentation, // 'actual' inputs
-	                   true // flag strict value checking to match correct expectation for return value
-	                 ) 
-	               ) {
-	                  // If match found against presentation return bound object (or self if chained)
-	                  obj = (method.returnValue && method.returnValue === mock) 
-	                    ? mock 
-	                    : method.expectedArgs[i]["returns"];
-	                }
-	             }
-	             return obj;
-	           })(parameters);
-	          };
+             // Compare actual with expected arguments and if true return correct object
+             for (var i = 0, len = method.expectedArgs.length; i < len; i++) {
+               if ( 
+                 assertArray (
+                   method.expectedArgs[i]["accepts"], // 'expected' inputs
+                   presentation, // 'actual' inputs
+                   true // flag strict value checking to match correct expectation for return value
+                 ) 
+               ) {
+                  // If match found against presentation return bound object (or self if chained)
+                  obj = (method.returnValue && method.returnValue === mock) 
+                    ? mock 
+                    : method.expectedArgs[i]["returns"];
+                }
+             			}
+	             			return obj;
+	           	})(parameters);
+	          
+						};
         
-				})(this, name);
+					})(this, name);
         
 	        // chain
 	       	return this; 
