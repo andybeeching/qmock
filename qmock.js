@@ -198,14 +198,12 @@
         
         // hack in support for native object types (aside from null // undefined)
         var nativeTypes = [Number, String, Boolean, Date, Function, Object, Array, RegExp],
-          expectation = (expected[i] !== null && expected[i] !== undefined) ? expected[i].constructor : expected[i], // falsy values 0,'',false still resolve constructor property
-					isKlass = false;
-          
+          expectation = (expected[i] !== null && expected[i] !== undefined) ? expected[i].constructor : expected[i]; // falsy values 0,'',false still resolve constructor property
+        
         assertType: 
           for (var j = 0, _len = nativeTypes.length; j < _len; j++) {
             if ( expected[i] === nativeTypes[j] ) {
               expectation = expected[i];
-							isKlass = true;
               break assertType;
             }
           }
@@ -216,50 +214,20 @@
             continue testingArgumentTypes;
           // Primitives  - compare by constructor unless strictValue flag is true (where compare by identity).
           case Number:
-          case 0:
+					case String:
+					case Boolean:
 						// If strict then simply do an identity check
             if ( ( strictValueChecking === true ) && ( expected[i] !== actual[i] ) ) {
               _throwException("IncorrectArgumentValueException", name, expectation, actual[i]);
-						// If not strict then check for falsy value and set to true
-            } else if ( ( ( (actual[i] === 0) ? true : actual[i] )
- 								// Or check truthy value's constructor.
-								&& actual[i].constructor ) !== expectation
-								// Or check truthy value isn't a constructor.
+						// If not strict then check if null/undefined else test constructor
+            } else if ( 
+							( (actual[i] !== null && actual[i] !== undefined ) ? actual[i].constructor : actual[i] ) !== expectation
+									// Or check received value is not simply a constructor itself.
  								&& expectation !== actual[i]) {
 									// Otherwise throw exception
-                	_throwException(exceptionType, name, "Number", actual[i]);
+                	_throwException(exceptionType, name, "Number/String/Boolean", actual[i]);
             }
             continue testingArgumentTypes;
-          case String:
-          case "":
-						// If strict then simply do an identity check
-	          if ( ( strictValueChecking === true ) && ( expected[i] !== actual[i] ) ) {
-	            _throwException("IncorrectArgumentValueException", name, expectation, actual[i]);
-						// If not strict then check for falsy value and set to true
-	          } else if ( ( ( (actual[i] === "") ? true : actual[i] )
-								// Or check truthy value's constructor.
-								&& actual[i].constructor ) !== expectation
-								// Or check truthy value isn't a constructor.
-								&& expectation !== actual[i]) {
-									// Otherwise throw exception
-	              	_throwException(exceptionType, name, "String", actual[i]);
-	          }
-	          continue testingArgumentTypes;
-          case Boolean:
-          case false:
-						// If strict then simply do an identity check
-	          if ( ( strictValueChecking === true ) && ( expected[i] !== actual[i] ) ) {
-	            _throwException("IncorrectArgumentValueException", name, expectation, actual[i]);
-						// If not strict then check for falsy value and set to true
-	          } else if ( ( ( (actual[i] === false) ? true : actual[i] )
-								// Or check truthy value's constructor.
-								&& actual[i].constructor ) !== expectation
-								// Or check truthy value isn't a constructor.
-								&& expectation !== actual[i]) {
-									// Otherwise throw exception
-	              	_throwException(exceptionType, name, "Boolean", actual[i]);
-	          }
-	          continue testingArgumentTypes;
           case Date:           
             if ( (actual[i] && actual[i].constructor) !== Date ) {
               _throwException("IncorrectArgumentValueException", name, "Date", actual[i]);

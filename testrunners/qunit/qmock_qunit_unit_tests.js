@@ -517,7 +517,6 @@
 		equals( assertCollection( _stubParams(true, undefined, true ) ), false, "assertCollection() should return false with expected: (Boolean: true) and actual: (undefined)" );
 		
 		// TRUE ASSERTIONS
-		debugger;
 		equals( assertCollection( _stubParams(true, Boolean, true ) ), false, "assertCollection() should return true with expected: (Boolean: true) and actual: (Boolean)" );
 		equals( assertCollection( _stubParams(true, true, true ) ), true, "assertCollection() should return true with expected: (Boolean: true) and actual: (Boolean: true)" );
 		equals( assertCollection( _stubParams(true, false, true ) ), false, "assertCollection() should return true with expected: (Boolean: true) and actual: (Boolean: false)" );
@@ -4114,7 +4113,6 @@
 	  ok(assertArray([10], [1]), "assertArray should be true (non-matching numbers)");
 	  ok(assertArray([""], [""]), "assertArray should be true (falsy matching empty strings)");
 	  ok(assertArray(["string"], ["string"]), "assertArray should be true (matching strings)");
-		debugger;
 	  ok(assertArray([""], ["different string"]), "assertArray should be true ([\"\"], [\"different string\"])");
 	  ok(assertArray([false], [false]), "assertArray should be true (matching false Booleans)");
 	  ok(assertArray([true], [false]), "assertArray should be true (matching true Booleans)");
