@@ -1343,7 +1343,6 @@
     
 	  mock.returnsTest()
 	  mock.isMethod("test");
-	  debugger;
 	  ok(mock.verify(), "verify() should be true");    
   
 	});
@@ -3146,7 +3145,7 @@
 	      .strict(true);
     
 	  ninja.chooseTarget("Jet Li, Bruce Lee, Chuck Norris", /Bruce Lee/);
-  
+
 	  ok(ninja.verify(), "verify() should be true");
   
 	  var samurai = new Mock();
@@ -3166,7 +3165,7 @@
 	        ok(false, "verify() should throw exception");
 	    } catch (e) {
 	        equals(e.length, 1 , "verify() should return an array of 1 exception");
-	        equals(e[0].type, "IncorrectArgumentTypeException", "verify()[0] exception type should be IncorrectArgumentsException");
+	        equals(e[0].type, "IncorrectArgumentValueException", "verify()[0] exception type should be IncorrectArgumentValueException");
 	    }
 
 	  samurai.reset();

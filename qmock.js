@@ -39,6 +39,7 @@
  * TODO: Extend callback parameter invocation to support multiple callback scenarios
  * TODO: Write simple helper function to test valid stuff in loops
  * TODO: Early exclusions via returns
+ * TODO: Need to look into using getPrototypeOf method for object type checking...
  */
 
 (function initialiseQMock (Mock, container) {
@@ -195,49 +196,31 @@
         
         // hack in support for native object types (aside from null // undefined)
         var nativeTypes = [Number, String, Boolean, Date, Function, Object, Array, RegExp, Variable],
-          expectation = (expected[i] !== null && expected[i] !== undefined) ? expected[i].constructor : expected[i];
+          expectedType = (expected[i] !== null && expected[i] !== undefined) ? expected[i].constructor : expected[i],
+          canCheck = false;
         
         assertType: 
           for (var j = 0, _len = nativeTypes.length; j < _len; j++) {
             if ( expected[i] === nativeTypes[j] ) {
-              expectation = expected[i];
+              expectedType = expected[i];
               break assertType;
             }
           }
         
-        switch(expectation) {
+        switch(expectedType) {
+          
           // Pass-through
           case Variable:
             continue testingArgumentTypes;
-          // Primitives  - compare by constructor unless strictValue flag is true (where compare by identity).
-          case Number:
-          case String:
-          case Boolean:
-            // If strict then simply do an identity check
-            if ( ( strictValueChecking === true ) && ( expected[i] !== actual[i] ) ) {
-              _throwException("IncorrectArgumentValueException", name, expectation, actual[i]);
-            // If not strict then check if null/undefined else test constructor
-            } else if ( 
-              ( (actual[i] !== null && actual[i] !== undefined ) ? actual[i].constructor : actual[i] ) !== expectation
-                  // Or check received value is not simply a constructor itself.
-                 && expectation !== actual[i]) {
-                  // Otherwise throw exception
-                  _throwException(exceptionType, name, "Number/String/Boolean", actual[i]); // Need to inject correct className 
-            }
-            continue testingArgumentTypes;
-          case Date:           
-            if ( (actual[i] && actual[i].constructor) !== Date ) {
-              _throwException("IncorrectArgumentValueException", name, "Date", actual[i]);
-            } else if ( ( strictValueChecking === true ) 
-              && ( expected[i].toUTCString() !== actual[i].toUTCString() ) ) {
-              _throwException(exceptionType, name, expected[i].toUTCString(), actual[i].toUTCString());
-            }
-            continue testingArgumentTypes;
-          // Composites - compare by constructor
-          case Function: 
-            if ( (actual[i] && actual[i].constructor) !== Function ) {
-              _throwException(exceptionType, name, "Function", actual[i]); }
+            
+          // False (however unlikely) - compare by type
+          case null:
+          case undefined:
+            if ( expected[i] !== actual[i] ) {
+              _throwException(exceptionType, name, expected[i], actual[i]); }
               continue testingArgumentTypes;
+              
+          // Collections - compare by constructor
           case Object: 
             if ( !assertObject(expected[i], actual[i], strictValueChecking ) ) {
               _throwException(exceptionType, name, "Object", actual[i]); }
@@ -246,20 +229,32 @@
             if ( !assertArray(expected[i], actual[i], strictValueChecking ) ) { 
               _throwException(exceptionType, name, "Array", actual[i]); }
               continue testingArgumentTypes;
-          case RegExp:
-            if ( (actual[i] && actual[i].constructor) !== RegExp ) {
-              _throwException(exceptionType, name, "RegExp", actual[i]); }
-              continue testingArgumentTypes;  
-          // Falsy - compare by type
-          case null:
-          case undefined:
-            if ( expected[i] !== actual[i] ) {
-              _throwException(exceptionType, name, expected[i], actual[i]); }
-              continue testingArgumentTypes;
-          // Custom Object - compare by constructor
-          default: 
-            if ( expected[i].constructor !== (actual[i] && actual[i].constructor) ) {
-              _throwException(exceptionType, name, "Custom Object", actual[i]); }
+          
+          // Primitives - compare by prototype or value (where strictValue === true)
+          case Date:
+          case Number:
+          case String:
+          case Boolean:
+            
+            // set Primitive flag
+            var canCheck = true;
+
+          default:
+            // If strict then simply do an identity check
+            if ( ( !!(canCheck) && strictValueChecking === true ) 
+              && ( ( expected[i] && expected[i].valueOf() ) !== ( actual[i] && actual[i].valueOf() ) ) ) {
+              _throwException("IncorrectArgumentValueException", name, expectedType, actual[i]);
+
+            // If not strict then check if NOT an instanceof expectation - acts on current prototype object
+            // May need refactoring to use getPrototypeOf() for more robust solution
+            // Or check received value is not simply a constructor itself.
+            // Alternative code for 1st expression (using Object())
+              // (((actual[i] !== null && actual[i] !== undefined ) ? actual[i].constructor : actual[i] ) !== expectedType
+            } else if ( !(Object(actual[i]) instanceof expectedType ) && ( actual[i] !== expectedType ) ) {
+              // Otherwise throw exception
+              _throwException(exceptionType, name, "Number/String/Boolean", actual[i]); // Need to inject correct className 
+            }
+            continue testingArgumentTypes;
         };
       }
 
@@ -269,17 +264,17 @@
   }
 
   // Function to build pretty exception objects
-  function createException (exceptionType, objName, expected, actual) {
+  function createException (expectedType, objName, expected, actual) {
     var e = {
-        type : exceptionType
+        type : expectedType
       },
       fn = "'" + objName + "'";
     
     switch (true) {
-      case "IncorrectNumberOfArgumentsException" === exceptionType   :
+      case "IncorrectNumberOfArgumentsException" === expectedType   :
         e.message = fn + " expected: " + expected + " arguments, actual number was: " + actual;
         break;
-      case "IncorrectNumberOfMethodCallsException" === exceptionType  :
+      case "IncorrectNumberOfMethodCallsException" === expectedType  :
         e.message = fn + " expected: " + expected + " method calls, actual number was: " + actual;
         break;
       default:
