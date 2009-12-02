@@ -21,7 +21,11 @@
 		};
 	}
 	
+	// Stub to test support for user-defined objects
 	function Custom () {};
+	
+	// Stub for CSS selector parameter expectation (e.g. mock jQuery)
+	var Selector = Mock.Variable;
   
 	/**
 	 *
@@ -1179,7 +1183,7 @@
 	  try {
 	    ninja = new Mock({
 	      "expects": { 
-	        value: Variable
+	        value: Mock.Variable
 	      }
 	    });
 	    ok(false, "mock should detect bad property name 'expects'");
@@ -1335,10 +1339,11 @@
 	      .returns('return')
 	    .andExpects(1)
 	      .method('isMethod')
-	      .accepts(Variable);
-      
+	      .accepts(Mock.Variable);
+    
 	  mock.returnsTest()
 	  mock.isMethod("test");
+	  debugger;
 	  ok(mock.verify(), "verify() should be true");    
   
 	});
@@ -1392,31 +1397,31 @@
 	  // Use exposed qMock's exposed assertArray & assertObject helper methods as check contents of array/object, rather than strict checking instance like QUnit.
     
 	  equals(mock.getNumericValue(), 10, "getNumericValue() should return 10");
-	    equals(mock.getStringValue(), 'data', "getStringValue() should return 'data'");
-	    ok(assertArray(mock.getArrayValue(), [ 1, 2, 3 ]), "getArrayValue() should return [ 1, 2, 3 ]");
-	    equals(mock.getFunctionValue()(), 'function', "getFunctionValue() when invoked should return 'function'");
-	    ok(assertObject(mock.getObjectValue(), { id: 5, value: 'value' }), "getObjectValue() should return object");
-	    equals(mock.getNullValue(), null, "getNullValue() should return null");
-	    equals(mock.getUndefinedValue(), undefined, "getUndefinedValue() should return undefined");
-	    equals(mock.getEmptyStringValue(), "", "getEmptyStringValue() should return ''");
-	    equals(mock.getZeroValue(), 0, "getZeroValue() should return 0");
-	    equals(mock.getTrueValue(), true, "getTrueValue() should return true");
-	    equals(mock.getFalseValue(), false, "getFalseValue() should return false");
-	    ok(assertArray(mock.getEmptyArrayValue(), [ ]), "getEmptyArrayValue() should return [ ]");
-	    ok(assertObject(mock.getEmptyObjectValue(), { }), "getEmptyObjectValue() should return { }");
-    
-	    ok(mock.verify(), "verify() should be true");
+    equals(mock.getStringValue(), 'data', "getStringValue() should return 'data'");
+    ok(assertArray(mock.getArrayValue(), [ 1, 2, 3 ]), "getArrayValue() should return [ 1, 2, 3 ]");
+    equals(mock.getFunctionValue()(), 'function', "getFunctionValue() when invoked should return 'function'");
+    ok(assertObject(mock.getObjectValue(), { id: 5, value: 'value' }), "getObjectValue() should return object");
+    equals(mock.getNullValue(), null, "getNullValue() should return null");
+    equals(mock.getUndefinedValue(), undefined, "getUndefinedValue() should return undefined");
+    equals(mock.getEmptyStringValue(), "", "getEmptyStringValue() should return ''");
+    equals(mock.getZeroValue(), 0, "getZeroValue() should return 0");
+    equals(mock.getTrueValue(), true, "getTrueValue() should return true");
+    equals(mock.getFalseValue(), false, "getFalseValue() should return false");
+    ok(assertArray(mock.getEmptyArrayValue(), [ ]), "getEmptyArrayValue() should return [ ]");
+    ok(assertObject(mock.getEmptyObjectValue(), { }), "getEmptyObjectValue() should return { }");
+  
+    ok(mock.verify(), "verify() should be true");
 
 	  mock = new Mock({
 	    "returnsTest": {
 	      returns: "return"
 	    },
 	    "isMethod": {
-	      accepts: Variable
+	      accepts: Mock.Variable
 	    }
 	  });
-      
-	  mock.returnsTest()
+    	  
+	  mock.returnsTest();
 	  mock.isMethod("test");
 	  ok(mock.verify(), "verify() should be true");    
   
@@ -3236,7 +3241,7 @@
   
 	  expect(15);
   
-	  function Custom () {};
+	  var ninja = new Mock();
   
 	  // Allow pass-through argument types (and implicitly values)
   
@@ -3245,7 +3250,7 @@
 	  ninja
 	    .expects(1)
 	      .method("hitOpponents")
-	      .accepts(Variable);
+	      .accepts(Mock.Variable);
       
 	  // Good Exercise
   
@@ -3333,7 +3338,7 @@
   
 	  ninja.reset();
       
-	  ninja.hitOpponents(Variable);
+	  ninja.hitOpponents(Mock.Variable);
   
 	  ok(ninja.verify(), "verify() should be true with pass-through object: Variable");
   
@@ -3353,8 +3358,6 @@
 	test("mock with multiple parameters - required total arguments", function () {
   
 	  expect(7);
-  
-	  function Custom() {};
   
 	  var ninja = new Mock();
   
@@ -3429,7 +3432,7 @@
   
 	  expect(7);
   
-	  function Custom() {};
+	  var ninja = new Mock();
   
 	  var ninja = new Mock({
 	    "testMultipleParameters": {
@@ -3504,9 +3507,7 @@
   
 	  expect(15);
   
-	  function Custom() {};
-  
-	  var samurai = new Mock();
+    var samurai = new Mock();
   
 	  samurai
 	    .expects(1)
@@ -3601,9 +3602,7 @@
 	test("w/ JSON: mock with multiple parameters - all optional arguments", function () {
   
 	  expect(15);
-  
-	  function Custom() {};
-  
+    
 	  var samurai = new Mock({
 	    "testMultipleParameters": {
 	      accepts: [1, "string", true, null, undefined, {}, [], new Date(), /RegExp/, Selector, new Custom()],
@@ -3902,7 +3901,7 @@
 	    $.accepts(".ninja")
 	        .expects(2)
 	      .method('run')
-	            .accepts(Variable)
+	            .accepts(Mock.Variable)
 	            .andChain()
 	        .expects(1)
 	      .method('fight')
