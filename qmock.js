@@ -1,4 +1,4 @@
-/**
+ /**
  * QMock - Copyright (c) 2008
  * Dual licensed under the MIT (MIT-LICENSE.txt)
  * and GPL (GPL-LICENSE.txt) licenses.
@@ -24,22 +24,27 @@
  * TODO: Better support for multiple parameter error messages.
  * TODO: Decide how to flag overload vs strict argumement NUMBER check
  * TODO: Ensure support for all major testruners - QUnit/YUI/GOOG/Evidence/ScrewUnit/JsSpec..
- * TODO: Add flag for strict value checking.. default is type checking...
  * TODO: Figure out a way to re-use mockedMember constructor wih mock constructors...SERIOUSLY NEED THIS, Constuctor features are messy as f*ck.
  * TODO: Refactor out object checking logic and make leaner....
  * TODO: Make code more readable with if (key in obj) notation... (rather than if(obj[key]))...
  * TODO: Question use of Constructor flag exception object? Really needed if execption thrown has enough detail? Or refactor as propert on exception thrown? e.g. e.objectType: "Constructor", "Method".
  * TODO: Add in optimisations for compilers like YUI & Google Closure.
  * TODO: add a end() utility function for restoration of scope to Mock obj (instead of member)
- * TODO: SUPPORT Native types in accepted arguments for type checking (otherwise people have to think of examples all the time!)
  * TODO: Look into dynamic generation of mocks based on code lib, and or pdoc comments? Mental.
  * TODO: Refactor conditionals with short-circuit evaluation...
  * TODO: Strict return support for single expected presentations? Too complex?
- * TODO: Protect against API collisions between QMock and Mocks through internal re-mapping
+ * TODO: Protect against API collisions between QMock and Mocks through internal re-mapping (can I not just invoke directly off prototype chain?)
  * TODO: Extend callback parameter invocation to support multiple callback scenarios
  * TODO: Write simple helper function to test valid stuff in loops
  * TODO: Early exclusions via returns
  * TODO: Need to look into using getPrototypeOf method for object type checking...
+ * TODO: Does assertHash check keys as well as values??!
+ * TODO: Check able to delete QMock for clean-up purposes?
+ * TODO: Add in support for NaN data type
+ * TODO: Check whether my assertHash handles {DontEnum} enumeration...!
+ * TODO: Group QUnit tests into sub-modules?
+ * TODO: Support for identifiers.. might wait until refactor of all constructor/methods to subclassed mockMember instances.
+ * TDOO: Support for classical, protypical, & parasitic inheritance instance checking
  */
 
 (function initialiseQMock (Mock, container) {
@@ -51,11 +56,10 @@
   // So Dmitry Baranovskiy doesn't shout at me ([O:O]) - http://sitepoint.com/blogs/2009/11/12/google-closure-how-not-to-write-javascript/
   // Really this is ultra defensive but since undefined is used in parameter verification code let's be sure it actually is typeof "undefined".
   var undefined,
-    slice = Array.prototype.slice,
-    Mock;
+    slice = [].slice;
     
   // Allow pass-through argument checking
-  // Either reference off Mock constructor (Mock.Variable), or map - e.g. var Selector = Mock.Variable;
+  // Either reference static member off Mock class (Mock.Variable), or alias - e.g. var Selector = Mock.Variable;
   function Variable () {};
   
   // PRIVATE static methods
@@ -79,6 +83,8 @@
   // Function to handle JSON based mock creation
   function createMockFromJSON (mockedMembers) {
     
+    if ( !mockedMembers ) { return false; }
+    
     var propertyWhitelist = "calls min max"; // List of method/property identifiers that are used in Qmock - protected.
 
     // loop through expected members on mock
@@ -93,8 +99,8 @@
           .apply(member,
             (memberConfig.calls !== undefined) 
               ? [memberConfig.calls] 
-              : [  (memberConfig.min) ? memberConfig.min : 0,
-                  (memberConfig.max) ? memberConfig.max  : Infinity ]
+              : [ (memberConfig.min) ? memberConfig.min : 0,
+                  (memberConfig.max) ? memberConfig.max : Infinity ]
               )[( isMethod ) ? "method" : "property"](key);
 
       // Set expectations for method or value of property
@@ -128,153 +134,260 @@
     }
   }
   
-  // Function to assert length & members of an array, returns Boolean
-  function assertArray (expected, actual, opt_strictValueChecking) {    
-    return ( expected && actual 
-      && expected.constructor === Array 
-      && actual.constructor === Array 
-      && expected.length === actual.length ) 
-        ? assertCollection ({
-            expected            : expected,
-            actual              : actual,
-            strictValueChecking : ( opt_strictValueChecking !== undefined ) ? opt_strictValueChecking : false,
-            name                : "",
-            exceptions          : [], // stubbed but not referenced atm in error logging.
-            isConstuctor        : false,
-            exceptionType       : ""      
-          })   ? true 
-              : false
-        : false; // Bad Arguments
-  }
-
-  // Function to assert members of an object, returns Boolean
-  function assertObject (expected, actual, opt_strictValueChecking) {
-    var result = true; 
-    if ( expected && actual ) {
-      for ( var property in expected ) {
-        if ( !assertCollection ({
-                expected            : [expected[property]],
-                actual              : [actual[property]],
-                strictValueChecking : ( opt_strictValueChecking !== undefined ) ? opt_strictValueChecking : false,
-                name                : "",
-                exceptions          : [], // stubbed but not referenced atm in error logging.
-                isConstructor       : false,
-                exceptionType       : ""
-              })
-        ) { result = false; }
-      } 
-    } else {
-      result = false;
+  var assertObject = (function () {
+    
+    // PRIVATE Helper functions
+    
+    // Adapter around assertCollection to provide an API consistent with assertHash()
+    // TBD refactor out logic detecting Array objects per se as generified to collection and handled in assertCollection()
+    function assertArray (expected, actual, opt_strictValueChecking, opt_exceptionType, opt_throwException) {    
+      return ( expected && actual 
+        && expected.constructor === Array 
+        && actual.constructor === Array 
+        && expected.length === actual.length ) 
+          ? assertCollection ({
+              expected            : expected,
+              actual              : actual,
+              strictValueChecking : ( opt_strictValueChecking !== undefined ) ? opt_strictValueChecking : false,
+              name                : "",
+              isConstuctor        : false,
+              throwException      : opt_throwException, 
+              exceptionType       : opt_exceptionType      
+            })  ? true 
+                : false
+          : false; // Bad Arguments
     }
-    return result;
-  }
+    
+    // Function to assert members of an object, returns Boolean
+    function assertHash (expected, actual, opt_strictValueChecking, opt_exceptionType, opt_throwException) {
+      var result = true,
+          errors = [];
+      // Is this the correct check? Everything in JS is essentially a hash (as all derive from Object.prototype), except for falsy data types (undefined, null, NaN)?
+      // Worth testing to see if absolutely generic (aka can enumerate over non object literal hashes)
+      // What about DontEnum stuff? Sort of taken by hasOwnProperty, so what about checking inherited props? Or make clear in description really meant for object literals? If so, should text for object literal? How - Array trick-esque thingy?
+      if ( expected && actual ) {
+        checkingMembers:
+          for ( var key in expected ) {
+            // expectations don't support prototypical inheritance...
+            if ( expected.hasOwnProperty(key) ) {
+              // but actual values do (and also shadowed natives, e.g. toString as a key - see {DontEnum} tests)
+              // We 'objectify' the 'actual' object as the in operator throws errors when executed against primitive values (e.g. key in "" --> key in Object("")))
+              // We use the in operator as opposed to a dynamic lookup because in the case of an assigned falsy value to actual[key] the result is false (as opposed to true - the property does exist on the actual object)
+              // in operator performs lookup resolution on [[Prototype]] chain
+              // FF 3.6 won't eumerate function instance prototype property (https://developer.mozilla.org/En/Firefox_3.6_for_developers#JavaScript)
+              if ( key in Object(actual) ) {
+                result &= assertObject(expected[key], actual[key], opt_strictValueChecking, opt_exceptionType, opt_throwException);
+              } else {
+                errors.push({
+                  type: "MissingHashKeyException",
+                  message: "assertHash() requires a key exist on both the expected and actual objects for member assertion. Missing key was: '" + key + "'"
+                });
+                continue checkingMembers;
+              }
+            }
+          } 
+      }
+      if (errors.length !== 0) { throw errors; }
+      return !!result;
+    }
+    
+    // Key function to test objects against each other.
+    function assertObject (expected, actual, opt_strictValueChecking, opt_exceptionType, opt_throwException) {
+            
+      // Test whether expected is a constructor for native object types (aside from null // undefined)
+      var expectedType = (expected !== null && expected !== undefined) ? expected.constructor : expected
+        /*expectedType = (expected !== null && expected !== undefined) 
+          ? ( expected.constructor === Function ) // but also matches function literals :-(
+            ? expected
+            : expected.constructor
+              : expected,*/
+        isValue = isRegExp = isCollection = false,
+        strictValueChecking = opt_strictValueChecking || false,
+        throwException = opt_throwException || function () {},
+        exceptionType = opt_exceptionType || ( strictValueChecking === true ? "IncorrectArgumentValueException" : "IncorrectArgumentTypeException"),
+        // What happened to isNative fn?!? - see Kangax blog... damn me and my lack of self-documentation sometimes.
+        nativeTypes = [Number, String, Boolean, Date, Function, Object, Array, RegExp, Variable],
+        result = true,
+        // WTF?
+        name = "getClass()";
+        
+      function _compare (expected, actual, serialiser) {
+        return ( expected && expected.valueOf && expected[serialiser]() ) === ( actual && actual.valueOf && actual[serialiser]() )
+      }
 
+      assertNativeType: 
+        for (var i = 0, len = nativeTypes.length; i < len; i++) {
+          if ( expected === nativeTypes[i] ) {
+            expectedType = expected;
+            break assertNativeType;
+          }
+        }
+      
+      // n.b. switch statements check by identity (aka strict === rather than ... ? See Nyman talk)
+      switch(expectedType) {
+
+        // Pass-through
+        case Variable:
+          return true;
+
+        // False (however unlikely) - compare by type
+        case null:
+        case undefined:
+        // case NaN: TBD
+          if ( expected !== actual ) {
+            throwException(exceptionType, name, expected, actual); 
+            return false;
+          }
+          return true;
+
+        // Primitives (plus Date) - compare by prototype or value (where strictValue === true)
+        case Date:
+        case Number:
+        case String:
+        case Boolean:
+          // set Primitive flag
+          isValue = true;
+          
+        case RegExp:
+          // set RegExp flag
+          isRegExp = true;
+                    
+        default:
+          // Let's make sure the types match first of all...
+          // If not strict then check if a instance of expectation - acts on CURRENT prototype object - DOUBLE CHECK this - surely traverses [[Prototype]] chain to check all sub/superclasses and root node(s)?
+          // May need refactoring to use getPrototypeOf() for more robust solution
+          // Or check received value is not simply a constructor itself.
+          // Alternative code for 1st expression (which uses Object())
+          //} else if  {
+          /*} else if ( ( (actual !== null && actual !== undefined) ? actual.constructor : actual ) === expectedType ) {
+            return true;
+          } else {
+            // Otherwise throw exception
+            throwException(exceptionType, name, "getClass() - Number/String/Boolean/Array/Object", actual); // Need to inject correct className
+          }*/
+          // Use of Object() converts primitve literal values into objects which plays nice with the instanceof operator (n.b. [[Prototype]] *is* setup, e.g. "".constuctor (which lives on __proto__, the prototype of the constructor function, exists)).
+          // I'd love to know why! instanceof crawls [[Prototype]]
+          
+          if ( Object ( actual ) instanceof expectedType || actual === expectedType ) {
+            
+            // If strict then 'deep' assertion
+            if ( strictValueChecking === true ) {
+              
+              // Catch errors thrown by collaborator object interface (e.g. assertHash())
+              try {
+                
+                // Handle primtive values - if correct types then identity check
+                // Using Object.prototype.valueOf() allows us to compare Dates along with the normal primitve values w/o custom handling (e.g. UTC conversion)
+                if ( ( isValue === true && !_compare(expected, actual, "valueOf") )
+
+                // Handle regular expression objects. Note: NOT testing implementation, just the string representation of the object
+                || ( isRegExp === true && !_compare(expected, actual, "toString") )
+
+                // Handle composite values & custom Data Types - first check for match on constructor, then match on collection, e.g. members (strict checking)
+                || ( (isValue === false) && ( actual !== expectedType ) && ( ( (isCollection === true) ? assertArray : assertHash)(expected, actual, true, exceptionType, (isCollection === true) ? null : opt_throwException) === false ) ) ) {
+                  result = false;
+                }
+                
+              } catch (error) {
+
+                // If MissingHashKeyException thrown then create custom error listing the missing keys.
+                if ( error && error[0] && error[0].type === "MissingHashKeyException" ) {
+                  throwException("MissingHashKeyException", name, "object with native and custom keys", (function (a) {
+                    for ( var i = 0, len = error.length; i < len; i++ ) {
+                      a.push((error[i].message.split(':')[1]) || null);
+                    }
+                    return a.join('')
+                  })(['missing keys:']));
+                } else {
+                  throw error;
+                }
+                // Ensure normal flow control plays out
+                result = false;
+              }
+
+          }
+          // Handle expected object literals whose Type match all types (aside from falsy types)  
+          // aka check Object actually is an Object instance
+          else if ( ( expectedType === Object ) && ( actual && actual.constructor !== Object.prototype.constructor ) ) {
+            result = false;
+          }
+          
+        // If not strict check actual isn't a constructor in own right
+        } else if ( actual !== expectedType ) {
+          result = false;
+        }
+        // Throw error if negative match
+        if ( result === false ) {
+          throwException(exceptionType, name, expected, actual); // Need to inject correct className
+        }
+        return result;
+      } // end switch
+    }
+
+    // Expose for testing
+    ;;;; expose( assertArray, assertObject, "_assertArray" );
+    ;;;; expose( assertHash, assertObject, "_assertHash" );
+    
+    // Return privileged function
+    return assertObject;
+    
+  })(); // end assertObject declaration
+  
   // Delegate function that asserts elements of a collection
   function assertCollection (config) {
-    
+        
     // Check required args exist
-    if (!config || arguments.length > 1) {
+    if (!config) {
       throw {
         type: "MissingConfigObjectException",
         msg: "assertCollection() requires single configuration object to be passed"
       }
-    }
-  
-    // Used to push errors into correct array
-    // Try and refactor out to use normal private static fn
-    function _throwException () {
-      config.exceptions.push(
-        createException.apply(null, arguments)
-      );
-    }
-  
-    // params === object literal with associated properties - used for readability
-    with ( config ) {      
-  
-      // Only assert on absolute number of params declared in method signature as expectations don't exist for overloaded interfaces
-      testingArgumentTypes: for (var i = 0, len = actual.length; i < len; i++) {
-        
-        // hack in support for native object types (aside from null // undefined)
-        var nativeTypes = [Number, String, Boolean, Date, Function, Object, Array, RegExp, Variable],
-          expectedType = (expected[i] !== null && expected[i] !== undefined) ? expected[i].constructor : expected[i],
-          canCheck = false;
-        
-        assertType: 
-          for (var j = 0, _len = nativeTypes.length; j < _len; j++) {
-            if ( expected[i] === nativeTypes[j] ) {
-              expectedType = expected[i];
-              break assertType;
-            }
-          }
-        
-        switch(expectedType) {
-          
-          // Pass-through
-          case Variable:
-            continue testingArgumentTypes;
-            
-          // False (however unlikely) - compare by type
-          case null:
-          case undefined:
-            if ( expected[i] !== actual[i] ) {
-              _throwException(exceptionType, name, expected[i], actual[i]); }
-              continue testingArgumentTypes;
-              
-          // Collections - compare by constructor
-          case Object: 
-            if ( !assertObject(expected[i], actual[i], strictValueChecking ) ) {
-              _throwException(exceptionType, name, "Object", actual[i]); }
-              continue testingArgumentTypes;
-          case Array: 
-            if ( !assertArray(expected[i], actual[i], strictValueChecking ) ) { 
-              _throwException(exceptionType, name, "Array", actual[i]); }
-              continue testingArgumentTypes;
-          
-          // Primitives - compare by prototype or value (where strictValue === true)
-          case Date:
-          case Number:
-          case String:
-          case Boolean:
-            
-            // set Primitive flag
-            var canCheck = true;
-
-          default:
-            // If strict then simply do an identity check
-            if ( ( !!(canCheck) && strictValueChecking === true ) 
-              && ( ( expected[i] && expected[i].valueOf() ) !== ( actual[i] && actual[i].valueOf() ) ) ) {
-              _throwException("IncorrectArgumentValueException", name, expectedType, actual[i]);
-
-            // If not strict then check if NOT an instanceof expectation - acts on current prototype object
-            // May need refactoring to use getPrototypeOf() for more robust solution
-            // Or check received value is not simply a constructor itself.
-            // Alternative code for 1st expression (using Object())
-              // (((actual[i] !== null && actual[i] !== undefined ) ? actual[i].constructor : actual[i] ) !== expectedType
-            } else if ( !(Object(actual[i]) instanceof expectedType ) && ( actual[i] !== expectedType ) ) {
-              // Otherwise throw exception
-              _throwException(exceptionType, name, "Number/String/Boolean", actual[i]); // Need to inject correct className 
-            }
-            continue testingArgumentTypes;
-        };
+    } else if ( (!config.expected || config.expected.length === undefined) || (!config.actual || config.actual.length === undefined) ) {
+      throw {
+        type: "MalformedArgumentsException",
+        msg: "assertCollection() requires the 'expected' and 'actual' collection properties on passed-in config object to be an Array-like collection"
       }
-
-      // Can just return a Boolean for recursive calls, ignored by assertArguments call.
-      return ( exceptions.length === 0 ) ? true : false;
+    } else {
+      var exceptions = config.exceptions || [];
     }
+    
+    function throwException () {
+      arguments.callee.count++;
+      exceptions.push( createException.apply(null, arguments) );
+    }
+    
+    throwException.count = 0;
+    
+    // Only assert on absolute number of params declared in method signature as expectations don't exist for overloaded interfaces
+    for (var i = 0, len = config.actual.length; i < len; i++) {
+
+      // 1:1 assertion
+      assertObject( 
+        config.expected[i],
+        config.actual[i],
+        config.strictValueChecking || null,
+        config.exceptionType || null,
+        config.throwException || throwException
+      );
+      
+    }
+      
+    // Return a Boolean for recursive calls - otherwise exception thrown in verify().
+    return ( exceptions.length === 0 ) ? true : false;
   }
 
   // Function to build pretty exception objects
-  function createException (expectedType, objName, expected, actual) {
+  function createException (exceptionType, objName, expected, actual) {
     var e = {
-        type : expectedType
+        type : exceptionType
       },
       fn = "'" + objName + "'";
     
     switch (true) {
-      case "IncorrectNumberOfArgumentsException" === expectedType   :
+      case "IncorrectNumberOfArgumentsException" === exceptionType   :
         e.message = fn + " expected: " + expected + " arguments, actual number was: " + actual;
         break;
-      case "IncorrectNumberOfMethodCallsException" === expectedType  :
+      case "IncorrectNumberOfMethodCallsException" === exceptionType  :
         e.message = fn + " expected: " + expected + " method calls, actual number was: " + actual;
         break;
       default:
@@ -283,218 +396,225 @@
     return e;
   }
   
-  Mock = (function createMockConstructor () {
-  
-    // PUBLIC MOCK OBJECT CONSTRUCTOR
-    return function MockConstructor () {
+  // PUBLIC MOCK OBJECT CONSTRUCTOR
+  function MockConstructor () {
 
-      var mock = function MockObject () {
-        // Can't use MockObject fn name, dies in IE <<< Changed to be ES5 compatible - test in IE!!
-        MockObject.actualArguments = arguments;
-        return MockObject;
-      },
-      methods = [], // List of MockedMember method instances declared on mock
-      exceptions = []; // List of exceptions thrown by verify/verifyMethod functions
+    var mock = function MockObject () {
+          // Can't use MockObject fn name, dies in IE <<< Changed to be ES5 compatible - test in IE!!
+          MockObject.actualArguments = arguments;
+          return MockObject;
+        },
+        methods = [], // List of MockedMember method instances declared on mock
+        exceptions = [], // List of exceptions thrown by verify/verifyMethod functions,
+        identifier = ( assertObject( String, arguments && arguments[0] ) ) ? arguments[0] : "'Constructor' (#protip - you can pass in a (String) to when instantiating a new Mock, which helps inform constructor-level error messages)" 
+  
+    // Function to push arguments into Mock exceptions list
+    function throwException () {
+      exceptions.push(
+        createException.apply(undefined, arguments)
+      );
+    }
+
+    // Function to compare expected and actual arguments for mock method & constructor
+    function assertArguments (expected, actual, opt_strictValueChecking, opt_isConstructor) {
+      // Check not parameterless constructor.
+      // Maybe can be refactored to not use constructor check - flaky.
+      if ( opt_isConstructor && expected.constructor === Function ) { return; }   
+      // Iterate over collection testing arguments
+      return assertCollection({
+        expected: expected,
+        actual: actual,
+        strictValueChecking: opt_strictValueChecking || false,
+        isConstructor: opt_isConstructor || false,
+        exceptionType: (opt_strictValueChecking) ? "IncorrectArgumentValueException" : "IncorrectArgumentTypeException",
+        name: ( opt_isConstructor === true ) ? "Constructor" : this["name"],
+        exceptions: exceptions
+      });
+    }
+
+    // CONSTRUCTOR for mocked methods
+    function MockedMember (min, max) {
+      this.name = "";
+      this.expectedCalls = ( min !== undefined ) ? min : false;
+      this.maxCalls = max || false;
+      this.actualCalls = 0;
+      this.expectedArgs = [{"accepts": [undefined]}];
+      this.actualArgs = [];
+      this.callbackArgs = [];
+      this.requiredNumberofArguments = false;
+      this.allowOverload = true;
+      this.returnValue = undefined;
+      this.strictValueChecking = false;
+      // Store reference to method in method list for reset functionality <str>and potential strict execution order tracking<str>.
+      methods.push(this);
+    };
     
-      // Function to push arguments into Mock exceptions list
-      function throwException () {
-        exceptions.push(
-          createException.apply(undefined, arguments)
-        );
-      }
-  
-      // Function to compare expected and actual arguments for mock method & constructor
-      function assertArguments (expected, actual, opt_strictValueChecking, opt_isConstructor) {
-        // Check not parameterless constructor.
-        if ( opt_isConstructor && expected.constructor === Function ) { return; }   
-        // Iterate over collection testing arguments
-        return assertCollection({
-          expected: expected,
-          actual: actual,
-          strictValueChecking: opt_strictValueChecking || false,
-          isConstructor: opt_isConstructor || false,
-          exceptionType: ( opt_isConstructor === true ) ? "InvalidConstructorException" : "IncorrectArgumentTypeException",
-          name: ( opt_isConstructor === true ) ? "Constructor" : this["name"],
-          exceptions: exceptions
-        });
-      }
-
-      // CONSTRUCTOR for mocked methods
-      function MockedMember (min, max) {
-        this.name = "";
-        this.expectedCalls = ( min !== undefined ) ? min : false;
-        this.maxCalls = max || false;
-        this.actualCalls = 0;
-        this.expectedArgs = [{"accepts": [undefined]}];
-        this.actualArgs = [];
-        this.callbackArgs = [];
-        this.requiredNumberofArguments = false;
-        this.allowOverload = true;
-        this.returnValue = undefined;
-        this.strictValueChecking = false;
-        // Store reference to method in method list for reset functionality <str>and potential strict execution order tracking<str>.
-        methods.push(this);
-      };
+    MockedMember.prototype = {
       
-      MockedMember.prototype = {
-        
-        "method": function (name) {
+      "method": function (name) {
 
-          // Throw error if collision with mockMember API
-          if (mock[name] !== undefined) {
-            throwException("InvalidMethodNameException", "Constructor function", "unique method name", "was reserved method name '" + name + "'");
-            throw exceptions;
-          }
+        // Throw error if collision with mockMember API
+        if (mock[name] !== undefined) {
+          throwException("InvalidMethodNameException", "Constructor function", "unique method name", "was reserved method name '" + name + "'");
+          throw exceptions;
+        }
+      
+          // Register public interface to mocked method instance on mock klass, bind to curried function
+          mock[name] = (function (method, name) {
         
-            // Register public interface to mocked method instance on mock klass, bind to curried function
-            mock[name] = (function (method, name) {
-          
-            method["name"] = name;
-  
-            // Invoked when mock is called within SUT object.
-            return function updateMethodState () {
-                     
+          method["name"] = name;
+
+          // Invoked when mock is called within SUT object.
+          return function updateMethodState () {
+                   
             // Normalise Arguments
             var parameters = slice.call(arguments, 0);
-                           
+                         
             // Track method invocations
             method.actualCalls++;
-           
+         
             // Store method call params for verification
             method.actualArgs.push(parameters);
-                     
+                   
             // Execute any callback functions specified with associated args.
             for (var i = 0, len = parameters.length; i < len; i++) {
               if (parameters[i] && parameters[i].constructor === Function) {
                   parameters[i].apply(undefined, method.callbackArgs);
               }
             }
-             
+           
             // Assert arguments against expected presentations and return appropriate object
             return (function getReturnValue(presentation) {
-       
+     
               // Make default return value the defualt method value (undefined || Object || self (mock - chained))
               var obj = method.returnValue;
-
-              // Compare actual with expected arguments and if true return correct object
-              for (var i = 0, len = method.expectedArgs.length; i < len; i++) {
-                if ( assertArray (
-                  method.expectedArgs[i]["accepts"], // 'expected' inputs
-                  presentation, // 'actual' inputs
-                  true ) // flag strict value checking to match correct expectation for return value
-                )  {
-                  // If match found against presentation return bound object (or self if chained)
-                  obj = (method.returnValue && method.returnValue === mock) 
-                    ? mock 
-                    : method.expectedArgs[i]["returns"];
-                }
-              }
-             
-             return obj;
-             
-           })(parameters)};
             
+              // Compare actual with expected arguments and if true return correct object
+              assertingPresentations:
+                for (var i = 0, len = method.expectedArgs.length; i < len; i++) {
+                  try {
+                    if ( assertObject["_assertArray"].get() (
+                      method.expectedArgs[i]["accepts"], // 'expected' inputs
+                      presentation, // 'actual' inputs
+                      true ) // flag strict value checking to match correct expectation for return value
+                    ) {
+                      // If match found against presentation return bound object (or self if chained)
+                      obj = (method.returnValue && method.returnValue === mock) 
+                        ? mock 
+                        : method.expectedArgs[i]["returns"];
+                    }
+                  } catch (e) {
+                    if ( e[0] && e[0].type === "MissingHashKeyException" ) {
+                      continue assertingPresentations;
+                    }
+                  }
+              }
+          
+              return obj;
+           
+           })(parameters)};
+          
           })(this, name);
-        
-          // chain
-          return this; 
+      
+        // chain
+        return this; 
 
-        },
-        "interface": function setInterfaceExpectations () {
+      },
+      "interface": function setInterfaceExpectations () {
+      
+        /*// Check for valid input to interface
+        for (var i = 0, len = arguments.length, i++) {
+          var acceptsProperty = arguments[i][accepts] || false; // attach hasOwnProperty check.
+          if ( acceptsProperty === false ) { 
+            throw {
+              type: "MissingAcceptsPropertyException",
+              msg: "Qmock expects arguments to setInterfaceExpectations() to contain an accepts property"
+            }
+          } else if ( acceptsProperty.constructor !== Array ) {
+            throw {
+              type: "InvalidAcceptsValueException",
+              msg: "Qmock expects value of 'accepts' in arguments to be an Array"
+            }  
+          }
+        }*/
+      
+        // Expected format of arguments - {accepts: [], returns: value}
+  
+        // Where arguments can equal either any type, or overloadable pairings.
+        // e.g. "string" or {params: foo, returns: bar}. Note array literals must be nested ({params: ["string", [1,2,3]], returns: "meh"})
+        // Normalize input to accepts into key/value expectation pairings
         
-          /*// Check for valid input to interface
-          for (var i = 0, len = arguments.length, i++) {
-            var acceptsProperty = arguments[i][accepts] || false; // attach hasOwnProperty check.
-            if ( acceptsProperty === false ) { 
-              throw {
-                type: "MissingAcceptsPropertyException",
-                msg: "Qmock expects arguments to setInterfaceExpectations() to contain an accepts property"
-              }
-            } else if ( acceptsProperty.constructor !== Array ) {
-              throw {
-                type: "InvalidAcceptsValueException",
-                msg: "Qmock expects value of 'accepts' in arguments to be an Array"
-              }  
-            }
-          }*/
+        // THIS NEEDS A DEBATE - DEFAULT IS FOR IMPLICT STRICT NUMBER OF, & VALUE OF, ARG CHECKING FOR 'PRESENTATIONS'.
+        // If required number of arguments not already set, then implicitly set it to length of param array (so let ppl customise it)
+        // Add in per presentation strict argument length unless already set either globally or locally (recommendation to keep it consistent locally - don't let mocks change behaviour in test group too much)
+        // This should probably be part of the refactor... feels messy!
+        if (this.requiredNumberofArguments === false) {
         
-          // Expected format of arguments - {accepts: [], returns: value}
-    
-          // Where arguments can equal either any type, or overloadable pairings.
-          // e.g. "string" or {params: foo, returns: bar}. Note array literals must be nested ({params: ["string", [1,2,3]], returns: "meh"})
-          // Normalize input to accepts into key/value expectation pairings
-          
-          // THIS NEEDS A DEBATE - DEFAULT IS FOR IMPLICT STRICT NUMBER OF, & VALUE OF, ARG CHECKING FOR 'PRESENTATIONS'.
-          // If required number of arguments not already set, then implicitly set it to length of param array (so let ppl customise it)
-          // Add in per presentation strict argument length unless already set either globally or locally (recommendation to keep it consistent locally - don't let mocks change behaviour in test group too much)
-          // This should probably be part of the refactor... feels messy!
-          if (this.requiredNumberofArguments === false) {
-          
-            // Set minimum expectations
-            this.requiredNumberofArguments = arguments[0]["accepts"].length; 
-          
-            // Assign explicit expectation if exist
-            for(var i = 0, len = arguments.length; i < len; i++) {
-              if(!arguments[i]["required"]) {
-                arguments[i]["required"] = arguments[i]["accepts"].length;
-              }
+          // Set minimum expectations
+          this.requiredNumberofArguments = arguments[0]["accepts"].length; 
+        
+          // Assign explicit expectation if exist
+          for(var i = 0, len = arguments.length; i < len; i++) {
+            if(!arguments[i]["required"]) {
+              arguments[i]["required"] = arguments[i]["accepts"].length;
             }
           }
-          this.expectedArgs = arguments;
-          return this;
-        },
-        "accepts": function setSingleInterfaceExpectation () {
-          this.requiredNumberofArguments = arguments.length;
-          this.expectedArgs = [{"accepts": slice.call(arguments, 0)}];
-          return this;
-        },
-        "returns": function (stub) {
-          this.returnValue = stub; // default is undefined
-          return this;
-        },
-        "required": function (requiredArgs) {
-          this.requiredNumberofArguments = requiredArgs;
-          return this;
-        },
-        "overload": function (overload_flag) {
-          this.allowOverload = overload_flag;
-          return this;
-        },
-        "strict": function () {
-          this.strictValueChecking = true;
-          return this;
-        },
-        "property": function (name) {
-          if (mock[name] !== undefined) {
-            throwException("InvalidPropertyNameException", "Constructor function", "undefined property name", "should be unique (was " + name + ")");
-            throw exceptions;
-          }
-          mock[name] = "stub";
-          return this;
-        },
-        "withValue": function (value) {
-          for(property in mock) {
-            if ( mock.hasOwnProperty(property) ) {
-              if ( mock[property] === "stub" ) {
-                mock[property] = value;
-              }
+        }
+        this.expectedArgs = arguments;
+        return this;
+      },
+      "accepts": function setSingleInterfaceExpectation () {
+        this.requiredNumberofArguments = arguments.length;
+        this.expectedArgs = [{"accepts": slice.call(arguments, 0)}];
+        return this;
+      },
+      "returns": function (stub) {
+        this.returnValue = stub; // default is undefined
+        return this;
+      },
+      "required": function (requiredArgs) {
+        this.requiredNumberofArguments = requiredArgs;
+        return this;
+      },
+      "overload": function (overload_flag) {
+        this.allowOverload = overload_flag;
+        return this;
+      },
+      "strict": function () {
+        this.strictValueChecking = true;
+        return this;
+      },
+      "property": function (name) {
+        if (mock[name] !== undefined) {
+          throwException("InvalidPropertyNameException", "Constructor function", "undefined property name", "should be unique (was " + name + ")");
+          throw exceptions;
+        }
+        mock[name] = "stub";
+        return this;
+      },
+      "withValue": function (value) {
+        for(property in mock) {
+          if ( mock.hasOwnProperty(property) ) {
+            if ( mock[property] === "stub" ) {
+              mock[property] = value;
             }
           }
-          return this;
-        },
-        "callFunctionWith": function () {
-            // Callback function arguments - useful for async requests
-            this.callbackArgs = arguments;
-            return this;
-        },
-        "andChain": function () {
-          return this.returnValue = mock;
-        },
-        "andExpects": function (calls) {
-          return mock.expects(calls);
-        },
-        "verifyMethod": function () {
-          assertMethod: 
+        }
+        return this;
+      },
+      "callFunctionWith": function () {
+        // Callback function arguments - useful for async requests
+        this.callbackArgs = arguments;
+        return this;
+      },
+      "andChain": function () {
+        return this.returnValue = mock;
+      },
+      "andExpects": function (calls) {
+        return mock.expects(calls);
+      },
+      "verifyMethod": function () {
+        assertMethod: 
           with (this) {
            // Evaluate expected method invocations against actual
            assertMethodCalls:
@@ -515,12 +635,12 @@
                  throwException("IncorrectNumberOfMethodCallsException", name, expectedCalls, actualCalls);
                  break assertMethod;
              }
-      
+    
           // assert presentations.... LET's DO THAT AFTERWARDS...IN fact more like a loop around the old atomic presentation checking mechanism...
-      
+    
           // Evaluate method interface expectations against actual
           assertInterface: switch ( true ) {
-        
+      
             // Strict Arg length checking - no overload
             case ( allowOverload === false) && ( requiredNumberofArguments !== false ) && ( requiredNumberofArguments !== actualArgs[0].length ): 
             // At least n Arg length checking - overloading allowed - Global check
@@ -530,30 +650,30 @@
 
             default:
               (function () {
-            
+          
               // Only check arguments if some available or explicitly required
               // By default functions returned 'undefined'
               // This feels hacky also... refactor out if possible!
               if ( requiredNumberofArguments !== false || ( actualCalls > 0 && actualArgs[0].length > 0 ) ) {
-            
+          
                 assertPresentations: // For each presentation to the interface...
-              
+            
                   for (var i = 0, len = actualArgs.length; i < len; i++) {
-              
+            
                     assertExpectations: // ...Check if a matching expectation
-                  
+                
                       for (var j = 0, _len = expectedArgs.length; j < _len; j++) {
-              
+            
                         // Assert Number of Arguments if expectation explicitly set...
                         // At least n Arg length checking - overloading allowed - Global check
                         if ( expectedArgs[j]["required"] > actualArgs[i].length )  {
                           throwException("IncorrectNumberOfArgumentsException", name, expectedArgs.length, actualArgs.length);
                           continue assertPresentations;
                         }      
-              
+            
                         // Use to restore exceptions object to pre-presentation assertion state in case of match                         
                         var cachedExceptionTotal = exceptions.length;
-            
+          
                         // If a match (strict value checking) between a presentation and expectation restore exceptions object and assert next interface presentation.
                         if (assertArguments(
                             expectedArgs[j]["accepts"],
@@ -568,116 +688,119 @@
                               // If match remove exceptions raised during checks and move on to next presentation.
                               exceptions.slice(0, cachedExceptionTotal);
                               continue assertPresentations;
-                        }  
+                        }
+                        
                       } // end assertExpectations loop
                   } // end assertPresentations loop
-              }
-            }).call(this);
-          } // end assertInterface
+                }
+              }).call(this);
+            } // end assertInterface
           } // end assertMethod
-        },
-        atLeast: function (n) {
-          this.expectedCalls = n;
-          this.maxCalls = Infinity;
-          return this;
-        },
-        noMoreThan: function (n) {
-          this.maxCalls = n;
-          return this;
-        }
-      
-      }; // End MockedMember.prototype declaration 
+      },
+      atLeast: function (n) {
+        this.expectedCalls = n;
+        this.maxCalls = Infinity;
+        return this;
+      },
+      noMoreThan: function (n) {
+        this.maxCalls = n;
+        return this;
+      }
     
-      // Backward compatibility for QMock v0.1 API
-      MockedMember.prototype["withArguments"] = MockedMember.prototype.accepts;
+    }; // End MockedMember.prototype declaration 
   
-      // PUBLIC METHODS on mock
-      // Creates new MockedMember instance on Mock Object and sets-up initial method expectation
-      mock.expects = mock.andExpects = function mockExpectsNewMethod (min, max) {
-        return new MockedMember(min, max);
-      };
-        
-      mock.accepts = function mockExpectsArguments () {
-        mock.expectsArguments = arguments;
-        return mock;
-      };
-    
-      mock.actualArguments = []; // Stub, used for symbol binding
-      mock.strictValueChecking = false; // Default is type checking
-      
-      mock.strict = function mockExpectsStrictParameterValues () {
-        mock.strictValueChecking = true;
-        return mock;
-      };
-  
-      // Verify method, tests both constructor and declared method's respective states.
-      mock.verify = function verifyMock () {
-        var isConstructor = true;
-        // Check Constructor Arguments
-        with ( mock ) {
-          if (expectsArguments.length !== actualArguments.length) {
-            // Thrown in to satisfy tests (for consistency's sake) - NEEDS TO BE REFACTORED OUT!
-            throwException("InvalidConstructorException", "Constructor function", expectsArguments, actualArguments);
-            throwException("IncorrectNumberOfArgumentsException", "Constructor function", expectsArguments.length, actualArguments.length);
-          }
-          assertArguments(expectsArguments, actualArguments, strictValueChecking, isConstructor);
-        }
-            
-        // Verify Mocked Methods
-        for (var i = 0, len = methods.length; i < len; i++) {
-          methods[i].verifyMethod();
-        }
-        
-        // Did it go bad?
-        if (exceptions.length !== 0) {
-          throw exceptions;
-        } else {
-          return true;
-        }
-      };
+    // Backward compatibility for QMock v0.1 API
+    MockedMember.prototype["withArguments"] = MockedMember.prototype.accepts;
 
-      // Resets internal state of Mock instance
-      mock.reset = function resetMock () {
-        exceptions = [];
-        this.actualArguments = [];
-        for (var i = 0, len = methods.length; i<len; i++) {
-          methods[i].actualCalls = 0;
-          methods[i].actualArgs = [];
-        }
-      };
-    
-      // Backward compatibility for QMock v0.1 API
-      mock.expectsArguments = mock.accepts;
-      
-      // If params passed to Mock constructor auto-magikally create mocked interface from JSON tree.
-      createMockFromJSON.call(mock, arguments[0]);
-      
-      // On my command, unleash the mock! :-)
-      return mock;
-    
+    // PUBLIC METHODS on mock
+    // Creates new MockedMember instance on Mock Object and sets-up initial method expectation
+    mock.expects = mock.andExpects = function mockExpectsNewMethod (min, max) {
+      return new MockedMember(min, max);
     };
-    
-  })();
+      
+    mock.accepts = function mockExpectsArguments () {
+      mock.expectsArguments = arguments;
+      return mock;
+    };
   
+    mock.actualArguments = []; // Stub, used for symbol binding
+    mock.strictValueChecking = false; // Default is type checking
+    
+    mock.strict = function mockExpectsStrictParameterValues () {
+      mock.strictValueChecking = true;
+      return mock;
+    };
+
+    // Verify method, tests both constructor and declared method's respective states.
+    mock.verify = function verifyMock () {
+      var isConstructor = true;
+      // Check Constructor Arguments
+      with ( mock ) {
+        if (expectsArguments.length !== actualArguments.length) {
+          // Thrown in to satisfy tests (for consistency's sake) - NEEDS TO BE REFACTORED OUT!
+          throwException("IncorrectNumberOfArgumentsException", "Constructor function", expectsArguments.length, actualArguments.length);
+        }
+        assertArguments(expectsArguments, actualArguments, strictValueChecking, isConstructor);
+      }
+          
+      // Verify Mocked Methods
+      for (var i = 0, len = methods.length; i < len; i++) {
+        methods[i].verifyMethod();
+      }
+      
+      // Did it go bad?
+      if (exceptions.length !== 0) {
+        throw exceptions;
+      } else {
+        return true;
+      }
+    };
+
+    // Resets internal state of Mock instance
+    mock.reset = function resetMock () {
+      exceptions = [];
+      this.actualArguments = [];
+      for (var i = 0, len = methods.length; i<len; i++) {
+        methods[i].actualCalls = 0;
+        methods[i].actualArgs = [];
+      }
+    };
+  
+    // Backward compatibility for QMock v0.1 API
+    mock.expectsArguments = mock.accepts;
+    
+    // If params passed to Mock constructor auto-magikally create mocked interface from JSON tree.
+    if ( assertObject( Object, arguments && arguments[0] ) ) {
+      createMockFromJSON.call(mock, arguments[0]);
+    }
+    
+    // On my command, unleash the mock! :-)
+    return mock;
+  
+  };
+      
   // PUBLIC static members on Mock class
   
   // Version number  
-  Mock["qMock"] = "0.2";
-  Mock["Variable"] = Variable;
+  MockConstructor["QMock"] = "0.2";
+  MockConstructor["Variable"] = Variable;
   
   // Expose internal methods for unit tests
-  ;;;; expose( assertArray, Mock, "_assertArray" );
-  ;;;; expose( assertObject, Mock, "_assertObject" );
-  ;;;; expose( assertCollection, Mock, "_assertCollection" );
-  ;;;; expose( createException, Mock, "_createException" );
-  ;;;; expose( createMockFromJSON, Mock, "_createMockFromJSON" );
+  // Base object checker method
+  ;;;; expose( assertObject, MockConstructor, "_assertObject" )
+  // assertObject Decorators
+  ;;;; expose( assertCollection, MockConstructor, "_assertCollection" );
+  // exception object builder
+  ;;;; expose( createException, MockConstructor, "_createException" );
+  // mock generator
+  ;;;; expose( createMockFromJSON, MockConstructor, "_createMockFromJSON" );
   
   // API Registration - register qMock in mapped scope
-  container.Mock = Mock;
+  container.Mock = MockConstructor;
   
   // Register qMock as a Common JS module
   if ( typeof exports !== "undefined" && typeof require !== "undefined" ) {
-    exports.Mocks = Mock;
+    exports.Mocks = MockConstructor;
   }
   
 })('Mock', this);
