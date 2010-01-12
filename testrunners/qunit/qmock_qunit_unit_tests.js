@@ -55,7 +55,6 @@
       })(1), false, "assertCollection() should return false if the 'expected' and 'actual' objects have mistmatched lengths");
 		
 	  // Test passing in an 'arguments' array
-	  debugger;
     equals((function() {
       return assertCollection([Boolean], arguments);
       })(true)["constructor"], Boolean, "assertCollection() should allow Array-like objects to be passed-in (e.g arguments collections) AND return a Boolean");
@@ -1509,7 +1508,6 @@
 	  ninja.swing(String);
 
 	  try {
-	    debugger;
 	    ninja.verify();  
 	    ok(false, "verify() should throw exception when swing() interface passed incorrect parameter type [constructor obj: (String)]");
 	  } catch (exception) {  
@@ -1570,7 +1568,6 @@
 	  ninja.swing(RegExp);
 
 	  try {
-	    debugger;
 	    ninja.verify();  
       ok(false, "verify() should throw exception when swing() interface passed incorrect parameter type [constructor obj: (RegExp)]");
 	  } catch (exception) {  
@@ -2939,7 +2936,7 @@
 
 	test("mock with composite argument types: object (literal) [enum] - strict type checking members", function () {
     
-	  expect(12);
+	  expect(18);
     
 	    var ninja = new Mock();
     
@@ -2956,13 +2953,13 @@
 
 	  // Test no arguments
     
-	    try {
-	        ninja.verify();
-	        ok(false, "verify() should throw exception");
-	    } catch (e) {
-	        equals(e.length, 1, "verify() should return an array of 1 exception");
-	        equals(e[0].type, "IncorrectNumberOfMethodCallsException", "verify() exception type should be IncorrectNumberOfMethodCallsException");
-	    }
+    try {
+      ninja.verify();
+      ok(false, "verify() should throw exception");
+    } catch (e) {
+      equals(e.length, 1, "verify() should return an array of 1 exception");
+      equals(e[0].type, "IncorrectNumberOfMethodCallsException", "verify() exception type should be IncorrectNumberOfMethodCallsException");
+    }
     
 	  ninja.reset();
   
@@ -2974,9 +2971,11 @@
       ninja.verify();
       ok(false, "verify() should throw exception");
     } catch (e) {
-      equals(e.length, 2 , "verify() should return an array of 2 exception");
+      equals(e.length, 4 , "verify() should return an array of 2 exception");
       equals(e[0].type, "MissingHashKeyException", "verify()[0] exception type should be MissingHashKeyException");
-      equals(e[1].type, "IncorrectArgumentValueException", "verify()[1] exception type should be IncorrectArgumentValueException");
+      equals(e[1].type, "MissingHashKeyException", "verify()[1] exception type should be MissingHashKeyException");
+      equals(e[2].type, "MissingHashKeyException", "verify()[1] exception type should be MissingHashKeyException");
+      equals(e[3].type, "IncorrectArgumentValueException", "verify()[3] exception type should be IncorrectArgumentValueException");
     }
 
 	  ninja.reset();
@@ -2995,6 +2994,9 @@
     } catch (e) {
       equals(e.length, 4 , "verify() should return an array of 4 exceptions");
       equals(e[0].type, "IncorrectArgumentValueException", "verify()[0] exception type should be IncorrectArgumentValueException");
+      equals(e[1].type, "IncorrectArgumentValueException", "verify()[1] exception type should be IncorrectArgumentValueException");
+      equals(e[2].type, "IncorrectArgumentValueException", "verify()[2] exception type should be IncorrectArgumentValueException");
+      equals(e[3].type, "IncorrectArgumentValueException", "verify()[3] exception type should be IncorrectArgumentValueException");
     }
     
 	  ninja.reset();
@@ -3037,7 +3039,7 @@
       
 	  // Bad Exercise
   
-	  // Test correct argument types - wrong values
+	  // Test correct argument types - wrong values - assertion recurse through whole object tree
   
 	  samurai.describe({
 	    name: "Jet Li",
@@ -3055,9 +3057,30 @@
       samurai.verify();
       ok(false, "verify() should throw exception");
     } catch (e) {
-      equals(e.length, 1 , "verify() should return an array of 1 exceptions");
+      equals(e.length, 2 , "verify() should return an array of 1 exceptions");
       equals(e[0].type, "IncorrectArgumentValueException", "verify() exception type should be IncorrectArgumentValueException");
+      equals(e[1].type, "IncorrectArgumentValueException", "verify() exception type should be IncorrectArgumentValueException");
     }
+  
+	  samurai.reset();
+	  
+	  // Test correct argument types - pass-thru values
+	  
+	  /*samurai.describe({
+	    name: "Jet Li",
+	    age: Number,
+	    'marshal arts': Array,
+	    weapon: {
+	      damage: String,
+	      type: 'sword'
+	    }        
+	  });
+  
+	  samurai.getDamage();
+  
+    debugger;
+    samurai.verify();
+	  ok(samurai.verify(), "verify() should be true with constructors as expected");*/
   
 	  samurai.reset();
   
@@ -3121,9 +3144,9 @@
   
 	});
 	
-	test("mock with composite argument types: array - strict value check", function () {
+	test("w/ API: mock with composite argument types: array - strict value check", function () {
     
-	  expect(6);
+	  expect(5);
     
 	    var ninja = Mock();
     
@@ -3954,6 +3977,7 @@
 
     $().run('slow').fight('hard').run('again');
 		try {
+		  debugger;
 		  $.verify();
 		  ok(false, "verify() should throw exception");
 		} catch (e) {
@@ -4198,6 +4222,10 @@
 	test("private assertHash() method", function () {
     
 	  expect(83);
+	  
+	  function _stubErrorHandler (errorType) {
+	    throw {type: errorType};
+	  }
 	  	  
 	  /* Authors note - there are many tests and I've strived to use the same ones for both type checking and value checking of member properties between expected and actual 'hashes'. 
 	  * The as-is also implitly test the object checking callback (assertObject()) invoked within this function, as opposed to just the flow control logic that naively enumerates over hash-like objects, but this should be seen as a secondary concern to this test-suite. 
@@ -4236,7 +4264,7 @@
 	  
 	  // Single missing key
 	  try {
-	    assertHash({key: 'value'}, {});
+	    assertHash({key: 'value'}, {}, null, null, _stubErrorHandler);
 	  } catch (e) {
 	    equals( e[0].type, "MissingHashKeyException", "assertHash() should raise a 'MissingHashKeyException' with expected: (Object {key: 'value'}) and actual: (Object {}). Error raised was");
 	    equals( /Missing key was: 'key'/.test(e[0].message), true, "assertHash() should identify 'key' as the missing accessor with expected: (Object {key: 'value'}) and actual: (Object {}). Result");
@@ -4376,7 +4404,6 @@
 	  equals( assertHash({Array: []}, {Array: []}, true), true, "assertHash() should be true with expected: (Object {Array: []}) and actual: (Object {Array: []}). Result");
 	  equals( assertHash({Array: ["one"]},{Array: ["one"]}, true), true, "assertHash() should be true with expected: (Object {Array: ['one']}) and actual: (Object {Array: ['one']}). Result");
 	  equals( assertHash({Object: {}}, {Object: {}}, true), true, "assertHash() should be true with expected: (Object {Object: {}}) and actual: (Object {Object: {}}). Result");
-	  debugger;
 	  // Not sure what to do with this one - it's definitely an edge case... for now maybe just defer to a quick type check (if expectedType === Function?)
 	  equals( assertHash({Function: function() {}}, {Function: function() {}}, true), true, "assertHash() should be true with expected: (Object {Function: function(){}}) and actual: (Object {Function: function(){}}). Result");
 	  equals( assertHash({"null": null},{"null": null}, true), true, "assertHash() should be true with expected: (Object {'null': null}) and actual: (Object {'null': null}). Result");

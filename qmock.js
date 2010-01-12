@@ -130,7 +130,7 @@
 
           // If not callable check property not whitelisted before throwing error
           } else if ( !!/propertyWhitelist/.test(expectation) ) {
-            throwException("InvalidExpectationMethodCallException", member["name"] + '.' + expectation, "Key to mutator method on mockedMember object", name);
+            throwMockException("InvalidExpectationMethodCallException", member["name"] + '.' + expectation, "Key to mutator method on mockedMember object", name);
           }
   
         } // end setExpectations loop
@@ -167,12 +167,12 @@
     
     // Function to assert members of an object, returns Boolean
     function assertHash (expected, actual, opt_strictValueChecking, opt_exceptionType, opt_exceptionHandler) {
-      var result = true,
-          errors = []; // TBD refactor for interface conformance! e.g. remove loop below and delgate that handling to exceptionHandler if exists...
+      var result = true;
       // Is this the correct check? Everything in JS is essentially a hash (as all derive from Object.prototype), except for falsy data types (undefined, null, NaN)?
       // Worth testing to see if absolutely generic (aka can enumerate over non object literal hashes)
       // What about DontEnum stuff? Sort of taken by hasOwnProperty, so what about checking inherited props? Or make clear in description really meant for object literals? If so, should text for object literal? How - Array trick-esque thingy?
       if ( expected && actual ) {
+        
         checkingMembers:
           for ( var key in expected ) {
             // expectations don't support prototypical inheritance...
@@ -185,16 +185,14 @@
               if ( key in Object(actual) ) {
                 result &= assertObject(expected[key], actual[key], opt_strictValueChecking, opt_exceptionType, opt_exceptionHandler);
               } else {
-                errors.push({
-                  type: "MissingHashKeyException",
-                  message: "assertHash() requires a key exist on both the expected and actual objects for member assertion. Missing key was: '" + key + "'"
-                });
+                opt_exceptionHandler && opt_exceptionHandler( "MissingHashKeyException", "assertHash", key, "not found on object" )
+                result = false;
                 continue checkingMembers;
               }
             }
-          } 
+          }
+          
       }
-      if (errors.length !== 0) { throw errors; }
       return !!result;
     }
     
@@ -224,16 +222,8 @@
 
         // Only assert on absolute number of params declared in method signature as expectations don't exist for overloaded interfaces
         for (var i = 0, len = actual.length; i < len; i++) {
-
           // 1:1 assertion
-          result &= assertObject ( 
-            expected[i],
-            actual[i],
-            opt_strictValueChecking || null,
-            opt_exceptionType || null,
-            opt_exceptionHandler || null
-          );
-
+          result &= assertObject ( expected[i], actual[i], opt_strictValueChecking, opt_exceptionType, opt_exceptionHandler );
         }
       }
 
@@ -395,7 +385,7 @@
     
   })(); // end assertObject declaration
   
-  // Function to build pretty exception objects
+  // Function to build pretty exception objects - TBR function signature
   function createException (exceptionType, objName, expected, actual) {
     var e = {
         type : exceptionType
@@ -410,6 +400,8 @@
       case "IncorrectNumberOfMethodCallsException" === exceptionType  :
         e.message = fn + " expected: " + expected + " method calls, actual number was: " + actual;
         break;
+      case "MissingHashKeyException" :
+        e.message = fn + " expected: " + expected + " key/property to exist on 'actual' object, actual was: " + actual;
       default:
         e.message = fn + " expected: " + expected + ", actual was: " + actual;
     }
@@ -426,7 +418,8 @@
         },
         methods = [], // List of MockedMember method instances declared on mock
         exceptions = [], // List of exceptions thrown by verify/verifyMethod functions,
-        identifier = ( assertObject( String, arguments && arguments[0] ) ) ? arguments[0] : "'Constructor' (#protip - you can pass in a (String) to when instantiating a new Mock, which helps inform constructor-level error messages)" 
+        identifier = ( assertObject( String, arguments && arguments[0] ) ) ? arguments[0] : "'Constructor' (#protip - you can pass in a (String) when instantiating a new Mock, which helps inform constructor-level error messages)",
+        assertCollection = assertObject["_assertCollection"].get(); // TBR
   
     // Function to push arguments into Mock exceptions list
     function throwMockException () {
@@ -473,7 +466,7 @@
 
         // Throw error if collision with mockMember API
         if (mock[name] !== undefined) {
-          throwException("InvalidMethodNameException", "Constructor function", "unique method name", "was reserved method name '" + name + "'");
+          throwMockException("InvalidMethodNameException", "Constructor function", "unique method name", "was reserved method name '" + name + "'");
           throw exceptions;
         }
       
@@ -612,7 +605,7 @@
       
       "property": function (name) {
         if (mock[name] !== undefined) {
-          throwException("InvalidPropertyNameException", "Constructor function", "undefined property name", "should be unique (was " + name + ")");
+          throwMockException("InvalidPropertyNameException", "Constructor function", "undefined property name", "should be unique (was " + name + ")");
           throw exceptions;
         }
         mock[name] = "stub";
@@ -663,7 +656,7 @@
                    break assertMethodCalls;
                  }
                default:
-                 throwException("IncorrectNumberOfMethodCallsException", name, expectedCalls, actualCalls);
+                 throwMockException("IncorrectNumberOfMethodCallsException", name, expectedCalls, actualCalls);
                  break assertMethod;
              }
     
@@ -676,7 +669,7 @@
             case ( allowOverload === false) && ( requiredNumberofArguments !== false ) && ( requiredNumberofArguments !== actualArgs[0].length ): 
             // At least n Arg length checking - overloading allowed - Global check
             case ( allowOverload === true) && ( requiredNumberofArguments !== false ) && ( requiredNumberofArguments > actualArgs[0].length )  :
-              throwException("IncorrectNumberOfArgumentsException", name, expectedArgs.length, actualArgs.length);
+              throwMockException("IncorrectNumberOfArgumentsException", name, expectedArgs.length, actualArgs.length);
               break assertMethod;
 
             default:
@@ -698,7 +691,7 @@
                         // Assert Number of Arguments if expectation explicitly set...
                         // At least n Arg length checking - overloading allowed - Global check
                         if ( expectedArgs[j]["required"] > actualArgs[i].length )  {
-                          throwException("IncorrectNumberOfArgumentsException", name, expectedArgs.length, actualArgs.length);
+                          throwMockException("IncorrectNumberOfArgumentsException", name, expectedArgs.length, actualArgs.length);
                           continue assertPresentations;
                         }      
             
@@ -780,9 +773,10 @@
       with ( mock ) {
         if (expectsArguments.length !== actualArguments.length) {
           // Thrown in to satisfy tests (for consistency's sake) - NEEDS TO BE REFACTORED OUT!
-          throwException("IncorrectNumberOfArgumentsException", "Constructor function", expectsArguments.length, actualArguments.length);
+          throwMockException("IncorrectNumberOfArgumentsException", "Constructor function", expectsArguments.length, actualArguments.length);
+        } else {
+          assertCollection(expectsArguments, actualArguments, strictValueChecking, null, throwMockException);
         }
-        assertCollection(expectsArguments, actualArguments, strictValueChecking, null, throwMockException);
       }
           
       // Verify Mocked Methods
