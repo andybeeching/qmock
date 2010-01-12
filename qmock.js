@@ -45,6 +45,7 @@
  * TODO: Group QUnit tests into sub-modules?
  * TODO: Support for identifiers.. might wait until refactor of all constructor/methods to subclassed mockMember instances.
  * TDOO: Support for classical, protypical, & parasitic inheritance instance checking
+ * TODO: Double check inheritance properties of instanceof - plus support for 'interface' conformance as well?
  */
 
 (function initialiseQMock (Mock, container) {
@@ -66,17 +67,23 @@
   
   // Function to expose private objects on a target object for testing (plus injection of mocks/stubs and reset functionality)
   function expose (obj, context, key) {
+    
     var cachedObj = obj; // can this part be improved by one cache for all or many atomic caches?
+    
     context[key] = {
+      
       get: function() {
         return obj;
       },
+      
       set: function() {
         obj = arguments[0] || null; 
       },
+      
       restore: function() {
         obj = cachedObj;
       }
+      
     }
   }
   
@@ -159,9 +166,9 @@
     }
     
     // Function to assert members of an object, returns Boolean
-    function assertHash (expected, actual, opt_strictValueChecking, opt_exceptionType, opt_throwException) {
+    function assertHash (expected, actual, opt_strictValueChecking, opt_exceptionType, opt_exceptionHandler) {
       var result = true,
-          errors = [];
+          errors = []; // TBD refactor for interface conformance! e.g. remove loop below and delgate that handling to exceptionHandler if exists...
       // Is this the correct check? Everything in JS is essentially a hash (as all derive from Object.prototype), except for falsy data types (undefined, null, NaN)?
       // Worth testing to see if absolutely generic (aka can enumerate over non object literal hashes)
       // What about DontEnum stuff? Sort of taken by hasOwnProperty, so what about checking inherited props? Or make clear in description really meant for object literals? If so, should text for object literal? How - Array trick-esque thingy?
@@ -176,7 +183,7 @@
               // in operator performs lookup resolution on [[Prototype]] chain
               // FF 3.6 won't eumerate function instance prototype property (https://developer.mozilla.org/En/Firefox_3.6_for_developers#JavaScript)
               if ( key in Object(actual) ) {
-                result &= assertObject(expected[key], actual[key], opt_strictValueChecking, opt_exceptionType, opt_throwException);
+                result &= assertObject(expected[key], actual[key], opt_strictValueChecking, opt_exceptionType, opt_exceptionHandler);
               } else {
                 errors.push({
                   type: "MissingHashKeyException",
@@ -191,8 +198,51 @@
       return !!result;
     }
     
+    // Delegate function that asserts elements of a collection
+    function assertCollection (expected, actual, opt_strictValueChecking, opt_exceptionType, opt_exceptionHandler, opt_identifier) {
+
+      var result = true;
+
+      // assertCollection interface checks
+      if (arguments.length < 2) {
+        throw {
+          type: "MissingParametersException",
+          msg: "assertCollection() requires at least an expected and actual parameter to be passed to interface"
+        }
+      } else if ( (!expected || expected.length === undefined) || (!actual || actual.length === undefined) ) {
+        throw {
+          type: "MalformedArgumentsException",
+          msg: "assertCollection() requires the 'expected' and 'actual' collection parameters to be an Array-like collection"
+        }
+      }
+
+      // assertCollection parameter checks
+      if ( expected.length !== actual.length ) {
+        opt_exceptionHandler && opt_exceptionHandler ('MismatchedNumberOfMembersException', opt_identifier || 'Function()', expected.length, actual.length )
+        result = false;
+      } else {
+
+        // Only assert on absolute number of params declared in method signature as expectations don't exist for overloaded interfaces
+        for (var i = 0, len = actual.length; i < len; i++) {
+
+          // 1:1 assertion
+          result &= assertObject ( 
+            expected[i],
+            actual[i],
+            opt_strictValueChecking || null,
+            opt_exceptionType || null,
+            opt_exceptionHandler || null
+          );
+
+        }
+      }
+
+      // Return a Boolean for recursive calls, exceptions handled in opt_exceptionsHandler.
+      return !!result;
+    }
+    
     // Key function to test objects against each other.
-    function assertObject (expected, actual, opt_strictValueChecking, opt_exceptionType, opt_throwException) {
+    function assertObject (expected, actual, opt_strictValueChecking, opt_exceptionType, opt_exceptionHandler) {
             
       // Test whether expected is a constructor for native object types (aside from null // undefined)
       var expectedType = (expected !== null && expected !== undefined) ? expected.constructor : expected
@@ -203,16 +253,15 @@
               : expected,*/
         isValue = isRegExp = isCollection = false,
         strictValueChecking = opt_strictValueChecking || false,
-        throwException = opt_throwException || function () {},
         exceptionType = opt_exceptionType || ( strictValueChecking === true ? "IncorrectArgumentValueException" : "IncorrectArgumentTypeException"),
         // What happened to isNative fn?!? - see Kangax blog... damn me and my lack of self-documentation sometimes.
         nativeTypes = [Number, String, Boolean, Date, Function, Object, Array, RegExp, Variable],
         result = true,
         // WTF?
-        name = "getClass()";
+        identifier = "getClass()";
         
       function _compare (expected, actual, serialiser) {
-        return ( expected && expected.valueOf && expected[serialiser]() ) === ( actual && actual.valueOf && actual[serialiser]() )
+        return ( expected && expected[serialiser] && expected[serialiser]() ) === ( actual && actual[serialiser] && actual[serialiser]() )
       }
 
       assertNativeType: 
@@ -228,18 +277,18 @@
 
         // Pass-through
         case Variable:
-          return true;
+          break;
 
         // False (however unlikely) - compare by type
         case null:
         case undefined:
         // case NaN: TBD
           if ( expected !== actual ) {
-            throwException(exceptionType, name, expected, actual); 
-            return false;
+            opt_exceptionHandler && opt_exceptionHandler(exceptionType, identifier, expected, actual);
+            result = false;
           }
-          return true;
-
+          break;
+          
         // Primitives (plus Date) - compare by prototype or value (where strictValue === true)
         case Date:
         case Number:
@@ -248,11 +297,20 @@
           // set Primitive flag
           isValue = true;
           
-        case RegExp:
-          // set RegExp flag
-          isRegExp = true;
-                    
         default:
+
+          // set RegExp flag
+          if ( expectedType === RegExp ) {
+            isRegExp = true; 
+          }
+          
+          // set collection flag
+          // We use hasOwnProperty() because a lookup a force to Boolean lookup generates false positives (e.g. 0), and the 'in' operator crawls the prototype chain
+          if ( expected.hasOwnProperty && expected.hasOwnProperty('length') ) {
+            isCollection = true;
+          }
+        
+        
           // Let's make sure the types match first of all...
           // If not strict then check if a instance of expectation - acts on CURRENT prototype object - DOUBLE CHECK this - surely traverses [[Prototype]] chain to check all sub/superclasses and root node(s)?
           // May need refactoring to use getPrototypeOf() for more robust solution
@@ -284,15 +342,18 @@
                 || ( isRegExp === true && !_compare(expected, actual, "toString") )
 
                 // Handle composite values & custom Data Types - first check for match on constructor, then match on collection, e.g. members (strict checking)
-                || ( (isValue === false) && ( actual !== expectedType ) && ( ( (isCollection === true) ? assertArray : assertHash)(expected, actual, true, exceptionType, (isCollection === true) ? null : opt_throwException) === false ) ) ) {
+                || ( (isValue === false) && ( actual !== expectedType ) && ( ( (isCollection === true) ? assertCollection : assertHash)(expected, actual, true, exceptionType, (isCollection === true) ? null : opt_exceptionHandler) === false ) ) ) {
+                
+                  // FAIL.
                   result = false;
+                
                 }
                 
               } catch (error) {
 
                 // If MissingHashKeyException thrown then create custom error listing the missing keys.
                 if ( error && error[0] && error[0].type === "MissingHashKeyException" ) {
-                  throwException("MissingHashKeyException", name, "object with native and custom keys", (function (a) {
+                  opt_exceptionHandler && opt_exceptionHandler("MissingHashKeyException", identifier, "object with native and custom keys", (function (a) {
                     for ( var i = 0, len = error.length; i < len; i++ ) {
                       a.push((error[i].message.split(':')[1]) || null);
                     }
@@ -318,14 +379,15 @@
         }
         // Throw error if negative match
         if ( result === false ) {
-          throwException(exceptionType, name, expected, actual); // Need to inject correct className
+          opt_exceptionHandler && opt_exceptionHandler(exceptionType, identifier, expected, actual); // Need to inject correct className
         }
-        return result;
       } // end switch
+       return result;
     }
 
     // Expose for testing
     ;;;; expose( assertArray, assertObject, "_assertArray" );
+    ;;;; expose( assertCollection, assertObject, "_assertCollection" );
     ;;;; expose( assertHash, assertObject, "_assertHash" );
     
     // Return privileged function
@@ -333,49 +395,6 @@
     
   })(); // end assertObject declaration
   
-  // Delegate function that asserts elements of a collection
-  function assertCollection (config) {
-        
-    // Check required args exist
-    if (!config) {
-      throw {
-        type: "MissingConfigObjectException",
-        msg: "assertCollection() requires single configuration object to be passed"
-      }
-    } else if ( (!config.expected || config.expected.length === undefined) || (!config.actual || config.actual.length === undefined) ) {
-      throw {
-        type: "MalformedArgumentsException",
-        msg: "assertCollection() requires the 'expected' and 'actual' collection properties on passed-in config object to be an Array-like collection"
-      }
-    } else {
-      var exceptions = config.exceptions || [];
-    }
-    
-    function throwException () {
-      arguments.callee.count++;
-      exceptions.push( createException.apply(null, arguments) );
-    }
-    
-    throwException.count = 0;
-    
-    // Only assert on absolute number of params declared in method signature as expectations don't exist for overloaded interfaces
-    for (var i = 0, len = config.actual.length; i < len; i++) {
-
-      // 1:1 assertion
-      assertObject( 
-        config.expected[i],
-        config.actual[i],
-        config.strictValueChecking || null,
-        config.exceptionType || null,
-        config.throwException || throwException
-      );
-      
-    }
-      
-    // Return a Boolean for recursive calls - otherwise exception thrown in verify().
-    return ( exceptions.length === 0 ) ? true : false;
-  }
-
   // Function to build pretty exception objects
   function createException (exceptionType, objName, expected, actual) {
     var e = {
@@ -385,7 +404,8 @@
     
     switch (true) {
       case "IncorrectNumberOfArgumentsException" === exceptionType   :
-        e.message = fn + " expected: " + expected + " arguments, actual number was: " + actual;
+      case "MismatchedNumberOfMembersException" === exceptionType     :
+        e.message = fn + " expected: " + expected + " items, actual number was: " + actual;
         break;
       case "IncorrectNumberOfMethodCallsException" === exceptionType  :
         e.message = fn + " expected: " + expected + " method calls, actual number was: " + actual;
@@ -409,10 +429,8 @@
         identifier = ( assertObject( String, arguments && arguments[0] ) ) ? arguments[0] : "'Constructor' (#protip - you can pass in a (String) to when instantiating a new Mock, which helps inform constructor-level error messages)" 
   
     // Function to push arguments into Mock exceptions list
-    function throwException () {
-      exceptions.push(
-        createException.apply(undefined, arguments)
-      );
+    function throwMockException () {
+      exceptions.push( createException.apply(null, arguments) );
     }
 
     // Function to compare expected and actual arguments for mock method & constructor
@@ -421,15 +439,15 @@
       // Maybe can be refactored to not use constructor check - flaky.
       if ( opt_isConstructor && expected.constructor === Function ) { return; }   
       // Iterate over collection testing arguments
-      return assertCollection({
-        expected: expected,
-        actual: actual,
-        strictValueChecking: opt_strictValueChecking || false,
-        isConstructor: opt_isConstructor || false,
-        exceptionType: (opt_strictValueChecking) ? "IncorrectArgumentValueException" : "IncorrectArgumentTypeException",
-        name: ( opt_isConstructor === true ) ? "Constructor" : this["name"],
-        exceptions: exceptions
-      });
+      return assertCollection(
+        expected,
+        actual,
+        opt_strictValueChecking || false,
+        (opt_strictValueChecking) ? "IncorrectArgumentValueException" : "IncorrectArgumentTypeException",
+        function(){},
+        ( opt_isConstructor === true ) ? "Constructor" : this["name"],
+        exceptions
+      );
     }
 
     // CONSTRUCTOR for mocked methods
@@ -493,10 +511,11 @@
               assertingPresentations:
                 for (var i = 0, len = method.expectedArgs.length; i < len; i++) {
                   try {
-                    if ( assertObject["_assertArray"].get() (
-                      method.expectedArgs[i]["accepts"], // 'expected' inputs
-                      presentation, // 'actual' inputs
-                      true ) // flag strict value checking to match correct expectation for return value
+                    if ( assertCollection(
+                          method.expectedArgs[i]["accepts"], // 'expected' inputs
+                          presentation, // 'actual' inputs
+                          true // Must be strict 1:1 match to return a certain value
+                        )
                     ) {
                       // If match found against presentation return bound object (or self if chained)
                       obj = (method.returnValue && method.returnValue === mock) 
@@ -520,6 +539,7 @@
         return this; 
 
       },
+      
       "interface": function setInterfaceExpectations () {
       
         /*// Check for valid input to interface
@@ -563,27 +583,33 @@
         this.expectedArgs = arguments;
         return this;
       },
+      
       "accepts": function setSingleInterfaceExpectation () {
         this.requiredNumberofArguments = arguments.length;
         this.expectedArgs = [{"accepts": slice.call(arguments, 0)}];
         return this;
       },
+      
       "returns": function (stub) {
         this.returnValue = stub; // default is undefined
         return this;
       },
+      
       "required": function (requiredArgs) {
         this.requiredNumberofArguments = requiredArgs;
         return this;
       },
+      
       "overload": function (overload_flag) {
         this.allowOverload = overload_flag;
         return this;
       },
+      
       "strict": function () {
         this.strictValueChecking = true;
         return this;
       },
+      
       "property": function (name) {
         if (mock[name] !== undefined) {
           throwException("InvalidPropertyNameException", "Constructor function", "undefined property name", "should be unique (was " + name + ")");
@@ -592,6 +618,7 @@
         mock[name] = "stub";
         return this;
       },
+      
       "withValue": function (value) {
         for(property in mock) {
           if ( mock.hasOwnProperty(property) ) {
@@ -602,17 +629,21 @@
         }
         return this;
       },
+      
       "callFunctionWith": function () {
         // Callback function arguments - useful for async requests
         this.callbackArgs = arguments;
         return this;
       },
+      
       "andChain": function () {
         return this.returnValue = mock;
       },
+      
       "andExpects": function (calls) {
         return mock.expects(calls);
       },
+      
       "verifyMethod": function () {
         assertMethod: 
           with (this) {
@@ -675,16 +706,25 @@
                         var cachedExceptionTotal = exceptions.length;
           
                         // If a match (strict value checking) between a presentation and expectation restore exceptions object and assert next interface presentation.
-                        if (assertArguments(
-                            expectedArgs[j]["accepts"],
-                            // If strict argument total checking is on just pass through expected and actual
-                             ( allowOverload === false && requiredNumberofArguments !== false ) 
-                              ? actualArgs[i] 
-                              // Else assume default mode of overloading and type checking against method interface
-                              : slice.call(actualArgs[i], 0, expectedArgs[j]["accepts"].length), 
-                            strictValueChecking
-                          ) 
-                            ) {
+                        // If strict argument total checking is on just pass through expected and actual
+                        if ( assertCollection(
+                              // expected
+                              ( allowOverload === false && requiredNumberofArguments !== false ) 
+                                ? expectedArgs[j]["accepts"]
+                                // Else assume default mode of overloading and type checking against method interface
+                                : slice.call(expectedArgs[j]["accepts"], 0, actualArgs[i].length),
+                              // actual
+                              ( allowOverload === false && requiredNumberofArguments !== false ) 
+                                ? actualArgs[i]
+                                // Else assume default mode of overloading and type checking against method interface
+                                : slice.call(actualArgs[i], 0, expectedArgs[j]["accepts"].length),
+                              strictValueChecking,
+                              (strictValueChecking) ? "IncorrectArgumentValueException" : "IncorrectArgumentTypeException",
+                              throwMockException,
+                              name,
+                              exceptions
+                            ) 
+                          ) {
                               // If match remove exceptions raised during checks and move on to next presentation.
                               exceptions.slice(0, cachedExceptionTotal);
                               continue assertPresentations;
@@ -697,11 +737,13 @@
             } // end assertInterface
           } // end assertMethod
       },
+      
       atLeast: function (n) {
         this.expectedCalls = n;
         this.maxCalls = Infinity;
         return this;
       },
+      
       noMoreThan: function (n) {
         this.maxCalls = n;
         return this;
@@ -733,14 +775,14 @@
 
     // Verify method, tests both constructor and declared method's respective states.
     mock.verify = function verifyMock () {
-      var isConstructor = true;
+      
       // Check Constructor Arguments
       with ( mock ) {
         if (expectsArguments.length !== actualArguments.length) {
           // Thrown in to satisfy tests (for consistency's sake) - NEEDS TO BE REFACTORED OUT!
           throwException("IncorrectNumberOfArgumentsException", "Constructor function", expectsArguments.length, actualArguments.length);
         }
-        assertArguments(expectsArguments, actualArguments, strictValueChecking, isConstructor);
+        assertCollection(expectsArguments, actualArguments, strictValueChecking, null, throwMockException);
       }
           
       // Verify Mocked Methods
@@ -788,8 +830,6 @@
   // Expose internal methods for unit tests
   // Base object checker method
   ;;;; expose( assertObject, MockConstructor, "_assertObject" )
-  // assertObject Decorators
-  ;;;; expose( assertCollection, MockConstructor, "_assertCollection" );
   // exception object builder
   ;;;; expose( createException, MockConstructor, "_createException" );
   // mock generator

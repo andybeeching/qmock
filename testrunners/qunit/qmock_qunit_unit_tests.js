@@ -1,28 +1,15 @@
 
-(function initQMockTests () {
+(function scopeQMockTests () {
   
   // Closure scoped aliases to internal qMock functions
   var assertObject = Mock["_assertObject"].get(),
     assertArray = assertObject["_assertArray"].get(),
+    assertCollection = assertObject["_assertCollection"].get(),
     assertHash = assertObject["_assertHash"].get(),
-    assertCollection = Mock["_assertCollection"].get(),
     createException = Mock["_createException"].get(),
     createMockFromJSON = Mock["_createMockFromJSON"].get(),
     undefined;
 
-	// Helper function for testing assertCollections()
-	function _stubParams (expected, actual, opt_strict) {
-		return {
-			expected: [expected],
-			actual: [actual],
-			strictValueChecking: opt_strict || false,
-			name: "",
-			exceptions: [],
-			isConstructor: false,
-			exceptionType: ""
-		};
-	}
-	
 	// Stub to test support for user-defined objects
 	function Custom () {};
 	
@@ -44,37 +31,33 @@
 			assertCollection();
 	    ok(false, "assertCollection() should throw exception when passed No parameters");
 	  } catch (exception) {  
-	    equals(exception.type, "MissingConfigObjectException", "assertCollection() exception type should be MissingConfigObjectException for no parameters");
+	    equals(exception.type, "MissingParametersException", "assertCollection() exception type should be MissingParametersException for less than two parameters (required)");
 	  }
 	  
 	  // Test malformed arguments to interface afforded by assertCollection()
 	  try {
-			assertCollection( 
-			  {
-    			expected: undefined,
-    			actual: [],
-    		}
-			);
+			assertCollection( undefined, []	);
 	    ok(false, "assertCollection() should throw exception when passed incorrectly formatted parameters");
 	  } catch (exception) {  
-	    equals(exception.type, "MalformedArgumentsException", "assertCollection() requires the 'expected' and 'actual' collection properties on passed-in config object to be (Arrays)");
+	    equals(exception.type, "MalformedArgumentsException", "assertCollection() requires the 'expected' and 'actual' parameters to be Array-like objects");
 	  }
 	  
 	  try {
-			assertCollection( 
-			  {
-    			expected: [],
-    			actual: undefined,
-    		}
-			);
+			assertCollection( [], undefined );
 	    ok(false, "assertCollection() should throw exception when passed incorrectly formatted parameters");
 	  } catch (exception) {  
-	    equals(exception.type, "MalformedArgumentsException", "assertCollection() requires the 'expected' and 'actual' collection properties on passed-in config object to be (Arrays)");
+	    equals(exception.type, "MalformedArgumentsException", "assertCollection() requires the 'expected' and 'actual' parameters to be Array-like objects");
 	  }
+	  
+	  // Test expected and actual collection of objects with different lengths
+		 equals((function() {
+          return assertCollection([1,2], arguments);
+      })(1), false, "assertCollection() should return false if the 'expected' and 'actual' objects have mistmatched lengths");
 		
 	  // Test passing in an 'arguments' array
+	  debugger;
     equals((function() {
-        return assertCollection({expected:[Boolean], actual: arguments});
+      return assertCollection([Boolean], arguments);
       })(true)["constructor"], Boolean, "assertCollection() should allow Array-like objects to be passed-in (e.g arguments collections) AND return a Boolean");
 		
 	});
@@ -1096,7 +1079,7 @@
   
 	});
 
-	test("mock with multiple parameterless methods", function () {
+	test("w/ API: mock with multiple parameterless methods", function () {
    
 	  expect(3);
     
@@ -1168,9 +1151,9 @@
 
 	});
 
-	test("mock with stubbed properties", function () {
+	test("w/ API: mock with stubbed properties", function () {
   
-	  expect(16);
+	  expect(15);
   
 	  var ninja = new Mock();
     
@@ -1259,23 +1242,22 @@
 	      .withValue(/RegExp/)
 	    .andExpects()
 	      .property("date")
-	      .withValue(new Date)  
+	      .withValue(new Date(1970))  
 	    .andExpects()
 	      .property("custom object")
 	      .withValue(new Custom);
       
 	  // No need to exercise - all stubs
-	  ok( (wizard["number"] === 1) , "wizard mock object should have a stubbed property of 'number' with a value of '1'");
-	  ok( (wizard["boolean"] === true) , "wizard mock object should have a stubbed property of 'boolen' with a value of 'true'");
-	  ok( (wizard["null"] === null) , "wizard mock object should have a stubbed property of 'null' with a value of 'null'");
-	  ok( (wizard["undefined"] === undefined) , "wizard mock object should have a stubbed property of 'undefined' with a value of undefined");
-	  ok( assertObject( function() {}, wizard["function"] ) , "wizard mock object should have a stubbed property of 'function' with a value of 'function stubbedFunction () {}'");
-	  ok( assertObject( {}, wizard["object"] ) , "wizard mock object should have a stubbed property of 'object' with a value of '{}'");
-	  ok( assertObject( [], wizard["array"] ) , "wizard mock object should have a stubbed property of 'array' with a value of '[]'");
-	  ok( assertObject( /RegExp/, wizard["regExp"] ) , "wizard mock object should have a stubbed property of 'regExp' with a value of '/RegExp/'");
-	  ok( assertObject( new Date, wizard["date"] ) , "wizard mock object should have a stubbed property of 'date' with a value of 'new Date'");
-	  ok( assertObject( new Custom, wizard["custom object"] ) , "wizard mock object should have a stubbed property of 'custom object' with a value of 'new Custom'");
-  
+	  ok( assertObject( wizard["number"], 1, true ), "wizard mock object should have a stubbed property of 'number' with a value of (Number: 1)");
+	  ok( assertObject( wizard["boolean"], true, true ), "wizard mock object should have a stubbed property of 'number' with a value of (Boolean: true)");
+	  ok( assertObject( wizard["null"], null, true ), "wizard mock object should have a stubbed property of 'null' with a value of (null)");
+	  ok( assertObject( wizard["function"], function() {}, true ), "wizard mock object should have a stubbed property of 'function' with a value of (Function: function stubbedFunction () {})");
+	  ok( assertObject( wizard["object"], {}, true ), "wizard mock object should have a stubbed property of 'object' with a value of (Object: {})");
+	  ok( assertObject( wizard["array"], [], true ), "wizard mock object should have a stubbed property of 'array' with a value of (Array: [])");
+	  ok( assertObject( wizard["regExp"], /RegExp/, true ), "wizard mock object should have a stubbed property of 'regExp' with a value of (RegExp: /RegExp/)");
+	  ok( assertObject( wizard["date"], new Date(1970), true ), "wizard mock object should have a stubbed property of 'date' with a value of (Date: new Date)");
+	  ok( assertObject( wizard["custom object"], new Custom, true ), "wizard mock object should have a stubbed property of 'custom object' with a value of (Custom: new Custom)");
+
 	});
 
 	test("w/ JSON: mock with stubbed properties", function () {
@@ -1343,55 +1325,35 @@
   
 	  function Custom () {};
   
-	  wizard = new Mock({
-	    "number"  : {
-	      value  	: 1
-	    },
-	    "boolean" : {
-	      value  	: true
-	    },
-	    "string" 	: {
-	      value  	: "string"
-	    },
-	    "null"    : {
-	      value  	: null
-	    },
-	    "function": {
-	      value  	: function stubbedFunction () {}
-	    },
-	    "object"  : {
-	      value  	: {}
-	    },
-	    "array"   : {
-	      value  	: []
-	    },
-	    "regExp"  : {
-	      value  	: /RegExp/
-	    },
-	    "date"    : {
-	      value  	: new Date
-	    },
-	    "custom object": {
-	      value  	: new Custom
-	    }
-	  });
+    wizard = new Mock({
+      "number": {value: 1},
+      "boolean": {value: true},
+      "string": {value: "string"},
+      "null": {value: null},
+      "function": {value: function stubbedFunction () {}},
+      "object": {value: {}},
+      "array": {value: []},
+      "regExp": {value: /RegExp/},
+      "date": {value: new Date(1970)},
+      "custom object": {value: new Custom}
+    });
       
 	  // No need to exercise - all stubs
-	  ok( (wizard["number"] === 1) , "wizard mock object should have a stubbed property of 'number' with a value of '1'");
-	  ok( (wizard["boolean"] === true) , "wizard mock object should have a stubbed property of 'number' with a value of 'true'");
-	  ok( (wizard["null"] === null) , "wizard mock object should have a stubbed property of 'null' with a value of 'null'");
-	  ok( assertArray( [wizard["function"]], [function() {}] ) , "wizard mock object should have a stubbed property of 'function' with a value of 'function stubbedFunction () {}'");
-	  ok( assertArray( [wizard["object"]], [{}] ) , "wizard mock object should have a stubbed property of 'object' with a value of '{}'");
-	  ok( assertArray( [wizard["array"]], [[]] ) , "wizard mock object should have a stubbed property of 'array' with a value of '[]'");
-	  ok( assertArray( [wizard["regExp"]], [/RegExp/] ) , "wizard mock object should have a stubbed property of 'regExp' with a value of '/RegExp/'");
-	  ok( assertArray( [wizard["date"]], [new Date] ) , "wizard mock object should have a stubbed property of 'date' with a value of 'new Date'");
-	  ok( assertArray( [wizard["custom object"]], [new Custom] ) , "wizard mock object should have a stubbed property of 'custom object' with a value of 'new Custom'");
+	  ok( assertObject( wizard["number"], 1, true ), "wizard mock object should have a stubbed property of 'number' with a value of (Number: 1)");
+	  ok( assertObject( wizard["boolean"], true, true ), "wizard mock object should have a stubbed property of 'number' with a value of (Boolean: true)");
+	  ok( assertObject( wizard["null"], null, true ), "wizard mock object should have a stubbed property of 'null' with a value of (null)");
+	  ok( assertObject( wizard["function"], function() {}, true ), "wizard mock object should have a stubbed property of 'function' with a value of (Function: function stubbedFunction () {})");
+	  ok( assertObject( wizard["object"], {}, true ), "wizard mock object should have a stubbed property of 'object' with a value of (Object: {})");
+	  ok( assertObject( wizard["array"], [], true ), "wizard mock object should have a stubbed property of 'array' with a value of (Array: [])");
+	  ok( assertObject( wizard["regExp"], /RegExp/, true ), "wizard mock object should have a stubbed property of 'regExp' with a value of (RegExp: /RegExp/)");
+	  ok( assertObject( wizard["date"], new Date(1970), true ), "wizard mock object should have a stubbed property of 'date' with a value of (Date: new Date)");
+	  ok( assertObject( wizard["custom object"], new Custom, true ), "wizard mock object should have a stubbed property of 'custom object' with a value of (Custom: new Custom)");
   
 	});
 
-	test("mock with no parameters, return values", function () {
+	test("w/ API: mock with no parameters, return values", function () {
     
-	  expect(15);
+	  expect(14);
     
 	    var mock = new Mock();
     
@@ -1423,41 +1385,26 @@
 	    .andExpects(1)
 	      .method('getEmptyObjectValue').returns({ });
   
-			// Use exposed qMock's exposed assertArray & assertHash helper methods as check contents of array/object, rather than strict checking instance like QUnit.
-			debugger;
-	  	equals(mock.getNumericValue(), 10, "getNumericValue() should return 10");
-	    equals(mock.getStringValue(), 'data', "getStringValue() should return 'data'");
-	    ok(assertArray(mock.getArrayValue(), [ 1, 2, 3 ]), "getArrayValue() should return [ 1, 2, 3 ]");
-	    equals(mock.getFunctionValue()(), 'function', "getFunctionValue() when invoked should return 'function'");
-	    ok(assertHash(mock.getObjectValue(), { id: 5, value: 'value' }), "getObjectValue() should return object");
-	    equals(mock.getNullValue(), null, "getNullValue() should return null");
-	    equals(mock.getUndefinedValue(), undefined, "getUndefinedValue() should return undefined");
-	    equals(mock.getEmptyStringValue(), "", "getEmptyStringValue() should return ''");
-	    equals(mock.getZeroValue(), 0, "getZeroValue() should return 0");
-	    equals(mock.getTrueValue(), true, "getTrueValue() should return true");
-	    equals(mock.getFalseValue(), false, "getFalseValue() should return false");
-	    ok(assertArray(mock.getEmptyArrayValue(), [ ]), "getEmptyArrayValue() should return [ ]");
-	    ok(assertHash(mock.getEmptyObjectValue(), { }), "getEmptyObjectValue() should return { }");
-	    ok(mock.verify(), "verify() should be true");
-
-	  mock = new Mock();
-	  mock
-	    .expects(1)
-	      .method('returnsTest')
-	      .returns('return')
-	    .andExpects(1)
-	      .method('isMethod')
-	      .accepts(Mock.Variable);
-    
-	  mock.returnsTest()
-	  mock.isMethod("test");
-	  ok(mock.verify(), "verify() should be true");    
+  	ok( assertObject( mock.getNumericValue(), 10, true ), "getNumericValue() on mock should return (Number: 10)");
+    ok( assertObject( mock.getStringValue(), 'data', true ), "getStringValue() on mock should return (String: data)");
+    ok( assertObject( mock.getArrayValue(), [ 1, 2, 3 ], true ), "getArrayValue() on mock should return (Array: [ 1, 2, 3 ])");
+    ok( assertObject( mock.getFunctionValue()(), 'function', true ), "getFunctionValue() on mock, when invoked, should return (String: 'function')");
+    ok( assertObject( mock.getObjectValue(), { id: 5, value: 'value' }, true ), "getObjectValue() on mock should return (Object: {id: 5, value: 'value'})");
+    ok( assertObject( mock.getNullValue(), null, true ), "getNullValue() on mock should return (null)");
+    ok( assertObject( mock.getUndefinedValue(), undefined, true ), "getUndefinedValue() on mock should return (undefined)");
+    ok( assertObject( mock.getEmptyStringValue(), "", true ), "getEmptyStringValue() on mock should return (String '')");
+    ok( assertObject( mock.getZeroValue(), 0, true ), "getZeroValue() on mock should return (Number: 0)");
+    ok( assertObject( mock.getTrueValue(), true, true ), "getTrueValue() on mock should return (Boolean: true)");
+    ok( assertObject( mock.getFalseValue(), false, true ), "getFalseValue() on mock should return (Boolean: false)");
+    ok( assertObject( mock.getEmptyArrayValue(), [], true ), "getEmptyArrayValue() on mock should return (Array: [])");
+    ok( assertObject( mock.getEmptyObjectValue(), {}, true ), "getEmptyObjectValue() on mock should return (Object: {})");
+    ok(mock.verify(), "verify() should be true");
   
 	});
 
 	test("w/ JSON: mock with no parameters, return values", function () {
     
-	  expect(15);
+	  expect(14);
     
 	    var mock = new Mock({
 	    "getNumericValue": {
@@ -1501,36 +1448,20 @@
 	    }
 	  });
     
-	  // Use exposed qMock's exposed assertArray & assertHash helper methods as check contents of array/object, rather than strict checking instance like QUnit.
-    
-	  equals(mock.getNumericValue(), 10, "getNumericValue() should return 10");
-    equals(mock.getStringValue(), 'data', "getStringValue() should return 'data'");
-    ok(assertArray(mock.getArrayValue(), [ 1, 2, 3 ]), "getArrayValue() should return [ 1, 2, 3 ]");
-    equals(mock.getFunctionValue()(), 'function', "getFunctionValue() when invoked should return 'function'");
-    ok(assertHash(mock.getObjectValue(), { id: 5, value: 'value' }), "getObjectValue() should return object");
-    equals(mock.getNullValue(), null, "getNullValue() should return null");
-    equals(mock.getUndefinedValue(), undefined, "getUndefinedValue() should return undefined");
-    equals(mock.getEmptyStringValue(), "", "getEmptyStringValue() should return ''");
-    equals(mock.getZeroValue(), 0, "getZeroValue() should return 0");
-    equals(mock.getTrueValue(), true, "getTrueValue() should return true");
-    equals(mock.getFalseValue(), false, "getFalseValue() should return false");
-    ok(assertArray(mock.getEmptyArrayValue(), [ ]), "getEmptyArrayValue() should return [ ]");
-    ok(assertHash(mock.getEmptyObjectValue(), { }), "getEmptyObjectValue() should return { }");
-  
+  	ok( assertObject( mock.getNumericValue(), 10, true ), "getNumericValue() on mock should return (Number: 10)");
+    ok( assertObject( mock.getStringValue(), 'data', true ), "getStringValue() on mock should return (String: data)");
+    ok( assertObject( mock.getArrayValue(), [ 1, 2, 3 ], true ), "getArrayValue() on mock should return (Array: [ 1, 2, 3 ])");
+    ok( assertObject( mock.getFunctionValue()(), 'function', true ), "getFunctionValue() on mock, when invoked, should return (String: 'function')");
+    ok( assertObject( mock.getObjectValue(), { id: 5, value: 'value' }, true ), "getObjectValue() on mock should return (Object: {id: 5, value: 'value'})");
+    ok( assertObject( mock.getNullValue(), null, true ), "getNullValue() on mock should return (null)");
+    ok( assertObject( mock.getUndefinedValue(), undefined, true ), "getUndefinedValue() on mock should return (undefined)");
+    ok( assertObject( mock.getEmptyStringValue(), "", true ), "getEmptyStringValue() on mock should return (String '')");
+    ok( assertObject( mock.getZeroValue(), 0, true ), "getZeroValue() on mock should return (Number: 0)");
+    ok( assertObject( mock.getTrueValue(), true, true ), "getTrueValue() on mock should return (Boolean: true)");
+    ok( assertObject( mock.getFalseValue(), false, true ), "getFalseValue() on mock should return (Boolean: false)");
+    ok( assertObject( mock.getEmptyArrayValue(), [], true ), "getEmptyArrayValue() on mock should return (Array: [])");
+    ok( assertObject( mock.getEmptyObjectValue(), {}, true ), "getEmptyObjectValue() on mock should return (Object: {})");
     ok(mock.verify(), "verify() should be true");
-
-	  mock = new Mock({
-	    "returnsTest": {
-	      returns: "return"
-	    },
-	    "isMethod": {
-	      accepts: Mock.Variable
-	    }
-	  });
-    	  
-	  mock.returnsTest();
-	  mock.isMethod("test");
-	  ok(mock.verify(), "verify() should be true");    
   
 	});
 
@@ -1565,10 +1496,10 @@
 
 	  try {
 	    ninja.verify();  
-	      ok(false, "verify() should throw exception when swing() interface passed No parameters");
+	    ok(false, "verify() should throw exception when swing() interface passed No parameters");
 	  } catch (exception) {  
-	      equals(exception.length, 1, "verify() should return 1 exception when swing() passed no parameters");
-	      equals(exception[0].type, "IncorrectNumberOfArgumentsException", "verify() exception type should be IncorrectNumberOfArgumentsException for (String)");
+	    equals(exception.length, 1, "verify() should return 1 exception when swing() passed no parameters");
+	    equals(exception[0].type, "IncorrectNumberOfArgumentsException", "verify() exception type should be IncorrectNumberOfArgumentsException for (String)");
 	  }
 
 	  ninja.reset();
@@ -1578,6 +1509,7 @@
 	  ninja.swing(String);
 
 	  try {
+	    debugger;
 	    ninja.verify();  
 	    ok(false, "verify() should throw exception when swing() interface passed incorrect parameter type [constructor obj: (String)]");
 	  } catch (exception) {  
@@ -3615,7 +3547,6 @@
 	  // Bad Exercises
   
 	  // Single incorrect argument
-
 	  samurai.testMultipleParameters("string");
 		try {
 			samurai.verify();
@@ -3624,7 +3555,6 @@
 		  equals(e.length, 1, "verify() should return an array of 1 exceptions");
 			equals(e[0].type, "IncorrectArgumentTypeException", "verify() exception type should be IncorrectArgumentTypeException");
 		}
-  
 	  samurai.reset();
   
 	  // Some arguments - first two switched around to be incorrect
