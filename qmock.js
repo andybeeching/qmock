@@ -145,27 +145,7 @@
   var assertObject = (function () {
     
     // PRIVATE Helper functions
-    
-    // Adapter around assertCollection to provide an API consistent with assertHash()
-    // TBD refactor out logic detecting Array objects per se as generified to collection and handled in assertCollection()
-    function assertArray (expected, actual, opt_strictValueChecking, opt_exceptionType, opt_throwException) {    
-      return ( expected && actual 
-        && expected.constructor === Array 
-        && actual.constructor === Array 
-        && expected.length === actual.length ) 
-          ? assertCollection ({
-              expected            : expected,
-              actual              : actual,
-              strictValueChecking : ( opt_strictValueChecking !== undefined ) ? opt_strictValueChecking : false,
-              name                : "",
-              isConstuctor        : false,
-              throwException      : opt_throwException, 
-              exceptionType       : opt_exceptionType      
-            })  ? true 
-                : false
-          : false; // Bad Arguments
-    }
-    
+        
     // Function to assert members of an object, returns Boolean
     function assertHash (expected, actual, opt_strictValueChecking, opt_exceptionType, opt_exceptionHandler) {
       var result = true;
@@ -379,7 +359,6 @@
     // Expose for testing
     ;;;; expose( assertArray, assertObject, "_assertArray" );
     ;;;; expose( assertCollection, assertObject, "_assertCollection" );
-    ;;;; expose( assertHash, assertObject, "_assertHash" );
     
     // Return privileged function
     return assertObject;

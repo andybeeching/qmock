@@ -3,7 +3,6 @@
   
   // Closure scoped aliases to internal qMock functions
   var assertObject = Mock["_assertObject"].get(),
-    assertArray = assertObject["_assertArray"].get(),
     assertCollection = assertObject["_assertCollection"].get(),
     assertHash = assertObject["_assertHash"].get(),
     createException = Mock["_createException"].get(),
