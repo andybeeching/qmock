@@ -61,7 +61,350 @@
 		
 	});
 	
-	/* test("assertCollection() - test interface & parameters", function () {
+	test("assertCollection() - type checking", function () {
+    
+	  expect(53);
+  
+	  var mock = new Mock();
+    
+	  // Bad Arguments
+  
+	  //ok(!assertArray(1, 2), "assertArray() should be false");
+	  
+	  // Test mis-matched member types
+	  
+	  equals( assertCollection([10], [""]), false, "assertArray() should be false with expected: [(Number: 10)] and actual: [(String: '')]. Result");
+	  equals( assertCollection([""], [10]), false, "assertArray() should be false with expected: [(String: '')] and actual: [(Number: 10)]. Result");
+	  equals( assertCollection([{test: "one"}], [["test", 1]]), false, "assertArray() should be false with expected: [(Object: {test: \"one\"})] and actual: [(Object: {test: 1})]. Result");
+	  equals( assertCollection([function() {}], []), false, "assertArray() should be false with expected: [(Function: function() {})] and actual: [undefined]. Result");
+	  equals( assertCollection([null], [undefined]), false, "assertArray() should be false with expected: [(null)] and actual: [(undefined)]. Result");
+	  equals( assertCollection([undefined], ["string"]), false, "assertArray() should be false with expected: [(undefined)] and actual: [(String: 'string')]. Result");
+	  equals( assertCollection([/re/], [9]), false, "assertArray() should be false: [(RegExp: /re/)], [(Number: 9)]. Result");
+	  equals( assertCollection([new Custom], [new Number]), false, "assertArray() should be false: [(Custom: new Custom)], [(Number: new Number)]. Result");
+  
+	  // Expected true evaluations 
+	  // Test matching member types
+	  
+	  equals( assertCollection([0], [0]), true, "assertCollection() should be true with expected: [(Number: 0)] and actual: [(Number: 0)]. Result");
+	  equals( assertCollection([10], [10]), true, "assertCollection() should be true with expected: [(Number: 10)] and actual: [(Number: 10)]. Result");
+	  equals( assertCollection([10], [1]), true, "assertCollection() should be true with expected: [(Number: 10)] and actual: [(Number: 1)]. Result");
+	  equals( assertCollection([""], [""]), true, "assertCollection() should be true with expected: [(String: '')] and actual: [(String: '')]. Result");
+	  equals( assertCollection(["string"], ["string"]), true, "assertCollection() should be true with expected: [(String: 'string')] and actual: [(String: 'string')]. Result");
+	  equals( assertCollection([""], ["different string"]), true, "assertCollection() should be true with expected: [(String: '')] and actual: [(String: 'different string')]. Result");
+	  equals( assertCollection([false], [false]), true, "assertCollection() should be true with expected: [(Boolean: false)] and actual: [(Boolean: false)]. Result");
+	  equals( assertCollection([true], [false]), true, "assertCollection() should be true with expected: [(Boolean: true)] and actual: [(Boolean: false)]. Result");
+	  equals( assertCollection([false], [true]), true, "assertCollection() should be true with expected: [(Boolean: false)] and actual: [(Boolean: true)]. Result");
+	  equals( assertCollection([true], [true]), true, "assertCollection() should be true with expected: [(Boolean: true)] and actual: [(Boolean: true)]. Result");
+	  equals( assertCollection([[]], [[]]), true, "assertCollection() should be true with expected: [(Array: [])] and actual: [(Array: [])]. Result");
+	  equals( assertCollection([{}], [{}]), true, "assertCollection() should be true with expected: [(Object: {})] and actual: [(Object: {})]. Result");
+	  equals( assertCollection([{test: "string"}], [{test: "string"}]), true, "assertCollection() should be true with expected: [(Object: {test: 'string'})] and actual: [(Object: {test: 'string'})]. Result");
+	  equals( assertCollection([{test: "string"}], [{test: "different string"}]), true, "assertCollection() should be true with expected: [(Object: {test: 'string'})] and actual: [(Object: {test: 'different string'})]. Result");
+	  equals( assertCollection([["nested"]], [["nested"]]), true, "assertCollection() should be true with expected: [(Array: [[]])] and actual: [(Array: [[]])]. Result");
+	  equals( assertCollection([function() {}], [function() {}]), true, "assertCollection() should be true with expected: [(Function: function(){})] and actual: [(Function: function(){})]. Result");
+	  equals( assertCollection([null], [null]), true, "assertCollection() should be true with expected: [(null)] and actual: [(null)]. Result");
+	  equals( assertCollection([undefined], [undefined]), true, "assertCollection() should be true with expected: [(undefined)] and actual: [(undefined)]. Result");
+	  equals( assertCollection([/re/], [/re/]), true, "assertCollection() should be true with expected: [(RegExp: /re/)] and actual: [(RegExp: /re/)]. Result");
+	  equals( assertCollection([new Date], [new Date]), true, "assertCollection() should be true with expected: [(Date: new Date)] and actual: [(Date: new Date)]. Result");
+	  equals( assertCollection([new Date], [new Date(1970)]), true, "assertCollection() should be true with expected: [(Date: new Date)] and actual: [(Date: new Date(1970))]. Result");
+	  equals( assertCollection([new Custom], [new Custom]), true, "assertCollection() should be true with expected: [(Custom: new Custom)] and actual: [(Custom: new Custom)]. Result");
+	  equals( assertCollection([0,"string", true, [], {}, function() {}, null, undefined, /re/, new Date], [0,"string", true, [], {}, function() {}, null, undefined, /re/, new Date]), true, "assertCollection() should be true with expected: [ MANY TYPES ] and actual: [ MANY TYPES ]. Result");
+	  
+	  // Nested
+  
+	  equals( assertCollection([[[["test"]]]], [[[["test"]]]]), true, "assertArray() should be true with expected: [(Array: [[[['test']]]])] with actual: (Array: [[[['test']]]]). Result");
+	  equals( assertCollection(["one", ["two", ["three", ["four"]]]], ["one", ["two", ["three", ["four"]]]]), true, "assertArray() should be true with expected: [ MANY NESTED [] ] and actual: [ MANY NESTED [] ]. Result");  
+	  
+	  // Strict value checking assertions (Boolean optional param)
+	  
+	  // Expected false evaluations 
+	  
+	  // Test mis-matched member values
+	  
+	  equals( assertCollection([10], [1], true), false, "assertCollection() should be false (non-matching numbers)");
+	  equals( assertCollection([""], ["different string"], true), false, "assertCollection() should be false ([\"\"], [\"different string\"])");
+	  equals( assertCollection([true], [false], true), false, "assertCollection() should be false (mismatched Booleans)");
+	  equals( assertCollection([false], [true], true), false, "assertCollection() should be true (mismatched Booleans)");
+	  equals( assertCollection([{test: "string"}], [{test: "different string"}], true), false, "assertCollection() should be false (object)");
+	  equals( assertCollection([new Date], [new Custom], true), false, "assertCollection() should be false (Date)");
+	  equals( assertCollection([new Custom], [new Date], true), false, "assertCollection() should be true (Custom object)");
+	  equals( assertCollection([0,"string", true, [], {}, function() {}, null, undefined, /re/, new Date], [1,"string", true, [], {}, function() {}, null, undefined, /re/, new Date], true), false, "assertCollection() should be true (All types)");
+  
+	  // Expected true evaluations
+
+	  equals( assertCollection([0], [0], true), true, "assertCollection() should be true (matching numbers 0)");
+	  equals( assertCollection([""], [""], true), true,"assertCollection() should be true (falsy matching empty strings)");
+	  equals( assertCollection([false], [false], true), true, "assertCollection() should be true (matching false Booleans)");
+	  equals( assertCollection([true], [true], true), true, "assertCollection() should be true (mismatched Booleans)");
+	  equals( assertCollection([[]], [[]], true), true, "assertCollection() should be true (empty array)");
+	  equals( assertCollection([{}], [{}], true), true, "assertCollection() should be true (empty object)");
+	  equals( assertCollection([{test: "string"}], [{test: "string"}], true), true, "assertCollection() should be true (object)");
+	  equals( assertCollection([["nested"]], [["nested"]], true), true, "assertCollection() should be true (nested arrays)");
+	  equals( assertCollection([function() {}], [function() {}], true), true, "assertCollection() should be true (function)");
+	  equals( assertCollection([null], [null], true), true, "assertCollection() should be true (null)");
+	  equals( assertCollection([undefined], [undefined], true), true, "assertCollection() should be true (undefined)");
+	  equals( assertCollection([/re/], [/re/], true), true, "assertCollection() should be true (RegExp)");
+	  
+	  // Test matching member values inc. potential false positives
+	    
+	  // Test strict value checking
+
+	});
+
+	test("private assertHash() method", function () {
+    
+	  expect(83);
+	  
+	  var mockErrorHandler = (function () {
+	    var errors = [];
+	    function handler (errorType, fn, expected, actual) {
+	      errors.push({
+	        type: errorType,
+	        message: 'expected: "' + expected + '", actual: "' + actual + '"'
+	      });
+	    }
+	    handler['reset'] = function () {
+	      errors = [];
+	    }
+	    handler['throwErrors'] = function () {
+	      if (errors.length > 0 ) {
+	        throw errors;
+	      } else {
+	        return true;
+	      }
+	    }
+	    return handler;
+	  })();
+	  	  
+	  /* Authors note - there are many tests and I've strived to use the same ones for both type checking and value checking of member properties between expected and actual 'hashes'. 
+	  * The as-is also implitly test the object checking callback (assertObject()) invoked within this function, as opposed to just the flow control logic that naively enumerates over hash-like objects, but this should be seen as a secondary concern to this test-suite. 
+	  * I simply wanted to poke the method a lot to see what it could handle. assertObject() has it's own test-suite available which actually focuses on object type checking and value assertion
+	  */
+	  
+	  // Function Sanity Checks... Abstractable for every function if think about it... // 1. Required params (arguments.length - undefined values don't register as members), 2. expected types... (as an expectation...?)
+	  
+	  /*
+	  // Check bad number of arguments (at least first two required)
+	  ok(!assertHash({}), "assertHash() should be throw '' error with expected: (undefined) and actual (N/A) ");
+  
+	  // Check bad expected arguments (those that cannot be enumerated)
+	  ok(!assertHash(undefined, {}), "assertHash() should be false with expected: (undefined) and ");
+	  ok(!assertHash(null, {}), "assertHash() should be false");
+	  ok(!assertHash(NaN, {}), "assertHash() should be false");
+	  
+	  // Check bad actual arguments (those that cannot be enumerated)
+	  ok(!assertHash(undefined, {}), "assertHash() should be false with expected: (undefined) and ");
+	  ok(!assertHash(null, {}), "assertHash() should be false");
+	  ok(!assertHash(NaN, {}), "assertHash() should be false");
+    
+	  
+	  // Check false positive on enumer-atable objects
+	  ok(!assertHash(0, Number), "assertHash() should be false");
+	  ok(!assertHash("", String), "assertHash() should be false");
+	  ok(!assertHash(false, Boolean), "assertHash() should be false");
+	  
+	  */
+	  
+	  // Type checking assertions (default)
+	  
+	  // Expected false evaluations 
+	  
+	  // Test incomplete 'actual' object (vis-a-vis expected)...
+	  
+	  // Single missing key
+	  try {
+	    assertHash({key: 'value'}, {}, null, null, mockErrorHandler);
+	    mockErrorHandler.throwErrors();
+	    ok(false, "assertHash() should throw exception when passed an 'actual' object missing the 'key' property");
+	  } catch (e) {
+	    equals( e[0].type, "MissingHashKeyException", "assertHash() should raise a 'MissingHashKeyException' with expected: (Object {key: 'value'}) and actual: (Object {}). Error raised was");
+	    equals( /expected: "key"/.test(e[0].message), true, "assertHash() should identify 'key' as the missing accessor with expected: (Object {key: 'value'}) and actual: (Object {}). Result");
+	  }
+
+	  mockErrorHandler.reset();
+
+	  try {
+	    assertHash({key: 'value', key2: 'value2'}, {key: 'value'}, null, null, mockErrorHandler);
+	    mockErrorHandler.throwErrors();
+	    ok(false, "assertHash() should throw exception when passed an 'actual' object missing the 'key2' property");
+	  } catch (e) {
+	    equals( e[0].type, "MissingHashKeyException", "assertHash() should raise a 'MissingHashKeyException' with expected: (Object {key: 'value', key2: 'value2'}) and actual: (Object {key: 'value'}). Error raised was");
+	    equals( /expected: "key2"/.test(e[0].message), true, "assertHash() should identify 'key2' as the missing accessor with expected: (Object {key: 'value', key2: 'value2'}) and actual: (Object {key: 'value'}). Result");
+	  }
+
+    mockErrorHandler.reset();
+
+	  try {
+	    assertHash({key: 'value', key2: 'value2', key3: 'value'}, {key: 'value', key2: 'value2'}, null, null, mockErrorHandler);
+	    mockErrorHandler.throwErrors();
+	    ok(false, "assertHash() should throw exception when passed an 'actual' object missing the 'key3' property");
+	  } catch (e) {
+	    equals( e[0].type, "MissingHashKeyException", "assertHash() should raise a 'MissingHashKeyException' be false with expected: (Object {key: 'value', key2: 'value2', key3: 'value'}) and actual: (Object {key: 'value', key2: 'value'}). Error raised was");
+	    equals( /expected: "key3"/.test(e[0].message), true, "assertHash() should identify 'key3' as the missing accessor with expected: (Object {key: 'value', key2: 'value2', key3: 'value'}) and actual: (Object {key: 'value', key2: 'value'}). Result");
+	  }
+	  
+	  mockErrorHandler.reset();
+	  
+	  // Multiple missing keys
+	  try {
+	    assertHash({key: 'value', key2: 'value2', key3: 'value'}, {key: 'value'}, null, null, mockErrorHandler);
+	    mockErrorHandler.throwErrors();
+	    ok(false, "assertHash() should throw exception when passed an 'actual' object missing the 'key2' and 'key3' properties");
+	  } catch (e) {
+	    equals( e[0].type, "MissingHashKeyException", "assertHash() should raise a 'MissingHashKeyException' be false with expected: (Object {key: 'value', key2: 'value2', key3: 'value'}) and actual: (Object {key: 'value'}). Error raised was");
+	    equals( /expected: "key2"/.test(e[0].message), true, "assertHash() should identify 'key2' as the missing accessor with expected: (Object {key: 'value', key2: 'value2', key3: 'value'}) and actual: (Object {key: 'value'}). Result");
+	    equals( e[1].type, "MissingHashKeyException", "assertHash() should raise a second 'MissingHashKeyException' be false with expected: (Object {key: 'value', key2: 'value2', key3: 'value'}) and actual: (Object {key: 'value'}). Error raised was");
+	    equals( /expected: "key3"/.test(e[1].message), true, "assertHash() should identify 'key3' as the missing accessor with expected: (Object {key: 'value', key2: 'value2', key3: 'value'}) and actual: (Object {key: 'value'}). Result");
+	  }
+	
+	  mockErrorHandler.reset();
+
+	  // Test mis-matched member types
+	  
+	  equals( assertHash({Number: 10}, {Number: "string"}), false, "assertHash() should be false with expected: (Object {Number: 10}) and actual: (Object {Number: 'string'}). Result");
+	  equals( assertHash({String: "string"}, {String: function() {}}), false, "assertHash() should be false with expected: (Object {String: 'string'}) and actual: (Object {String: function(){}}). Result");
+	  equals( assertHash({Array: []}, {Array: {}}), false, "assertHash() should be false with expected: (Object {Array: []}) and actual: (Object {Array: {}}). Result");
+	  equals( assertHash({Function: function() {}}, {Function: false}), false, "assertHash() should be false with expected: (Object {Function: function(){}}) and actual: (Object {Function: false}). Result");
+	  equals( assertHash({"null": null},{"null": undefined}), false, "assertHash() should be false with expected: (Object {'null': null}) and actual: (Object {'null': undefined}). Result");
+	  equals( assertHash({"undefined": undefined},{"undefined": null}), false, "assertHash() should be false with expected: (Object {'undefined': undefined}) and actual: (Object {'undefined': null}). Result");
+	  equals( assertHash({RegExp: /re/},{RegExp: "/re/"}), false, "assertHash() should be false with expected: (Object {RegExp: /re/}) and actual: (Object {RegExp: '/re/'}). Result");
+	  equals( assertHash({Custom: new Custom},{Custom: new Date}), false, "assertHash() should be false with expected: (Object {Custom: new Custom}) and actual: (Object {Custom: new Date})). Result");
+	  
+	  // Expected true evaluations 
+	  // Test matching member types
+	  equals( assertHash({Number: 0}, {Number: 0}), true, "assertHash() should be true with expected: (Object {Number: 0}) and actual: (Object {Number: 0}). Result" );
+	  equals( assertHash({Number: 10}, {Number: 10}), true, "assertHash() should be true with expected: (Object {Number: 10}) and actual: (Object {Number: 10}). Result" );
+	  equals( assertHash({String: ""}, {String: ""}), true, "assertHash() should be true with expected: (Object {String: ''}) and actual: (Object {String: ''}). Result" );
+	  equals( assertHash({String: "string"}, {String: "string"}), true, "assertHash() should be true with expected: (Object {String: 'string'}) and actual: (Object {String: 'string'}). Result" );
+	  equals( assertHash({Boolean: false}, {Boolean: false}), true, "assertHash() should be true with expected: (Object {Boolean: false}) and actual: (Object {Boolean: false}). Result" );
+	  equals( assertHash({Boolean: true}, {Boolean: true}), true, "assertHash() should be true with expected: (Object {Boolean: true}) and actual: (Object {Boolean: true}). Result");
+	  equals( assertHash({Array: []}, {Array: []}), true, "assertHash() should be true with expected: (Object {Array: []}) and actual: (Object {Array: []}). Result");
+	  equals( assertHash({Array: ["one"]},{Array: ["one"]}), true, "assertHash() should be true with expected: (Object {Array: ['one']}) and actual: (Object {Array: ['one']}). Result");
+	  equals( assertHash({Object: {}}, {Object: {}}), true, "assertHash() should be true with expected: (Object {Object: {}}) and actual: (Object {Object: {}}). Result");
+	  equals( assertHash({Function: function() {}}, {Function: function() {}}), true, "assertHash() should be true with expected: (Object {Function: function(){}}) and actual: (Object {Function: function(){}}). Result");
+	  equals( assertHash({"null": null},{"null": null}), true, "assertHash() should be true with expected: (Object {'null': null}) and actual: (Object {'null': null}). Result");
+	  equals( assertHash({"undefined": undefined},{"undefined": undefined}), true, "assertHash() should be true with expected: (Object {'undefined': undefined}) and actual: (Object {'undefined': undefined}). Result");
+	  equals( assertHash({RegExp: /re/},{RegExp: /re/}), true, "assertHash() should be true with expected: (Object {RegExp: /re/}) and actual: (Object {RegExp: /re/}). Result");
+	  equals( assertHash({RegExp: /re/},{RegExp: /re2/}), true, "assertHash() should be true with expected: (Object {RegExp: /re/}) and actual: (Object {RegExp: /re2/}). Result");
+	  equals( assertHash({Date: new Date},{Date: new Date}), true, "assertHash() should be true with expected: (Object {Date: new Date}) and actual: (Object {Date: new Date}). Result");
+	  equals( assertHash({Date: new Date},{Date: new Date(1970)}), true, "assertHash() should be true with expected: (Object {Date: new Date}) and actual: (Object {Date: new Date(1970)}). Result");
+	  equals( assertHash({Custom: new Custom},{Custom: new Custom}), true, "assertHash() should be true with expected: (Object {Custom: new Custom}) and actual: (Object {Custom: new Custom}). Result");
+	  equals( assertHash({Number: 0,String: "string",Boolean: true,Array: [],Object: {},Function: function() {},"null": null,"undefined": undefined,RegExp: /re/,Date: new Date}, {Number: 0,String: "string",Boolean: true,Array: [],Object: {},Function: function() {},"null": null,"undefined": undefined,RegExp: /re/,Date: new Date}), true, "assertHash() should be true (Many native types). Result");
+
+	  // Test nested object literals
+	  equals( assertHash({"one": {"two": {"three": {"four": "value"}}}}, {"one": {"two": {"three": {"four": "value"}}}}), true, "assertHash() should be true with matching nested object literals 4 levels deep. Result");
+	  
+	  // Test shadowed native keys ({DontEnum} IE bug)
+    // ????? meh ???????
+    
+	  // Strict value checking assertions (Boolean optional param)
+	  
+	  // Expected false evaluations 
+	  
+	  // Test mis-matched member types
+	  
+	  equals( assertHash({Number: 10}, {Number: "string"}, true), false, "assertHash() should be false with expected: (Object {Number: 10}) and actual: (Object {Number: 'string'}). Result");
+	  equals( assertHash({String: "string"}, {String: function() {}}, true), false, "assertHash() should be false with expected: (Object {String: 'string'}) and actual: (Object {String: function(){}}). Result");
+	  equals( assertHash({Array: []}, {Array: {}}, true), false, "assertHash() should be false with expected: (Object {Array: []}) and actual: (Object {Array: {}}). Result");
+	  equals( assertHash({Function: function() {}}, {Function: false}, true), false, "assertHash() should be false with expected: (Object {Function: function(){}}) and actual: (Object {Function: false}). Result");
+	  equals( assertHash({"null": null},{"null": undefined}, true), false, "assertHash() should be false with expected: (Object {'null': null}) and actual: (Object {'null': undefined}). Result");
+	  equals( assertHash({"undefined": undefined},{"undefined": null}, true), false, "assertHash() should be false with expected: (Object {'undefined': undefined}) and actual: (Object {'undefined': null}). Result");
+	  equals( assertHash({RegExp: /re/},{RegExp: "/re/"}, true), false, "assertHash() should be false with expected: (Object {RegExp: /re/}) and actual: (Object {RegExp: '/re/'}). Result");
+	  equals( assertHash({Custom: new Custom},{Custom: new Date}, true), false, "assertHash() should be false with expected: (Object {Custom: new Custom}) and actual: (Object {Custom: new Date})). Result");
+	  
+	  // Test mis-matched member values
+	  
+	  equals( assertHash({String: "string"}, {String: "different string"}, true), false, "assertHash() should be false with expected: (Object {String: 'string'}) and actual: (Object {String: 'different string'}). Result");
+	  equals( assertHash({Boolean: false}, {Boolean: true}, true), false, "assertHash() should be false with expected: (Object {Boolean: false}) and actual: (Object {Boolean: true}). Result");
+	  equals( assertHash({Number: 1}, {Number: 2}, true), false, "assertHash() should be false with expected: (Object {Number: 1}) and actual: (Object {Number: 2}). Result");
+	  equals( assertHash({RegExp: /re/}, {RegExp: /re2/}, true), false, "assertHash() should be false with expected: (Object {RegExp: /re/}) and actual: (Object {RegExp: /re2/}). Result");
+	  equals( assertHash({Array: ["one"]},{Array: ["two"]}, true), false, "assertHash() should be false with expected: (Object {Array: ['one']}) and actual: (Object {Array: ['two']}). Result");
+	  equals( assertHash({Object: {key: "value"}},{Object: {key: "value2"}}, true), false, "assertHash() should be false with expected: (Object {Object: {key: 'value'}}) and actual: (Object {Object: {key: 'value2'}}). Result");
+	  equals( assertHash({"null": null},{"null": undefined}, true), false, "assertHash() should be false with expected: (Object {'null': null}) and actual: (Object {'null': undefined}). Result");
+	  equals( assertHash({"undefined": undefined},{"undefined": null}, true), false, "assertHash() should be false with expected: (Object {'undefined': undefined}) and actual: (Object {'undefined': null}). Result");
+	  equals( assertHash({Date: new Date},{Date: new Date(1970)}, true), false, "assertHash() should be true with expected: (Object {Date: new Date}) and actual: (Object {Date: new Date(1970)}). Result");
+	  equals( assertHash({Number: 0,String: "string",Boolean: true,Array: [],Object: {},Function: function() {},"null": null,"undefined": undefined,RegExp: /re/,Date: new Date}, {Number: 1,String: "string",Boolean: true,Array: [],Object: {},Function: function() {},"null": null,"undefined": undefined,RegExp: /re/,Date: new Date}, true), false, "assertHash() should be false (Many native types). Result");
+	  
+	  // Test falsy nested object literals
+	  equals( assertHash({"one": {"two": {"three": {"four": "value"}}}}, {"one": {"two": {"three": {"four": "string"}}}}, true), false, "assertHash() should be false with matching nested object literals 4 levels deep. Result");
+  
+	  // Test incomplete 'actual' object (vis-a-vis expected)...
+	  
+	  // Single missing key
+	  try {
+	    assertHash({key: 'value'}, {}, true, null, mockErrorHandler);
+	    mockErrorHandler.throwErrors();
+	    ok(false, "assertHash() should throw exception when passed an 'actual' object missing the 'key' property");
+	  } catch (e) {
+	    equals( e[0].type, "MissingHashKeyException", "assertHash() should raise a 'MissingHashKeyException' with expected: (Object {key: 'value'}) and actual: (Object {}). Error raised was");
+	    equals( /expected: "key"/.test(e[0].message), true, "assertHash() should identify 'key' as the missing accessor with expected: (Object {key: 'value'}) and actual: (Object {}). Result");
+	  }
+	  
+	  mockErrorHandler.reset();
+	  
+	  try {
+	    assertHash({key: 'value', key2: 'value2'}, {key: 'value'}, true, null, mockErrorHandler);
+	    mockErrorHandler.throwErrors();
+	    ok(false, "assertHash() should throw exception when passed an 'actual' object missing the 'key2' property");
+	  } catch (e) {
+	    equals( e[0].type, "MissingHashKeyException", "assertHash() should raise a 'MissingHashKeyException' with expected: (Object {key: 'value', key2: 'value2'}) and actual: (Object {key: 'value'}). Error raised was");
+	    equals( /expected: "key2"/.test(e[0].message), true, "assertHash() should identify 'key2' as the missing accessor with expected: (Object {key: 'value', key2: 'value2'}) and actual: (Object {key: 'value'}). Result");
+	  }
+	  
+	  mockErrorHandler.reset();
+	  
+	  try {
+	    assertHash({key: 'value', key2: 'value2', key3: 'value'}, {key: 'value', key2: 'value2'}, true, null, mockErrorHandler);
+	    mockErrorHandler.throwErrors();
+	    ok(false, "assertHash() should throw exception when passed an 'actual' object missing the 'key3' property");
+	  } catch (e) {
+	    equals( e[0].type, "MissingHashKeyException", "assertHash() should raise a 'MissingHashKeyException' be false with expected: (Object {key: 'value', key2: 'value2', key3: 'value'}) and actual: (Object {key: 'value', key2: 'value'}). Error raised was");
+	    equals( /expected: "key3"/.test(e[0].message), true, "assertHash() should identify 'key3' as the missing accessor with expected: (Object {key: 'value', key2: 'value2', key3: 'value'}) and actual: (Object {key: 'value', key2: 'value'}). Result");
+	  }
+	  
+	  mockErrorHandler.reset();
+	  
+	  // Multiple missing keys
+	  try {
+	    assertHash({key: 'value', key2: 'value2', key3: 'value'}, {key: 'value'}, true, null, mockErrorHandler);
+	    mockErrorHandler.throwErrors();
+	    ok(false, "assertHash() should throw exception when passed an 'actual' object missing the 'key2' and 'key3' properties");
+	  } catch (e) {
+	    equals( e[0].type, "MissingHashKeyException", "assertHash() should raise a 'MissingHashKeyException' be false with expected: (Object {key: 'value', key2: 'value2', key3: 'value'}) and actual: (Object {key: 'value'}). Error raised was");
+	    equals( /expected: "key2"/.test(e[0].message), true, "assertHash() should identify 'key2' as the missing accessor with expected: (Object {key: 'value', key2: 'value2', key3: 'value'}) and actual: (Object {key: 'value'}). Result");
+	    equals( e[1].type, "MissingHashKeyException", "assertHash() should raise a second 'MissingHashKeyException' be false with expected: (Object {key: 'value', key2: 'value2', key3: 'value'}) and actual: (Object {key: 'value'}). Error raised was");
+	    equals( /expected: "key3"/.test(e[1].message), true, "assertHash() should identify 'key3' as the missing accessor with expected: (Object {key: 'value', key2: 'value2', key3: 'value'}) and actual: (Object {key: 'value'}). Result");
+	  }
+	  
+	  mockErrorHandler.reset();
+	  
+	  // Expected true evaluations
+	  
+	  // Test matching member values inc. potential false positives
+	  
+	  equals( assertHash({Number: 0}, {Number: 0}, true), true, "assertHash() should be true with expected: (Object {Number: 0}) and actual: (Object {Number: 0}). Result" );
+	  equals( assertHash({Number: 10}, {Number: 10}, true), true, "assertHash() should be true with expected: (Object {Number: 10}) and actual: (Object {Number: 10}). Result" );
+	  equals( assertHash({String: ""}, {String: ""}, true), true, "assertHash() should be true with expected: (Object {String: ''}) and actual: (Object {String: ''}). Result" );
+	  equals( assertHash({String: "string"}, {String: "string"}, true), true, "assertHash() should be true with expected: (Object {String: 'string'}) and actual: (Object {String: 'string'}). Result" );
+	  equals( assertHash({Boolean: false}, {Boolean: false}, true), true, "assertHash() should be true with expected: (Object {Boolean: false}) and actual: (Object {Boolean: false}). Result" );
+	  equals( assertHash({Boolean: true}, {Boolean: true}, true), true, "assertHash() should be true with expected: (Object {Boolean: true}) and actual: (Object {Boolean: true}). Result");
+	  equals( assertHash({Array: []}, {Array: []}, true), true, "assertHash() should be true with expected: (Object {Array: []}) and actual: (Object {Array: []}). Result");
+	  equals( assertHash({Array: ["one"]},{Array: ["one"]}, true), true, "assertHash() should be true with expected: (Object {Array: ['one']}) and actual: (Object {Array: ['one']}). Result");
+	  equals( assertHash({Object: {}}, {Object: {}}, true), true, "assertHash() should be true with expected: (Object {Object: {}}) and actual: (Object {Object: {}}). Result");
+	  // Not sure what to do with this one - it's definitely an edge case... for now maybe just defer to a quick type check (if expectedType === Function?)
+	  equals( assertHash({Function: function() {}}, {Function: function() {}}, true), true, "assertHash() should be true with expected: (Object {Function: function(){}}) and actual: (Object {Function: function(){}}). Result");
+	  equals( assertHash({"null": null},{"null": null}, true), true, "assertHash() should be true with expected: (Object {'null': null}) and actual: (Object {'null': null}). Result");
+	  equals( assertHash({"undefined": undefined},{"undefined": undefined}, true), true, "assertHash() should be true with expected: (Object {'undefined': undefined}) and actual: (Object {'undefined': undefined}). Result");
+	  equals( assertHash({RegExp: /re/},{RegExp: /re/}, true), true, "assertHash() should be true with expected: (Object {RegExp: /re/}) and actual: (Object {RegExp: /re/}). Result");
+	  equals( assertHash({Date: new Date},{Date: new Date}, true), true, "assertHash() should be true with expected: (Object {Date: new Date}) and actual: (Object {Date: new Date}). Result");
+	  equals( assertHash({Custom: new Custom},{Custom: new Custom}, true), true, "assertHash() should be true with expected: (Object {Custom: new Custom}) and actual: (Object {Custom: new Custom}). Result");
+	  equals( assertHash({Number: 0,String: "string",Boolean: true,Array: [],Object: {},Function: function() {},"null": null,"undefined": undefined,RegExp: /re/,Date: new Date}, {Number: 0,String: "string",Boolean: true,Array: [],Object: {},Function: function() {},"null": null,"undefined": undefined,RegExp: /re/,Date: new Date}), true, "assertHash() should be true (Many native types). Result");
+	  	  
+	  // Test nested object literals
+	  equals( assertHash({"one": {"two": {"three": {"four": "value"}}}}, {"one": {"two": {"three": {"four": "value"}}}}, true), true, "assertHash() should be true with matching nested object literals 4 levels deep. Result");
+	  
+	});
+	
+	/* test("assertObject() - test interface & parameters", function () {
 	  
 	}); */
 
@@ -3977,7 +4320,6 @@
 
     $().run('slow').fight('hard').run('again');
 		try {
-		  debugger;
 		  $.verify();
 		  ok(false, "verify() should throw exception");
 		} catch (e) {
@@ -4143,279 +4485,4 @@
         
 	});
 
-	test("private assertArray method", function () {
-    
-	  expect(54);
-  
-	  var mock = new Mock();
-    
-	  // Bad Arguments
-  
-	  ok(!assertArray(1, 2), "assertArray() should be false");
-  
-	  // Check element type - simple
-	  ok(assertArray([0], [0], true), "assertArray() should be true (matching numbers 0)");
-	  ok(assertArray([10], [10]), "assertArray() should be true (matching numbers)");
-	  ok(assertArray([10], [1]), "assertArray() should be true (non-matching numbers)");
-	  ok(assertArray([""], [""]), "assertArray() should be true (falsy matching empty strings)");
-	  ok(assertArray(["string"], ["string"]), "assertArray() should be true (matching strings)");
-	  ok(assertArray([""], ["different string"]), "assertArray() should be true ([\"\"], [\"different string\"])");
-	  ok(assertArray([false], [false]), "assertArray() should be true (matching false Booleans)");
-	  ok(assertArray([true], [false]), "assertArray() should be true (matching true Booleans)");
-	  ok(assertArray([false], [true]), "assertArray() should be true (mismatched Booleans)");
-	  ok(assertArray([true], [true]), "assertArray() should be true (mismatched Booleans)");
-	  ok(assertArray([[]], [[]]), "assertArray() should be true (empty array)");
-	  ok(assertArray([{}], [{}]), "assertArray() should be true (empty object)");
-	  ok(assertArray([{test: "string"}], [{test: "string"}]), "assertArray() should be true (object)");
-	  ok(assertArray([{test: "string"}], [{test: "different string"}]), "assertArray() should be true (object)");
-	  ok(assertArray([["nested"]], [["nested"]]), "assertArray() should be true (nested arrays)");
-	  ok(assertArray([function() {}], [function() {}]), "assertArray() should be true (function)");
-	  ok(assertArray([null], [null]), "assertArray() should be true (null)");
-	  ok(assertArray([undefined], [undefined]), "assertArray() should be true (undefined)");
-	  ok(assertArray([/re/], [/re/]), "assertArray() should be true (RegExp)");
-	  ok(assertArray([new Date], [new Date]), "assertArray() should be true (Date)");
-	  ok(assertArray([new Date], [new Date(1970)]), "assertArray() should be false: [new Date], [new Date(1970)]");
-	  ok(assertArray([new Custom], [new Custom]), "assertArray() should be true (Custom object)");
-	  ok(assertArray([0,"string", true, [], {}, function() {}, null, undefined, /re/, new Date], [0,"string", true, [], {}, function() {}, null, undefined, /re/, new Date]), "assertArray() should be true (All types)");
-  
-	  // Falsy 
-
-	  ok(!assertArray([10], [""]), "assertArray() should be false: [10], [\"\"]");
-	  ok(!assertArray([""], [10]), "assertArray() should be false: [\"\"], [10]");
-	  ok(!assertArray([{test: "one"}], [["test", 1]]), "assertArray() should be false: [{test: \"one\"}], [{test: 1}]");
-	  ok(!assertArray([function() {}], []), "assertArray() should be false: [function() {}], []");
-	  ok(!assertArray([null], [undefined]), "assertArray() should be false: [null], [undefined]");
-	  ok(!assertArray([undefined], ["string"]), "assertArray() should be false: [undefined], [\"string\"]");
-	  ok(!assertArray([/re/], [9]), "assertArray() should be false: [/re/], [9]");
-	  ok(!assertArray([new Custom], [new Number()]), "assertArray() should be false: [new Custom], [new Number()]");
-  
-	  // Nested
-  
-	  ok(assertArray([[[["test"]]]], [[[["test"]]]]), "assertArray() should be true (nested array to 4 levels)");
-	  ok(assertArray(["one", ["two", ["three", ["four"]]]], ["one", ["two", ["three", ["four"]]]]), "assertArray() should be true (nested array to 4 levels)");  
-  
-	  // Test strict value checking
-
-	  ok(assertArray([0], [0], true), "assertArray() should be true (matching numbers 0)");
-	  ok(!assertArray([10], [1], true), "assertArray() should be false (non-matching numbers)");
-	  ok(assertArray([""], [""], true), "assertArray() should be true (falsy matching empty strings)");
-	  ok(!assertArray([""], ["different string"], true), "assertArray() should be false ([\"\"], [\"different string\"])");
-	  ok(assertArray([false], [false], true), "assertArray() should be true (matching false Booleans)");
-	  ok(!assertArray([true], [false], true), "assertArray() should be false (mismatched Booleans)");
-	  ok(!assertArray([false], [true], true), "assertArray() should be true (mismatched Booleans)");
-	  ok(assertArray([true], [true], true), "assertArray() should be true (mismatched Booleans)");
-	  ok(assertArray([[]], [[]], true), "assertArray() should be true (empty array)");
-	  ok(assertArray([{}], [{}], true), "assertArray() should be true (empty object)");
-	  ok(assertArray([{test: "string"}], [{test: "string"}], true), "assertArray() should be true (object)");
-	  ok(!assertArray([{test: "string"}], [{test: "different string"}], true), "assertArray() should be false (object)");
-	  ok(assertArray([["nested"]], [["nested"]], true), "assertArray() should be true (nested arrays)");
-	  ok(assertArray([function() {}], [function() {}], true), "assertArray() should be true (function)");
-	  ok(assertArray([null], [null], true), "assertArray() should be true (null)");
-	  ok(assertArray([undefined], [undefined], true), "assertArray() should be true (undefined)");
-	  ok(assertArray([/re/], [/re/], true), "assertArray() should be true (RegExp)");
-	  ok(!assertArray([new Date], [new Custom], true), "assertArray() should be false (Date)");
-	  ok(!assertArray([new Custom], [new Date], true), "assertArray() should be true (Custom object)");
-	  ok(!assertArray([0,"string", true, [], {}, function() {}, null, undefined, /re/, new Date], [1,"string", true, [], {}, function() {}, null, undefined, /re/, new Date], true), "assertArray() should be true (All types)");
-  
-	});
-
-	test("private assertHash() method", function () {
-    
-	  expect(83);
-	  
-	  function _stubErrorHandler (errorType) {
-	    throw {type: errorType};
-	  }
-	  	  
-	  /* Authors note - there are many tests and I've strived to use the same ones for both type checking and value checking of member properties between expected and actual 'hashes'. 
-	  * The as-is also implitly test the object checking callback (assertObject()) invoked within this function, as opposed to just the flow control logic that naively enumerates over hash-like objects, but this should be seen as a secondary concern to this test-suite. 
-	  * I simply wanted to poke the method a lot to see what it could handle. assertObject() has it's own test-suite available which actually focuses on object type checking and value assertion
-	  */
-	  
-	  // Function Sanity Checks... Abstractable for every function if think about it... // 1. Required params (arguments.length - undefined values don't register as members), 2. expected types... (as an expectation...?)
-	  
-	  /*
-	  // Check bad number of arguments (at least first two required)
-	  ok(!assertHash({}), "assertHash() should be throw '' error with expected: (undefined) and actual (N/A) ");
-  
-	  // Check bad expected arguments (those that cannot be enumerated)
-	  ok(!assertHash(undefined, {}), "assertHash() should be false with expected: (undefined) and ");
-	  ok(!assertHash(null, {}), "assertHash() should be false");
-	  ok(!assertHash(NaN, {}), "assertHash() should be false");
-	  
-	  // Check bad actual arguments (those that cannot be enumerated)
-	  ok(!assertHash(undefined, {}), "assertHash() should be false with expected: (undefined) and ");
-	  ok(!assertHash(null, {}), "assertHash() should be false");
-	  ok(!assertHash(NaN, {}), "assertHash() should be false");
-    
-	  
-	  // Check false positive on enumer-atable objects
-	  ok(!assertHash(0, Number), "assertHash() should be false");
-	  ok(!assertHash("", String), "assertHash() should be false");
-	  ok(!assertHash(false, Boolean), "assertHash() should be false");
-	  
-	  */
-	  
-	  // Type checking assertions (default)
-	  
-	  // Expected false evaluations 
-	  
-	  // Test incomplete 'actual' object (vis-a-vis expected)...
-	  
-	  // Single missing key
-	  try {
-	    assertHash({key: 'value'}, {}, null, null, _stubErrorHandler);
-	  } catch (e) {
-	    equals( e[0].type, "MissingHashKeyException", "assertHash() should raise a 'MissingHashKeyException' with expected: (Object {key: 'value'}) and actual: (Object {}). Error raised was");
-	    equals( /Missing key was: 'key'/.test(e[0].message), true, "assertHash() should identify 'key' as the missing accessor with expected: (Object {key: 'value'}) and actual: (Object {}). Result");
-	  }
-	  try {
-	    assertHash({key: 'value', key2: 'value2'}, {key: 'value'});
-	  } catch (e) {
-	    equals( e[0].type, "MissingHashKeyException", "assertHash() should raise a 'MissingHashKeyException' with expected: (Object {key: 'value', key2: 'value2'}) and actual: (Object {key: 'value'}). Error raised was");
-	    equals( /Missing key was: 'key2'/.test(e[0].message), true, "assertHash() should identify 'key2' as the missing accessor with expected: (Object {key: 'value', key2: 'value2'}) and actual: (Object {key: 'value'}). Result");
-	  }
-	  try {
-	    assertHash({key: 'value', key2: 'value2', key3: 'value'}, {key: 'value', key2: 'value2'});
-	  } catch (e) {
-	    equals( e[0].type, "MissingHashKeyException", "assertHash() should raise a 'MissingHashKeyException' be false with expected: (Object {key: 'value', key2: 'value2', key3: 'value'}) and actual: (Object {key: 'value', key2: 'value'}). Error raised was");
-	    equals( /Missing key was: 'key3'/.test(e[0].message), true, "assertHash() should identify 'key3' as the missing accessor with expected: (Object {key: 'value', key2: 'value2', key3: 'value'}) and actual: (Object {key: 'value', key2: 'value'}). Result");
-	  }
-	  // Multiple missing keys
-	  try {
-	    assertHash({key: 'value', key2: 'value2', key3: 'value'}, {key: 'value'});
-	  } catch (e) {
-	    equals( e[0].type, "MissingHashKeyException", "assertHash() should raise a 'MissingHashKeyException' be false with expected: (Object {key: 'value', key2: 'value2', key3: 'value'}) and actual: (Object {key: 'value'}). Error raised was");
-	    equals( /Missing key was: 'key2'/.test(e[0].message), true, "assertHash() should identify 'key2' as the missing accessor with expected: (Object {key: 'value', key2: 'value2', key3: 'value'}) and actual: (Object {key: 'value'}). Result");
-	    equals( e[1].type, "MissingHashKeyException", "assertHash() should raise a second 'MissingHashKeyException' be false with expected: (Object {key: 'value', key2: 'value2', key3: 'value'}) and actual: (Object {key: 'value'}). Error raised was");
-	    equals( /Missing key was: 'key3'/.test(e[1].message), true, "assertHash() should identify 'key3' as the missing accessor with expected: (Object {key: 'value', key2: 'value2', key3: 'value'}) and actual: (Object {key: 'value'}). Result");
-	  }
-
-	  // Test mis-matched member types
-	  
-	  equals( assertHash({Number: 10}, {Number: "string"}), false, "assertHash() should be false with expected: (Object {Number: 10}) and actual: (Object {Number: 'string'}). Result");
-	  equals( assertHash({String: "string"}, {String: function() {}}), false, "assertHash() should be false with expected: (Object {String: 'string'}) and actual: (Object {String: function(){}}). Result");
-	  equals( assertHash({Array: []}, {Array: {}}), false, "assertHash() should be false with expected: (Object {Array: []}) and actual: (Object {Array: {}}). Result");
-	  equals( assertHash({Function: function() {}}, {Function: false}), false, "assertHash() should be false with expected: (Object {Function: function(){}}) and actual: (Object {Function: false}). Result");
-	  equals( assertHash({"null": null},{"null": undefined}), false, "assertHash() should be false with expected: (Object {'null': null}) and actual: (Object {'null': undefined}). Result");
-	  equals( assertHash({"undefined": undefined},{"undefined": null}), false, "assertHash() should be false with expected: (Object {'undefined': undefined}) and actual: (Object {'undefined': null}). Result");
-	  equals( assertHash({RegExp: /re/},{RegExp: "/re/"}), false, "assertHash() should be false with expected: (Object {RegExp: /re/}) and actual: (Object {RegExp: '/re/'}). Result");
-	  equals( assertHash({Custom: new Custom},{Custom: new Date}), false, "assertHash() should be false with expected: (Object {Custom: new Custom}) and actual: (Object {Custom: new Date})). Result");
-	  
-	  // Expected true evaluations 
-	  // Test matching member types
-	  equals( assertHash({Number: 0}, {Number: 0}), true, "assertHash() should be true with expected: (Object {Number: 0}) and actual: (Object {Number: 0}). Result" );
-	  equals( assertHash({Number: 10}, {Number: 10}), true, "assertHash() should be true with expected: (Object {Number: 10}) and actual: (Object {Number: 10}). Result" );
-	  equals( assertHash({String: ""}, {String: ""}), true, "assertHash() should be true with expected: (Object {String: ''}) and actual: (Object {String: ''}). Result" );
-	  equals( assertHash({String: "string"}, {String: "string"}), true, "assertHash() should be true with expected: (Object {String: 'string'}) and actual: (Object {String: 'string'}). Result" );
-	  equals( assertHash({Boolean: false}, {Boolean: false}), true, "assertHash() should be true with expected: (Object {Boolean: false}) and actual: (Object {Boolean: false}). Result" );
-	  equals( assertHash({Boolean: true}, {Boolean: true}), true, "assertHash() should be true with expected: (Object {Boolean: true}) and actual: (Object {Boolean: true}). Result");
-	  equals( assertHash({Array: []}, {Array: []}), true, "assertHash() should be true with expected: (Object {Array: []}) and actual: (Object {Array: []}). Result");
-	  equals( assertHash({Array: ["one"]},{Array: ["one"]}), true, "assertHash() should be true with expected: (Object {Array: ['one']}) and actual: (Object {Array: ['one']}). Result");
-	  equals( assertHash({Object: {}}, {Object: {}}), true, "assertHash() should be true with expected: (Object {Object: {}}) and actual: (Object {Object: {}}). Result");
-	  equals( assertHash({Function: function() {}}, {Function: function() {}}), true, "assertHash() should be true with expected: (Object {Function: function(){}}) and actual: (Object {Function: function(){}}). Result");
-	  equals( assertHash({"null": null},{"null": null}), true, "assertHash() should be true with expected: (Object {'null': null}) and actual: (Object {'null': null}). Result");
-	  equals( assertHash({"undefined": undefined},{"undefined": undefined}), true, "assertHash() should be true with expected: (Object {'undefined': undefined}) and actual: (Object {'undefined': undefined}). Result");
-	  equals( assertHash({RegExp: /re/},{RegExp: /re/}), true, "assertHash() should be true with expected: (Object {RegExp: /re/}) and actual: (Object {RegExp: /re/}). Result");
-	  equals( assertHash({RegExp: /re/},{RegExp: /re2/}), true, "assertHash() should be true with expected: (Object {RegExp: /re/}) and actual: (Object {RegExp: /re2/}). Result");
-	  equals( assertHash({Date: new Date},{Date: new Date}), true, "assertHash() should be true with expected: (Object {Date: new Date}) and actual: (Object {Date: new Date}). Result");
-	  equals( assertHash({Date: new Date},{Date: new Date(1970)}), true, "assertHash() should be true with expected: (Object {Date: new Date}) and actual: (Object {Date: new Date(1970)}). Result");
-	  equals( assertHash({Custom: new Custom},{Custom: new Custom}), true, "assertHash() should be true with expected: (Object {Custom: new Custom}) and actual: (Object {Custom: new Custom}). Result");
-	  equals( assertHash({Number: 0,String: "string",Boolean: true,Array: [],Object: {},Function: function() {},"null": null,"undefined": undefined,RegExp: /re/,Date: new Date}, {Number: 0,String: "string",Boolean: true,Array: [],Object: {},Function: function() {},"null": null,"undefined": undefined,RegExp: /re/,Date: new Date}), true, "assertHash() should be true (Many native types). Result");
-
-	  // Test nested object literals
-	  equals( assertHash({"one": {"two": {"three": {"four": "value"}}}}, {"one": {"two": {"three": {"four": "value"}}}}), true, "assertHash() should be true with matching nested object literals 4 levels deep. Result");
-	  
-	  // Test shadowed native keys ({DontEnum} IE bug)
-    // ????? meh ???????
-    
-	  // Strict value checking assertions (Boolean optional param)
-	  
-	  // Expected false evaluations 
-	  
-	  // Test mis-matched member types
-	  
-	  equals( assertHash({Number: 10}, {Number: "string"}, true), false, "assertHash() should be false with expected: (Object {Number: 10}) and actual: (Object {Number: 'string'}). Result");
-	  equals( assertHash({String: "string"}, {String: function() {}}, true), false, "assertHash() should be false with expected: (Object {String: 'string'}) and actual: (Object {String: function(){}}). Result");
-	  equals( assertHash({Array: []}, {Array: {}}, true), false, "assertHash() should be false with expected: (Object {Array: []}) and actual: (Object {Array: {}}). Result");
-	  equals( assertHash({Function: function() {}}, {Function: false}, true), false, "assertHash() should be false with expected: (Object {Function: function(){}}) and actual: (Object {Function: false}). Result");
-	  equals( assertHash({"null": null},{"null": undefined}, true), false, "assertHash() should be false with expected: (Object {'null': null}) and actual: (Object {'null': undefined}). Result");
-	  equals( assertHash({"undefined": undefined},{"undefined": null}, true), false, "assertHash() should be false with expected: (Object {'undefined': undefined}) and actual: (Object {'undefined': null}). Result");
-	  equals( assertHash({RegExp: /re/},{RegExp: "/re/"}, true), false, "assertHash() should be false with expected: (Object {RegExp: /re/}) and actual: (Object {RegExp: '/re/'}). Result");
-	  equals( assertHash({Custom: new Custom},{Custom: new Date}, true), false, "assertHash() should be false with expected: (Object {Custom: new Custom}) and actual: (Object {Custom: new Date})). Result");
-	  
-	  // Test mis-matched member values
-	  
-	  equals( assertHash({String: "string"}, {String: "different string"}, true), false, "assertHash() should be false with expected: (Object {String: 'string'}) and actual: (Object {String: 'different string'}). Result");
-	  equals( assertHash({Boolean: false}, {Boolean: true}, true), false, "assertHash() should be false with expected: (Object {Boolean: false}) and actual: (Object {Boolean: true}). Result");
-	  equals( assertHash({Number: 1}, {Number: 2}, true), false, "assertHash() should be false with expected: (Object {Number: 1}) and actual: (Object {Number: 2}). Result");
-	  equals( assertHash({RegExp: /re/}, {RegExp: /re2/}, true), false, "assertHash() should be false with expected: (Object {RegExp: /re/}) and actual: (Object {RegExp: /re2/}). Result");
-	  equals( assertHash({Array: ["one"]},{Array: ["two"]}, true), false, "assertHash() should be false with expected: (Object {Array: ['one']}) and actual: (Object {Array: ['two']}). Result");
-	  equals( assertHash({Object: {key: "value"}},{Object: {key: "value2"}}, true), false, "assertHash() should be false with expected: (Object {Object: {key: 'value'}}) and actual: (Object {Object: {key: 'value2'}}). Result");
-	  equals( assertHash({"null": null},{"null": undefined}, true), false, "assertHash() should be false with expected: (Object {'null': null}) and actual: (Object {'null': undefined}). Result");
-	  equals( assertHash({"undefined": undefined},{"undefined": null}, true), false, "assertHash() should be false with expected: (Object {'undefined': undefined}) and actual: (Object {'undefined': null}). Result");
-	  equals( assertHash({Date: new Date},{Date: new Date(1970)}, true), false, "assertHash() should be true with expected: (Object {Date: new Date}) and actual: (Object {Date: new Date(1970)}). Result");
-	  equals( assertHash({Number: 0,String: "string",Boolean: true,Array: [],Object: {},Function: function() {},"null": null,"undefined": undefined,RegExp: /re/,Date: new Date}, {Number: 1,String: "string",Boolean: true,Array: [],Object: {},Function: function() {},"null": null,"undefined": undefined,RegExp: /re/,Date: new Date}, true), false, "assertHash() should be false (Many native types). Result");
-	  
-	  // Test falsy nested object literals
-	  equals( assertHash({"one": {"two": {"three": {"four": "value"}}}}, {"one": {"two": {"three": {"four": "string"}}}}, true), false, "assertHash() should be false with matching nested object literals 4 levels deep. Result");
-  
-	  // Test incomplete 'actual' object (vis-a-vis expected)...
-	  
-	  // Single missing key
-	  try {
-	    assertHash({key: 'value'}, {}, true);
-	  } catch (e) {
-	    equals( e[0].type, "MissingHashKeyException", "assertHash() should raise a 'MissingHashKeyException' with expected: (Object {key: 'value'}) and actual: (Object {}). Error raised was");
-	    equals( /Missing key was: 'key'/.test(e[0].message), true, "assertHash() should identify 'key' as the missing accessor with expected: (Object {key: 'value'}) and actual: (Object {}). Result");
-	  }
-	  try {
-	    assertHash({key: 'value', key2: 'value2'}, {key: 'value'}, true);
-	  } catch (e) {
-	    equals( e[0].type, "MissingHashKeyException", "assertHash() should raise a 'MissingHashKeyException' with expected: (Object {key: 'value', key2: 'value2'}) and actual: (Object {key: 'value'}). Error raised was");
-	    equals( /Missing key was: 'key2'/.test(e[0].message), true, "assertHash() should identify 'key2' as the missing accessor with expected: (Object {key: 'value', key2: 'value2'}) and actual: (Object {key: 'value'}). Result");
-	  }
-	  try {
-	    assertHash({key: 'value', key2: 'value2', key3: 'value'}, {key: 'value', key2: 'value2'}, true);
-	  } catch (e) {
-	    equals( e[0].type, "MissingHashKeyException", "assertHash() should raise a 'MissingHashKeyException' be false with expected: (Object {key: 'value', key2: 'value2', key3: 'value'}) and actual: (Object {key: 'value', key2: 'value'}). Error raised was");
-	    equals( /Missing key was: 'key3'/.test(e[0].message), true, "assertHash() should identify 'key3' as the missing accessor with expected: (Object {key: 'value', key2: 'value2', key3: 'value'}) and actual: (Object {key: 'value', key2: 'value'}). Result");
-	  }
-	  // Multiple missing keys
-	  try {
-	    assertHash({key: 'value', key2: 'value2', key3: 'value'}, {key: 'value'}, true);
-	  } catch (e) {
-	    equals( e[0].type, "MissingHashKeyException", "assertHash() should raise a 'MissingHashKeyException' be false with expected: (Object {key: 'value', key2: 'value2', key3: 'value'}) and actual: (Object {key: 'value'}). Error raised was");
-	    equals( /Missing key was: 'key2'/.test(e[0].message), true, "assertHash() should identify 'key2' as the missing accessor with expected: (Object {key: 'value', key2: 'value2', key3: 'value'}) and actual: (Object {key: 'value'}). Result");
-	    equals( e[1].type, "MissingHashKeyException", "assertHash() should raise a second 'MissingHashKeyException' be false with expected: (Object {key: 'value', key2: 'value2', key3: 'value'}) and actual: (Object {key: 'value'}). Error raised was");
-	    equals( /Missing key was: 'key3'/.test(e[1].message), true, "assertHash() should identify 'key3' as the missing accessor with expected: (Object {key: 'value', key2: 'value2', key3: 'value'}) and actual: (Object {key: 'value'}). Result");
-	  }
-	  
-	  // Expected true evaluations
-	  
-	  // Test matching member values inc. potential false positives
-	  
-	  equals( assertHash({Number: 0}, {Number: 0}, true), true, "assertHash() should be true with expected: (Object {Number: 0}) and actual: (Object {Number: 0}). Result" );
-	  equals( assertHash({Number: 10}, {Number: 10}, true), true, "assertHash() should be true with expected: (Object {Number: 10}) and actual: (Object {Number: 10}). Result" );
-	  equals( assertHash({String: ""}, {String: ""}, true), true, "assertHash() should be true with expected: (Object {String: ''}) and actual: (Object {String: ''}). Result" );
-	  equals( assertHash({String: "string"}, {String: "string"}, true), true, "assertHash() should be true with expected: (Object {String: 'string'}) and actual: (Object {String: 'string'}). Result" );
-	  equals( assertHash({Boolean: false}, {Boolean: false}, true), true, "assertHash() should be true with expected: (Object {Boolean: false}) and actual: (Object {Boolean: false}). Result" );
-	  equals( assertHash({Boolean: true}, {Boolean: true}, true), true, "assertHash() should be true with expected: (Object {Boolean: true}) and actual: (Object {Boolean: true}). Result");
-	  equals( assertHash({Array: []}, {Array: []}, true), true, "assertHash() should be true with expected: (Object {Array: []}) and actual: (Object {Array: []}). Result");
-	  equals( assertHash({Array: ["one"]},{Array: ["one"]}, true), true, "assertHash() should be true with expected: (Object {Array: ['one']}) and actual: (Object {Array: ['one']}). Result");
-	  equals( assertHash({Object: {}}, {Object: {}}, true), true, "assertHash() should be true with expected: (Object {Object: {}}) and actual: (Object {Object: {}}). Result");
-	  // Not sure what to do with this one - it's definitely an edge case... for now maybe just defer to a quick type check (if expectedType === Function?)
-	  equals( assertHash({Function: function() {}}, {Function: function() {}}, true), true, "assertHash() should be true with expected: (Object {Function: function(){}}) and actual: (Object {Function: function(){}}). Result");
-	  equals( assertHash({"null": null},{"null": null}, true), true, "assertHash() should be true with expected: (Object {'null': null}) and actual: (Object {'null': null}). Result");
-	  equals( assertHash({"undefined": undefined},{"undefined": undefined}, true), true, "assertHash() should be true with expected: (Object {'undefined': undefined}) and actual: (Object {'undefined': undefined}). Result");
-	  equals( assertHash({RegExp: /re/},{RegExp: /re/}, true), true, "assertHash() should be true with expected: (Object {RegExp: /re/}) and actual: (Object {RegExp: /re/}). Result");
-	  equals( assertHash({Date: new Date},{Date: new Date}, true), true, "assertHash() should be true with expected: (Object {Date: new Date}) and actual: (Object {Date: new Date}). Result");
-	  equals( assertHash({Custom: new Custom},{Custom: new Custom}, true), true, "assertHash() should be true with expected: (Object {Custom: new Custom}) and actual: (Object {Custom: new Custom}). Result");
-	  equals( assertHash({Number: 0,String: "string",Boolean: true,Array: [],Object: {},Function: function() {},"null": null,"undefined": undefined,RegExp: /re/,Date: new Date}, {Number: 0,String: "string",Boolean: true,Array: [],Object: {},Function: function() {},"null": null,"undefined": undefined,RegExp: /re/,Date: new Date}), true, "assertHash() should be true (Many native types). Result");
-	  	  
-	  // Test nested object literals
-	  equals( assertHash({"one": {"two": {"three": {"four": "value"}}}}, {"one": {"two": {"three": {"four": "value"}}}}, true), true, "assertHash() should be true with matching nested object literals 4 levels deep. Result");
-	  
-	});
-	
-})(); // run tests
+})(); // Go Go Inspector Gadget!

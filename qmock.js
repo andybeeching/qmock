@@ -46,6 +46,7 @@
  * TODO: Support for identifiers.. might wait until refactor of all constructor/methods to subclassed mockMember instances.
  * TDOO: Support for classical, protypical, & parasitic inheritance instance checking
  * TODO: Double check inheritance properties of instanceof - plus support for 'interface' conformance as well?
+ * TODO: Patch QUnit to support a sentence like: 700 tests of 702 run passed, 2 failed and 150 weren't run.
  */
 
 (function initialiseQMock (Mock, container) {
