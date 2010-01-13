@@ -70,14 +70,14 @@
     	  
 	  // Test mis-matched member types
 	  
-	  equals( assertCollection([10], [""]), false, "assertArray() should be false with expected: [(Number: 10)] and actual: [(String: '')]. Result");
-	  equals( assertCollection([""], [10]), false, "assertArray() should be false with expected: [(String: '')] and actual: [(Number: 10)]. Result");
-	  equals( assertCollection([{test: "one"}], [["test", 1]]), false, "assertArray() should be false with expected: [(Object: {test: \"one\"})] and actual: [(Object: {test: 1})]. Result");
-	  equals( assertCollection([function() {}], []), false, "assertArray() should be false with expected: [(Function: function() {})] and actual: [undefined]. Result");
-	  equals( assertCollection([null], [undefined]), false, "assertArray() should be false with expected: [(null)] and actual: [(undefined)]. Result");
-	  equals( assertCollection([undefined], ["string"]), false, "assertArray() should be false with expected: [(undefined)] and actual: [(String: 'string')]. Result");
-	  equals( assertCollection([/re/], [9]), false, "assertArray() should be false: [(RegExp: /re/)], [(Number: 9)]. Result");
-	  equals( assertCollection([new Custom], [new Number]), false, "assertArray() should be false: [(Custom: new Custom)], [(Number: new Number)]. Result");
+	  equals( assertCollection([10], [""]), false, "assertCollection() should be false with expected: [(Number: 10)] and actual: [(String: '')]. Result");
+	  equals( assertCollection([""], [10]), false, "assertCollection() should be false with expected: [(String: '')] and actual: [(Number: 10)]. Result");
+	  equals( assertCollection([{test: "one"}], [["test", 1]]), false, "assertCollection() should be false with expected: [(Object: {test: \"one\"})] and actual: [(Object: {test: 1})]. Result");
+	  equals( assertCollection([function() {}], []), false, "assertCollection() should be false with expected: [(Function: function() {})] and actual: [undefined]. Result");
+	  equals( assertCollection([null], [undefined]), false, "assertCollection() should be false with expected: [(null)] and actual: [(undefined)]. Result");
+	  equals( assertCollection([undefined], ["string"]), false, "assertCollection() should be false with expected: [(undefined)] and actual: [(String: 'string')]. Result");
+	  equals( assertCollection([/re/], [9]), false, "assertCollection() should be false: [(RegExp: /re/)], [(Number: 9)]. Result");
+	  equals( assertCollection([new Custom], [new Number]), false, "assertCollection() should be false: [(Custom: new Custom)], [(Number: new Number)]. Result");
   
 	  // Expected true evaluations 
 	  
@@ -115,8 +115,8 @@
 	  	  
 	  // Nested
   
-	  equals( assertCollection([[[["test"]]]], [[[["test"]]]]), true, "assertArray() should be true with expected: [(Array: [[[['test']]]])] with actual: (Array: [[[['test']]]]). Result");
-	  equals( assertCollection(["one", ["two", ["three", ["four"]]]], ["one", ["two", ["three", ["four"]]]]), true, "assertArray() should be true with expected: [ MANY NESTED [] ] and actual: [ MANY NESTED [] ]. Result");  
+	  equals( assertCollection([[[["test"]]]], [[[["test"]]]]), true, "assertCollection() should be true with expected: [(Array: [[[['test']]]])] with actual: (Array: [[[['test']]]]). Result");
+	  equals( assertCollection(["one", ["two", ["three", ["four"]]]], ["one", ["two", ["three", ["four"]]]]), true, "assertCollection() should be true with expected: [ MANY NESTED [] ] and actual: [ MANY NESTED [] ]. Result");  
 	  
 	});
 	
@@ -130,14 +130,14 @@
 		  
 	  // Test mis-matched member types
 	  
-	  equals( assertCollection([10], [""]), false, "assertArray() should be false with expected: [(Number: 10)] and actual: [(String: '')]. Result");
-	  equals( assertCollection([""], [10]), false, "assertArray() should be false with expected: [(String: '')] and actual: [(Number: 10)]. Result");
-	  equals( assertCollection([{test: "one"}], [["test", 1]]), false, "assertArray() should be false with expected: [(Object: {test: \"one\"})] and actual: [(Object: {test: 1})]. Result");
-	  equals( assertCollection([function() {}], []), false, "assertArray() should be false with expected: [(Function: function() {})] and actual: [undefined]. Result");
-	  equals( assertCollection([null], [undefined]), false, "assertArray() should be false with expected: [(null)] and actual: [(undefined)]. Result");
-	  equals( assertCollection([undefined], ["string"]), false, "assertArray() should be false with expected: [(undefined)] and actual: [(String: 'string')]. Result");
-	  equals( assertCollection([/re/], [9]), false, "assertArray() should be false: [(RegExp: /re/)], [(Number: 9)]. Result");
-	  equals( assertCollection([new Custom], [new Number]), false, "assertArray() should be false: [(Custom: new Custom)], [(Number: new Number)]. Result");
+	  equals( assertCollection([10], [""]), false, "assertCollection() should be false with expected: [(Number: 10)] and actual: [(String: '')]. Result");
+	  equals( assertCollection([""], [10]), false, "assertCollection() should be false with expected: [(String: '')] and actual: [(Number: 10)]. Result");
+	  equals( assertCollection([{test: "one"}], [["test", 1]]), false, "assertCollection() should be false with expected: [(Object: {test: \"one\"})] and actual: [(Object: {test: 1})]. Result");
+	  equals( assertCollection([function() {}], []), false, "assertCollection() should be false with expected: [(Function: function() {})] and actual: [undefined]. Result");
+	  equals( assertCollection([null], [undefined]), false, "assertCollection() should be false with expected: [(null)] and actual: [(undefined)]. Result");
+	  equals( assertCollection([undefined], ["string"]), false, "assertCollection() should be false with expected: [(undefined)] and actual: [(String: 'string')]. Result");
+	  equals( assertCollection([/re/], [9]), false, "assertCollection() should be false: [(RegExp: /re/)], [(Number: 9)]. Result");
+	  equals( assertCollection([new Custom], [new Number]), false, "assertCollection() should be false: [(Custom: new Custom)], [(Number: new Number)]. Result");
 	  
 	  // Test mis-matched member values
 	  
@@ -174,8 +174,8 @@
 	 
 	  // Nested
   
-	  equals( assertCollection([[[["test"]]]], [[[["test"]]]], true), true, "assertArray() should be true with expected: [(Array: [[[['test']]]])] with actual: (Array: [[[['test']]]]). Result");
-	  equals( assertCollection(["one", ["two", ["three", ["four"]]]], ["one", ["two", ["three", ["four"]]]], true), true, "assertArray() should be true with expected: [ MANY NESTED [] ] and actual: [ MANY NESTED [] ]. Result");  
+	  equals( assertCollection([[[["test"]]]], [[[["test"]]]], true), true, "assertCollection() should be true with expected: [(Array: [[[['test']]]])] with actual: (Array: [[[['test']]]]). Result");
+	  equals( assertCollection(["one", ["two", ["three", ["four"]]]], ["one", ["two", ["three", ["four"]]]], true), true, "assertCollection() should be true with expected: [ MANY NESTED [] ] and actual: [ MANY NESTED [] ]. Result");  
 	  
 	});
 	
@@ -1091,22 +1091,15 @@
 
 	});
 
-	/*test("assertArray()", function() { // TBR out. Unified with assertCollection()
-  
-	});
-
-	test("assertHash()", function() {
-  
-	});
-
+/*
 	test("createException()", function() {
   
 	});
 
 	test("createMockFromJSON()", function() {
   
-	});*/
-
+	});
+*/
 
 	/**
 	 *
