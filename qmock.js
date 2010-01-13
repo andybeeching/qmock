@@ -357,7 +357,7 @@
     }
 
     // Expose for testing
-    ;;;; expose( assertArray, assertObject, "_assertArray" );
+    ;;;; expose( assertHash, assertObject, "_assertHash" );
     ;;;; expose( assertCollection, assertObject, "_assertCollection" );
     
     // Return privileged function
@@ -404,23 +404,6 @@
     // Function to push arguments into Mock exceptions list
     function throwMockException () {
       exceptions.push( createException.apply(null, arguments) );
-    }
-
-    // Function to compare expected and actual arguments for mock method & constructor
-    function assertArguments (expected, actual, opt_strictValueChecking, opt_isConstructor) {
-      // Check not parameterless constructor.
-      // Maybe can be refactored to not use constructor check - flaky.
-      if ( opt_isConstructor && expected.constructor === Function ) { return; }   
-      // Iterate over collection testing arguments
-      return assertCollection(
-        expected,
-        actual,
-        opt_strictValueChecking || false,
-        (opt_strictValueChecking) ? "IncorrectArgumentValueException" : "IncorrectArgumentTypeException",
-        function(){},
-        ( opt_isConstructor === true ) ? "Constructor" : this["name"],
-        exceptions
-      );
     }
 
     // CONSTRUCTOR for mocked methods
