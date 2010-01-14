@@ -136,6 +136,8 @@
         member.withValue(memberConfig["value"]);
       }
     }
+
+    return undefined;
   }
   
   var assertObject = (function () {
@@ -256,13 +258,15 @@
     function assertObject (expected, actual, opt_strictValueChecking, opt_exceptionType, opt_exceptionHandler) {
             
       // Test whether expected is a constructor for native object types (aside from null // undefined)
-      var expectedType = (expected !== null && expected !== undefined) ? expected.constructor : expected
+      var expectedType = (expected !== null && expected !== undefined) ? expected.constructor : expected,
         /*expectedType = (expected !== null && expected !== undefined) 
           ? ( expected.constructor === Function ) // but also matches function literals :-(
             ? expected
             : expected.constructor
               : expected,*/
-        isValue = isRegExp = isCollection = false,
+        isValue = false,
+        isRegExp = false,
+        isCollection = false,
         strictValueChecking = opt_strictValueChecking || false,
         exceptionType = opt_exceptionType || ( strictValueChecking === true ? "IncorrectArgumentValueException" : "IncorrectArgumentTypeException"),
         // What happened to isNative fn?!? - see Kangax blog... damn me and my lack of self-documentation sometimes.
