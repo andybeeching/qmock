@@ -1043,6 +1043,83 @@
 		
 	});
 	
+	test("assertObject() - (RegExp) composite - typed checking only", function() {
+
+	  // FALSE ASSERTIONS
+	  
+	  // Test invalid argument type - Constructors
+		
+		equals( assertObject(RegExp, Number), false, "assertObject() should return false with expected: (RegExp) and actual: (Number)" );
+		equals( assertObject(RegExp, String), false, "assertObject() should return false with expected: (RegExp) and actual: (String)" );
+		equals( assertObject(RegExp, Boolean), false, "assertObject() should return false with expected: (RegExp) and actual: (Boolean)" );
+		equals( assertObject(RegExp, Array), false, "assertObject() should return false with expected: (RegExp) and actual: (Array)" );
+		equals( assertObject(RegExp, Object), false, "assertObject() should return false with expected: (RegExp) and actual: (Object)" );
+		equals( assertObject(RegExp, Function), false, "assertObject() should return false with expected: (RegExp) and actual: (Function)" );
+		equals( assertObject(RegExp, Date), false, "assertObject() should return false with expected: (RegExp) and actual: (Date)" );
+		equals( assertObject(RegExp, Custom), false, "assertObject() should return false with expected: (RegExp) and actual: (Custom)" );
+		
+		// Test invalid argument type - Values (truthy)
+		
+		equals( assertObject(RegExp, 1), false, "assertObject() should return false with expected: (RegExp) and actual: (Number: 1)" );
+		equals( assertObject(RegExp, "string"), false, "assertObject() should return false with expected: (RegExp) and actual: (String: string)" );
+		equals( assertObject(RegExp, true), false, "assertObject() should return false with expected: (RegExp) and actual: (Boolean: true)" );
+		equals( assertObject(RegExp, []), false, "assertObject() should return false with expected: (RegExp) and actual: (Array: [])" );
+		equals( assertObject(RegExp, {}), false, "assertObject() should return false with expected: (RegExp) and actual: (Object: {})" );
+		equals( assertObject(RegExp, function(){}), false, "assertObject() should return false with expected: (RegExp) and actual: (Function: function(){})" );
+		equals( assertObject(RegExp, new Date), false, "assertObject() should return false with expected: (RegExp) and actual: (Date: new instance)" );
+		equals( assertObject(RegExp, new Custom), false, "assertObject() should return false with expected: (RegExp) and actual: (Custom: new instance)" );
+  
+	  // Test invalid argument types - false values
+	
+		equals( assertObject(RegExp, null), false, "assertObject() should return false with expected: (RegExp) and actual: (null)" );
+		equals( assertObject(RegExp, undefined), false, "assertObject() should return false with expected: (RegExp) and actual: (undefined)" );
+		
+		// TRUE ASSERTIONS
+		equals( assertObject(RegExp, RegExp), true, "assertObject() should return true with expected: (RegExp) and actual: (RegExp)" );
+		equals( assertObject(RegExp, /re/), true, "assertObject() should return true with expected: (RegExp) and actual: (RegExp: /re/)" );
+		equals( assertObject(RegExp, new RegExp(/re/)), true, "assertObject() should return true with expected: (RegExp) and actual: (RegExp: new RegExp(/re/))" );
+				
+	});
+	
+	test("assertObject() - (RegExp) composite - strict 'value' checking", function() {
+
+	  // FALSE ASSERTIONS
+  
+	  // Test invalid argument type - Constructors
+		
+		equals( assertObject(RegExp, Number, true ), false, "assertObject() should return false with expected: (RegExp) and actual: (Number)" );
+		equals( assertObject(RegExp, String, true ), false, "assertObject() should return false with expected: (RegExp) and actual: (String)" );
+		equals( assertObject(RegExp, Boolean, true ), false, "assertObject() should return false with expected: (RegExp) and actual: (Boolean)" );
+		equals( assertObject(RegExp, Array, true ), false, "assertObject() should return false with expected: (RegExp) and actual: (Array)" );
+		equals( assertObject(RegExp, Object, true ), false, "assertObject() should return false with expected: (RegExp) and actual: (Object)" );
+		equals( assertObject(RegExp, Function, true ), false, "assertObject() should return false with expected: (RegExp) and actual: (Function)" );
+		equals( assertObject(RegExp, Date, true ), false, "assertObject() should return false with expected: (RegExp) and actual: (Date)" );
+		equals( assertObject(RegExp, Custom, true ), false, "assertObject() should return false with expected: (RegExp) and actual: (Custom)" );
+		
+		// Test invalid argument type - Values (truthy)
+		
+		equals( assertObject(RegExp, 1, true ), false, "assertObject() should return false with expected: (RegExp) and actual: (Number: 1)" );
+		equals( assertObject(RegExp, "string", true ), false, "assertObject() should return false with expected: (RegExp) and actual: (String: string)" );
+		equals( assertObject(RegExp, true, true ), false, "assertObject() should return false with expected: (RegExp) and actual: (Boolean: true)" );
+		equals( assertObject(RegExp, [], true ), false, "assertObject() should return false with expected: (RegExp) and actual: (Array: [])" );
+		equals( assertObject(RegExp, {}, true ), false, "assertObject() should return false with expected: (RegExp) and actual: (Object: {})" );
+		equals( assertObject(RegExp, function(){}, true ), false, "assertObject() should return false with expected: (RegExp) and actual: (Function: function(){})" );
+		equals( assertObject(RegExp, new Date, true ), false, "assertObject() should return false with expected: (RegExp) and actual: (Date: new instance)" );
+		equals( assertObject(RegExp, new Custom, true ), false, "assertObject() should return false with expected: (RegExp) and actual: (Custom: new instance)" );
+  
+	  // Test invalid argument types - false values
+	
+		equals( assertObject(RegExp, null, true ), false, "assertObject() should return false with expected: (RegExp) and actual: (null)" );
+		equals( assertObject(RegExp, undefined, true ), false, "assertObject() should return false with expected: (RegExp) and actual: (undefined)" );
+		
+		// TRUE ASSERTIONS
+		equals( assertObject(RegExp, RegExp, true ), true, "assertObject() should return true with expected: (RegExp) and actual: (RegExp)" );
+		equals( assertObject(RegExp, /re/, true ), false, "assertObject() should return true with expected: (RegExp) and actual: (RegExp: /re/)" );
+		equals( assertObject(RegExp, new RegExp(/re/), true ), false, "assertObject() should return true with expected: (RegExp) and actual: (RegExp: new RegExp(/re/))" );
+
+	});
+	
+	
 	test("assertObject() - (RegExp: /re/) composite - typed checking only", function() {
 
 	  // FALSE ASSERTIONS

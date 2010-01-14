@@ -108,7 +108,7 @@
               )[( isMethod ) ? "method" : "property"](key);
 
       // Set expectations for method or value of property
-      if ( true === isMethod ) {
+      if ( isMethod ) {
 
         setExpectations:
           for (var expectation in memberConfig) {
@@ -209,9 +209,10 @@
         return !!result;
       }
       
-      // For Unit Testing
+      // Expose for testing
       ;;;; expose( isHash, assertHash, "_isHash" );
       
+      // Return priviledged object
       return assertHash;
             
     })();
