@@ -180,64 +180,88 @@
 	});
 	
 	test("assertHash() - test interface & parameters", function () {
+	  		
+		// Expected false evaluations
+		
+		// Test no arguments
+	  try {
+			assertHash();
+	    ok(false, "assertHash() should throw exception when passed No parameters");
+	  } catch (exception) {  
+	    equals(exception.type, "MissingParametersException", "assertHash() exception type should be MissingParametersException for less than two parameters (required)");
+	  }
 	  
-	  // Function Sanity Checks... Abstractable for every function if think about it... // 1. Required params (arguments.length - undefined values don't register as members), 2. expected types... (as an expectation...?)
+	  // Test malformed arguments to interface afforded by assertHash() [see test suite for _isHash() for more examples]
+	  try {
+			assertHash( undefined, {}	);
+	    ok(false, "assertHash() should throw exception when passed incorrectly formatted parameters");
+	  } catch (exception) {  
+	    equals(exception.type, "MalformedArgumentsException", "assertHash() requires the 'expected' and 'actual' parameters to be Hash-like objects");
+	  }
 	  
-	  /*
-	  // Check bad number of arguments (at least first two required)
-	  ok(!assertHash({}), "assertHash() should be throw '' error with expected: (undefined) and actual (N/A) ");
-  
-	  // Check bad expected arguments (those that cannot be enumerated)
-	  ok(!assertHash(undefined, {}), "assertHash() should be false with expected: (undefined) and ");
-	  ok(!assertHash(null, {}), "assertHash() should be false");
-	  ok(!assertHash(NaN, {}), "assertHash() should be false");
+	  try {
+			assertHash( {}, undefined );
+	    ok(false, "assertHash() should throw exception when passed incorrectly formatted parameters");
+	  } catch (exception) {  
+	    equals(exception.type, "MalformedArgumentsException", "assertHash() requires the 'expected' and 'actual' parameters to be Hash-like objects");
+	  }
 	  
-	  // Check bad actual arguments (those that cannot be enumerated)
-	  ok(!assertHash(undefined, {}), "assertHash() should be false with expected: (undefined) and ");
-	  ok(!assertHash(null, {}), "assertHash() should be false");
-	  ok(!assertHash(NaN, {}), "assertHash() should be false");
+	  // Expected true evaluations
+	  		
+	  // Test passing in a hash-like objects [see other test groups fopr in-depth examples]
+    equals( assertHash({}, {}), true, "assertHash() should be false with expected: (Object {}) and actual: (Object {}). Result");
     
-	  
-	  // Check false positive on enumer-atable objects
-	  ok(!assertHash(0, Number), "assertHash() should be false");
-	  ok(!assertHash("", String), "assertHash() should be false");
-	  ok(!assertHash(false, Boolean), "assertHash() should be false");
-		
-		/ Test no arguments
-	  try {
-			assertCollection();
-	    ok(false, "assertCollection() should throw exception when passed No parameters");
-	  } catch (exception) {  
-	    equals(exception.type, "MissingParametersException", "assertCollection() exception type should be MissingParametersException for less than two parameters (required)");
-	  }
-	  
-	  // Test malformed arguments to interface afforded by assertCollection()
-	  try {
-			assertCollection( undefined, []	);
-	    ok(false, "assertCollection() should throw exception when passed incorrectly formatted parameters");
-	  } catch (exception) {  
-	    equals(exception.type, "MalformedArgumentsException", "assertCollection() requires the 'expected' and 'actual' parameters to be Array-like objects");
-	  }
-	  
-	  try {
-			assertCollection( [], undefined );
-	    ok(false, "assertCollection() should throw exception when passed incorrectly formatted parameters");
-	  } catch (exception) {  
-	    equals(exception.type, "MalformedArgumentsException", "assertCollection() requires the 'expected' and 'actual' parameters to be Array-like objects");
-	  }
-	  
-	  // Test expected and actual collection of objects with different lengths
-		 equals((function() {
-          return assertCollection([1,2], arguments);
-      })(1), false, "assertCollection() should return false if the 'expected' and 'actual' objects have mistmatched lengths");
-		
-	  // Test passing in an 'arguments' array
-    equals((function() {
-      return assertCollection([Boolean], arguments);
-      })(true)["constructor"], Boolean, "assertCollection() should allow Array-like objects to be passed-in (e.g arguments collections) AND return a Boolean");
-		*/
 	});
 	
+	test("assertHash._isHash() - black box test", function () {
+	  
+	  var isHash = assertHash["_isHash"].get();
+	  
+	  // Expected False Evaluations
+	  
+	  // Test falsy types and primitive data types
+	  
+	  equals( isHash( null ), false, "isHash() should be false with 'obj' parameter: (null). Result");
+	  equals( isHash( undefined ), false, "isHash() should be false with 'obj' parameter: (undefined). Result");
+	  equals( isHash( NaN ), false, "isHash() should be false with 'obj' parameter: (NaN). Result");
+	  equals( isHash( 0 ), false, "isHash() should be false with 'obj' parameter: (Number: 0). Result");
+	  equals( isHash( 1 ), false, "isHash() should be false with 'obj' parameter: (Number: 1). Result");
+	  //equals( isHash( "" ), false, "isHash() should be false with 'obj' parameter: (String: ""). Result");
+	  equals( isHash( "string primitive type" ), false, "isHash() should be false with 'obj' parameter: (String: 'string primitive type'). Result");
+	  equals( isHash( false ), false, "isHash() should be false with 'obj' parameter: (Boolean: false). Result");
+	  equals( isHash( true ), false, "isHash() should be false with 'obj' parameter: (Boolean: true). Result");
+	  
+	  // Expected True Evalutions
+	  
+	  // Test native & custom constructors
+	  
+	  equals( isHash( Number ), true, "isHash() should be true with 'obj' parameter: (Number). Result");
+	  equals( isHash( String ), true, "isHash() should be true with 'obj' parameter: (String). Result");
+	  equals( isHash( Boolean ), true, "isHash() should be true with 'obj' parameter: (Boolean). Result");
+	  equals( isHash( RegExp ), true, "isHash() should be true with 'obj' parameter: (RegExp). Result");
+	  equals( isHash( Date ), true, "isHash() should be true with 'obj' parameter: (Date). Result");
+	  equals( isHash( Function ), true, "isHash() should be true with 'obj' parameter: (Function). Result");
+	  equals( isHash( Math ), true, "isHash() should be true with 'obj' parameter: (Math). Result");
+	  equals( isHash( Array ), true, "isHash() should be true with 'obj' parameter: (Array). Result");
+	  equals( isHash( Object ), true, "isHash() should be true with 'obj' parameter: (Object). Result");
+	  equals( isHash( Custom ), true, "isHash() should be true with 'obj' parameter: (Custom). Result");
+	  
+	  // Test composite data types
+
+	  equals( isHash( Object(0) ), true, "isHash() should be true with 'obj' parameter: (Number: Object(0)). Result");
+	  equals( isHash( Object(1) ), true, "isHash() should be true with 'obj' parameter: (Number: Object(1)). Result");
+	  equals( isHash( Object("") ), true, "isHash() should be true with 'obj' parameter: (String: Object('')). Result");
+	  equals( isHash( Object('string composite type') ), true, "isHash() should be true with 'obj' parameter: (String: Object('string compositive type')). Result");
+	  equals( isHash( Object(false) ), true, "isHash() should be true with 'obj' parameter: (Boolean: false). Result");
+	  equals( isHash( Object(true) ), true, "isHash() should be true with 'obj' parameter: (Boolean: true). Result");
+	  equals( isHash( /re/ ), true, "isHash() should be true with 'obj' parameter: (RegExp: /re/). Result");
+	  equals( isHash( function() {} ), true, "isHash() should be true with 'obj' parameter: (Function: function(){}). Result");
+	  equals( isHash( {} ), true, "isHash() should be true with 'obj' parameter: (Object: {}). Result");
+	  equals( isHash( [] ), true, "isHash() should be true with 'obj' parameter: (Array: []). Result");
+	  equals( isHash( new Date ), true, "isHash() should be true with 'obj' parameter: (Date: new Date). Result");
+	  equals( isHash( new Custom ), true, "isHash() should be true with 'obj' parameter: (Custom: new Custom). Result");
+
+	});
 
 	test("assertHash() - type checking", function () {
     
@@ -492,6 +516,10 @@
 	  	  
 	  // Test nested object literals
 	  equals( assertHash({"one": {"two": {"three": {"four": "value"}}}}, {"one": {"two": {"three": {"four": "value"}}}}, true), true, "assertHash() should be true with matching nested object literals 4 levels deep. Result");
+	  
+	});
+	
+	test("assertHash() - test interface assertion use case", function () {
 	  
 	});
 	
@@ -3398,7 +3426,7 @@
 
 	test("mock with composite argument types: object (literal) [enum] - strict type checking members", function () {
     
-	  expect(18);
+	  expect(21);
     
 	    var ninja = new Mock();
     
@@ -3425,15 +3453,29 @@
     
 	  ninja.reset();
   
-	  // Test incomplete arguments
+	  // Test wrong type arguments
 
-	  ninja.describe('Jet Li');
+	  ninja.describe('Jet Li'); // primitive data type will be flagged
     
     try {
       ninja.verify();
       ok(false, "verify() should throw exception");
     } catch (e) {
-      equals(e.length, 4 , "verify() should return an array of 2 exception");
+      equals(e.length, 2 , "verify() should return an array of 2 exception");
+      equals(e[0].type, "MalformedArgumentsException", "verify()[0] exception type should be MalformedArgumentsException");
+      equals(e[1].type, "IncorrectArgumentValueException", "verify()[3] exception type should be IncorrectArgumentValueException");
+    }
+    
+    ninja.reset()
+    
+    ninja.describe({});
+    
+    try {
+      debugger;
+      ninja.verify();
+      ok(false, "verify() should throw exception");
+    } catch (e) {
+      equals(e.length, 4 , "verify() should return an array of 4 exception");
       equals(e[0].type, "MissingHashKeyException", "verify()[0] exception type should be MissingHashKeyException");
       equals(e[1].type, "MissingHashKeyException", "verify()[1] exception type should be MissingHashKeyException");
       equals(e[2].type, "MissingHashKeyException", "verify()[1] exception type should be MissingHashKeyException");

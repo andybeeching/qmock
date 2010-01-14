@@ -58,7 +58,7 @@
   // So Dmitry Baranovskiy doesn't shout at me ([O:O]) - http://sitepoint.com/blogs/2009/11/12/google-closure-how-not-to-write-javascript/
   // Really this is ultra defensive but since undefined is used in parameter verification code let's be sure it actually is typeof "undefined".
   var undefined,
-    slice = [].slice;
+      slice = Array.prototype.slice;
     
   // Allow pass-through argument checking
   // Either reference static member off Mock class (Mock.Variable), or alias - e.g. var Selector = Mock.Variable;
@@ -72,19 +72,15 @@
     var cachedObj = obj; // can this part be improved by one cache for all or many atomic caches?
     
     context[key] = {
-      
       get: function() {
         return obj;
       },
-      
       set: function() {
         obj = arguments[0] || null; 
       },
-      
       restore: function() {
         obj = cachedObj;
       }
-      
     }
   }
   
@@ -147,35 +143,78 @@
     // PRIVATE Helper functions
         
     // Function to assert members of an object, returns Boolean
-    function assertHash (expected, actual, opt_strictValueChecking, opt_exceptionType, opt_exceptionHandler) {
-      var result = true;
-      // Is this the correct check? Everything in JS is essentially a hash (as all derive from Object.prototype), except for falsy data types (undefined, null, NaN)?
-      // Worth testing to see if absolutely generic (aka can enumerate over non object literal hashes)
-      // What about DontEnum stuff? Sort of taken by hasOwnProperty, so what about checking inherited props? Or make clear in description really meant for object literals? If so, should text for object literal? How - Array trick-esque thingy?
-      if ( expected && actual ) {
+    var assertHash = (function () {
+      
+      function isHash ( obj ) {
+
+        var result = false;
+
+        // exclude null/undefined early
+        if ( obj === undefined || obj === null) { 
+          return result;
+        }
         
-        checkingMembers:
-          for ( var key in expected ) {
-            // expectations don't support prototypical inheritance...
-            if ( expected.hasOwnProperty(key) ) {
-              // but actual values do (and also shadowed natives, e.g. toString as a key - see {DontEnum} tests)
-              // We 'objectify' the 'actual' object as the in operator throws errors when executed against primitive values (e.g. key in "" --> key in Object("")))
-              // We use the in operator as opposed to a dynamic lookup because in the case of an assigned falsy value to actual[key] the result is false (as opposed to true - the property does exist on the actual object)
-              // in operator performs lookup resolution on [[Prototype]] chain
-              // FF 3.6 won't eumerate function instance prototype property (https://developer.mozilla.org/En/Firefox_3.6_for_developers#JavaScript)
-              if ( key in Object(actual) ) {
-                result &= assertObject(expected[key], actual[key], opt_strictValueChecking, opt_exceptionType, opt_exceptionHandler);
-              } else {
-                opt_exceptionHandler && opt_exceptionHandler( "MissingHashKeyException", "assertHash", key, "not found on object" )
-                result = false;
-                continue checkingMembers;
+        // If object then should allow mutation
+        obj['test'] = true;
+        result = !!(obj['test']);
+        
+        // cleanup to avoid false positives later on
+        if (result) {
+          delete obj['test'];
+        }
+        return result;        
+      }
+      
+      function assertHash (expected, actual, opt_strictValueChecking, opt_exceptionType, opt_exceptionHandler) {
+      
+        var result = true;
+      
+        // asserHash interface checks
+        // Required parameters & characteristics (e.g. is enumerable)
+        if (arguments.length < 2) {
+          throw {
+            type: "MissingParametersException",
+            msg: "assertHash() requires at least an expected and actual parameter to be passed to interface"
+          }
+        } else if ( (isHash(expected) === false) || (isHash(actual) === false) ) {
+          throw {
+            type: "MalformedArgumentsException",
+            msg: "assertHash() requires the 'expected' and 'actual' parameters to be Hashes. Expected was: " + expected + ", actual was: " + actual
+          }
+        } else {
+        // Is this the correct check? Everything in JS is essentially a hash (as all derive from Object.prototype), except for falsy data types (undefined, null, NaN)?
+        // Worth testing to see if absolutely generic (aka can enumerate over non object literal hashes)
+        // What about DontEnum stuff? Sort of taken by hasOwnProperty, so what about checking inherited props? Or make clear in description really meant for object literals? If so, should text for object literal? How - Array trick-esque thingy?
+        
+          checkingMembers:
+            for ( var key in expected ) {
+              // expectations don't support prototypical inheritance...
+              if ( expected.hasOwnProperty(key) ) {
+                // but actual values do (and also shadowed natives, e.g. toString as a key - see {DontEnum} tests)
+                // We 'objectify' the 'actual' object as the in operator throws errors when executed against primitive values (e.g. key in "" --> key in Object("")))
+                // We use the in operator as opposed to a dynamic lookup because in the case of an assigned falsy value to actual[key] the result is false (as opposed to true - the property does exist on the actual object)
+                // in operator performs lookup resolution on [[Prototype]] chain
+                // FF 3.6 won't eumerate function instance prototype property (https://developer.mozilla.org/En/Firefox_3.6_for_developers#JavaScript)
+                if ( key in Object(actual) ) {
+                  result &= assertObject(expected[key], actual[key], opt_strictValueChecking, opt_exceptionType, opt_exceptionHandler);
+                } else {
+                  opt_exceptionHandler && opt_exceptionHandler( "MissingHashKeyException", "assertHash", key, "not found on object" )
+                  result = false;
+                  continue checkingMembers;
+                }
               }
             }
-          }
+        }
           
+        return !!result;
       }
-      return !!result;
-    }
+      
+      // For Unit Testing
+      ;;;; expose( isHash, assertHash, "_isHash" );
+      
+      return assertHash;
+            
+    })();
     
     // Delegate function that asserts elements of a collection
     function assertCollection (expected, actual, opt_strictValueChecking, opt_exceptionType, opt_exceptionHandler, opt_identifier) {
@@ -323,13 +362,8 @@
               } catch (error) {
 
                 // If MissingHashKeyException thrown then create custom error listing the missing keys.
-                if ( error && error[0] && error[0].type === "MissingHashKeyException" ) {
-                  opt_exceptionHandler && opt_exceptionHandler("MissingHashKeyException", identifier, "object with native and custom keys", (function (a) {
-                    for ( var i = 0, len = error.length; i < len; i++ ) {
-                      a.push((error[i].message.split(':')[1]) || null);
-                    }
-                    return a.join('')
-                  })(['missing keys:']));
+                if ( error && error.type && error.type === "MalformedArgumentsException" ) {
+                  opt_exceptionHandler && opt_exceptionHandler(error.type, identifier, expected, actual); 
                 } else {
                   throw error;
                 }
