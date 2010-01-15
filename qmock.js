@@ -126,20 +126,17 @@
             ](member, memberConfig[expectation]);
 
           } else if ( /propertyWhitelist/.test(expectation) ) {
-
             // If not callable check property not whitelisted before throwing error
             throwMockException("InvalidExpectationMethodCallException", member["name"] + '.' + expectation, "Key to mutator method on mockedMember object", name);
-          
           }
 
         } // end setExpectations loop
-      
+
       } else {
-        
         // If expectation not method then simply set property
         member.withValue(memberConfig["value"]);
-        
       }
+
     }
 
     return undefined;
@@ -194,7 +191,7 @@
 
           checkingMembers:
             for ( var key in expected ) {
-              
+
               // expectations don't support prototypical inheritance...
               if ( expected.hasOwnProperty(key) ) {
                 // but actual values do (and also shadowed natives, e.g. toString as a key - see {DontEnum} tests)
@@ -210,7 +207,7 @@
                   continue checkingMembers;
                 }
               }
-              
+
             }
         }
 
@@ -511,7 +508,7 @@
               // Compare actual with expected arguments and if true return correct object
               assertingPresentations:
                 for (var i = 0, len = method.expectedArgs.length; i < len; i++) {
-                  
+
                   try {
                     if ( assertCollection(
                           method.expectedArgs[i]["accepts"], // 'expected' inputs
@@ -529,7 +526,7 @@
                       continue assertingPresentations;
                     }
                   }
-                  
+
               }
 
               return obj;
