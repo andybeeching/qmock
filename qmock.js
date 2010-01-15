@@ -172,7 +172,7 @@
         var result = true;
 
         // asserHash interface checks
-        // Required parameters & characteristics (e.g. is enumerable)
+        // Required parameters & characteristics (i.e. is enumerable)
         if (arguments.length < 2) {
           throw {
             type: "MissingParametersException",
@@ -184,12 +184,12 @@
             msg: "assertHash() requires the 'expected' and 'actual' parameters to be Hashes. Expected was: " + expected + ", actual was: " + actual
           }
         } else {
-        // Is this the correct check? Everything in JS is essentially a hash (as all derive from Object.prototype), except for falsy data types (undefined, null, NaN)?
-        // Worth testing to see if absolutely generic (aka can enumerate over non object literal hashes)
-        // What about DontEnum stuff? Sort of taken by hasOwnProperty, so what about checking inherited props? Or make clear in description really meant for object literals? If so, should text for object literal? How - Array trick-esque thingy?
+
+        // What about DontEnum stuff?
 
           checkingMembers:
             for ( var key in expected ) {
+              
               // expectations don't support prototypical inheritance...
               if ( expected.hasOwnProperty(key) ) {
                 // but actual values do (and also shadowed natives, e.g. toString as a key - see {DontEnum} tests)
@@ -205,6 +205,7 @@
                   continue checkingMembers;
                 }
               }
+              
             }
         }
 
@@ -492,12 +493,12 @@
             // Execute any callback functions specified with associated args.
             for (var i = 0, len = parameters.length; i < len; i++) {
               if (parameters[i] && parameters[i].constructor === Function) {
-                  parameters[i].apply(undefined, method.callbackArgs);
+                  parameters[i].apply(null, method.callbackArgs);
               }
             }
 
             // Assert arguments against expected presentations and return appropriate object
-            return (function getReturnValue(presentation) {
+            return ( function getReturnValue ( presentation ) {
 
               // Make default return value the defualt method value (undefined || Object || self (mock - chained))
               var obj = method.returnValue;
@@ -505,6 +506,7 @@
               // Compare actual with expected arguments and if true return correct object
               assertingPresentations:
                 for (var i = 0, len = method.expectedArgs.length; i < len; i++) {
+                  
                   try {
                     if ( assertCollection(
                           method.expectedArgs[i]["accepts"], // 'expected' inputs
@@ -522,6 +524,7 @@
                       continue assertingPresentations;
                     }
                   }
+                  
               }
 
               return obj;
@@ -748,6 +751,7 @@
 
     // Backward compatibility for QMock v0.1 API
     MockedMember.prototype["withArguments"] = MockedMember.prototype.accepts;
+    MockedMember.prototype["andReturns"] = MockedMember.prototype.returns;
 
     // PUBLIC METHODS on mock
     // Creates new MockedMember instance on Mock Object and sets-up initial method expectation

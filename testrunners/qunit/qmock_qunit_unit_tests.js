@@ -4693,7 +4693,7 @@
 
 	test("QMock version 0.1 Constructor and mockedMember object API backward compatibility", function () {
 
-	  expect(2);
+	  expect(3);
   
 	  // Setup - Test support for expectsArguments on mock Constructors
 	  var $ = new Mock ();
@@ -4720,6 +4720,17 @@
 	  mock.swing(1).run("string");
 	  // Verify
 	  ok(mock.verify(), "verify() should be true: mock supports 'withArguments' setup method on mocked members");
+	  
+	  // Setup - Test support for withArguments method on mocked methods
+
+  	  var mock = new Mock ();
+  	  mock
+  	    .expects(1)
+  	      .method("swing")
+  	      .andReturns(true);
+  
+  	  // Good exercise & verify
+		  equals(mock.swing(), true, "mock.swing() should return true when setting up return value with 'andReturns' (API v 0.1)");
         
 	});
 
