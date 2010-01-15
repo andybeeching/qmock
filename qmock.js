@@ -840,7 +840,7 @@
 
   // Register qMock as a Common JS module
   if ( typeof exports !== "undefined" && typeof require !== "undefined" ) {
-    exports.Mocks = MockConstructor;
+    exports.Mock = MockConstructor;
   }
 
 })('Mock', this);
