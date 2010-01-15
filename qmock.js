@@ -125,15 +125,20 @@
                 : "call"
             ](member, memberConfig[expectation]);
 
-          // If not callable check property not whitelisted before throwing error
           } else if ( /propertyWhitelist/.test(expectation) ) {
+
+            // If not callable check property not whitelisted before throwing error
             throwMockException("InvalidExpectationMethodCallException", member["name"] + '.' + expectation, "Key to mutator method on mockedMember object", name);
+          
           }
 
         } // end setExpectations loop
+      
       } else {
+        
         // If expectation not method then simply set property
         member.withValue(memberConfig["value"]);
+        
       }
     }
 
