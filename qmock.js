@@ -843,4 +843,4 @@
   // API Registration - register qMock in mapped scope
   container[ identifier ] = MockConstructor;
 
-})('Mock', typeof exports === "undefined" ? this : exports);
+})('Mock', ( typeof exports === "undefined" ) ? this : exports );
