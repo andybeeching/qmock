@@ -49,7 +49,7 @@
  * TODO: Patch QUnit to support a sentence like: 700 tests of 702 run passed, 2 failed and 150 weren't run.
  */
 
-(function initialiseQMock (Mock, container) {
+(function initialiseQMock (identifier, container) {
 
   /**
   * Helpers - Protected
@@ -836,11 +836,6 @@
   ;;;; expose( createMockFromJSON, MockConstructor, "_createMockFromJSON" );
 
   // API Registration - register qMock in mapped scope
-  container.Mock = MockConstructor;
+  container[ identifier ] = MockConstructor;
 
-  // Register qMock as a Common JS module
-  if ( typeof exports !== "undefined" && typeof require !== "undefined" ) {
-    exports.Mock = MockConstructor;
-  }
-
-})('Mock', this);
+})('Mock', typeof exports === "undefined" ? this : exports);
