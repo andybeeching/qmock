@@ -3553,7 +3553,6 @@
     ninja.describe({});
 
     try {
-      debugger;
       ninja.verify();
       ok(false, "verify() should throw exception");
     } catch (e) {

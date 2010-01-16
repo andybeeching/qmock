@@ -160,7 +160,7 @@
         if ( obj === undefined || obj === null) {
           return result;
         }
-        
+
         // If object then should allow mutation
         obj[id] = true;
         result = !!(obj[id]);
@@ -169,7 +169,7 @@
         if (result) {
           delete obj[id];
         }
-        
+
         return result;
       }
 
@@ -178,7 +178,7 @@
         var result = true,
             raiseError = (opt && opt.exceptionHandler) || null,
             identifier = (opt && opt.identifier) || 'assertHash()';
-        
+
         // asserHash interface checks
         // Required parameters & characteristics (i.e. is enumerable)
         if ( arguments.length < 2 ) {
@@ -194,7 +194,7 @@
         } else {
 
         // What about DontEnum stuff?
-        
+
           checkingMembers:
             for ( var key in expected ) {
 
@@ -262,7 +262,7 @@
 
       // Return a Boolean for recursive calls, exceptions handled in opt_exceptionsHandler.
       return !!result;
-      
+
     }
 
     // Key function to test objects against each other.
@@ -522,7 +522,7 @@
                     if ( assertCollection(
                           method.expectedArgs[i]["accepts"], // 'expected' inputs
                           presentation, // 'actual' inputs
-                          true // Must be strict 1:1 match to return a certain value
+                          {strictValueChecking: true} // Must be strict 1:1 match to return a certain value
                         )
                     ) {
                       // If match found against presentation return bound object (or self if chained)
@@ -727,11 +727,12 @@
                                 ? actualArgs[i]
                                 // Else assume default mode of overloading and type checking against method interface
                                 : slice.call(actualArgs[i], 0, expectedArgs[j]["accepts"].length),
-                              strictValueChecking,
-                              (strictValueChecking) ? "IncorrectArgumentValueException" : "IncorrectArgumentTypeException",
-                              throwMockException,
-                              name,
-                              exceptions
+                              {
+                                "strictValueChecking": strictValueChecking,
+                                "exceptionType": (strictValueChecking) ? "IncorrectArgumentValueException" : "IncorrectArgumentTypeException",
+                                "exceptionHandler": throwMockException,
+                                "identifier": name
+                              }
                             )
                           ) {
                               // If match remove exceptions raised during checks and move on to next presentation.
@@ -792,7 +793,14 @@
           // Thrown in to satisfy tests (for consistency's sake) - NEEDS TO BE REFACTORED OUT!
           throwMockException("IncorrectNumberOfArgumentsException", "Constructor function", expectsArguments.length, actualArguments.length);
         } else {
-          assertCollection(expectsArguments, actualArguments, strictValueChecking, null, throwMockException);
+          assertCollection(
+            expectsArguments,
+            actualArguments,
+            {
+              "strictValueChecking": strictValueChecking,
+              "exceptionHandler": throwMockException
+            }
+          );
         }
       }
 
