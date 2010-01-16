@@ -688,43 +688,43 @@
 	  // FALSE ASSERTIONS
 	
 	  // Test invalid argument type - Constructors
-		equals( assertObject(1, String, true ), false, "assertObject() should return false with expected: (Number: 1) and actual: (String)" );
-		equals( assertObject(1, Boolean, true ), false, "assertObject() should return false with expected: (Number: 1) and actual: (Boolean)" );
-		equals( assertObject(1, Array, true ), false, "assertObject() should return false with expected: (Number: 1) and actual: (Array)" );
-		equals( assertObject(1, Object, true ), false, "assertObject() should return false with expected: (Number: 1) and actual: (Object)" );
-		equals( assertObject(1, Function, true ), false, "assertObject() should return false with expected: (Number: 1) and actual: (Function)" );
-		equals( assertObject(1, RegExp, true ), false, "assertObject() should return false with expected: (Number: 1) and actual: (RegExp)" );
-		equals( assertObject(1, Date, true ), false, "assertObject() should return false with expected: (Number: 1) and actual: (Date)" );
-		equals( assertObject(1, Custom, true ), false, "assertObject() should return false with expected: (Number: 1) and actual: (Custom)" );
+		equals( assertObject(1, String, {strictValueChecking: true} ), false, "assertObject() should return false with expected: (Number: 1) and actual: (String)" );
+		equals( assertObject(1, Boolean, {strictValueChecking: true} ), false, "assertObject() should return false with expected: (Number: 1) and actual: (Boolean)" );
+		equals( assertObject(1, Array, {strictValueChecking: true} ), false, "assertObject() should return false with expected: (Number: 1) and actual: (Array)" );
+		equals( assertObject(1, Object, {strictValueChecking: true} ), false, "assertObject() should return false with expected: (Number: 1) and actual: (Object)" );
+		equals( assertObject(1, Function, {strictValueChecking: true} ), false, "assertObject() should return false with expected: (Number: 1) and actual: (Function)" );
+		equals( assertObject(1, RegExp, {strictValueChecking: true} ), false, "assertObject() should return false with expected: (Number: 1) and actual: (RegExp)" );
+		equals( assertObject(1, Date, {strictValueChecking: true} ), false, "assertObject() should return false with expected: (Number: 1) and actual: (Date)" );
+		equals( assertObject(1, Custom, {strictValueChecking: true} ), false, "assertObject() should return false with expected: (Number: 1) and actual: (Custom)" );
 		
 		// Test invalid argument type - Values (truthy)
 		
-		equals( assertObject(1, "string", true ), false, "assertObject() should return false with expected: (Number: 1) and actual: (String: string)" );
-		equals( assertObject(1, true, true ), false, "assertObject() should return false with expected: (Number: 1) and actual: (Boolean: true)" );
-		equals( assertObject(1, [], true ), false, "assertObject() should return false with expected: (Number: 1) and actual: (Array: [])" );
-		equals( assertObject(1, {}, true ), false, "assertObject() should return false with expected: (Number: 1) and actual: (Object: {})" );
-		equals( assertObject(1, function(){}, true ), false, "assertObject() should return false with expected: (Number: 1) and actual: (Function: function(){})" );
-		equals( assertObject(1, /test/, true ), false, "assertObject() should return false with expected: (Number: 1) and actual: (RegExp: /test/)" );
-		equals( assertObject(1, new Date, true ), false, "assertObject() should return false with expected: (Number: 1) and actual: (Date: new instance)" );
-		equals( assertObject(1, new Custom, true ), false, "assertObject() should return false with expected: (Number: 1) and actual: (Custom: new instance)" );
+		equals( assertObject(1, "string", {strictValueChecking: true} ), false, "assertObject() should return false with expected: (Number: 1) and actual: (String: string)" );
+		equals( assertObject(1, true, {strictValueChecking: true} ), false, "assertObject() should return false with expected: (Number: 1) and actual: (Boolean: true)" );
+		equals( assertObject(1, [], {strictValueChecking: true} ), false, "assertObject() should return false with expected: (Number: 1) and actual: (Array: [])" );
+		equals( assertObject(1, {}, {strictValueChecking: true} ), false, "assertObject() should return false with expected: (Number: 1) and actual: (Object: {})" );
+		equals( assertObject(1, function(){}, {strictValueChecking: true} ), false, "assertObject() should return false with expected: (Number: 1) and actual: (Function: function(){})" );
+		equals( assertObject(1, /test/, {strictValueChecking: true} ), false, "assertObject() should return false with expected: (Number: 1) and actual: (RegExp: /test/)" );
+		equals( assertObject(1, new Date, {strictValueChecking: true} ), false, "assertObject() should return false with expected: (Number: 1) and actual: (Date: new instance)" );
+		equals( assertObject(1, new Custom, {strictValueChecking: true} ), false, "assertObject() should return false with expected: (Number: 1) and actual: (Custom: new instance)" );
   
 	  // Test invalid argument types - false values
-		equals( assertObject(1, null, true ), false, "assertObject() should return false with expected: (Number: 1) and actual: (null)" );
-		equals( assertObject(1, undefined, true ), false, "assertObject() should return false with expected: (Number: 1) and actual: (undefined)" );
+		equals( assertObject(1, null, {strictValueChecking: true} ), false, "assertObject() should return false with expected: (Number: 1) and actual: (null)" );
+		equals( assertObject(1, undefined, {strictValueChecking: true} ), false, "assertObject() should return false with expected: (Number: 1) and actual: (undefined)" );
 		
 		// TRUE ASSERTIONS
-		equals( assertObject(1, Number, true ), false, "assertObject() should return false with expected: (Number: 1) and actual: (Number)" );
-		equals( assertObject(1, 1, true ), true, "assertObject() should return true with expected: (Number: 1) and actual: (Number: 1)" );
-		equals( assertObject(1, 0, true ), false, "assertObject() should return false with expected: (Number: 1) and actual: (Number: 0)" );
+		equals( assertObject(1, Number, {strictValueChecking: true} ), false, "assertObject() should return false with expected: (Number: 1) and actual: (Number)" );
+		equals( assertObject(1, 1, {strictValueChecking: true} ), true, "assertObject() should return true with expected: (Number: 1) and actual: (Number: 1)" );
+		equals( assertObject(1, 0, {strictValueChecking: true} ), false, "assertObject() should return false with expected: (Number: 1) and actual: (Number: 0)" );
 		
 		// Expect Falsy Value
-		equals( assertObject(0, Number, true ), false, "assertObject() should return false with expected: (Number: 0) and actual: (Number)" );
-		equals( assertObject(0, 1, true ), false, "assertObject() should return false with expected: (Number: 0) and actual: (Number: 1)" );
-		equals( assertObject(0, 0, true ), true, "assertObject() should return true with expected: (Number: 0) and actual: (Number: 0)" );
+		equals( assertObject(0, Number, {strictValueChecking: true} ), false, "assertObject() should return false with expected: (Number: 0) and actual: (Number)" );
+		equals( assertObject(0, 1, {strictValueChecking: true} ), false, "assertObject() should return false with expected: (Number: 0) and actual: (Number: 1)" );
+		equals( assertObject(0, 0, {strictValueChecking: true} ), true, "assertObject() should return true with expected: (Number: 0) and actual: (Number: 0)" );
 		
 	});
 
-	test("assertObject() - (String: Constructor) primitive - typed checking only", function() {
+	test("assertObject() - (String: Constructor) primitive - typed checking", function() {
 
 	  // FALSE ASSERTIONS
 	  
@@ -768,35 +768,35 @@
 	  
 	  // Test invalid argument type - Constructors
 		
-		equals( assertObject(String, Number, true ), false, "assertObject() should return false with expected: (String) and actual: (Number)" );
-		equals( assertObject(String, Boolean, true ), false, "assertObject() should return false with expected: (String) and actual: (Boolean)" );
-		equals( assertObject(String, Array, true ), false, "assertObject() should return false with expected: (String) and actual: (Array)" );
-		equals( assertObject(String, Object, true ), false, "assertObject() should return false with expected: (String) and actual: (Object)" );
-		equals( assertObject(String, Function, true ), false, "assertObject() should return false with expected: (String) and actual: (Function)" );
-		equals( assertObject(String, RegExp, true ), false, "assertObject() should return false with expected: (String) and actual: (RegExp)" );
-		equals( assertObject(String, Date, true ), false, "assertObject() should return false with expected: (String) and actual: (Date)" );
-		equals( assertObject(String, Custom, true ), false, "assertObject() should return false with expected: (String) and actual: (Custom)" );
+		equals( assertObject(String, Number, {strictValueChecking: true}), false, "assertObject() should return false with expected: (String) and actual: (Number)" );
+		equals( assertObject(String, Boolean, {strictValueChecking: true}), false, "assertObject() should return false with expected: (String) and actual: (Boolean)" );
+		equals( assertObject(String, Array, {strictValueChecking: true}), false, "assertObject() should return false with expected: (String) and actual: (Array)" );
+		equals( assertObject(String, Object, {strictValueChecking: true}), false, "assertObject() should return false with expected: (String) and actual: (Object)" );
+		equals( assertObject(String, Function, {strictValueChecking: true}), false, "assertObject() should return false with expected: (String) and actual: (Function)" );
+		equals( assertObject(String, RegExp, {strictValueChecking: true}), false, "assertObject() should return false with expected: (String) and actual: (RegExp)" );
+		equals( assertObject(String, Date, {strictValueChecking: true}), false, "assertObject() should return false with expected: (String) and actual: (Date)" );
+		equals( assertObject(String, Custom, {strictValueChecking: true}), false, "assertObject() should return false with expected: (String) and actual: (Custom)" );
 		
 		// Test invalid argument type - Values (truthy)
 		
-		equals( assertObject(String, 1, true ), false, "assertObject() should return false with expected: (String) and actual: (Number: 1)" );
-		equals( assertObject(String, true, true ), false, "assertObject() should return false with expected: (String) and actual: (Boolean: true)" );
-		equals( assertObject(String, [], true ), false, "assertObject() should return false with expected: (String) and actual: (Array: [])" );
-		equals( assertObject(String, {}, true ), false, "assertObject() should return false with expected: (String) and actual: (Object: {})" );
-		equals( assertObject(String, function(){}, true ), false, "assertObject() should return false with expected: (String) and actual: (Function: function(){})" );
-		equals( assertObject(String, /test/, true ), false, "assertObject() should return false with expected: (String) and actual: (RegExp: /test/)" );
-		equals( assertObject(String, new Date, true ), false, "assertObject() should return false with expected: (String) and actual: (Date: new instance)" );
-		equals( assertObject(String, new Custom, true ), false, "assertObject() should return false with expected: (String) and actual: (Custom: new instance)" );
+		equals( assertObject(String, 1, {strictValueChecking: true}), false, "assertObject() should return false with expected: (String) and actual: (Number: 1)" );
+		equals( assertObject(String, true, {strictValueChecking: true}), false, "assertObject() should return false with expected: (String) and actual: (Boolean: true)" );
+		equals( assertObject(String, [], {strictValueChecking: true}), false, "assertObject() should return false with expected: (String) and actual: (Array: [])" );
+		equals( assertObject(String, {}, {strictValueChecking: true}), false, "assertObject() should return false with expected: (String) and actual: (Object: {})" );
+		equals( assertObject(String, function(){}, {strictValueChecking: true}), false, "assertObject() should return false with expected: (String) and actual: (Function: function(){})" );
+		equals( assertObject(String, /test/, {strictValueChecking: true}), false, "assertObject() should return false with expected: (String) and actual: (RegExp: /test/)" );
+		equals( assertObject(String, new Date, {strictValueChecking: true}), false, "assertObject() should return false with expected: (String) and actual: (Date: new instance)" );
+		equals( assertObject(String, new Custom, {strictValueChecking: true}), false, "assertObject() should return false with expected: (String) and actual: (Custom: new instance)" );
   
 	  // Test invalid argument types - false values
 	
-		equals( assertObject(String, null, true ), false, "assertObject() should return false with expected: (String) and actual: (null)" );
-		equals( assertObject(String, undefined, true ), false, "assertObject() should return false with expected: (String) and actual: (undefined)" );
+		equals( assertObject(String, null, {strictValueChecking: true}), false, "assertObject() should return false with expected: (String) and actual: (null)" );
+		equals( assertObject(String, undefined, {strictValueChecking: true}), false, "assertObject() should return false with expected: (String) and actual: (undefined)" );
 		
 		// TRUE ASSERTIONS
-		equals( assertObject(String, String, true ), true, "assertObject() should return true with expected: (String) and actual: (String)" );
-		equals( assertObject(String, "string", true ), false, "assertObject() should return true with expected: (String) and actual: (String: 'string')" );
-		equals( assertObject(String, "", true ), false, "assertObject() should return true with expected: (String) and actual: (String: '')" );
+		equals( assertObject(String, String, {strictValueChecking: true}), true, "assertObject() should return true with expected: (String) and actual: (String)" );
+		equals( assertObject(String, "string", {strictValueChecking: true}), false, "assertObject() should return true with expected: (String) and actual: (String: 'string')" );
+		equals( assertObject(String, "", {strictValueChecking: true}), false, "assertObject() should return true with expected: (String) and actual: (String: '')" );
 		
 	});
 	
@@ -849,44 +849,44 @@
 	
 	  // Test invalid argument type - Constructors
 		
-		equals( assertObject('string', Number, true ), false, "assertObject() should return false with expected: (String: 'string') and actual: (Number)" );
-		equals( assertObject('string', Boolean, true ), false, "assertObject() should return false with expected: (String: 'string') and actual: (Boolean)" );
-		equals( assertObject('string', Array, true ), false, "assertObject() should return false with expected: (String: 'string') and actual: (Array)" );
-		equals( assertObject('string', Object, true ), false, "assertObject() should return false with expected: (String: 'string') and actual: (Object)" );
-		equals( assertObject('string', Function, true ), false, "assertObject() should return false with expected: (String: 'string') and actual: (Function)" );
-		equals( assertObject('string', RegExp, true ), false, "assertObject() should return false with expected: (String: 'string') and actual: (RegExp)" );
-		equals( assertObject('string', Date, true ), false, "assertObject() should return false with expected: (String: 'string') and actual: (Date)" );
-		equals( assertObject('string', Custom, true ), false, "assertObject() should return false with expected: (String: 'string') and actual: (Custom)" );
+		equals( assertObject('string', Number, {strictValueChecking: true}), false, "assertObject() should return false with expected: (String: 'string') and actual: (Number)" );
+		equals( assertObject('string', Boolean, {strictValueChecking: true}), false, "assertObject() should return false with expected: (String: 'string') and actual: (Boolean)" );
+		equals( assertObject('string', Array, {strictValueChecking: true}), false, "assertObject() should return false with expected: (String: 'string') and actual: (Array)" );
+		equals( assertObject('string', Object, {strictValueChecking: true}), false, "assertObject() should return false with expected: (String: 'string') and actual: (Object)" );
+		equals( assertObject('string', Function, {strictValueChecking: true}), false, "assertObject() should return false with expected: (String: 'string') and actual: (Function)" );
+		equals( assertObject('string', RegExp, {strictValueChecking: true}), false, "assertObject() should return false with expected: (String: 'string') and actual: (RegExp)" );
+		equals( assertObject('string', Date, {strictValueChecking: true}), false, "assertObject() should return false with expected: (String: 'string') and actual: (Date)" );
+		equals( assertObject('string', Custom, {strictValueChecking: true}), false, "assertObject() should return false with expected: (String: 'string') and actual: (Custom)" );
 		
 		// Test invalid argument type - Values (truthy)
 		
-		equals( assertObject('string', 1, true ), false, "assertObject() should return false with expected: (String: 'string') and actual: (Number: 1)" );
-		equals( assertObject('string', true, true ), false, "assertObject() should return false with expected: (String: 'string') and actual: (Boolean: true)" );
-		equals( assertObject('string', [], true ), false, "assertObject() should return false with expected: (String: 'string') and actual: (Array: [])" );
-		equals( assertObject('string', {}, true ), false, "assertObject() should return false with expected: (String: 'string') and actual: (Object: {})" );
-		equals( assertObject('string', function(){}, true ), false, "assertObject() should return false with expected: (String: 'string') and actual: (Function: function(){})" );
-		equals( assertObject('string', /test/, true ), false, "assertObject() should return false with expected: (String: 'string') and actual: (RegExp: /test/)" );
-		equals( assertObject('string', new Date, true ), false, "assertObject() should return false with expected: (String: 'string') and actual: (Date: new instance)" );
-		equals( assertObject('string', new Custom, true ), false, "assertObject() should return false with expected: (String: 'string') and actual: (Custom: new instance)" );
+		equals( assertObject('string', 1, {strictValueChecking: true}), false, "assertObject() should return false with expected: (String: 'string') and actual: (Number: 1)" );
+		equals( assertObject('string', true, {strictValueChecking: true}), false, "assertObject() should return false with expected: (String: 'string') and actual: (Boolean: true)" );
+		equals( assertObject('string', [], {strictValueChecking: true}), false, "assertObject() should return false with expected: (String: 'string') and actual: (Array: [])" );
+		equals( assertObject('string', {}, {strictValueChecking: true}), false, "assertObject() should return false with expected: (String: 'string') and actual: (Object: {})" );
+		equals( assertObject('string', function(){}, {strictValueChecking: true}), false, "assertObject() should return false with expected: (String: 'string') and actual: (Function: function(){})" );
+		equals( assertObject('string', /test/, {strictValueChecking: true}), false, "assertObject() should return false with expected: (String: 'string') and actual: (RegExp: /test/)" );
+		equals( assertObject('string', new Date, {strictValueChecking: true}), false, "assertObject() should return false with expected: (String: 'string') and actual: (Date: new instance)" );
+		equals( assertObject('string', new Custom, {strictValueChecking: true}), false, "assertObject() should return false with expected: (String: 'string') and actual: (Custom: new instance)" );
   
 	  // Test invalid argument types - false values
 	
-		equals( assertObject('string', null, true ), false, "assertObject() should return false with expected: (String: 'string') and actual: (null)" );
-		equals( assertObject('string', undefined, true ), false, "assertObject() should return false with expected: (String: 'string') and actual: (undefined)" );
+		equals( assertObject('string', null, {strictValueChecking: true}), false, "assertObject() should return false with expected: (String: 'string') and actual: (null)" );
+		equals( assertObject('string', undefined, {strictValueChecking: true}), false, "assertObject() should return false with expected: (String: 'string') and actual: (undefined)" );
 		
 		// TRUE ASSERTIONS
-		equals( assertObject('string', String, true ), false, "assertObject() should return false with expected: (String: 'string') and actual: (String)" );
-		equals( assertObject('string', "string", true ), true, "assertObject() should return true with expected: (String: 'string') and actual: (String: 'string')" );
-		equals( assertObject('string', "", true ), false, "assertObject() should return false with expected: (String: 'string') and actual: (String: '')" );
+		equals( assertObject('string', String, {strictValueChecking: true}), false, "assertObject() should return false with expected: (String: 'string') and actual: (String)" );
+		equals( assertObject('string', "string", {strictValueChecking: true}), true, "assertObject() should return true with expected: (String: 'string') and actual: (String: 'string')" );
+		equals( assertObject('string', "", {strictValueChecking: true}), false, "assertObject() should return false with expected: (String: 'string') and actual: (String: '')" );
 
 		// Expect Falsy Value
-		equals( assertObject('', String, true), false, "assertObject() should return false with expected: (String: '') and actual: (String)" );
-		equals( assertObject('', "string", true), false, "assertObject() should return false with expected: (String: '') and actual: (String: 'string')" );
-		equals( assertObject('', "", true), true, "assertObject() should return true with expected: (String: '') and actual: (String: '')" );
+		equals( assertObject('', String, {strictValueChecking: true}), false, "assertObject() should return false with expected: (String: '') and actual: (String)" );
+		equals( assertObject('', "string", {strictValueChecking: true}), false, "assertObject() should return false with expected: (String: '') and actual: (String: 'string')" );
+		equals( assertObject('', "", {strictValueChecking: true}), true, "assertObject() should return true with expected: (String: '') and actual: (String: '')" );
 		
 	});
 
-	test("assertObject() - (Boolean: Constructor) primitive - typed checking only", function() {
+	test("assertObject() - (Boolean: Constructor) primitive - typed checking", function() {
 
 	  // FALSE ASSERTIONS
 	  
@@ -930,39 +930,39 @@
   
 	  // Test invalid argument type - Constructors
 		
-		equals( assertObject(Boolean, Number, true ), false, "assertObject() should return false with expected: (Boolean) and actual: (Number)" );
-		equals( assertObject(Boolean, String, true ), false, "assertObject() should return false with expected: (Boolean) and actual: (String)" );
-		equals( assertObject(Boolean, Array, true ), false, "assertObject() should return false with expected: (Boolean) and actual: (Array)" );
-		equals( assertObject(Boolean, Object, true ), false, "assertObject() should return false with expected: (Boolean) and actual: (Object)" );
-		equals( assertObject(Boolean, Function, true ), false, "assertObject() should return false with expected: (Boolean) and actual: (Function)" );
-		equals( assertObject(Boolean, RegExp, true ), false, "assertObject() should return false with expected: (Boolean) and actual: (RegExp)" );
-		equals( assertObject(Boolean, Date, true ), false, "assertObject() should return false with expected: (Boolean) and actual: (Date)" );
-		equals( assertObject(Boolean, Custom, true ), false, "assertObject() should return false with expected: (Boolean) and actual: (Custom)" );
+		equals( assertObject(Boolean, Number, {strictValueChecking: true}), false, "assertObject() should return false with expected: (Boolean) and actual: (Number)" );
+		equals( assertObject(Boolean, String, {strictValueChecking: true}), false, "assertObject() should return false with expected: (Boolean) and actual: (String)" );
+		equals( assertObject(Boolean, Array, {strictValueChecking: true}), false, "assertObject() should return false with expected: (Boolean) and actual: (Array)" );
+		equals( assertObject(Boolean, Object, {strictValueChecking: true}), false, "assertObject() should return false with expected: (Boolean) and actual: (Object)" );
+		equals( assertObject(Boolean, Function, {strictValueChecking: true}), false, "assertObject() should return false with expected: (Boolean) and actual: (Function)" );
+		equals( assertObject(Boolean, RegExp, {strictValueChecking: true}), false, "assertObject() should return false with expected: (Boolean) and actual: (RegExp)" );
+		equals( assertObject(Boolean, Date, {strictValueChecking: true}), false, "assertObject() should return false with expected: (Boolean) and actual: (Date)" );
+		equals( assertObject(Boolean, Custom, {strictValueChecking: true}), false, "assertObject() should return false with expected: (Boolean) and actual: (Custom)" );
 		
 		// Test invalid argument type - Values (truthy)
 		
-		equals( assertObject(Boolean, 1, true ), false, "assertObject() should return false with expected: (Boolean) and actual: (Number: 1)" );
-		equals( assertObject(Boolean, "string", true ), false, "assertObject() should return false with expected: (Boolean) and actual: (String: string)" );
-		equals( assertObject(Boolean, [], true ), false, "assertObject() should return false with expected: (Boolean) and actual: (Array: [])" );
-		equals( assertObject(Boolean, {}, true ), false, "assertObject() should return false with expected: (Boolean) and actual: (Object: {})" );
-		equals( assertObject(Boolean, function(){}, true ), false, "assertObject() should return false with expected: (Boolean) and actual: (Function: function(){})" );
-		equals( assertObject(Boolean, /test/, true ), false, "assertObject() should return false with expected: (Boolean) and actual: (RegExp: /test/)" );
-		equals( assertObject(Boolean, new Date, true ), false, "assertObject() should return false with expected: (Boolean) and actual: (Date: new instance)" );
-		equals( assertObject(Boolean, new Custom, true ), false, "assertObject() should return false with expected: (Boolean) and actual: (Custom: new instance)" );
+		equals( assertObject(Boolean, 1, {strictValueChecking: true}), false, "assertObject() should return false with expected: (Boolean) and actual: (Number: 1)" );
+		equals( assertObject(Boolean, "string", {strictValueChecking: true}), false, "assertObject() should return false with expected: (Boolean) and actual: (String: string)" );
+		equals( assertObject(Boolean, [], {strictValueChecking: true}), false, "assertObject() should return false with expected: (Boolean) and actual: (Array: [])" );
+		equals( assertObject(Boolean, {}, {strictValueChecking: true}), false, "assertObject() should return false with expected: (Boolean) and actual: (Object: {})" );
+		equals( assertObject(Boolean, function(){}, {strictValueChecking: true}), false, "assertObject() should return false with expected: (Boolean) and actual: (Function: function(){})" );
+		equals( assertObject(Boolean, /test/, {strictValueChecking: true}), false, "assertObject() should return false with expected: (Boolean) and actual: (RegExp: /test/)" );
+		equals( assertObject(Boolean, new Date, {strictValueChecking: true}), false, "assertObject() should return false with expected: (Boolean) and actual: (Date: new instance)" );
+		equals( assertObject(Boolean, new Custom, {strictValueChecking: true}), false, "assertObject() should return false with expected: (Boolean) and actual: (Custom: new instance)" );
   
 	  // Test invalid argument types - false values
 	
-		equals( assertObject(Boolean, null, true ), false, "assertObject() should return false with expected: (Boolean) and actual: (null)" );
-		equals( assertObject(Boolean, undefined, true ), false, "assertObject() should return false with expected: (Boolean) and actual: (undefined)" );
+		equals( assertObject(Boolean, null, {strictValueChecking: true}), false, "assertObject() should return false with expected: (Boolean) and actual: (null)" );
+		equals( assertObject(Boolean, undefined, {strictValueChecking: true}), false, "assertObject() should return false with expected: (Boolean) and actual: (undefined)" );
 		
 		// TRUE ASSERTIONS
-		equals( assertObject(Boolean, Boolean, true ), true, "assertObject() should return true with expected: (Boolean) and actual: (Boolean)" );
-		equals( assertObject(Boolean, true, true ), false, "assertObject() should return true with expected: (Boolean) and actual: (Boolean: true)" );
-		equals( assertObject(Boolean, false, true ), false, "assertObject() should return true with expected: (Boolean) and actual: (Boolean: false)" );
+		equals( assertObject(Boolean, Boolean, {strictValueChecking: true}), true, "assertObject() should return true with expected: (Boolean) and actual: (Boolean)" );
+		equals( assertObject(Boolean, true, {strictValueChecking: true}), false, "assertObject() should return true with expected: (Boolean) and actual: (Boolean: true)" );
+		equals( assertObject(Boolean, false, {strictValueChecking: true}), false, "assertObject() should return true with expected: (Boolean) and actual: (Boolean: false)" );
 		
 	});
 	
-	test("assertObject() - (Boolean: true) primitive - typed checking only", function() {
+	test("assertObject() - (Boolean: true) primitive - typed checking", function() {
 
 	  // FALSE ASSERTIONS
 	  
@@ -1011,44 +1011,44 @@
   
 	  // Test invalid argument type - Constructors
 		
-		equals( assertObject(true, Number, true ), false, "assertObject() should return false with expected: (Boolean: true) and actual: (Number)" );
-		equals( assertObject(true, String, true ), false, "assertObject() should return false with expected: (Boolean: true) and actual: (String)" );
-		equals( assertObject(true, Array, true ), false, "assertObject() should return false with expected: (Boolean: true) and actual: (Array)" );
-		equals( assertObject(true, Object, true ), false, "assertObject() should return false with expected: (Boolean: true) and actual: (Object)" );
-		equals( assertObject(true, Function, true ), false, "assertObject() should return false with expected: (Boolean: true) and actual: (Function)" );
-		equals( assertObject(true, RegExp, true ), false, "assertObject() should return false with expected: (Boolean: true) and actual: (RegExp)" );
-		equals( assertObject(true, Date, true ), false, "assertObject() should return false with expected: (Boolean: true) and actual: (Date)" );
-		equals( assertObject(true, Custom, true ), false, "assertObject() should return false with expected: (Boolean: true) and actual: (Custom)" );
+		equals( assertObject(true, Number, {strictValueChecking: true}), false, "assertObject() should return false with expected: (Boolean: true) and actual: (Number)" );
+		equals( assertObject(true, String, {strictValueChecking: true}), false, "assertObject() should return false with expected: (Boolean: true) and actual: (String)" );
+		equals( assertObject(true, Array, {strictValueChecking: true}), false, "assertObject() should return false with expected: (Boolean: true) and actual: (Array)" );
+		equals( assertObject(true, Object, {strictValueChecking: true}), false, "assertObject() should return false with expected: (Boolean: true) and actual: (Object)" );
+		equals( assertObject(true, Function, {strictValueChecking: true}), false, "assertObject() should return false with expected: (Boolean: true) and actual: (Function)" );
+		equals( assertObject(true, RegExp, {strictValueChecking: true}), false, "assertObject() should return false with expected: (Boolean: true) and actual: (RegExp)" );
+		equals( assertObject(true, Date, {strictValueChecking: true}), false, "assertObject() should return false with expected: (Boolean: true) and actual: (Date)" );
+		equals( assertObject(true, Custom, {strictValueChecking: true}), false, "assertObject() should return false with expected: (Boolean: true) and actual: (Custom)" );
 		
 		// Test invalid argument type - Values (truthy)
 		
-		equals( assertObject(true, 1, true ), false, "assertObject() should return false with expected: (Boolean: true) and actual: (Number: 1)" );
-		equals( assertObject(true, "string", true ), false, "assertObject() should return false with expected: (Boolean: true) and actual: (String: string)" );
-		equals( assertObject(true, [], true ), false, "assertObject() should return false with expected: (Boolean: true) and actual: (Array: [])" );
-		equals( assertObject(true, {}, true ), false, "assertObject() should return false with expected: (Boolean: true) and actual: (Object: {})" );
-		equals( assertObject(true, function(){}, true ), false, "assertObject() should return false with expected: (Boolean: true) and actual: (Function: function(){})" );
-		equals( assertObject(true, /test/, true ), false, "assertObject() should return false with expected: (Boolean: true) and actual: (RegExp: /test/)" );
-		equals( assertObject(true, new Date, true ), false, "assertObject() should return false with expected: (Boolean: true) and actual: (Date: new instance)" );
-		equals( assertObject(true, new Custom, true ), false, "assertObject() should return false with expected: (Boolean: true) and actual: (Custom: new instance)" );
+		equals( assertObject(true, 1, {strictValueChecking: true}), false, "assertObject() should return false with expected: (Boolean: true) and actual: (Number: 1)" );
+		equals( assertObject(true, "string", {strictValueChecking: true}), false, "assertObject() should return false with expected: (Boolean: true) and actual: (String: string)" );
+		equals( assertObject(true, [], {strictValueChecking: true}), false, "assertObject() should return false with expected: (Boolean: true) and actual: (Array: [])" );
+		equals( assertObject(true, {}, {strictValueChecking: true}), false, "assertObject() should return false with expected: (Boolean: true) and actual: (Object: {})" );
+		equals( assertObject(true, function(){}, {strictValueChecking: true}), false, "assertObject() should return false with expected: (Boolean: true) and actual: (Function: function(){})" );
+		equals( assertObject(true, /test/, {strictValueChecking: true}), false, "assertObject() should return false with expected: (Boolean: true) and actual: (RegExp: /test/)" );
+		equals( assertObject(true, new Date, {strictValueChecking: true}), false, "assertObject() should return false with expected: (Boolean: true) and actual: (Date: new instance)" );
+		equals( assertObject(true, new Custom, {strictValueChecking: true}), false, "assertObject() should return false with expected: (Boolean: true) and actual: (Custom: new instance)" );
   
 	  // Test invalid argument types - false values
 	
-		equals( assertObject(true, null, true ), false, "assertObject() should return false with expected: (Boolean: true) and actual: (null)" );
-		equals( assertObject(true, undefined, true ), false, "assertObject() should return false with expected: (Boolean: true) and actual: (undefined)" );
+		equals( assertObject(true, null, {strictValueChecking: true}), false, "assertObject() should return false with expected: (Boolean: true) and actual: (null)" );
+		equals( assertObject(true, undefined, {strictValueChecking: true}), false, "assertObject() should return false with expected: (Boolean: true) and actual: (undefined)" );
 		
 		// TRUE ASSERTIONS
-		equals( assertObject(true, Boolean, true ), false, "assertObject() should return true with expected: (Boolean: true) and actual: (Boolean)" );
-		equals( assertObject(true, true, true ), true, "assertObject() should return true with expected: (Boolean: true) and actual: (Boolean: true)" );
-		equals( assertObject(true, false, true ), false, "assertObject() should return true with expected: (Boolean: true) and actual: (Boolean: false)" );
+		equals( assertObject(true, Boolean, {strictValueChecking: true}), false, "assertObject() should return true with expected: (Boolean: true) and actual: (Boolean)" );
+		equals( assertObject(true, true, {strictValueChecking: true}), true, "assertObject() should return true with expected: (Boolean: true) and actual: (Boolean: true)" );
+		equals( assertObject(true, false, {strictValueChecking: true}), false, "assertObject() should return true with expected: (Boolean: true) and actual: (Boolean: false)" );
 		
 		// Expect Falsy Value
-		equals( assertObject(false, Boolean, true), false, "assertObject() should return false with expected: (Boolean: false) and actual: (Boolean)" );
-		equals( assertObject(false, true, true), false, "assertObject() should return false with expected: (Boolean: false) and actual: (Boolean: true)" );
-		equals( assertObject(false, false, true), true, "assertObject() should return true with expected: (Boolean: false) and actual: (Boolean: false)" );
+		equals( assertObject(false, Boolean, {strictValueChecking: true}), false, "assertObject() should return false with expected: (Boolean: false) and actual: (Boolean)" );
+		equals( assertObject(false, true, {strictValueChecking: true}), false, "assertObject() should return false with expected: (Boolean: false) and actual: (Boolean: true)" );
+		equals( assertObject(false, false, {strictValueChecking: true}), true, "assertObject() should return true with expected: (Boolean: false) and actual: (Boolean: false)" );
 		
 	});
 	
-	test("assertObject() - (RegExp) composite - typed checking only", function() {
+	test("assertObject() - (RegExp) composite - typed checking", function() {
 
 	  // FALSE ASSERTIONS
 	  
@@ -1092,40 +1092,40 @@
   
 	  // Test invalid argument type - Constructors
 		
-		equals( assertObject(RegExp, Number, true ), false, "assertObject() should return false with expected: (RegExp) and actual: (Number)" );
-		equals( assertObject(RegExp, String, true ), false, "assertObject() should return false with expected: (RegExp) and actual: (String)" );
-		equals( assertObject(RegExp, Boolean, true ), false, "assertObject() should return false with expected: (RegExp) and actual: (Boolean)" );
-		equals( assertObject(RegExp, Array, true ), false, "assertObject() should return false with expected: (RegExp) and actual: (Array)" );
-		equals( assertObject(RegExp, Object, true ), false, "assertObject() should return false with expected: (RegExp) and actual: (Object)" );
-		equals( assertObject(RegExp, Function, true ), false, "assertObject() should return false with expected: (RegExp) and actual: (Function)" );
-		equals( assertObject(RegExp, Date, true ), false, "assertObject() should return false with expected: (RegExp) and actual: (Date)" );
-		equals( assertObject(RegExp, Custom, true ), false, "assertObject() should return false with expected: (RegExp) and actual: (Custom)" );
+		equals( assertObject(RegExp, Number, {strictValueChecking: true}), false, "assertObject() should return false with expected: (RegExp) and actual: (Number)" );
+		equals( assertObject(RegExp, String, {strictValueChecking: true}), false, "assertObject() should return false with expected: (RegExp) and actual: (String)" );
+		equals( assertObject(RegExp, Boolean, {strictValueChecking: true}), false, "assertObject() should return false with expected: (RegExp) and actual: (Boolean)" );
+		equals( assertObject(RegExp, Array, {strictValueChecking: true}), false, "assertObject() should return false with expected: (RegExp) and actual: (Array)" );
+		equals( assertObject(RegExp, Object, {strictValueChecking: true}), false, "assertObject() should return false with expected: (RegExp) and actual: (Object)" );
+		equals( assertObject(RegExp, Function, {strictValueChecking: true}), false, "assertObject() should return false with expected: (RegExp) and actual: (Function)" );
+		equals( assertObject(RegExp, Date, {strictValueChecking: true}), false, "assertObject() should return false with expected: (RegExp) and actual: (Date)" );
+		equals( assertObject(RegExp, Custom, {strictValueChecking: true}), false, "assertObject() should return false with expected: (RegExp) and actual: (Custom)" );
 		
 		// Test invalid argument type - Values (truthy)
 		
-		equals( assertObject(RegExp, 1, true ), false, "assertObject() should return false with expected: (RegExp) and actual: (Number: 1)" );
-		equals( assertObject(RegExp, "string", true ), false, "assertObject() should return false with expected: (RegExp) and actual: (String: string)" );
-		equals( assertObject(RegExp, true, true ), false, "assertObject() should return false with expected: (RegExp) and actual: (Boolean: true)" );
-		equals( assertObject(RegExp, [], true ), false, "assertObject() should return false with expected: (RegExp) and actual: (Array: [])" );
-		equals( assertObject(RegExp, {}, true ), false, "assertObject() should return false with expected: (RegExp) and actual: (Object: {})" );
-		equals( assertObject(RegExp, function(){}, true ), false, "assertObject() should return false with expected: (RegExp) and actual: (Function: function(){})" );
-		equals( assertObject(RegExp, new Date, true ), false, "assertObject() should return false with expected: (RegExp) and actual: (Date: new instance)" );
-		equals( assertObject(RegExp, new Custom, true ), false, "assertObject() should return false with expected: (RegExp) and actual: (Custom: new instance)" );
+		equals( assertObject(RegExp, 1, {strictValueChecking: true}), false, "assertObject() should return false with expected: (RegExp) and actual: (Number: 1)" );
+		equals( assertObject(RegExp, "string", {strictValueChecking: true}), false, "assertObject() should return false with expected: (RegExp) and actual: (String: string)" );
+		equals( assertObject(RegExp, true, {strictValueChecking: true}), false, "assertObject() should return false with expected: (RegExp) and actual: (Boolean: true)" );
+		equals( assertObject(RegExp, [], {strictValueChecking: true}), false, "assertObject() should return false with expected: (RegExp) and actual: (Array: [])" );
+		equals( assertObject(RegExp, {}, {strictValueChecking: true}), false, "assertObject() should return false with expected: (RegExp) and actual: (Object: {})" );
+		equals( assertObject(RegExp, function(){}, {strictValueChecking: true}), false, "assertObject() should return false with expected: (RegExp) and actual: (Function: function(){})" );
+		equals( assertObject(RegExp, new Date, {strictValueChecking: true}), false, "assertObject() should return false with expected: (RegExp) and actual: (Date: new instance)" );
+		equals( assertObject(RegExp, new Custom, {strictValueChecking: true}), false, "assertObject() should return false with expected: (RegExp) and actual: (Custom: new instance)" );
   
 	  // Test invalid argument types - false values
 	
-		equals( assertObject(RegExp, null, true ), false, "assertObject() should return false with expected: (RegExp) and actual: (null)" );
-		equals( assertObject(RegExp, undefined, true ), false, "assertObject() should return false with expected: (RegExp) and actual: (undefined)" );
+		equals( assertObject(RegExp, null, {strictValueChecking: true}), false, "assertObject() should return false with expected: (RegExp) and actual: (null)" );
+		equals( assertObject(RegExp, undefined, {strictValueChecking: true}), false, "assertObject() should return false with expected: (RegExp) and actual: (undefined)" );
 		
 		// TRUE ASSERTIONS
-		equals( assertObject(RegExp, RegExp, true ), true, "assertObject() should return true with expected: (RegExp) and actual: (RegExp)" );
-		equals( assertObject(RegExp, /re/, true ), false, "assertObject() should return true with expected: (RegExp) and actual: (RegExp: /re/)" );
-		equals( assertObject(RegExp, new RegExp(/re/), true ), false, "assertObject() should return true with expected: (RegExp) and actual: (RegExp: new RegExp(/re/))" );
+		equals( assertObject(RegExp, RegExp, {strictValueChecking: true}), true, "assertObject() should return true with expected: (RegExp) and actual: (RegExp)" );
+		equals( assertObject(RegExp, /re/, {strictValueChecking: true}), false, "assertObject() should return true with expected: (RegExp) and actual: (RegExp: /re/)" );
+		equals( assertObject(RegExp, new RegExp(/re/), {strictValueChecking: true}), false, "assertObject() should return true with expected: (RegExp) and actual: (RegExp: new RegExp(/re/))" );
 
 	});
 	
 	
-	test("assertObject() - (RegExp: /re/) composite - typed checking only", function() {
+	test("assertObject() - (RegExp: /re/) composite - typed checking", function() {
 
 	  // FALSE ASSERTIONS
 	  
@@ -1169,35 +1169,35 @@
   
 	  // Test invalid argument type - Constructors
 		
-		equals( assertObject(/re/, Number, true ), false, "assertObject() should return false with expected: (RegExp: /re/) and actual: (Number)" );
-		equals( assertObject(/re/, String, true ), false, "assertObject() should return false with expected: (RegExp: /re/) and actual: (String)" );
-		equals( assertObject(/re/, Boolean, true ), false, "assertObject() should return false with expected: (RegExp: /re/) and actual: (Boolean)" );
-		equals( assertObject(/re/, Array, true ), false, "assertObject() should return false with expected: (RegExp: /re/) and actual: (Array)" );
-		equals( assertObject(/re/, Object, true ), false, "assertObject() should return false with expected: (RegExp: /re/) and actual: (Object)" );
-		equals( assertObject(/re/, Function, true ), false, "assertObject() should return false with expected: (RegExp: /re/) and actual: (Function)" );
-		equals( assertObject(/re/, Date, true ), false, "assertObject() should return false with expected: (RegExp: /re/) and actual: (Date)" );
-		equals( assertObject(/re/, Custom, true ), false, "assertObject() should return false with expected: (RegExp: /re/) and actual: (Custom)" );
+		equals( assertObject(/re/, Number, {strictValueChecking: true}), false, "assertObject() should return false with expected: (RegExp: /re/) and actual: (Number)" );
+		equals( assertObject(/re/, String, {strictValueChecking: true}), false, "assertObject() should return false with expected: (RegExp: /re/) and actual: (String)" );
+		equals( assertObject(/re/, Boolean, {strictValueChecking: true}), false, "assertObject() should return false with expected: (RegExp: /re/) and actual: (Boolean)" );
+		equals( assertObject(/re/, Array, {strictValueChecking: true}), false, "assertObject() should return false with expected: (RegExp: /re/) and actual: (Array)" );
+		equals( assertObject(/re/, Object, {strictValueChecking: true}), false, "assertObject() should return false with expected: (RegExp: /re/) and actual: (Object)" );
+		equals( assertObject(/re/, Function, {strictValueChecking: true}), false, "assertObject() should return false with expected: (RegExp: /re/) and actual: (Function)" );
+		equals( assertObject(/re/, Date, {strictValueChecking: true}), false, "assertObject() should return false with expected: (RegExp: /re/) and actual: (Date)" );
+		equals( assertObject(/re/, Custom, {strictValueChecking: true}), false, "assertObject() should return false with expected: (RegExp: /re/) and actual: (Custom)" );
 		
 		// Test invalid argument type - Values (truthy)
 		
-		equals( assertObject(/re/, 1, true ), false, "assertObject() should return false with expected: (RegExp: /re/) and actual: (Number: 1)" );
-		equals( assertObject(/re/, "string", true ), false, "assertObject() should return false with expected: (RegExp: /re/) and actual: (String: string)" );
-		equals( assertObject(/re/, true, true ), false, "assertObject() should return false with expected: (RegExp: /re/) and actual: (Boolean: true)" );
-		equals( assertObject(/re/, [], true ), false, "assertObject() should return false with expected: (RegExp: /re/) and actual: (Array: [])" );
-		equals( assertObject(/re/, {}, true ), false, "assertObject() should return false with expected: (RegExp: /re/) and actual: (Object: {})" );
-		equals( assertObject(/re/, function(){}, true ), false, "assertObject() should return false with expected: (RegExp: /re/) and actual: (Function: function(){})" );
-		equals( assertObject(/re/, new Date, true ), false, "assertObject() should return false with expected: (RegExp: /re/) and actual: (Date: new instance)" );
-		equals( assertObject(/re/, new Custom, true ), false, "assertObject() should return false with expected: (RegExp: /re/) and actual: (Custom: new instance)" );
+		equals( assertObject(/re/, 1, {strictValueChecking: true}), false, "assertObject() should return false with expected: (RegExp: /re/) and actual: (Number: 1)" );
+		equals( assertObject(/re/, "string", {strictValueChecking: true}), false, "assertObject() should return false with expected: (RegExp: /re/) and actual: (String: string)" );
+		equals( assertObject(/re/, true, {strictValueChecking: true}), false, "assertObject() should return false with expected: (RegExp: /re/) and actual: (Boolean: true)" );
+		equals( assertObject(/re/, [], {strictValueChecking: true}), false, "assertObject() should return false with expected: (RegExp: /re/) and actual: (Array: [])" );
+		equals( assertObject(/re/, {}, {strictValueChecking: true}), false, "assertObject() should return false with expected: (RegExp: /re/) and actual: (Object: {})" );
+		equals( assertObject(/re/, function(){}, {strictValueChecking: true}), false, "assertObject() should return false with expected: (RegExp: /re/) and actual: (Function: function(){})" );
+		equals( assertObject(/re/, new Date, {strictValueChecking: true}), false, "assertObject() should return false with expected: (RegExp: /re/) and actual: (Date: new instance)" );
+		equals( assertObject(/re/, new Custom, {strictValueChecking: true}), false, "assertObject() should return false with expected: (RegExp: /re/) and actual: (Custom: new instance)" );
   
 	  // Test invalid argument types - false values
 	
-		equals( assertObject(/re/, null, true ), false, "assertObject() should return false with expected: (RegExp: /re/) and actual: (null)" );
-		equals( assertObject(/re/, undefined, true ), false, "assertObject() should return false with expected: (RegExp: /re/) and actual: (undefined)" );
+		equals( assertObject(/re/, null, {strictValueChecking: true}), false, "assertObject() should return false with expected: (RegExp: /re/) and actual: (null)" );
+		equals( assertObject(/re/, undefined, {strictValueChecking: true}), false, "assertObject() should return false with expected: (RegExp: /re/) and actual: (undefined)" );
 		
 		// TRUE ASSERTIONS
-		equals( assertObject(/re/, RegExp, true ), false, "assertObject() should return true with expected: (RegExp: /re/) and actual: (RegExp)" );
-		equals( assertObject(/re/, /re/, true ), true, "assertObject() should return true with expected: (RegExp: /re/) and actual: (RegExp: /re/)" );
-		equals( assertObject(/re/, new RegExp(/re/), true ), true, "assertObject() should return true with expected: (RegExp: /re/) and actual: (RegExp: new RegExp(/re/))" );
+		equals( assertObject(/re/, RegExp, {strictValueChecking: true}), false, "assertObject() should return true with expected: (RegExp: /re/) and actual: (RegExp)" );
+		equals( assertObject(/re/, /re/, {strictValueChecking: true}), true, "assertObject() should return true with expected: (RegExp: /re/) and actual: (RegExp: /re/)" );
+		equals( assertObject(/re/, new RegExp(/re/), {strictValueChecking: true}), true, "assertObject() should return true with expected: (RegExp: /re/) and actual: (RegExp: new RegExp(/re/))" );
 
 	});
 
