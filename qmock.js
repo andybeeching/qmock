@@ -47,9 +47,11 @@
  * TDOO: Support for classical, protypical, & parasitic inheritance instance checking
  * TODO: Double check inheritance properties of instanceof - plus support for 'interface' conformance as well?
  * TODO: Patch QUnit to support a sentence like: 700 tests of 702 run passed, 2 failed and 150 weren't run.
+ * TODO: Change behaviour of the mock so that when passed functions it matches by type (for literals and constructors)
+ * TODO: Change expose function to accept list of expected methods (e.g. get, set, reset - save memory!)
  */
 
-(function initialiseQMock (identifier, container) {
+(function initialiseQMock ( identifier, container ) {
 
   /**
   * Helpers - Protected
@@ -67,7 +69,7 @@
   // PRIVATE static methods
 
   // Function to expose private objects on a target object for testing (plus injection of mocks/stubs and reset functionality)
-  function expose (obj, context, key) {
+  function expose ( obj, context, key ) {
 
     var cachedObj = obj; // can this part be improved by one cache for all or many atomic caches?
 
@@ -85,17 +87,17 @@
   }
 
   // Function to handle JSON based mock creation
-  function createMockFromJSON (mockedMembers) {
+  function createMockFromJSON ( mockedMembers ) {
 
     if ( !mockedMembers ) { return false; }
 
     var propertyWhitelist = "calls min max"; // List of method/property identifiers that are used in Qmock - protected.
 
     // loop through expected members on mock
-    for (var key in mockedMembers) {
+    for ( var key in mockedMembers ) {
 
       var memberConfig = mockedMembers[key],
-        isMethod = !!( memberConfig["value"] === undefined ),
+          isMethod = !!( memberConfig["value"] === undefined ),
 
       // register property or method onto mock interface
       member = this
@@ -118,12 +120,12 @@
             && (member[expectation].constructor === Function) ) {
 
             // Disco.
-            member[expectation][
+            member[ expectation ][
               ( (expectation === "interface" || expectation === "accepts")
-              && memberConfig[expectation].constructor === Array)
+              && memberConfig[ expectation ].constructor === Array)
                 ? "apply"
                 : "call"
-            ](member, memberConfig[expectation]);
+            ](member, memberConfig[ expectation ]);
 
           } else if ( /propertyWhitelist/.test(expectation) ) {
             // If not callable check property not whitelisted before throwing error
@@ -151,31 +153,35 @@
 
       function isHash ( obj ) {
 
-        var result = false;
+        var result = false,
+            id = Math.random();
 
         // exclude null/undefined early
         if ( obj === undefined || obj === null) {
           return result;
         }
-
+        
         // If object then should allow mutation
-        obj['test'] = true;
-        result = !!(obj['test']);
+        obj[id] = true;
+        result = !!(obj[id]);
 
         // cleanup to avoid false positives later on
         if (result) {
-          delete obj['test'];
+          delete obj[id];
         }
+        
         return result;
       }
 
-      function assertHash (expected, actual, opt_strictValueChecking, opt_exceptionType, opt_exceptionHandler) {
+      function assertHash ( expected, actual, opt ) {
 
-        var result = true;
-
+        var result = true,
+            raiseError = (opt && opt.exceptionHandler) || null,
+            identifier = (opt && opt.identifier) || 'assertHash()';
+        
         // asserHash interface checks
         // Required parameters & characteristics (i.e. is enumerable)
-        if (arguments.length < 2) {
+        if ( arguments.length < 2 ) {
           throw {
             type: "MissingParametersException",
             msg: "assertHash() requires at least an expected and actual parameter to be passed to interface"
@@ -188,21 +194,21 @@
         } else {
 
         // What about DontEnum stuff?
-
+        
           checkingMembers:
             for ( var key in expected ) {
 
               // expectations don't support prototypical inheritance...
-              if ( expected.hasOwnProperty(key) ) {
+              if ( expected.hasOwnProperty( key ) ) {
                 // but actual values do (and also shadowed natives, e.g. toString as a key - see {DontEnum} tests)
                 // We 'objectify' the 'actual' object as the in operator throws errors when executed against primitive values (e.g. key in "" --> key in Object("")))
                 // We use the in operator as opposed to a dynamic lookup because in the case of an assigned falsy value to actual[key] the result is false (as opposed to true - the property does exist on the actual object)
                 // in operator performs lookup resolution on [[Prototype]] chain
                 // FF 3.6 won't eumerate function instance prototype property (https://developer.mozilla.org/En/Firefox_3.6_for_developers#JavaScript)
-                if ( key in Object(actual) ) {
-                  result &= assertObject(expected[key], actual[key], opt_strictValueChecking, opt_exceptionType, opt_exceptionHandler);
+                if ( key in Object( actual ) ) {
+                  result &= assertObject( expected[key], actual[key], opt );
                 } else {
-                  opt_exceptionHandler && opt_exceptionHandler( "MissingHashKeyException", "assertHash", key, "not found on object" )
+                  raiseError && raiseError( "MissingHashKeyException", identifier, key, "not found on object" )
                   result = false;
                   continue checkingMembers;
                 }
@@ -214,7 +220,7 @@
         return !!result;
       }
 
-      // Expose for testing
+      // Register priviledged pointer for testing
       ;;;; expose( isHash, assertHash, "_isHash" );
 
       // Return priviledged object
@@ -223,12 +229,14 @@
     })();
 
     // Delegate function that asserts elements of a collection
-    function assertCollection (expected, actual, opt_strictValueChecking, opt_exceptionType, opt_exceptionHandler, opt_identifier) {
+    function assertCollection ( expected, actual, opt ) {
 
-      var result = true;
+      var result = true,
+          raiseError = (opt && opt.exceptionHandler) || null,
+          identifier = (opt && opt.identifier) || 'assertCollection()';
 
       // assertCollection interface checks
-      if (arguments.length < 2) {
+      if ( arguments.length < 2 ) {
         throw {
           type: "MissingParametersException",
           msg: "assertCollection() requires at least an expected and actual parameter to be passed to interface"
@@ -242,23 +250,23 @@
 
       // assertCollection parameter checks
       if ( expected.length !== actual.length ) {
-        opt_exceptionHandler && opt_exceptionHandler ('MismatchedNumberOfMembersException', opt_identifier || 'Function()', expected.length, actual.length )
+        raiseError && raiseError( "MismatchedNumberOfMembersException", identifier, expected.length, actual.length )
         result = false;
       } else {
-
         // Only assert on absolute number of params declared in method signature as expectations don't exist for overloaded interfaces
-        for (var i = 0, len = actual.length; i < len; i++) {
+        for ( var i = 0, len = actual.length; i < len; i++ ) {
           // 1:1 assertion
-          result &= assertObject ( expected[i], actual[i], opt_strictValueChecking, opt_exceptionType, opt_exceptionHandler );
+          result &= assertObject ( expected[i], actual[i], opt );
         }
       }
 
       // Return a Boolean for recursive calls, exceptions handled in opt_exceptionsHandler.
       return !!result;
+      
     }
 
     // Key function to test objects against each other.
-    function assertObject (expected, actual, opt_strictValueChecking, opt_exceptionType, opt_exceptionHandler) {
+    function assertObject ( expected, actual, opt ) {
 
       // Test whether expected is a constructor for native object types (aside from null // undefined)
       var expectedType = (expected !== null && expected !== undefined) ? expected.constructor : expected,
@@ -270,20 +278,21 @@
         isValue = false,
         isRegExp = false,
         isCollection = false,
-        strictValueChecking = opt_strictValueChecking || false,
-        exceptionType = opt_exceptionType || ( strictValueChecking === true ? "IncorrectArgumentValueException" : "IncorrectArgumentTypeException"),
+        strictValueChecking = (opt && opt.strictValueChecking) || false,
+        exceptionType = (opt && opt.exceptionType) || ( strictValueChecking === true ? "IncorrectArgumentValueException" : "IncorrectArgumentTypeException"),
         // What happened to isNative fn?!? - see Kangax blog... damn me and my lack of self-documentation sometimes.
         nativeTypes = [Number, String, Boolean, Date, Function, Object, Array, RegExp, Variable],
         result = true,
         // WTF?
-        identifier = "getClass()";
+        identifier = "getClass()",
+        raiseError = (opt && opt.exceptionHandler) || null;
 
-      function _compare (expected, actual, serialiser) {
+      function _compare ( expected, actual, serialiser ) {
         return ( expected && expected[serialiser] && expected[serialiser]() ) === ( actual && actual[serialiser] && actual[serialiser]() )
       }
 
       assertNativeType:
-        for (var i = 0, len = nativeTypes.length; i < len; i++) {
+        for ( var i = 0, len = nativeTypes.length; i < len; i++ ) {
           if ( expected === nativeTypes[i] ) {
             expectedType = expected;
             break assertNativeType;
@@ -291,7 +300,7 @@
         }
 
       // n.b. switch statements check by identity (aka strict === rather than ... ? See Nyman talk)
-      switch(expectedType) {
+      switch( expectedType ) {
 
         // Pass-through
         case Variable:
@@ -302,7 +311,7 @@
         case undefined:
         // case NaN: TBD
           if ( expected !== actual ) {
-            opt_exceptionHandler && opt_exceptionHandler(exceptionType, identifier, expected, actual);
+            raiseError && raiseError( exceptionType, identifier, expected, actual );
             result = false;
           }
           break;
@@ -360,7 +369,7 @@
                 || ( isRegExp === true && !_compare(expected, actual, "toString") )
 
                 // Handle composite values & custom Data Types - first check for match on constructor, then match on collection, e.g. members (strict checking)
-                || ( (isValue === false) && ( actual !== expectedType ) && ( ( (isCollection === true) ? assertCollection : assertHash)(expected, actual, true, exceptionType, (isCollection === true) ? null : opt_exceptionHandler) === false ) ) ) {
+                || ( (isValue === false) && ( actual !== expectedType ) && ( ( (isCollection === true) ? assertCollection : assertHash)(expected, actual, {strictValueChecking: true, exceptionType: exceptionType, exceptionHandler: (isCollection === true) ? null : raiseError} ) === false ) ) ) {
 
                   // FAIL.
                   result = false;
@@ -371,7 +380,7 @@
 
                 // If MissingHashKeyException thrown then create custom error listing the missing keys.
                 if ( error && error.type && error.type === "MalformedArgumentsException" ) {
-                  opt_exceptionHandler && opt_exceptionHandler(error.type, identifier, expected, actual);
+                  raiseError && raiseError(error.type, identifier, expected, actual);
                 } else {
                   throw error;
                 }
@@ -392,7 +401,7 @@
         }
         // Throw error if negative match
         if ( result === false ) {
-          opt_exceptionHandler && opt_exceptionHandler(exceptionType, identifier, expected, actual); // Need to inject correct className
+          raiseError && raiseError( exceptionType, identifier, expected, actual ); // Need to inject correct className
         }
       } // end switch
        return result;
@@ -408,7 +417,7 @@
   })(); // end assertObject declaration
 
   // Function to build pretty exception objects - TBR function signature
-  function createException (exceptionType, objName, expected, actual) {
+  function createException ( exceptionType, objName, expected, actual ) {
     var e = {
         type : exceptionType
       },
