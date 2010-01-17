@@ -51,102 +51,33 @@
  * TODO: Change expose function to accept list of expected methods (e.g. get, set, reset - save memory!)
  */
 
-(function initialiseQMock ( identifier, container ) {
+function initEspy ( identifier, container, opt ) {
 
-  /**
-  * Helpers - Protected
-  */
+    var isTest = opt && opt.isTest;
 
-  // So Dmitry Baranovskiy doesn't shout at me ([O:O]) - http://sitepoint.com/blogs/2009/11/12/google-closure-how-not-to-write-javascript/
-  // Really this is ultra defensive but since undefined is used in parameter verification code let's be sure it actually is typeof "undefined".
-  var undefined,
-      slice = Array.prototype.slice;
+    // PRIVATE functions
 
-  // Allow pass-through argument checking
-  // Either reference static member off Mock class (Mock.Variable), or alias - e.g. var Selector = Mock.Variable;
-  function Variable () {};
+    // Allow pass-through argument checking
+    // Either reference static member off Mock class (Mock.Variable), or alias - e.g. var Selector = Mock.Variable;
+    function Variable () {};
 
-  // PRIVATE static methods
+    // Function to expose private objects on a target object for testing (plus injection of mocks/stubs and reset functionality)
+    function exposeObject ( obj, identifier, container ) {
 
-  // Function to expose private objects on a target object for testing (plus injection of mocks/stubs and reset functionality)
-  function expose ( obj, context, key ) {
+      var cachedObj = obj; // can this part be improved by one cache for all or many atomic caches?
 
-    var cachedObj = obj; // can this part be improved by one cache for all or many atomic caches?
-
-    context[key] = {
-      get: function() {
-        return obj;
-      },
-      set: function() {
-        obj = arguments[0] || null;
-      },
-      restore: function() {
-        obj = cachedObj;
+      container[ identifier ] = {
+        get: function() {
+          return obj;
+        },
+        set: function() {
+          obj = arguments[0] || null;
+        },
+        restore: function() {
+          obj = cachedObj;
+        }
       }
     }
-  }
-
-  // Function to handle JSON based mock creation
-  function createMockFromJSON ( mockedMembers ) {
-
-    if ( !mockedMembers ) { return false; }
-
-    var propertyWhitelist = "calls min max"; // List of method/property identifiers that are used in Qmock - protected.
-
-    // loop through expected members on mock
-    for ( var key in mockedMembers ) {
-
-      var memberConfig = mockedMembers[key],
-          isMethod = !!( memberConfig["value"] === undefined ),
-
-      // register property or method onto mock interface
-      member = this
-        .expects
-          .apply(member,
-            (memberConfig.calls !== undefined)
-              ? [memberConfig.calls]
-              : [ (memberConfig.min) ? memberConfig.min : 0,
-                  (memberConfig.max) ? memberConfig.max : Infinity ]
-              )[( isMethod ) ? "method" : "property"](key);
-
-      // Set expectations for method or value of property
-      if ( isMethod ) {
-
-        setExpectations:
-          for (var expectation in memberConfig) {
-
-          // Check property exists on mock object and is a callable method
-          if ( (member[expectation] !== undefined)
-            && (member[expectation].constructor === Function) ) {
-
-            // Disco.
-            member[ expectation ][
-              ( (expectation === "interface" || expectation === "accepts")
-              && memberConfig[ expectation ].constructor === Array)
-                ? "apply"
-                : "call"
-            ](member, memberConfig[ expectation ]);
-
-          } else if ( /propertyWhitelist/.test(expectation) ) {
-            // If not callable check property not whitelisted before throwing error
-            throwMockException("InvalidExpectationMethodCallException", member["name"] + '.' + expectation, "Key to mutator method on mockedMember object", name);
-          }
-
-        } // end setExpectations loop
-
-      } else {
-        // If expectation not method then simply set property
-        member.withValue(memberConfig["value"]);
-      }
-
-    }
-
-    return undefined;
-  }
-
-  var assertObject = (function () {
-
-    // PRIVATE Helper functions
 
     // Function to assert members of an object, returns Boolean
     var assertHash = (function () {
@@ -220,8 +151,10 @@
         return !!result;
       }
 
-      // Register priviledged pointer for testing
-      ;;;; expose( isHash, assertHash, "_isHash" );
+      if ( isTest ) {
+        // Register priviledged pointer for testing
+        ;;;; exposeObject( isHash, "_isHash", assertHash );
+      }
 
       // Return priviledged object
       return assertHash;
@@ -337,7 +270,6 @@
             isCollection = true;
           }
 
-
           // Let's make sure the types match first of all...
           // If not strict then check if a instance of expectation - acts on CURRENT prototype object - DOUBLE CHECK this - surely traverses [[Prototype]] chain to check all sub/superclasses and root node(s)?
           // May need refactoring to use getPrototypeOf() for more robust solution
@@ -407,14 +339,115 @@
        return result;
     }
 
-    // Expose for testing
-    ;;;; expose( assertHash, assertObject, "_assertHash" );
-    ;;;; expose( assertCollection, assertObject, "_assertCollection" );
+    // PUBLIC static members on Etsy namespace
+    container[ identifier ] = {
+      "version": "0.1",
+      "exposeObject": exposeObject,
+      "assertObject": assertObject,
+      "assertHash": assertHash,
+      "assertCollection": assertCollection,
+      "Variable": Variable
+    };
+}
 
-    // Return privileged function
-    return assertObject;
+// Register Espy Interface
 
-  })(); // end assertObject declaration
+initEspy(
+  // identifier (String)
+  'Espy',
+  // container (Object)
+  ( typeof exports === "undefined" ) ? this : exports,
+  // opt (Hash)
+  {isTest: true}
+);
+
+function initQMock ( identifier, container, assert, opt ) {
+
+  // initialisation requirement checks
+  if ( arguments.length < 3 ) {
+    throw {
+      type: "MissingParametersException",
+      message: "initQMock() requires the 'identifier', 'container' & 'assert' parameters to be supplied"
+    }
+  } else if ( assert.constructor !== Function ) {
+    throw {
+      type: "DependencyUnavailableException",
+      message: "qMock requires the 'assert' parameter be a function (with the signature: {(Variable: expected), (Variable: actual), [(Hash: opt)]})"
+    }
+  } else if ( !assert(String, identifier) ) {
+    throw {
+      type: "MalformedArgumentsException",
+      message: "qMock requires the 'identifier' parameter to be a (String)"
+    }
+  }
+
+  /**
+  * Helpers - Protected
+  */
+
+  // So Dmitry Baranovskiy doesn't shout at me ([O:O]) - http://sitepoint.com/blogs/2009/11/12/google-closure-how-not-to-write-javascript/
+  // Really this is ultra defensive but since undefined is used in parameter verification code let's be sure it actually is typeof "undefined".
+  var undefined,
+      slice = Array.prototype.slice;
+
+  // PRIVATE static methods
+
+  // Function to handle JSON based mock creation
+  function createMockFromJSON ( mockedMembers ) {
+
+    if ( !mockedMembers ) { return false; }
+
+    var propertyWhitelist = "calls min max"; // List of method/property identifiers that are used in Qmock - protected.
+
+    // loop through expected members on mock
+    for ( var key in mockedMembers ) {
+
+      var memberConfig = mockedMembers[key],
+          isMethod = !!( memberConfig["value"] === undefined ),
+
+      // register property or method onto mock interface
+      member = this
+        .expects
+          .apply(member,
+            (memberConfig.calls !== undefined)
+              ? [memberConfig.calls]
+              : [ (memberConfig.min) ? memberConfig.min : 0,
+                  (memberConfig.max) ? memberConfig.max : Infinity ]
+              )[( isMethod ) ? "method" : "property"](key);
+
+      // Set expectations for method or value of property
+      if ( isMethod ) {
+
+        setExpectations:
+          for (var expectation in memberConfig) {
+
+          // Check property exists on mock object and is a callable method
+          if ( (member[expectation] !== undefined)
+            && (member[expectation].constructor === Function) ) {
+
+            // Disco.
+            member[ expectation ][
+              ( (expectation === "interface" || expectation === "accepts")
+              && memberConfig[ expectation ].constructor === Array)
+                ? "apply"
+                : "call"
+            ](member, memberConfig[ expectation ]);
+
+          } else if ( /propertyWhitelist/.test( expectation ) ) {
+            // If not callable check property not whitelisted before throwing error
+            throwMockException("InvalidExpectationMethodCallException", member["name"] + '.' + expectation, "Key to mutator method on mockedMember object", name);
+          }
+
+        } // end setExpectations loop
+
+      } else {
+        // If expectation not method then simply set property
+        member.withValue(memberConfig["value"]);
+      }
+
+    }
+    return undefined;
+  }
 
   // Function to build pretty exception objects - TBR function signature
   function createException ( exceptionType, objName, expected, actual ) {
@@ -449,16 +482,15 @@
         },
         methods = [], // List of MockedMember method instances declared on mock
         exceptions = [], // List of exceptions thrown by verify/verifyMethod functions,
-        identifier = ( assertObject( String, arguments && arguments[0] ) ) ? arguments[0] : "'Constructor' (#protip - you can pass in a (String) when instantiating a new Mock, which helps inform constructor-level error messages)",
-        assertCollection = assertObject["_assertCollection"].get(); // TBR
+        identifier = ( assert( String, arguments && arguments[0] ) ) ? arguments[0] : "'Constructor' (#protip - you can pass in a (String) when instantiating a new Mock, which helps inform constructor-level error messages)";
 
     // Function to push arguments into Mock exceptions list
     function throwMockException () {
-      exceptions.push( createException.apply(null, arguments) );
+      exceptions.push( createException.apply( null, arguments ) );
     }
 
     // CONSTRUCTOR for mocked methods
-    function MockedMember (min, max) {
+    function MockedMember ( min, max ) {
       this.name = "";
       this.expectedCalls = ( min !== undefined ) ? min : false;
       this.maxCalls = max || false;
@@ -476,35 +508,35 @@
 
     MockedMember.prototype = {
 
-      "method": function (name) {
+      "method": function ( name ) {
 
         // Throw error if collision with mockMember API
-        if (mock[name] !== undefined) {
+        if (mock[ name ] !== undefined) {
           throwMockException("InvalidMethodNameException", "Constructor function", "unique method name", "was reserved method name '" + name + "'");
           throw exceptions;
         }
 
           // Register public interface to mocked method instance on mock klass, bind to curried function
-          mock[name] = (function (method, name) {
+          mock[ name ] = (function ( method, name ) {
 
-          method["name"] = name;
+          method[ "name" ] = name;
 
           // Invoked when mock is called within SUT object.
           return function updateMethodState () {
 
             // Normalise Arguments
-            var parameters = slice.call(arguments, 0);
+            var parameters = slice.call( arguments, 0 );
 
             // Track method invocations
             method.actualCalls++;
 
             // Store method call params for verification
-            method.actualArgs.push(parameters);
+            method.actualArgs.push( parameters );
 
             // Execute any callback functions specified with associated args.
             for (var i = 0, len = parameters.length; i < len; i++) {
               if (parameters[i] && parameters[i].constructor === Function) {
-                  parameters[i].apply(null, method.callbackArgs);
+                  parameters[i].apply( null, method.callbackArgs );
               }
             }
 
@@ -519,7 +551,7 @@
                 for (var i = 0, len = method.expectedArgs.length; i < len; i++) {
 
                   try {
-                    if ( assertCollection(
+                    if ( assert(
                           method.expectedArgs[i]["accepts"], // 'expected' inputs
                           presentation, // 'actual' inputs
                           {strictValueChecking: true} // Must be strict 1:1 match to return a certain value
@@ -716,7 +748,7 @@
 
                         // If a match (strict value checking) between a presentation and expectation restore exceptions object and assert next interface presentation.
                         // If strict argument total checking is on just pass through expected and actual
-                        if ( assertCollection(
+                        if ( assert(
                               // expected
                               ( allowOverload === false && requiredNumberofArguments !== false )
                                 ? expectedArgs[j]["accepts"]
@@ -793,7 +825,7 @@
           // Thrown in to satisfy tests (for consistency's sake) - NEEDS TO BE REFACTORED OUT!
           throwMockException("IncorrectNumberOfArgumentsException", "Constructor function", expectsArguments.length, actualArguments.length);
         } else {
-          assertCollection(
+          assert(
             expectsArguments,
             actualArguments,
             {
@@ -831,7 +863,7 @@
     mock.expectsArguments = mock.accepts;
 
     // If params passed to Mock constructor auto-magikally create mocked interface from JSON tree.
-    if ( assertObject( Object, arguments && arguments[0] ) ) {
+    if ( assert( Object, arguments && arguments[0] ) ) {
       createMockFromJSON.call(mock, arguments[0]);
     }
 
@@ -844,17 +876,32 @@
 
   // Version number
   MockConstructor["QMock"] = "0.2";
-  MockConstructor["Variable"] = Variable;
 
   // Expose internal methods for unit tests
-  // Base object checker method
-  ;;;; expose( assertObject, MockConstructor, "_assertObject" )
-  // exception object builder
-  ;;;; expose( createException, MockConstructor, "_createException" );
-  // mock generator
-  ;;;; expose( createMockFromJSON, MockConstructor, "_createMockFromJSON" );
+  if ( opt && opt.isTest && assert(Function, opt.expose) ) {
+    // mock generator
+    ;;;; opt.expose( createMockFromJSON, "_createMockFromJSON", MockConstructor );
+  }
 
   // API Registration - register qMock in mapped scope
   container[ identifier ] = MockConstructor;
 
-})('Mock', ( typeof exports === "undefined" ) ? this : exports );
+}
+
+// Register QMock interface
+initQMock(
+  // identifier (String)
+  'Mock',
+  // container (Object)
+  ( typeof exports === "undefined" ) ? this : exports,
+   // assert (Function)
+  (this.Espy && this.Espy.assertObject),
+  // opt (Hash)
+  {
+    "isTest": true,
+    "expose": (this.Espy && this.Espy.exposeObject)
+  }
+);
+
+// Add reference to Variable for backward compatibility for Juice (TBR)
+Mock.Variable = Espy.Variable;

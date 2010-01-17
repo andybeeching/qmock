@@ -1,10 +1,10 @@
 (function scopeQMockTests () {
 
   // Closure scoped aliases to internal qMock functions
-  var assertObject = Mock["_assertObject"].get(),
-    assertCollection = assertObject["_assertCollection"].get(),
-    assertHash = assertObject["_assertHash"].get(),
-    createException = Mock["_createException"].get(),
+  var assertObject = Espy.assertObject,
+    assertCollection = Espy.assertCollection,
+    assertHash = Espy.assertHash,
+    //createException = Mock["_createException"].get(),
     createMockFromJSON = Mock["_createMockFromJSON"].get(),
     undefined;
 
@@ -35,7 +35,7 @@
 			assertCollection();
 	    ok(false, "assertCollection() should throw exception when passed No parameters");
 	  } catch (exception) {
-	    equals(exception.type, "MissingParametersException", "assertCollection() exception type should be MissingParametersException for less than two parameters (required)");
+	    equals(exception.type, "MissingParametersException", "assertCollection() exception type should be MissingParametersException for less than two parameters (required). Result");
 	  }
 
 	  // Test malformed arguments to interface afforded by assertCollection()
@@ -43,14 +43,14 @@
 			assertCollection( undefined, []	);
 	    ok(false, "assertCollection() should throw exception when passed incorrectly formatted parameters");
 	  } catch (exception) {
-	    equals(exception.type, "MalformedArgumentsException", "assertCollection() requires the 'expected' and 'actual' parameters to be Array-like objects");
+	    equals(exception.type, "MalformedArgumentsException", "assertCollection() requires the 'expected' and 'actual' parameters to be Array-like objects. Result");
 	  }
 
 	  try {
 			assertCollection( [], undefined );
 	    ok(false, "assertCollection() should throw exception when passed incorrectly formatted parameters");
 	  } catch (exception) {
-	    equals(exception.type, "MalformedArgumentsException", "assertCollection() requires the 'expected' and 'actual' parameters to be Array-like objects");
+	    equals(exception.type, "MalformedArgumentsException", "assertCollection() requires the 'expected' and 'actual' parameters to be Array-like objects. Result");
 	  }
 
 	  // Test expected and actual collection of objects with different lengths
@@ -59,10 +59,10 @@
       return assertCollection([1,2], arguments);
     })(1), false, "assertCollection() should return false if the 'expected' and 'actual' objects have mistmatched lengths");
 
-	  // Test passing in an 'arguments' array
+	  // Test passing in an 'arguments' array and returned object is a Boolean
     equals((function() {
       return assertCollection([Boolean], arguments);
-    })(true)["constructor"], Boolean, "assertCollection() should allow Array-like objects to be passed-in (e.g arguments collections) AND return a Boolean");
+    })(true)["constructor"], Boolean, "assertCollection() should allow Array-like objects to be passed-in (e.g arguments collections) AND return a Boolean. Result");
 
 	});
 
@@ -186,6 +186,7 @@
 
 	test("assertHash() - test interface & parameters", function () {
 
+    debugger;
 		// Expected false evaluations
 
 		// Test no arguments
@@ -193,7 +194,7 @@
 			assertHash();
 	    ok(false, "assertHash() should throw exception when passed No parameters");
 	  } catch (exception) {
-	    equals(exception.type, "MissingParametersException", "assertHash() exception type should be MissingParametersException for less than two parameters (required)");
+	    equals(exception.type, "MissingParametersException", "assertHash() exception type should be MissingParametersException for less than two parameters (required). Result");
 	  }
 
 	  // Test malformed arguments to interface afforded by assertHash() [see test suite for _isHash() for more examples]
@@ -201,24 +202,26 @@
 			assertHash( undefined, {}	);
 	    ok(false, "assertHash() should throw exception when passed incorrectly formatted parameters");
 	  } catch (exception) {
-	    equals(exception.type, "MalformedArgumentsException", "assertHash() requires the 'expected' and 'actual' parameters to be Hash-like objects");
+	    equals(exception.type, "MalformedArgumentsException", "assertHash() requires the 'expected' and 'actual' parameters to be Hash-like objects. Result");
 	  }
 
 	  try {
 			assertHash( {}, undefined );
 	    ok(false, "assertHash() should throw exception when passed incorrectly formatted parameters");
 	  } catch (exception) {
-	    equals(exception.type, "MalformedArgumentsException", "assertHash() requires the 'expected' and 'actual' parameters to be Hash-like objects");
+	    equals(exception.type, "MalformedArgumentsException", "assertHash() requires the 'expected' and 'actual' parameters to be Hash-like objects. Result");
 	  }
 
 	  // Expected true evaluations
 
-	  // Test passing in a hash-like objects [see other test groups fopr in-depth examples]
-    equals( assertHash({}, {}), true, "assertHash() should be false with expected: (Object {}) and actual: (Object {}). Result");
+	  // Test passing in a hash-like objects [see other test groups fopr in-depth examples] and that returned value is a Boolean
+    equals((function() {
+      return assertHash({}, {});
+    })(true)["constructor"], Boolean, "assertCollection() should allow Hash-like objects to be passed-in (e.g composite types and hashes) AND return a Boolean. Result");
 
 	});
 
-	test("assertHash._isHash() - black box test", function () {
+	test("_isHash() - black box test", function () {
 
 	  var isHash = assertHash["_isHash"].get();
 
