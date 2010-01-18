@@ -51,7 +51,7 @@
  * TODO: Change expose function to accept list of expected methods (e.g. get, set, reset - save memory!)
  */
 
-function initEspy ( identifier, container, opt ) {
+function initAssayer ( identifier, container, opt ) {
 
     var isTest = opt && opt.isTest;
 
@@ -201,6 +201,12 @@ function initEspy ( identifier, container, opt ) {
     // Key function to test objects against each other.
     function assertObject ( expected, actual, opt ) {
 
+      // Delegate straight to assertCollection if a presentation to an interface
+      if ( opt && opt.isPresentation ) {
+        delete opt.isPresentation;
+        return assertCollection.apply( null, arguments );
+      }
+
       // Test whether expected is a constructor for native object types (aside from null // undefined)
       var expectedType = (expected !== null && expected !== undefined) ? expected.constructor : expected,
         /*expectedType = (expected !== null && expected !== undefined)
@@ -348,13 +354,16 @@ function initEspy ( identifier, container, opt ) {
       "assertCollection": assertCollection,
       "Variable": Variable
     };
+
+    // Assay was successfully initialised!
+    return true;
 }
 
-// Register Espy Interface
+// Register Assay Interface
 
-initEspy(
+initAssayer(
   // identifier (String)
-  'Espy',
+  'Assayer',
   // container (Object)
   ( typeof exports === "undefined" ) ? this : exports,
   // opt (Hash)
@@ -763,7 +772,8 @@ function initQMock ( identifier, container, assert, opt ) {
                                 "strictValueChecking": strictValueChecking,
                                 "exceptionType": (strictValueChecking) ? "IncorrectArgumentValueException" : "IncorrectArgumentTypeException",
                                 "exceptionHandler": throwMockException,
-                                "identifier": name
+                                "identifier": name,
+                                "isPresentation": true
                               }
                             )
                           ) {
@@ -804,7 +814,7 @@ function initQMock ( identifier, container, assert, opt ) {
     };
 
     mock.accepts = function mockExpectsArguments () {
-      mock.expectsArguments = arguments;
+      mock.expectsArguments = slice.call(arguments);
       return mock;
     };
 
@@ -820,17 +830,18 @@ function initQMock ( identifier, container, assert, opt ) {
     mock.verify = function verifyMock () {
 
       // Check Constructor Arguments
-      with ( mock ) {
-        if (expectsArguments.length !== actualArguments.length) {
+      if ( mock.expectsArguments.push ) {
+        if ( mock.expectsArguments.length !== mock.actualArguments.length ) {
           // Thrown in to satisfy tests (for consistency's sake) - NEEDS TO BE REFACTORED OUT!
-          throwMockException("IncorrectNumberOfArgumentsException", "Constructor function", expectsArguments.length, actualArguments.length);
+          throwMockException("IncorrectNumberOfArgumentsException", "Constructor function", mock.expectsArguments.length, mock.actualArguments.length);
         } else {
           assert(
-            expectsArguments,
-            actualArguments,
+            mock.expectsArguments,
+            mock.actualArguments,
             {
-              "strictValueChecking": strictValueChecking,
-              "exceptionHandler": throwMockException
+              "strictValueChecking": mock.strictValueChecking,
+              "exceptionHandler": throwMockException,
+              "isPresentation": true
             }
           );
         }
@@ -886,6 +897,9 @@ function initQMock ( identifier, container, assert, opt ) {
   // API Registration - register qMock in mapped scope
   container[ identifier ] = MockConstructor;
 
+  // QMock was successfully initialised!
+  return true;
+
 }
 
 // Register QMock interface
@@ -895,13 +909,13 @@ initQMock(
   // container (Object)
   ( typeof exports === "undefined" ) ? this : exports,
    // assert (Function)
-  (this.Espy && this.Espy.assertObject),
+  (this.Assayer && this.Assayer.assertObject),
   // opt (Hash)
   {
     "isTest": true,
-    "expose": (this.Espy && this.Espy.exposeObject)
+    "expose": (this.Assayer && this.Assayer.exposeObject)
   }
 );
 
 // Add reference to Variable for backward compatibility for Juice (TBR)
-Mock.Variable = Espy.Variable;
+Mock.Variable = Assayer.Variable;

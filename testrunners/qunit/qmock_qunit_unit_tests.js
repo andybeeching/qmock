@@ -1,9 +1,9 @@
 (function scopeQMockTests () {
 
   // Closure scoped aliases to internal qMock functions
-  var assertObject = Espy.assertObject,
-    assertCollection = Espy.assertCollection,
-    assertHash = Espy.assertHash,
+  var assertObject = Assayer.assertObject,
+    assertCollection = Assayer.assertCollection,
+    assertHash = Assayer.assertHash,
     //createException = Mock["_createException"].get(),
     createMockFromJSON = Mock["_createMockFromJSON"].get(),
     undefined;
@@ -186,7 +186,6 @@
 
 	test("assertHash() - test interface & parameters", function () {
 
-    debugger;
 		// Expected false evaluations
 
 		// Test no arguments
@@ -1283,13 +1282,13 @@
 	      .method('swing');
 
 	  // Test Bad Exercise phase - no method call
-	    try {
-	      ninja.verify();
-	      ok(false, "verify() should throw exception when swing not called");
-	    } catch (e) {
-	      equals(e.length, 1, "verify() should return an array of 1 exception");
-	      equals(e[0].type, "IncorrectNumberOfMethodCallsException", "verify() exception type should be IncorrectNumberOfMethodCallsException");
-	    }
+    try {
+      ninja.verify();
+      ok(false, "verify() should throw exception when swing not called");
+    } catch (e) {
+      equals(e.length, 1, "verify() should return an array of 1 exception");
+      equals(e[0].type, "IncorrectNumberOfMethodCallsException", "verify() exception type should be IncorrectNumberOfMethodCallsException");
+    }
 
 	  ninja.reset();
 
@@ -3995,7 +3994,7 @@
 
 	});
 
-	test("mock with multiple parameters - required total arguments", function () {
+	test("w/ API: mock with multiple parameters - required total arguments", function () {
 
 	  expect(7);
 
@@ -4027,11 +4026,11 @@
 
 	  ninja.testMultipleParameters("string", 1, true, null, undefined, {} );
 	  try {
-	        ninja.verify();
-	        ok(false, "verify() should throw exception");
-	    } catch (e) {
-	        equals(e[0].type, "IncorrectNumberOfArgumentsException", "verify() exception type should be IncorrectNumberOfArgumentsException");
-	    }
+	    ninja.verify();
+	    ok(false, "verify() should throw exception");
+	  } catch (e) {
+	    equals(e[0].type, "IncorrectNumberOfArgumentsException", "verify() exception type should be IncorrectNumberOfArgumentsException");
+	  }
 
 	  ninja.reset();
 
@@ -4039,11 +4038,11 @@
 
 	  ninja.testMultipleParameters("string", 1, true, null, undefined, {}, [], new Date, /RegExp/, Selector, new Custom, "string" );
 	  try {
-	        ninja.verify();
-	        ok(false, "verify() should throw exception");
-	    } catch (e) {
-	        equals(e[0].type, "IncorrectNumberOfArgumentsException", "verify() exception type should be IncorrectNumberOfArgumentsException");
-	    }
+	    ninja.verify();
+	    ok(false, "verify() should throw exception");
+	  } catch (e) {
+	    equals(e[0].type, "IncorrectNumberOfArgumentsException", "verify() exception type should be IncorrectNumberOfArgumentsException");
+	  }
 
 	  ninja.reset();
 
@@ -4051,12 +4050,12 @@
 
 	  ninja.testMultipleParameters("string", 1, true, null, undefined, {}, [], new Date, /RegExp/, Selector, new Custom );
 	  try {
-	        ninja.verify();
-	        ok(false, "verify() should throw exception");
-	    } catch (e) {
-	        equals(e.length, 2, "verify() should return an array of 2 exceptions");
-	        equals(e[0].type, "IncorrectArgumentTypeException", "verify() exception type should be IncorrectArgumentTypeException");
-	        equals(e[1].type, "IncorrectArgumentTypeException", "verify() exception type should be IncorrectArgumentTypeException");
+	    ninja.verify();
+	    ok(false, "verify() should throw exception an array of 2 exceptions");
+	  } catch (e) {
+	    equals(e.length, 2, "verify() should return an array of 2 exceptions");
+	    equals(e[0].type, "IncorrectArgumentTypeException", "verify() exception type should be IncorrectArgumentTypeException");
+      equals(e[1].type, "IncorrectArgumentTypeException", "verify() exception type should be IncorrectArgumentTypeException");
 	   }
 
 	  ninja.reset();
@@ -4427,7 +4426,7 @@
 	  expect(8);
 
 	  // Mock jQuery
-	    var $ = new Mock ();
+	  var $ = new Mock ();
 
 	  $.accepts("#id")
   	  .expects(1)
@@ -4438,22 +4437,22 @@
 
 	  // Test invalid parameter type
 
-	    $(1).html('<span>blah</span>');
+    $(1).html('<span>blah</span>');
 
-	    try {
-	        $.verify();
-	        ok(false, "verify() should throw exception");
-	    } catch (e) {
-	        equals(e.length, 1, "verify() should return an array of 1 exception: test invalid parameter type");
-	        equals(e[0].type, "IncorrectArgumentTypeException", "verify() exception type should be IncorrectArgumentTypeException");
-	    }
+    try {
+      $.verify();
+      ok(false, "verify() should throw exception when ($) passed invalid parameter type. Expected: (String), Actual: (Number: 1)");
+    } catch (e) {
+      equals(e.length, 1, "verify() should return an array of 1 exception: [IncorrectArgumentTypeException]");
+      equals(e[0].type, "IncorrectArgumentTypeException", "verify() exception type should be IncorrectArgumentTypeException");
+    }
 
-	    $.reset();
+	  $.reset();
 
 	  // Test valid parameter type but wrong value
 
-	    $("#customid").html('<span>blah</span>');
-	    ok($.verify(), "verify() should be true");
+    $("#customid").html('<span>blah</span>');
+    ok($.verify(), "verify() should be true when ($) passed correct parameter type: (String: #customid)");
 
 	  // Trigger strict argument checking
 
@@ -4463,37 +4462,37 @@
 	    .strict()
 	      .expects(1)
 	      .method('html')
-	            .accepts('<span>blah</span>');
+	        .accepts('<span>blah</span>');
 
 
 	  // Test valid parameter type but wrong value - same as before but in strict mode
 
 	  $("#customid").html('<span>blah</span>');
 	  try {
-	        $.verify();
-	        ok(false, "verify() should throw exception");
-	    } catch (e) {
-	        equals(e.length, 1, "verify() should return an array of 1 exception");
-	        equals(e[0].type, "IncorrectArgumentValueException", "verify() exception type should be IncorrectArgumentValueException");
-	    }
+      $.verify();
+      ok(false, "verify() should throw exception when ($) passed invalid parameter value. Expected: (String: #id), actual: (String: #customid)");
+    } catch (e) {
+      equals(e.length, 1, "verify() should return an array of 1 exception: [IncorrectArgumentValueException]");
+      equals(e[0].type, "IncorrectArgumentValueException", "verify() exception type should be IncorrectArgumentValueException");
+    }
 
 	  $.reset();
 
 	  // Test valid parameter type and value, but invalid argument type to method
 
-	    $("#id").html(true);
+    $("#id").html(true);
 
-	    try {
-	        $.verify();
-	        ok(false, "verify() should throw exception");
-	    } catch (e) {
-	        equals(e.length, 1, "verify() should return an array of 1 exception");
-	        equals(e[0].type, "IncorrectArgumentTypeException", "verify() exception type should be IncorrectArgumentValueException");
-	    }
+    try {
+        $.verify();
+        ok(false, "verify() should throw exception");
+    } catch (e) {
+        equals(e.length, 1, "verify() should return an array of 1 exception: [IncorrectArgumentTypeException]");
+        equals(e[0].type, "IncorrectArgumentTypeException", "verify() exception type should be IncorrectArgumentValueException");
+    }
 
-	    // Good Exercise
+    // Good Exercise
 
-	    $("#id").html('<span>blah</span>');
+    $("#id").html('<span>blah</span>');
 
 	  // Mock the query of the J
 
@@ -4534,7 +4533,7 @@
 
 	test("chaining", function () {
 
-	  expect(13);
+	  expect(14);
 	    var $ = new Mock();
 	    $.accepts(".ninja")
 	        .expects(2)
@@ -4551,9 +4550,9 @@
     $(1);
 		try {
 		  $.verify();
-		  ok(false, "verify() should throw exception");
+		  ok(false, "verify() should throw exception when ($) passed invalid parameter. Expected: (String), actual: (Number: 1)");
 		} catch (e) {
-		  equals(e.length, 3, "verify() should return an array of 3 exceptions");
+		  equals(e.length, 3, "verify() should return an array of 3 exceptions: [IncorrectArgumentTypeException, IncorrectNumberOfMethodCallsException, IncorrectNumberOfMethodCallsException]");
 		  equals(e[0].type, "IncorrectArgumentTypeException", "verify() exception type should be IncorrectArgumentTypeException");
 		  equals(e[1].type, "IncorrectNumberOfMethodCallsException", "verify() exception type should be IncorrectNumberOfMethodCallsException");
 		  equals(e[2].type, "IncorrectNumberOfMethodCallsException", "verify() exception type should be IncorrectNumberOfMethodCallsException");
@@ -4566,9 +4565,9 @@
     $().run('slow').fight('hard').run('again');
 		try {
 		  $.verify();
-		  ok(false, "verify() should throw exception");
+		  ok(false, "verify() should throw exception when passed NO parameters. Expected: (String), Actual: (N/A)");
 		} catch (e) {
-		  equals(e.length, 1, "verify() should return an array of 1 exception");
+		  equals(e.length, 1, "verify() should return an array of 1 exception: IncorrectNumberOfArgumentsException");
 		  equals(e[0].type, "IncorrectNumberOfArgumentsException", "verify() exception type should be IncorrectNumberOfArgumentsException");
 		}
 
@@ -4580,10 +4579,11 @@
 
 		try {
 		  $.verify();
-		  ok(false, "verify() should throw exception");
+		  ok(false, "verify() should throw exception when fight() is not invoked once, and run() twice");
 		} catch (e) {
-		  equals(e.length, 2, "verify() should return an array of 2 exception");
+		  equals(e.length, 2, "verify() should return an array of 2 exceptions: [IncorrectNumberOfMethodCallsException, IncorrectNumberOfMethodCallsException]");
 		  equals(e[0].type, "IncorrectNumberOfMethodCallsException", "verify() exception type should be IncorrectNumberOfMethodCallsException");
+		  equals(e[1].type, "IncorrectNumberOfMethodCallsException", "verify() exception type should be IncorrectNumberOfMethodCallsException");
 		}
 
     $.reset();
@@ -4708,7 +4708,6 @@
 
 	  // Good Exercise
 	  $('.myClassName');
-
 	  ok($.verify(), "verify() should be true: mock supports 'expectsArguments' on mock constructors");
 
 	  // Setup - Test support for withArguments method on mocked methods
