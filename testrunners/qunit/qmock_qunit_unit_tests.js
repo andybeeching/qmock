@@ -12,7 +12,7 @@
 	function Custom () {};
 
 	// Stub for CSS selector parameter expectation (e.g. mock jQuery)
-	var Selector = Mock.Variable;
+	var Selector = Assay.Variable;
 
 	/**
 	 *
