@@ -1220,7 +1220,7 @@
 	 */
 
 	module("qMock Interface");
-	
+
 	/**
 	 * All tests follow this simple process:
 	 *
@@ -1476,7 +1476,7 @@
 	  ninja
 	    .expects(1, 3)
 	      .method('swing');
-	      
+
 	  // Test _getState for mockedMembers.
 	  var state = ninja.swing._getState();
 	  equals(state.actualCalls, 0, "verify() should be true. Result");
@@ -4421,7 +4421,7 @@
 	  equals( fs.isFile('templates/index.tash') , true, "fs.isFile('templates/index.tash') should return 'true'");
 	  equals( fs.rawOpen('templates/index.tt').readWhole() , 'Foo bar baz' , "fs.rawOpen('templates/index.tt') should return 'fileMock'");
 	  ok(fs.verify(), "verify() should be true");
-	  
+
 	});
 
 	test("mock with constructor function parameters - i.e. jQuery", function () {

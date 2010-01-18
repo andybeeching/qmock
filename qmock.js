@@ -516,7 +516,7 @@ function initQMock ( identifier, container, assert, opt ) {
     };
 
     MockedMember.prototype = {
-      
+
       "method": function ( name ) {
 
         // Throw error if collision with mockMember API
@@ -529,14 +529,14 @@ function initQMock ( identifier, container, assert, opt ) {
           mock[ name ] = (function ( method, name ) {
 
           method[ "name" ] = name;
-          
+
           function getState () {
             return method;
           }
-          
+
           // Invoked when mock is called within SUT object.
           function updateMethodState () {
-            
+
             // Normalise Arguments
             var parameters = slice.call( arguments, 0 );
 
@@ -586,9 +586,9 @@ function initQMock ( identifier, container, assert, opt ) {
               return obj;
 
            })(parameters)}
-           
+
            updateMethodState._getState = getState;
-           
+
            return updateMethodState;
 
           })(this, name);
