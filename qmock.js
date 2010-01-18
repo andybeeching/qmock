@@ -51,7 +51,7 @@
  * TODO: Change expose function to accept list of expected methods (e.g. get, set, reset - save memory!)
  */
 
-function initAssayer ( identifier, container, opt ) {
+function initAssay ( identifier, container, opt ) {
 
     var isTest = opt && opt.isTest;
 
@@ -347,11 +347,11 @@ function initAssayer ( identifier, container, opt ) {
 
     // PUBLIC static members on Etsy namespace
     container[ identifier ] = {
-      "version": "0.1",
+      "version": "0.2",
       "exposeObject": exposeObject,
-      "assertObject": assertObject,
-      "assertHash": assertHash,
-      "assertCollection": assertCollection,
+      "object": assertObject,
+      "hash": assertHash,
+      "collection": assertCollection,
       "Variable": Variable
     };
 
@@ -361,9 +361,9 @@ function initAssayer ( identifier, container, opt ) {
 
 // Register Assay Interface
 
-initAssayer(
+initAssay(
   // identifier (String)
-  'Assayer',
+  'Assay',
   // container (Object)
   ( typeof exports === "undefined" ) ? this : exports,
   // opt (Hash)
@@ -909,13 +909,13 @@ initQMock(
   // container (Object)
   ( typeof exports === "undefined" ) ? this : exports,
    // assert (Function)
-  (this.Assayer && this.Assayer.assertObject),
+  (Assay && Assay.object),
   // opt (Hash)
   {
     "isTest": true,
-    "expose": (this.Assayer && this.Assayer.exposeObject)
+    "expose": (Assay && Assay.exposeObject)
   }
 );
 
 // Add reference to Variable for backward compatibility for Juice (TBR)
-Mock.Variable = Assayer.Variable;
+Mock.Variable = Assay.Variable;

@@ -1,9 +1,9 @@
 (function scopeQMockTests () {
 
   // Closure scoped aliases to internal qMock functions
-  var assertObject = Assayer.assertObject,
-    assertCollection = Assayer.assertCollection,
-    assertHash = Assayer.assertHash,
+  var assertObject = Assay.object,
+    assertCollection = Assay.collection,
+    assertHash = Assay.hash,
     //createException = Mock["_createException"].get(),
     createMockFromJSON = Mock["_createMockFromJSON"].get(),
     undefined;
