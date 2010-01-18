@@ -1220,7 +1220,7 @@
 	 */
 
 	module("qMock Interface");
-
+	
 	/**
 	 * All tests follow this simple process:
 	 *
@@ -1469,13 +1469,17 @@
 
 	test("w/ API: mock with single parameterless method (arbitrary execution call range, no return value)", function() {
 
-	  expect(12);
+	  expect(13);
 
 	  var ninja = new Mock();
 
 	  ninja
 	    .expects(1, 3)
 	      .method('swing');
+	      
+	  // Test _getState for mockedMembers.
+	  var state = ninja.swing._getState();
+	  equals(state.actualCalls, 0, "verify() should be true. Result");
 
 	  // Bad Exercise - no swings
 	  try {
@@ -3665,7 +3669,6 @@
 
 	  samurai.getDamage();
 
-    debugger;
     samurai.verify();
 	  ok(samurai.verify(), "verify() should be true with constructors as expected");*/
 
@@ -4418,7 +4421,7 @@
 	  equals( fs.isFile('templates/index.tash') , true, "fs.isFile('templates/index.tash') should return 'true'");
 	  equals( fs.rawOpen('templates/index.tt').readWhole() , 'Foo bar baz' , "fs.rawOpen('templates/index.tt') should return 'fileMock'");
 	  ok(fs.verify(), "verify() should be true");
-
+	  
 	});
 
 	test("mock with constructor function parameters - i.e. jQuery", function () {

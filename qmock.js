@@ -466,14 +466,14 @@ function initQMock ( identifier, container, assert, opt ) {
       fn = "'" + objName + "'";
 
     switch (true) {
-      case "IncorrectNumberOfArgumentsException" === exceptionType   :
-      case "MismatchedNumberOfMembersException" === exceptionType     :
+      case "IncorrectNumberOfArgumentsException" === exceptionType:
+      case "MismatchedNumberOfMembersException" === exceptionType:
         e.message = fn + " expected: " + expected + " items, actual number was: " + actual;
         break;
-      case "IncorrectNumberOfMethodCallsException" === exceptionType  :
+      case "IncorrectNumberOfMethodCallsException" === exceptionType:
         e.message = fn + " expected: " + expected + " method calls, actual number was: " + actual;
         break;
-      case "MissingHashKeyException" :
+      case "MissingHashKeyException":
         e.message = fn + " expected: " + expected + " key/property to exist on 'actual' object, actual was: " + actual;
       default:
         e.message = fn + " expected: " + expected + ", actual was: " + actual;
@@ -516,7 +516,7 @@ function initQMock ( identifier, container, assert, opt ) {
     };
 
     MockedMember.prototype = {
-
+      
       "method": function ( name ) {
 
         // Throw error if collision with mockMember API
@@ -529,10 +529,14 @@ function initQMock ( identifier, container, assert, opt ) {
           mock[ name ] = (function ( method, name ) {
 
           method[ "name" ] = name;
-
+          
+          function getState () {
+            return method;
+          }
+          
           // Invoked when mock is called within SUT object.
-          return function updateMethodState () {
-
+          function updateMethodState () {
+            
             // Normalise Arguments
             var parameters = slice.call( arguments, 0 );
 
@@ -581,7 +585,11 @@ function initQMock ( identifier, container, assert, opt ) {
 
               return obj;
 
-           })(parameters)};
+           })(parameters)}
+           
+           updateMethodState._getState = getState;
+           
+           return updateMethodState;
 
           })(this, name);
 
