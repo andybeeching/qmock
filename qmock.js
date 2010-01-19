@@ -573,7 +573,9 @@ function initQMock ( identifier, container, assert, opt ) {
                       // If match found against presentation return bound object (or self if chained)
                       obj = (method.returnValue && method.returnValue === mock)
                         ? mock
-                        : method.expectedArgs[i]["returns"];
+                        : ( "returns" in method.expectedArgs[i] )
+                          ? method.expectedArgs[i]["returns"]
+                          : method.returnValue;
                     }
                   } catch (e) {
                     if ( e[0] && e[0].type === "MissingHashKeyException" ) {

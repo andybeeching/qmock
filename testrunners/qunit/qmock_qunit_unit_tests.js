@@ -4337,7 +4337,7 @@
 
 	test("mock with single / multiple parameters and matched return values", function () {
 
-	  expect(14);
+	  expect(9);
 
 	  var ninja = new Mock();
 	  ninja
@@ -4388,39 +4388,6 @@
 	    ok(ninja.verify(), "verify() should be true");
 
 	  ninja.reset();
-
-	  // TETSTSTSTSTSTSS!
-
-	  // Juice Tests
-
-	  // mock the file interface
-	  var fileMock = new Mock({
-	    "readWhole" : {
-	      returns : 'Foo bar baz'
-	    }
-	  });
-	  // mock there being no .tt or .haml template, but there being a .tash template
-	  var fs = new Mock({
-	    isFile : {
-	      interface: [
-	        {accepts: ['templates/index.tt'], returns: false},
-	        {accepts: ['templates/index.haml'], returns: false},
-	        {accepts: ['templates/index.tash'], returns: true},
-	      ],
-	      calls: 3 // Only use if bothered about strict number of calls.
-	    },
-	    rawOpen : {
-	      accepts: ['templates/index.tash'], // alternative declaration of expectations without interface()
-	      returns: fileMock,
-	      calls: 1
-	    }
-	  });
-
-	  equals( fs.isFile('templates/index.tt') , false, "fs.isFile('templates/index.tt') should return 'false'");
-	  equals( fs.isFile('templates/index.haml') , false, "fs.isFile('templates/index.haml') should return 'false'");
-	  equals( fs.isFile('templates/index.tash') , true, "fs.isFile('templates/index.tash') should return 'true'");
-	  equals( fs.rawOpen('templates/index.tt').readWhole() , 'Foo bar baz' , "fs.rawOpen('templates/index.tt') should return 'fileMock'");
-	  ok(fs.verify(), "verify() should be true");
 
 	});
 
@@ -4742,5 +4709,51 @@
 		  equals(mock.swing(), true, "mock.swing() should return true when setting up return value with 'andReturns' (API v 0.1)");
 
 	});
+
+	test("Juice Framework Tests & Patterns", function () {
+
+	  // Juice Tests
+
+	  // mock the file interface
+	  var fileMock = new Mock({
+	    "readWhole" : {
+	      returns : 'Foo bar baz'
+	    }
+	  });
+	  // mock there being no .tt or .haml template, but there being a .tash template
+	  var fs = new Mock({
+	    isFile : {
+	      interface: [
+	        {accepts: ['templates/index.tt'], returns: false},
+	        {accepts: ['templates/index.haml'], returns: false},
+	        {accepts: ['templates/index.tash'], returns: true},
+	      ],
+	      calls: 3 // Only use if bothered about strict number of calls.
+	    },
+	    rawOpen : {
+	      accepts: ['templates/index.tash'], // alternative declaration of expectations without interface()
+	      returns: fileMock,
+	      calls: 1
+	    }
+	  });
+
+	  equals( fs.isFile('templates/index.tt') , false, "fs.isFile('templates/index.tt') should return 'false'");
+	  equals( fs.isFile('templates/index.haml') , false, "fs.isFile('templates/index.haml') should return 'false'");
+	  equals( fs.isFile('templates/index.tash') , true, "fs.isFile('templates/index.tash') should return 'true'");
+	  equals( fs.rawOpen('templates/index.tt').readWhole() , 'Foo bar baz' , "fs.rawOpen('templates/index.tt') should return 'fileMock'");
+	  ok(fs.verify(), "verify() should be true");
+
+	  fileMock = ["object","array"]
+    // ["object", "array"]
+    var mock = new Mock({ rawOpen: { accepts: ['templates/index.tash'], returns: fileMock, calls: 1 } });
+    equals( mock.rawOpen('templates/index.tash')[0], "object", "mock.rawOpen('templates/index.tash') should return ['object','array']" );
+    equals( mock.rawOpen('templates/index.ta sh')[0], "object", "mock.rawOpen('templates/index.ta sh') should return ['object','array']" );
+    // strict mode
+    var mock = new Mock({ rawOpen: { accepts: ['templates/index.tash'], returns: fileMock, calls: 1, strict: true } });
+    equals( mock.rawOpen('templates/index.tash')[0], "object", "mock.rawOpen('templates/index.tash') should return ['object','array']" );
+    equals( mock.rawOpen('templates/index.ta sh')[0], "object", "mock.rawOpen('templates/index.ta sh') should return ['object','array']" );
+
+
+	})
 
 })(); // Go Go Inspector Gadget!
