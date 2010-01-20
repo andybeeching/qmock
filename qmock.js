@@ -49,11 +49,15 @@
  * TODO: Patch QUnit to support a sentence like: 700 tests of 702 run passed, 2 failed and 150 weren't run.
  * TODO: Change behaviour of the mock so that when passed functions it matches by type (for literals and constructors)
  * TODO: Change expose function to accept list of expected methods (e.g. get, set, reset - save memory!)
+ * TODO: Add ability for desciptor on Mock Constructors
+ * TODO: Make autoMockConstructor thing work for constructors (i.e. call)
+ * Refactor hasOWnProperty into method()
  */
 
 function initAssay ( opt ) {
 
-    var isTest = opt && opt.isTest;
+    var undefined,
+        isTest = opt && opt.isTest;
 
     // PRIVATE functions
 
@@ -357,6 +361,19 @@ function initAssay ( opt ) {
     };
 }
 
+// Export Assay initialiser
+(( typeof exports === "undefined" ) ? this : exports )["Assay"] = initAssay;
+
+// Register Assay Public Interface
+(function bootstrapAssay ( container ) {
+
+  container.Assay = container.initAssay(
+    // opt (Hash)
+    {isTest: true}
+  );
+
+})( ( typeof exports === "undefined" ) ? this : exports );
+
 function initQMock ( assert, opt ) {
 
   // initialisation requirement checks
@@ -421,7 +438,7 @@ function initQMock ( assert, opt ) {
 
           } else if ( propertyBlacklist.test( expectation ) ) {
             // If not callable check property not whitelisted before throwing error
-            throwMockException("InvalidExpectationMethodCallException", member["name"] + '.' + expectation, "Key to mutator method on mockedMember object", name);
+            throwMockException("Identifier for method on new Mock instance", "Mock." + member["name"] + "[" + expectation + "]", "InvalidMockInstanceMethodException", member["name"] + '.' + expectation);
           }
 
         } // end setExpectations loop
@@ -436,11 +453,13 @@ function initQMock ( assert, opt ) {
   }
 
   // Function to build pretty exception objects - TBR function signature
-  function createException ( exceptionType, objName, expected, actual ) {
+  //function createException ( exceptionType, objName, expected, actual ) {
+  function createException ( expected, actual, exceptionType, descriptor ) {
+    
     var e = {
         type : exceptionType
       },
-      fn = "'" + objName + "'";
+      fn = "'" + descriptor + "'";
 
     switch (true) {
       case "IncorrectNumberOfArgumentsException" === exceptionType:
@@ -498,7 +517,7 @@ function initQMock ( assert, opt ) {
 
         // Throw error if collision with mockMember API
         if (mock[ name ] !== undefined) {
-          throwMockException("InvalidMethodNameException", "Constructor function", "unique method name", "was reserved method name '" + name + "'");
+          throwMockException("a unique method name", "was reserved method name '" + name + "'", "InvalidMethodNameException", "Constructor function");
           throw exceptions;
         }
 
@@ -649,7 +668,7 @@ function initQMock ( assert, opt ) {
 
       "property": function (name) {
         if (mock[name] !== undefined) {
-          throwMockException("InvalidPropertyNameException", "Constructor function", "undefined property name", "should be unique (was " + name + ")");
+          throwMockException("undefined property name", "should be unique (was " + name + ")", "InvalidPropertyNameException", "Constructor function");
           throw exceptions;
         }
         mock[name] = "stub";
@@ -700,7 +719,7 @@ function initQMock ( assert, opt ) {
                    break assertMethodCalls;
                  }
                default:
-                 throwMockException("IncorrectNumberOfMethodCallsException", name, expectedCalls, actualCalls);
+                 throwMockException(expectedCalls, actualCalls, "IncorrectNumberOfMethodCallsException", name);
                  break assertMethod;
              }
 
@@ -892,19 +911,26 @@ function initQMock ( assert, opt ) {
 
   // QMock was successfully initialised!
   return MockConstructor;
-
 }
 
-(function QMock_scope( export_to ) {
+// Export QMock initialiser
+(( typeof exports === "undefined" ) ? this : exports )["Mock"] = initQMock;
 
-  // Register Assay Interface
-  var Assay = initAssay(
+/*
+ * Bootstrap QMock
+ */
+
+ // Register QMock interface
+(function bootstrapQMock ( container ) {
+
+  // Private Assay Interface
+  var Assay = container.initAssay(
     // opt (Hash)
     {isTest: true}
   );
 
-  // Register QMock interface
-  var Mock = initQMock(
+  // Initialise QMock
+  container.Mock = container.initQMock(
      // assert (Function)
     (Assay && Assay.object),
     // opt (Hash)
@@ -915,12 +941,7 @@ function initQMock ( assert, opt ) {
   );
 
   // Add reference to Variable for backward compatibility for Juice (TBR)
+  // Needs to be refactored to a custom matcher IMO, so can set from qmock and it will perform a lookup for a deserializer fn in a cache witin Assay.
   Mock.Variable = Assay.Variable;
-
-  export_to.Mock = Mock;
-  export_to.Assay = Assay;
-
-  // Export the init function so people can use cusotm assert modules too.
-  export_to.initQMOCK = initQMock;
 
 })( ( typeof exports === "undefined" ) ? this : exports );
