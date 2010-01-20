@@ -82,6 +82,7 @@ function initAssay ( identifier, container, opt ) {
     // Function to assert members of an object, returns Boolean
     var assertHash = (function () {
 
+      // Private function to test whether an object can be enumerated
       function isHash ( obj ) {
 
         var result = false,
@@ -104,11 +105,12 @@ function initAssay ( identifier, container, opt ) {
         return result;
       }
 
+      // Priviledged function to compare two hash-like objects
       function assertHash ( expected, actual, opt ) {
 
         var result = true,
             raiseError = (opt && opt.exceptionHandler) || null,
-            identifier = (opt && opt.identifier) || 'assertHash()';
+            descriptor = (opt && opt.descriptor) || 'assertHash()';
 
         // asserHash interface checks
         // Required parameters & characteristics (i.e. is enumerable)
@@ -124,11 +126,10 @@ function initAssay ( identifier, container, opt ) {
           }
         } else {
 
-        // What about DontEnum stuff?
+        // TODO: 'DontEnum' checking
 
           checkingMembers:
             for ( var key in expected ) {
-
               // expectations don't support prototypical inheritance...
               if ( expected.hasOwnProperty( key ) ) {
                 // but actual values do (and also shadowed natives, e.g. toString as a key - see {DontEnum} tests)
@@ -144,15 +145,14 @@ function initAssay ( identifier, container, opt ) {
                   continue checkingMembers;
                 }
               }
-
             }
         }
 
         return !!result;
       }
 
+      // Register priviledged pointer for testing
       if ( isTest ) {
-        // Register priviledged pointer for testing
         ;;;; exposeObject( isHash, "_isHash", assertHash );
       }
 
@@ -166,7 +166,7 @@ function initAssay ( identifier, container, opt ) {
 
       var result = true,
           raiseError = (opt && opt.exceptionHandler) || null,
-          identifier = (opt && opt.identifier) || 'assertCollection()';
+          descriptor = (opt && opt.descriptor) || 'assertCollection()';
 
       // assertCollection interface checks
       if ( arguments.length < 2 ) {
@@ -202,8 +202,8 @@ function initAssay ( identifier, container, opt ) {
     function assertObject ( expected, actual, opt ) {
 
       // Delegate straight to assertCollection if a presentation to an interface
-      if ( opt && opt.isPresentation ) {
-        delete opt.isPresentation;
+      if ( opt && opt.isDelegate ) {
+        delete opt.isDelegate;
         return assertCollection.apply( null, arguments );
       }
 
@@ -223,11 +223,12 @@ function initAssay ( identifier, container, opt ) {
         nativeTypes = [Number, String, Boolean, Date, Function, Object, Array, RegExp, Variable],
         result = true,
         // WTF?
-        identifier = "getClass()",
+        descriptor = (opt && opt.descriptor) || "getClass()",
         raiseError = (opt && opt.exceptionHandler) || null;
 
-      function _compare ( expected, actual, serialiser ) {
-        return ( expected && expected[serialiser] && expected[serialiser]() ) === ( actual && actual[serialiser] && actual[serialiser]() )
+      function _compare ( expected, actual, deserialize ) {
+        // Should throw error if deserialize method not found on object?
+        return ( expected && expected[deserialize] && expected[deserialize]() ) === ( actual && actual[deserialize] && actual[deserialize]() )
       }
 
       assertNativeType:
@@ -307,7 +308,7 @@ function initAssay ( identifier, container, opt ) {
                 || ( isRegExp === true && !_compare(expected, actual, "toString") )
 
                 // Handle composite values & custom Data Types - first check for match on constructor, then match on collection, e.g. members (strict checking)
-                || ( (isValue === false) && ( actual !== expectedType ) && ( ( (isCollection === true) ? assertCollection : assertHash)(expected, actual, {strictValueChecking: true, exceptionType: exceptionType, exceptionHandler: (isCollection === true) ? null : raiseError} ) === false ) ) ) {
+                || ( (isValue === false) && ( actual !== expectedType ) && ( ( (isCollection === true) ? assertCollection : assertHash)(expected, actual, {"strictValueChecking": true, "exceptionType": exceptionType, "exceptionHandler": (isCollection === true) ? null : raiseError, "descriptor": descriptor} ) === false ) ) ) {
 
                   // FAIL.
                   result = false;
@@ -318,7 +319,7 @@ function initAssay ( identifier, container, opt ) {
 
                 // If MissingHashKeyException thrown then create custom error listing the missing keys.
                 if ( error && error.type && error.type === "MalformedArgumentsException" ) {
-                  raiseError && raiseError(error.type, identifier, expected, actual);
+                  raiseError && raiseError(error.type, descriptor, expected, actual);
                 } else {
                   throw error;
                 }
@@ -339,7 +340,7 @@ function initAssay ( identifier, container, opt ) {
         }
         // Throw error if negative match
         if ( result === false ) {
-          raiseError && raiseError( exceptionType, identifier, expected, actual ); // Need to inject correct className
+          raiseError && raiseError( exceptionType, descriptor, expected, actual ); // Need to inject correct className
         }
       } // end switch
        return result;
@@ -751,6 +752,9 @@ function initQMock ( identifier, container, assert, opt ) {
 
                   for (var i = 0, len = actualArgs.length; i < len; i++) {
 
+                    // Use to restore exceptions object to pre-presentation assertion state in case of match
+                    var cachedExceptionTotal = exceptions.length;
+
                     assertExpectations: // ...Check if a matching expectation
 
                       for (var j = 0, _len = expectedArgs.length; j < _len; j++) {
@@ -761,9 +765,6 @@ function initQMock ( identifier, container, assert, opt ) {
                           throwMockException("IncorrectNumberOfArgumentsException", name, expectedArgs.length, actualArgs.length);
                           continue assertPresentations;
                         }
-
-                        // Use to restore exceptions object to pre-presentation assertion state in case of match
-                        var cachedExceptionTotal = exceptions.length;
 
                         // If a match (strict value checking) between a presentation and expectation restore exceptions object and assert next interface presentation.
                         // If strict argument total checking is on just pass through expected and actual
@@ -782,11 +783,19 @@ function initQMock ( identifier, container, assert, opt ) {
                                 "strictValueChecking": strictValueChecking,
                                 "exceptionType": (strictValueChecking) ? "IncorrectArgumentValueException" : "IncorrectArgumentTypeException",
                                 "exceptionHandler": throwMockException,
-                                "identifier": name,
-                                "isPresentation": true
+                                "descriptor": name,
+                                "isDelegate": true
                               }
                             )
                           ) {
+                            //debugger;
+                            while (exceptions.length > cachedExceptionTotal) {
+                                exceptions.shift();
+                            }
+
+                            var test = exceptions;
+                            var testLen = exceptions.length;
+                            var slic = exceptions.slice;
                               // If match remove exceptions raised during checks and move on to next presentation.
                               exceptions.slice(0, cachedExceptionTotal);
                               continue assertPresentations;
@@ -851,7 +860,8 @@ function initQMock ( identifier, container, assert, opt ) {
             {
               "strictValueChecking": mock.strictValueChecking,
               "exceptionHandler": throwMockException,
-              "isPresentation": true
+              "isDelegate": true,
+              "descriptor": "Mock Constructor"
             }
           );
         }

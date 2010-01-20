@@ -4743,6 +4743,7 @@
 	  equals( fs.rawOpen('templates/index.tt').readWhole() , 'Foo bar baz' , "fs.rawOpen('templates/index.tt') should return 'fileMock'");
 	  ok(fs.verify(), "verify() should be true");
 
+    // Test global 'returnValue'
 	  fileMock = ["object","array"]
     // ["object", "array"]
     var mock = new Mock({ rawOpen: { accepts: ['templates/index.tash'], returns: fileMock, calls: 1 } });
@@ -4753,6 +4754,55 @@
     equals( mock.rawOpen('templates/index.tash')[0], "object", "mock.rawOpen('templates/index.tash') should return ['object','array']" );
     equals( mock.rawOpen('templates/index.ta sh')[0], "object", "mock.rawOpen('templates/index.ta sh') should return ['object','array']" );
 
+    // Test direct manipulation of expectedArgs - but also logic to matchAll or not...
+    var app = new Mock;
+
+    var fn = app.expects().method("controller");
+
+    fn.expectedArgs.push(
+      { accepts: [ "foo", "r"], returns: 2 }
+    );
+    try {
+      app.controller( "foo", "r" );
+      app.verify();
+    }
+    catch (e) {
+      var test = e;
+      //print( JSON.stringify( e, 0, 4 ) );
+      //print( JSON.stringify( fn, 0, 4 ) );
+    }
+
+    // output:
+    /*
+    e == [{
+            "type":"IncorrectArgumentTypeException",
+            "message":"'getClass()' expected: undefined, actual was: foo"
+        }
+    ]
+    fn.expectedArgs == {
+        "name":"controller",
+        "expectedCalls":false,
+        "maxCalls":false,
+        "actualCalls":1,
+        "expectedArgs":[{
+                "accepts":[undefined
+                ]
+            },
+            {
+                "accepts":["foo",
+                    "r"
+                ],
+                "returns":2
+            }
+        ],
+        "actualArgs":[["foo"
+            ]
+        ],
+        "callbackArgs":[],
+        "requiredNumberofArguments":false,
+        "allowOverload":true,
+        "strictValueChecking":false
+    }*/
 
 	})
 
