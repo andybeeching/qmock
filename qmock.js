@@ -382,7 +382,7 @@ function initQMock ( assert, opt ) {
 
     if ( !mockedMembers ) { return false; }
 
-    var propertyWhitelist = "calls min max"; // List of method/property identifiers that are used in Qmock - protected.
+    var propertyBlacklist = /^(?:calls|min|max)$/; // List of method/property identifiers that are used in Qmock - protected.
 
     // loop through expected members on mock
     for ( var key in mockedMembers ) {
@@ -418,7 +418,7 @@ function initQMock ( assert, opt ) {
                 : "call"
             ](member, memberConfig[ expectation ]);
 
-          } else if ( /propertyWhitelist/.test( expectation ) ) {
+          } else if ( propertyBlacklist.test( expectation ) ) {
             // If not callable check property not whitelisted before throwing error
             throwMockException("InvalidExpectationMethodCallException", member["name"] + '.' + expectation, "Key to mutator method on mockedMember object", name);
           }
