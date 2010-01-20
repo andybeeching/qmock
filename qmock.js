@@ -51,7 +51,7 @@
  * TODO: Change expose function to accept list of expected methods (e.g. get, set, reset - save memory!)
  */
 
-function initAssay ( identifier, container, opt ) {
+function initAssay ( opt ) {
 
     var isTest = opt && opt.isTest;
 
@@ -346,8 +346,8 @@ function initAssay ( identifier, container, opt ) {
        return result;
     }
 
-    // PUBLIC static members on Etsy namespace
-    container[ identifier ] = {
+    // PUBLIC static members on Assay namespace
+    return {
       "version": "0.2",
       "exposeObject": exposeObject,
       "object": assertObject,
@@ -355,39 +355,15 @@ function initAssay ( identifier, container, opt ) {
       "collection": assertCollection,
       "Variable": Variable
     };
-
-    // Assay was successfully initialised!
-    return true;
 }
 
-// Register Assay Interface
-
-initAssay(
-  // identifier (String)
-  'Assay',
-  // container (Object)
-  ( typeof exports === "undefined" ) ? this : exports,
-  // opt (Hash)
-  {isTest: true}
-);
-
-function initQMock ( identifier, container, assert, opt ) {
+function initQMock ( assert, opt ) {
 
   // initialisation requirement checks
-  if ( arguments.length < 3 ) {
-    throw {
-      type: "MissingParametersException",
-      message: "initQMock() requires the 'identifier', 'container' & 'assert' parameters to be supplied"
-    }
-  } else if ( assert.constructor !== Function ) {
+  if ( assert.constructor !== Function ) {
     throw {
       type: "DependencyUnavailableException",
       message: "qMock requires the 'assert' parameter be a function (with the signature: {(Variable: expected), (Variable: actual), [(Hash: opt)]})"
-    }
-  } else if ( !assert(String, identifier) ) {
-    throw {
-      type: "MalformedArgumentsException",
-      message: "qMock requires the 'identifier' parameter to be a (String)"
     }
   }
 
@@ -407,7 +383,7 @@ function initQMock ( identifier, container, assert, opt ) {
 
     if ( !mockedMembers ) { return false; }
 
-    var propertyWhitelist = "calls min max"; // List of method/property identifiers that are used in Qmock - protected.
+    var propertyBlacklist = /^(?:calls|min|max)$/; // List of method/property identifiers that are used in Qmock - protected.
 
     // loop through expected members on mock
     for ( var key in mockedMembers ) {
@@ -443,7 +419,7 @@ function initQMock ( identifier, container, assert, opt ) {
                 : "call"
             ](member, memberConfig[ expectation ]);
 
-          } else if ( /propertyWhitelist/.test( expectation ) ) {
+          } else if ( propertyBlacklist.test( expectation ) ) {
             // If not callable check property not whitelisted before throwing error
             throwMockException("InvalidExpectationMethodCallException", member["name"] + '.' + expectation, "Key to mutator method on mockedMember object", name);
           }
@@ -914,28 +890,37 @@ function initQMock ( identifier, container, assert, opt ) {
     ;;;; opt.expose( createMockFromJSON, "_createMockFromJSON", MockConstructor );
   }
 
-  // API Registration - register qMock in mapped scope
-  container[ identifier ] = MockConstructor;
-
   // QMock was successfully initialised!
-  return true;
+  return MockConstructor;
 
 }
 
-// Register QMock interface
-initQMock(
-  // identifier (String)
-  'Mock',
-  // container (Object)
-  ( typeof exports === "undefined" ) ? this : exports,
-   // assert (Function)
-  (Assay && Assay.object),
-  // opt (Hash)
-  {
-    "isTest": true,
-    "expose": (Assay && Assay.exposeObject)
-  }
-);
+(function QMock_scope( export_to ) {
 
-// Add reference to Variable for backward compatibility for Juice (TBR)
-Mock.Variable = Assay.Variable;
+  // Register Assay Interface
+  var Assay = initAssay(
+    // opt (Hash)
+    {isTest: true}
+  );
+
+  // Register QMock interface
+  var Mock = initQMock(
+     // assert (Function)
+    (Assay && Assay.object),
+    // opt (Hash)
+    {
+      "isTest": true,
+      "expose": (Assay && Assay.exposeObject)
+    }
+  );
+
+  // Add reference to Variable for backward compatibility for Juice (TBR)
+  Mock.Variable = Assay.Variable;
+
+  export_to.Mock = Mock;
+  export_to.Assay = Assay;
+
+  // Export the init function so people can use cusotm assert modules too.
+  export_to.initQMOCK = initQMock;
+
+})( ( typeof exports === "undefined" ) ? this : exports );
