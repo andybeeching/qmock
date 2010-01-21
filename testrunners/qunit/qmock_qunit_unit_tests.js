@@ -276,7 +276,7 @@
 
 	  var mockErrorHandler = (function () {
 	    var errors = [];
-	    function handler (errorType, fn, expected, actual) {
+	    function handler ( expected, actual, errorType, fn ) {
 	      errors.push({
 	        type: errorType,
 	        message: 'expected: "' + expected + '", actual: "' + actual + '"'
@@ -399,7 +399,7 @@
 
 	  var mockErrorHandler = (function () {
 	    var errors = [];
-	    function handler (errorType, fn, expected, actual) {
+	    function handler ( expected, actual, errorType, fn ) {
 	      errors.push({
 	        type: errorType,
 	        message: 'expected: "' + expected + '", actual: "' + actual + '"'

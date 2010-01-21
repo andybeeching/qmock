@@ -66,6 +66,7 @@ function initAssay ( opt ) {
     function Variable () {};
 
     // Function to expose private objects on a target object for testing (plus injection of mocks/stubs and reset functionality)
+    // Be able to pass object detailing which methods to return (maybe config? {get:true, set:true, reset:true} - default would be false?)
     function exposeObject ( obj, identifier, container ) {
 
       var cachedObj = obj; // can this part be improved by one cache for all or many atomic caches?
@@ -113,6 +114,7 @@ function initAssay ( opt ) {
       function assertHash ( expected, actual, opt ) {
 
         var result = true,
+            // defaults
             raiseError = (opt && opt.exceptionHandler) || null,
             descriptor = (opt && opt.descriptor) || 'assertHash()';
 
@@ -144,7 +146,7 @@ function initAssay ( opt ) {
                 if ( key in Object( actual ) ) {
                   result &= assertObject( expected[key], actual[key], opt );
                 } else {
-                  raiseError && raiseError( "MissingHashKeyException", identifier, key, "not found on object" )
+                  raiseError && raiseError( key, "not found on object", "MissingHashKeyException", descriptor )
                   result = false;
                   continue checkingMembers;
                 }
@@ -187,7 +189,7 @@ function initAssay ( opt ) {
 
       // assertCollection parameter checks
       if ( expected.length !== actual.length ) {
-        raiseError && raiseError( "MismatchedNumberOfMembersException", identifier, expected.length, actual.length )
+        raiseError && raiseError( expected.length, actual.length, "MismatchedNumberOfMembersException", descriptor )
         result = false;
       } else {
         // Only assert on absolute number of params declared in method signature as expectations don't exist for overloaded interfaces
@@ -255,7 +257,7 @@ function initAssay ( opt ) {
         case undefined:
         // case NaN: TBD
           if ( expected !== actual ) {
-            raiseError && raiseError( exceptionType, identifier, expected, actual );
+            raiseError && raiseError( expected, actual, exceptionType, descriptor );
             result = false;
           }
           break;
@@ -323,7 +325,7 @@ function initAssay ( opt ) {
 
                 // If MissingHashKeyException thrown then create custom error listing the missing keys.
                 if ( error && error.type && error.type === "MalformedArgumentsException" ) {
-                  raiseError && raiseError(error.type, descriptor, expected, actual);
+                  raiseError && raiseError( expected, actual, error.type, descriptor );
                 } else {
                   throw error;
                 }
@@ -344,7 +346,7 @@ function initAssay ( opt ) {
         }
         // Throw error if negative match
         if ( result === false ) {
-          raiseError && raiseError( exceptionType, descriptor, expected, actual ); // Need to inject correct className
+          raiseError && raiseError(  expected, actual, exceptionType, descriptor ); // Need to inject correct className
         }
       } // end switch
        return result;
@@ -438,7 +440,7 @@ function initQMock ( assert, opt ) {
 
           } else if ( propertyBlacklist.test( expectation ) ) {
             // If not callable check property not whitelisted before throwing error
-            throwMockException("Identifier for method on new Mock instance", "Mock." + member["name"] + "[" + expectation + "]", "InvalidMockInstanceMethodException", member["name"] + '.' + expectation);
+            //throwMockException("Identifier for method on new Mock instance", "Mock." + member["name"] + "[" + expectation + "]", "InvalidMockInstanceMethodException", member["name"] + '.' + expectation);
           }
 
         } // end setExpectations loop
@@ -455,7 +457,7 @@ function initQMock ( assert, opt ) {
   // Function to build pretty exception objects - TBR function signature
   //function createException ( exceptionType, objName, expected, actual ) {
   function createException ( expected, actual, exceptionType, descriptor ) {
-    
+
     var e = {
         type : exceptionType
       },
@@ -732,7 +734,7 @@ function initQMock ( assert, opt ) {
             case ( allowOverload === false) && ( requiredNumberofArguments !== false ) && ( requiredNumberofArguments !== actualArgs[0].length ):
             // At least n Arg length checking - overloading allowed - Global check
             case ( allowOverload === true) && ( requiredNumberofArguments !== false ) && ( requiredNumberofArguments > actualArgs[0].length )  :
-              throwMockException("IncorrectNumberOfArgumentsException", name, expectedArgs.length, actualArgs.length);
+              throwMockException( expectedArgs.length, actualArgs.length, "IncorrectNumberOfArgumentsException", name );
               break assertMethod;
 
             default:
@@ -756,8 +758,8 @@ function initQMock ( assert, opt ) {
 
                         // Assert Number of Arguments if expectation explicitly set...
                         // At least n Arg length checking - overloading allowed - Global check
-                        if ( expectedArgs[j]["required"] > actualArgs[i].length )  {
-                          throwMockException("IncorrectNumberOfArgumentsException", name, expectedArgs.length, actualArgs.length);
+                        if ( expectedArgs[ j ][ "required" ] > actualArgs[ i ].length )  {
+                          throwMockException( expectedArgs.length, actualArgs.length, "IncorrectNumberOfArgumentsException", name );
                           continue assertPresentations;
                         }
 
@@ -766,14 +768,14 @@ function initQMock ( assert, opt ) {
                         if ( assert(
                               // expected
                               ( allowOverload === false && requiredNumberofArguments !== false )
-                                ? expectedArgs[j]["accepts"]
+                                ? expectedArgs[ j ][ "accepts" ]
                                 // Else assume default mode of overloading and type checking against method interface
-                                : slice.call(expectedArgs[j]["accepts"], 0, actualArgs[i].length),
+                                : slice.call(expectedArgs[ j ][ "accepts" ], 0, actualArgs[ i ].length),
                               // actual
                               ( allowOverload === false && requiredNumberofArguments !== false )
-                                ? actualArgs[i]
+                                ? actualArgs[ i ]
                                 // Else assume default mode of overloading and type checking against method interface
-                                : slice.call(actualArgs[i], 0, expectedArgs[j]["accepts"].length),
+                                : slice.call(actualArgs[ i ], 0, expectedArgs[ j ][ "accepts" ].length),
                               {
                                 "strictValueChecking": strictValueChecking,
                                 "exceptionType": (strictValueChecking) ? "IncorrectArgumentValueException" : "IncorrectArgumentTypeException",
@@ -784,13 +786,13 @@ function initQMock ( assert, opt ) {
                             )
                           ) {
                             //debugger;
-                            while (exceptions.length > cachedExceptionTotal) {
+                            /*while (exceptions.length > cachedExceptionTotal) {
                                 exceptions.shift();
                             }
 
                             var test = exceptions;
                             var testLen = exceptions.length;
-                            var slic = exceptions.slice;
+                            var slic = exceptions.slice;*/
                               // If match remove exceptions raised during checks and move on to next presentation.
                               exceptions.slice(0, cachedExceptionTotal);
                               continue assertPresentations;
@@ -847,7 +849,7 @@ function initQMock ( assert, opt ) {
       if ( mock.expectsArguments.push ) {
         if ( mock.expectsArguments.length !== mock.actualArguments.length ) {
           // Thrown in to satisfy tests (for consistency's sake) - NEEDS TO BE REFACTORED OUT!
-          throwMockException("IncorrectNumberOfArgumentsException", "Constructor function", mock.expectsArguments.length, mock.actualArguments.length);
+          throwMockException( mock.expectsArguments.length, mock.actualArguments.length, "IncorrectNumberOfArgumentsException", "Constructor function" );
         } else {
           assert(
             mock.expectsArguments,
@@ -864,7 +866,7 @@ function initQMock ( assert, opt ) {
 
       // Verify Mocked Methods
       for (var i = 0, len = methods.length; i < len; i++) {
-        methods[i].verifyMethod();
+        methods[ i ].verifyMethod();
       }
 
       // Did it go bad?
@@ -879,9 +881,9 @@ function initQMock ( assert, opt ) {
     mock.reset = function resetMock () {
       exceptions = [];
       this.actualArguments = [];
-      for (var i = 0, len = methods.length; i<len; i++) {
-        methods[i].actualCalls = 0;
-        methods[i].actualArgs = [];
+      for (var i = 0, len = methods.length; i < len; i++) {
+        methods[ i ].actualCalls = 0;
+        methods[ i ].actualArgs = [];
       }
     };
 
@@ -889,8 +891,8 @@ function initQMock ( assert, opt ) {
     mock.expectsArguments = mock.accepts;
 
     // If params passed to Mock constructor auto-magikally create mocked interface from JSON tree.
-    if ( assert( Object, arguments && arguments[0] ) ) {
-      createMockFromJSON.call(mock, arguments[0]);
+    if ( assert( Object, arguments && arguments[ 0 ] ) ) {
+      createMockFromJSON.call( mock, arguments[ 0 ] );
     }
 
     // On my command, unleash the mock! :-)
@@ -914,7 +916,7 @@ function initQMock ( assert, opt ) {
 }
 
 // Export QMock initialiser
-(( typeof exports === "undefined" ) ? this : exports )["Mock"] = initQMock;
+(( typeof exports === "undefined" ) ? this : exports )[ "Mock" ] = initQMock;
 
 /*
  * Bootstrap QMock
@@ -926,7 +928,9 @@ function initQMock ( assert, opt ) {
   // Private Assay Interface
   var Assay = container.initAssay(
     // opt (Hash)
-    {isTest: true}
+    {
+      "isTest": true
+    }
   );
 
   // Initialise QMock
