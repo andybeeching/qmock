@@ -903,7 +903,7 @@ function initQMock ( assert, opt ) {
   // PUBLIC static members on Mock class
 
   // Version number
-  MockConstructor["QMock"] = "0.2";
+  MockConstructor["version"] = "0.2";
 
   // Expose internal methods for unit tests
   if ( opt && opt.isTest && assert(Function, opt.expose) ) {
