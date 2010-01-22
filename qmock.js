@@ -369,7 +369,7 @@ function initAssay ( opt ) {
 // Register Assay Public Interface
 (function bootstrapAssay ( container ) {
 
-  container.Assay = container.initAssay(
+  container.Assay = initAssay(
     // opt (Hash)
     {isTest: true}
   );
@@ -926,7 +926,7 @@ function initQMock ( assert, opt ) {
 (function bootstrapQMock ( container ) {
 
   // Private Assay Interface
-  var Assay = container.initAssay(
+  var Assay = initAssay(
     // opt (Hash)
     {
       "isTest": true
@@ -934,7 +934,7 @@ function initQMock ( assert, opt ) {
   );
 
   // Initialise QMock
-  container.Mock = container.initQMock(
+  container.Mock = initQMock(
      // assert (Function)
     (Assay && Assay.object),
     // opt (Hash)
@@ -946,6 +946,6 @@ function initQMock ( assert, opt ) {
 
   // Add reference to Variable for backward compatibility for Juice (TBR)
   // Needs to be refactored to a custom matcher IMO, so can set from qmock and it will perform a lookup for a deserializer fn in a cache witin Assay.
-  Mock.Variable = Assay.Variable;
+  container.Mock.Variable = Assay.Variable;
 
 })( ( typeof exports === "undefined" ) ? this : exports );
