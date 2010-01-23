@@ -20,7 +20,7 @@
 	 *
 	 */
 
-	module("Assay Initialisation", {
+	module("Assay lib // Bootstrap", {
 
 	  setup: function () {
 	    this.expectedAssayInterface = {
@@ -39,7 +39,7 @@
 
 	});
 
-	test("App initialisation & unloading [normal mode]", function () {
+	test("Setup & teardown [normal mode]", function () {
 
 	  expect( 3 );
 
@@ -62,7 +62,7 @@
 
 	});
 
-	test("App initialisation & unloading [exposed mode]", function () {
+	test("Setup & teardown [exposed mode]", function () {
 
 	  expect( 3 );
 
@@ -85,7 +85,7 @@
 
 	});
 
-	module("Assay Interface Unit Test");
+	module("Assay lib // Interface unit test");
 
 	test("exposeObject() method - test parameter requirements", function () {
 	  // ...
@@ -1287,7 +1287,7 @@
   */
 
 
-	module("QMock Initialisation", {
+	module("QMock lib // Bootstrap", {
 
 	  setup: function () {
 	    this.expectedQMockInterface = {
@@ -1301,17 +1301,33 @@
 
 	});
 
-	test("App initialisation & unloading [normal mode]", function () {
+	test("Setup & teardown [normal mode]", function () {
 
-	  expect( 3 );
+	  expect( 5 );
 
 	  var container = {},
 	    // private Assay instance
 	      __Assay = initAssay();
 
+	  // Expected false results
+
+	  // initialise QMock without required parameters
+	  try {
+	    container[ "QMock" ] = initQMock();
+	  } catch (e) {
+	    equals( e && e.type, "DependencyUnavailableException", "initQmock() should throw a 'DependencyUnavailableException' if the required parameter 'assert' is not passed to the constructor initQmock()" );
+	  }
+
+	  // initialise QMock with incorrect parameter type
+	  try {
+	    container[ "QMock" ] = initQMock( "assert" );
+	  } catch (e) {
+	    equals( e && e.type, "DependencyUnavailableException", "initQmock() should throw a 'DependencyUnavailableException' if a function is not passed as the required parameter 'assert' to the constructor initQmock()" );
+	  }
+
 	  // Exercise inititaliser as common use case
     container[ "QMock" ] = initQMock( __Assay && __Assay.object, { "expose": __Assay && __Assay.exposeObject } );
-    
+
     // Test interface
     equals( assertHash( this.expectedQMockInterface, container[ "QMock" ] ), true, "initQmock() should return a Qmock instance interface registered to the identifier 'QMock' on container" );
 
@@ -1326,7 +1342,7 @@
 
 	});
 
-	test("App initialisation & unloading [exposed mode]", function () {
+	test("Setup & teardown [exposed mode]", function () {
 
 	  expect( 3 );
 
@@ -1360,8 +1376,8 @@
 	 *  4. Reset: [Optional] Call reset method on the mock to return it's internal state to the end of the setup phase. Sometimes located in the 'teardown' phase of the testrunner after each test phase.
 	 *
 	 */
-	
-	module( "qMock Interface Unit Test" );
+
+	module( "QMock lib // Interface unit test" );
 
 	test("w/ API: mock with single parameterless method (explicit execution call total, no return value)", function () {
 

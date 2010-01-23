@@ -394,7 +394,7 @@ function initAssay ( opt ) {
 function initQMock ( assert, opt ) {
 
   // initialisation requirement checks
-  if ( assert.constructor !== Function ) {
+  if ( !assert || assert.constructor !== Function ) {
     throw {
       type: "DependencyUnavailableException",
       message: "qMock requires the 'assert' parameter be a function (with the signature: {(Variable: expected), (Variable: actual), [(Hash: opt)]})"
