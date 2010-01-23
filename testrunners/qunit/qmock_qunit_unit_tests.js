@@ -20,13 +20,78 @@
 	 *
 	 */
 
+	module("Assay Initialisation", {
+
+	  setup: function () {
+	    this.expectedAssayInterface = {
+        "version": String,
+        "collection": Function,
+        "object": Function,
+        "hash": Function,
+        "exposeObject": Function,
+        "Variable": Function
+      };
+	  },
+
+	  teardown: function () {
+	    delete this.expectedAssayInterface;
+	  }
+
+	});
+
+	test("App initialisation & unloading [normal mode]", function () {
+
+	  expect( 3 );
+
+	  var container = {};
+
+	  // Exercise inititaliser as common use case
+    container[ "Assay" ] = initAssay();
+
+    // Test interface
+    equals( assertHash( this.expectedAssayInterface, container[ "Assay" ] ), true, "initAssay() should return an Assay interface registered with the identifier 'Assay' on container" );
+
+    // Test private methods NOT exposed
+    ok( assertObject( undefined, container.Assay.hash._isHash ), "initAssay() without optional param should not expose private methods" );
+
+    // Unload Assay from container
+    delete container[ "Assay" ];
+
+    // Test successful removal
+    ok( assertObject( undefined, container.Assay ), "The property 'Assay' should not exist on container" );
+
+	});
+
+	test("App initialisation & unloading [exposed mode]", function () {
+
+	  expect( 3 );
+
+	  var container = {};
+
+    // Exercise inititaliser in exposed mode
+    container[ "Assay" ] = initAssay( { "isTest": true } );
+
+    // Test interface
+    equals( assertHash( this.expectedAssayInterface, container[ "Assay" ] ), true, "initAssay() should return an Assay interface registered with the identifier 'Assay' on container" );
+
+    // Test private methods exposed
+    ok( assertHash( {"get": Function, "set": Function, "restore": Function}, container.Assay.hash._isHash ), "initAssay() should expose accessors and mutators for the private function _isHash() on container.Assay.hash()" );
+
+    // Unload Assay from container
+    delete container[ "Assay" ];
+
+    // Test successful removal
+    ok( assertObject( undefined, container.Assay ), "The property 'Assay' should not exist on container" );
+
+	});
+
 	module("Assay Interface Unit Test");
 
-	test("Interface initialisation and flushing", function () {
+	test("exposeObject() method - test parameter requirements", function () {
 	  // ...
 	});
 
-	test("assertCollection() method - test input requirements", function () {
+	test("assertCollection() method - test parameter requirements", function () {
 
 	  expect(5);
 
@@ -184,7 +249,7 @@
 
 	});
 
-	test("assertHash() method - test input requirements", function () {
+	test("assertHash() method - test parameter requirements", function () {
 
 		// Expected false evaluations
 
@@ -530,7 +595,7 @@
 
 	});*/
 
-	test("assertObject() method - test input requirements", function () {
+	test("assertObject() method - test parameter requirements", function () {
 
 		/*// Test no arguments
 	  try {
@@ -1213,7 +1278,7 @@
 	module( "qMock Interface Unit Test" );
 
 	//module( "qMock Internal Integration Test" );
-	
+
 	/*
 
   	test("createMockFromJSON()", function() {
@@ -1221,12 +1286,12 @@
   	});
 
   */
-  
-	
+
+
 	test("qMock registration and unloading", function () {
     // ...
   });
-  
+
 	/**
 	 * All tests follow this simple process:
 	 *
@@ -4764,7 +4829,7 @@
     var app = new Mock;
 
     var fn = app.expects().method("controller");
-    
+
     fn.expectedArgs.push(
       { accepts: [ "foo", "r"], returns: 2 }
     );

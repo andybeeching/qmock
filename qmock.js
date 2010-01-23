@@ -57,7 +57,7 @@
 function initAssay ( opt ) {
 
     var undefined,
-        isTest = opt && opt.isTest;
+        isTest = ( opt && opt.isTest ) || false;
 
     // PRIVATE functions
 
@@ -67,11 +67,22 @@ function initAssay ( opt ) {
 
     // Function to expose private objects on a target object for testing (plus injection of mocks/stubs and reset functionality)
     // Be able to pass object detailing which methods to return (maybe config? {get:true, set:true, reset:true} - default would be false?)
-    function exposeObject ( obj, identifier, container ) {
+    function exposeObject ( obj, descriptor, container ) {
 
-      var cachedObj = obj; // can this part be improved by one cache for all or many atomic caches?
+      var cachedObj = obj, // can this part be improved by one cache for all or many atomic caches?
+          // defaults
+          container = container || this;
 
-      container[ identifier ] = {
+      // parameter checks
+      if ( arguments.length < 3 ) {
+        throw {
+          type: "MissingParametersException",
+          msg: "exposeObject() requires an 'obj', 'descriptor', and 'container' parameter to be passed to method interface"
+        }
+      }
+
+      // attach accessors & mutators
+      container[ descriptor ] = {
         get: function () {
           return obj;
         },
@@ -82,6 +93,10 @@ function initAssay ( opt ) {
           obj = cachedObj;
         }
       }
+
+      // successful exposé
+      return true;
+
     }
 
     // Function to assert members of an object, returns Boolean
@@ -123,7 +138,7 @@ function initAssay ( opt ) {
         if ( arguments.length < 2 ) {
           throw {
             type: "MissingParametersException",
-            msg: "assertHash() requires at least an expected and actual parameter to be passed to interface"
+            msg: "assertHash() requires at least an 'expected' and 'actual' parameter to be passed to method interface"
           }
         } else if ( ( isHash( expected ) === false ) || ( isHash( actual ) === false ) ) {
           throw {
