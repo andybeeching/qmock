@@ -72,20 +72,20 @@ function initAssay ( opt ) {
       var cachedObj = obj; // can this part be improved by one cache for all or many atomic caches?
 
       container[ identifier ] = {
-        get: function() {
+        get: function () {
           return obj;
         },
-        set: function() {
-          obj = arguments[0] || null;
+        set: function () {
+          obj = arguments[ 0 ] || null;
         },
-        restore: function() {
+        restore: function () {
           obj = cachedObj;
         }
       }
     }
 
     // Function to assert members of an object, returns Boolean
-    var assertHash = (function () {
+    var assertHash = ( function () {
 
       // Private function to test whether an object can be enumerated
       function isHash ( obj ) {
@@ -94,17 +94,17 @@ function initAssay ( opt ) {
             id = Math.random();
 
         // exclude null/undefined early
-        if ( obj === undefined || obj === null) {
+        if ( obj === undefined || obj === null ) {
           return result;
         }
 
         // If object then should allow mutation
-        obj[id] = true;
-        result = !!(obj[id]);
+        obj[ id ] = true;
+        result = !!( obj[ id ] );
 
         // cleanup to avoid false positives later on
-        if (result) {
-          delete obj[id];
+        if ( result ) {
+          delete obj[ id ];
         }
 
         return result;
@@ -115,8 +115,8 @@ function initAssay ( opt ) {
 
         var result = true,
             // defaults
-            raiseError = (opt && opt.exceptionHandler) || null,
-            descriptor = (opt && opt.descriptor) || 'assertHash()';
+            raiseError = ( opt && opt.exceptionHandler ) || null,
+            descriptor = ( opt && opt.descriptor ) || 'assertHash()';
 
         // asserHash interface checks
         // Required parameters & characteristics (i.e. is enumerable)
@@ -125,7 +125,7 @@ function initAssay ( opt ) {
             type: "MissingParametersException",
             msg: "assertHash() requires at least an expected and actual parameter to be passed to interface"
           }
-        } else if ( (isHash(expected) === false) || (isHash(actual) === false) ) {
+        } else if ( ( isHash( expected ) === false ) || ( isHash( actual ) === false ) ) {
           throw {
             type: "MalformedArgumentsException",
             msg: "assertHash() requires the 'expected' and 'actual' parameters to be Hashes. Expected was: " + expected + ", actual was: " + actual
@@ -171,8 +171,8 @@ function initAssay ( opt ) {
     function assertCollection ( expected, actual, opt ) {
 
       var result = true,
-          raiseError = (opt && opt.exceptionHandler) || null,
-          descriptor = (opt && opt.descriptor) || 'assertCollection()';
+          raiseError = ( opt && opt.exceptionHandler ) || null,
+          descriptor = ( opt && opt.descriptor ) || 'assertCollection()';
 
       // assertCollection interface checks
       if ( arguments.length < 2 ) {
@@ -180,7 +180,7 @@ function initAssay ( opt ) {
           type: "MissingParametersException",
           msg: "assertCollection() requires at least an expected and actual parameter to be passed to interface"
         }
-      } else if ( (!expected || expected.length === undefined) || (!actual || actual.length === undefined) ) {
+      } else if ( ( !expected || expected.length === undefined ) || ( !actual || actual.length === undefined ) ) {
         throw {
           type: "MalformedArgumentsException",
           msg: "assertCollection() requires the 'expected' and 'actual' collection parameters to be an Array-like collection"
@@ -195,7 +195,7 @@ function initAssay ( opt ) {
         // Only assert on absolute number of params declared in method signature as expectations don't exist for overloaded interfaces
         for ( var i = 0, len = actual.length; i < len; i++ ) {
           // 1:1 assertion
-          result &= assertObject ( expected[i], actual[i], opt );
+          result &= assertObject ( expected[ i ], actual[ i ], opt );
         }
       }
 
@@ -214,7 +214,7 @@ function initAssay ( opt ) {
       }
 
       // Test whether expected is a constructor for native object types (aside from null // undefined)
-      var expectedType = (expected !== null && expected !== undefined) ? expected.constructor : expected,
+      var expectedType = ( expected !== null && expected !== undefined ) ? expected.constructor : expected,
         /*expectedType = (expected !== null && expected !== undefined)
           ? ( expected.constructor === Function ) // but also matches function literals :-(
             ? expected
@@ -346,7 +346,7 @@ function initAssay ( opt ) {
         }
         // Throw error if negative match
         if ( result === false ) {
-          raiseError && raiseError(  expected, actual, exceptionType, descriptor ); // Need to inject correct className
+          raiseError && raiseError( expected, actual, exceptionType, descriptor ); // Need to inject correct className
         }
       } // end switch
        return result;
@@ -559,7 +559,7 @@ function initQMock ( assert, opt ) {
 
               // Compare actual with expected arguments and if true return correct object
               assertingPresentations:
-                for (var i = 0, len = method.expectedArgs.length; i < len; i++) {
+                for ( var i = 0, len = method.expectedArgs.length; i < len; i++ ) {
 
                   try {
                     if ( assert(
@@ -585,13 +585,13 @@ function initQMock ( assert, opt ) {
 
               return obj;
 
-           })(parameters)}
+           })( parameters )}
 
            updateMethodState._getState = getState;
 
            return updateMethodState;
 
-          })(this, name);
+          })( this, name );
 
         // chain
         return this;
@@ -626,15 +626,15 @@ function initQMock ( assert, opt ) {
         // If required number of arguments not already set, then implicitly set it to length of param array (so let ppl customise it)
         // Add in per presentation strict argument length unless already set either globally or locally (recommendation to keep it consistent locally - don't let mocks change behaviour in test group too much)
         // This should probably be part of the refactor... feels messy!
-        if (this.requiredNumberofArguments === false) {
+        if ( this.requiredNumberofArguments === false ) {
 
           // Set minimum expectations
-          this.requiredNumberofArguments = arguments[0]["accepts"].length;
+          this.requiredNumberofArguments = arguments[ 0 ][ "accepts" ].length;
 
           // Assign explicit expectation if exist
-          for(var i = 0, len = arguments.length; i < len; i++) {
-            if(!arguments[i]["required"]) {
-              arguments[i]["required"] = arguments[i]["accepts"].length;
+          for ( var i = 0, len = arguments.length; i < len; i++ ) {
+            if ( !arguments[ i ][ "required" ] ) {
+              arguments[ i ][ "required" ] = arguments[ i ][ "accepts" ].length;
             }
           }
         }
@@ -644,22 +644,22 @@ function initQMock ( assert, opt ) {
 
       "accepts": function setSingleInterfaceExpectation () {
         this.requiredNumberofArguments = arguments.length;
-        this.expectedArgs = [{"accepts": slice.call(arguments, 0)}];
+        this.expectedArgs = [ { "accepts" : slice.call( arguments, 0 ) } ];
         return this;
       },
 
-      "returns": function (stub) {
+      "returns": function ( stub ) {
         this.returnValue = stub; // default is undefined
         return this;
       },
 
-      "required": function (requiredArgs) {
+      "required": function ( requiredArgs ) {
         this.requiredNumberofArguments = requiredArgs;
         return this;
       },
 
-      "overload": function (overload_flag) {
-        this.allowOverload = overload_flag;
+      "overload": function ( isOverload ) {
+        this.allowOverload = isOverload;
         return this;
       },
 
@@ -668,20 +668,20 @@ function initQMock ( assert, opt ) {
         return this;
       },
 
-      "property": function (name) {
-        if (mock[name] !== undefined) {
-          throwMockException("undefined property name", "should be unique (was " + name + ")", "InvalidPropertyNameException", "Constructor function");
+      "property": function ( name ) {
+        if ( mock[ name ] !== undefined ) {
+          throwMockException( "undefined property name", "should be unique (was " + name + ")", "InvalidPropertyNameException", "Constructor function" );
           throw exceptions;
         }
-        mock[name] = "stub";
+        mock[ name ] = "stub";
         return this;
       },
 
-      "withValue": function (value) {
-        for(property in mock) {
-          if ( mock.hasOwnProperty(property) ) {
-            if ( mock[property] === "stub" ) {
-              mock[property] = value;
+      "withValue": function ( value ) {
+        for ( property in mock ) {
+          if ( mock.hasOwnProperty( property ) ) {
+            if ( mock[ property ] === "stub" ) {
+              mock[ property ] = value;
             }
           }
         }
@@ -698,8 +698,8 @@ function initQMock ( assert, opt ) {
         return this.returnValue = mock;
       },
 
-      "andExpects": function (calls) {
-        return mock.expects(calls);
+      "andExpects": function ( calls ) {
+        return mock.expects( calls );
       },
 
       "verifyMethod": function () {
@@ -785,16 +785,8 @@ function initQMock ( assert, opt ) {
                               }
                             )
                           ) {
-                            //debugger;
-                            /*while (exceptions.length > cachedExceptionTotal) {
-                                exceptions.shift();
-                            }
-
-                            var test = exceptions;
-                            var testLen = exceptions.length;
-                            var slic = exceptions.slice;*/
                               // If match remove exceptions raised during checks and move on to next presentation.
-                              exceptions.slice(0, cachedExceptionTotal);
+                              exceptions = exceptions.splice(0, cachedExceptionTotal);
                               continue assertPresentations;
                         }
 

@@ -12,7 +12,7 @@
 	function Custom () {};
 
 	// Stub for CSS selector parameter expectation (e.g. mock jQuery)
-	var Selector = Assay.Variable;
+	var Selector = Mock.Variable;
 
 	/**
 	 *
@@ -24,7 +24,7 @@
 
 	test("qMock registration and unloading", function () {
 	  // ...
-	})
+	});
 
 	test("assertCollection() - test interface & parameters", function () {
 
@@ -4758,19 +4758,14 @@
     var app = new Mock;
 
     var fn = app.expects().method("controller");
-
+    
     fn.expectedArgs.push(
       { accepts: [ "foo", "r"], returns: 2 }
     );
-    try {
-      app.controller( "foo", "r" );
-      app.verify();
-    }
-    catch (e) {
-      var test = e;
+    app.controller( "foo", "r" );
+    ok(app.verify(), "verify() should be true");
       //print( JSON.stringify( e, 0, 4 ) );
       //print( JSON.stringify( fn, 0, 4 ) );
-    }
 
     // output:
     /*
