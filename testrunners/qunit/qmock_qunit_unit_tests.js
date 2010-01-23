@@ -20,13 +20,13 @@
 	 *
 	 */
 
-	module("qMock Implementation");
+	module("Assay Interface Unit Test");
 
-	test("qMock registration and unloading", function () {
+	test("Interface initialisation and flushing", function () {
 	  // ...
 	});
 
-	test("assertCollection() - test interface & parameters", function () {
+	test("assertCollection() method - test input requirements", function () {
 
 	  expect(5);
 
@@ -66,7 +66,7 @@
 
 	});
 
-	test("assertCollection() - type checking", function () {
+	test("assertCollection() method - type checking exercises", function () {
 
 	  expect(33);
 
@@ -125,7 +125,7 @@
 
 	});
 
-	test("assertCollection() - strict value checking", function () {
+	test("assertCollection() method - strict value checking exercises", function () {
 
 	  expect(31)
 
@@ -184,7 +184,7 @@
 
 	});
 
-	test("assertHash() - test interface & parameters", function () {
+	test("assertHash() method - test input requirements", function () {
 
 		// Expected false evaluations
 
@@ -220,7 +220,7 @@
 
 	});
 
-	test("_isHash() - black box test", function () {
+	test("assertHash._isHash() [private] method - exercises", function () {
 
 	  var isHash = assertHash["_isHash"].get();
 
@@ -270,7 +270,7 @@
 
 	});
 
-	test("assertHash() - type checking", function () {
+	test("assertHash() method - type checking exercises", function () {
 
 	  expect(37);
 
@@ -393,7 +393,7 @@
     // ????? meh ???????
   });
 
-  test("assertHash() - strict value checking", function () {
+  test("assertHash() method - strict value checking exercises", function () {
 
 	  expect(46);
 
@@ -526,11 +526,11 @@
 
 	});
 
-	test("assertHash() - test *interface* assertion use case", function () {
+	/*test("assertHash() - test *interface* assertion use case", function () {
 
-	});
+	});*/
 
-	test("assertObject() - test interface & parameters", function () {
+	test("assertObject() method - test input requirements", function () {
 
 		/*// Test no arguments
 	  try {
@@ -569,7 +569,7 @@
 	});
 
 
-	test("assertObject() - (Number: Constructor) primitive - typed checking", function() {
+	test("assertObject() exercises - (Number: Constructor) primitive [typed checking]", function() {
 
 	  // FALSE ASSERTIONS
 
@@ -605,7 +605,7 @@
 
 	});
 
-	test("assertObject() - (Number: Constructor) primitive - strict value checking", function() {
+	test("assertObject() exercises - (Number: Constructor) primitive [strict value checking]", function() {
 
 	  // FALSE ASSERTIONS
 
@@ -642,7 +642,7 @@
 
 	});
 
-	test("assertObject() - (Number: 1) primitive - typed checking", function() {
+	test("assertObject() exercises - (Number: 1) primitive [typed checking]", function() {
 
 	  // FALSE ASSERTIONS
 
@@ -685,7 +685,7 @@
 
 	});
 
-	test("assertObject() - (Number: 1) primitive - strict value checking", function() {
+	test("assertObject() exercises - (Number: 1) primitive [strict value checking]", function() {
 
 	  // FALSE ASSERTIONS
 
@@ -726,7 +726,7 @@
 
 	});
 
-	test("assertObject() - (String: Constructor) primitive - typed checking", function() {
+	test("assertObject() exercises - (String: Constructor) primitive [typed checking]", function() {
 
 	  // FALSE ASSERTIONS
 
@@ -764,7 +764,7 @@
 
 	});
 
-	test("assertObject() - (String: Constructor) primitive - strict value checking", function() {
+	test("assertObject() exercises - (String: Constructor) primitive [strict value checking]", function() {
 
 	  // FALSE ASSERTIONS
 
@@ -802,7 +802,7 @@
 
 	});
 
-	test("assertObject() - (String: 'string') primitive - typed checking only", function() {
+	test("assertObject() exercises - (String: 'string') primitive [typed checking]", function() {
 
 	  // FALSE ASSERTIONS
 
@@ -845,7 +845,7 @@
 
 	});
 
-	test("assertObject() - (String: 'string') primitive - strict value checking", function() {
+	test("assertObject() exercises - (String: 'string') primitive [strict value checking]", function() {
 
 	  // FALSE ASSERTIONS
 
@@ -888,7 +888,7 @@
 
 	});
 
-	test("assertObject() - (Boolean: Constructor) primitive - typed checking", function() {
+	test("assertObject() exercises - (Boolean: Constructor) primitive [typed checking]", function() {
 
 	  // FALSE ASSERTIONS
 
@@ -926,7 +926,7 @@
 
 	});
 
-	test("assertObject() - (Boolean: Constructor) primitive - strict value checking", function() {
+	test("assertObject() exercises - (Boolean: Constructor) primitive [strict value checking]", function() {
 
 	  // FALSE ASSERTIONS
 
@@ -964,7 +964,7 @@
 
 	});
 
-	test("assertObject() - (Boolean: true) primitive - typed checking", function() {
+	test("assertObject() exercises - (Boolean: true) primitive [typed checking]", function() {
 
 	  // FALSE ASSERTIONS
 
@@ -1007,7 +1007,7 @@
 
 	});
 
-	test("assertObject() - (Boolean: true) primitive - strict value checking", function() {
+	test("assertObject() exercises - (Boolean: true) primitive [strict value checking]", function() {
 
 	  // FALSE ASSERTIONS
 
@@ -1050,7 +1050,7 @@
 
 	});
 
-	test("assertObject() - (RegExp) composite - typed checking", function() {
+	test("assertObject() exercises - (RegExp) composite [typed checking]", function() {
 
 	  // FALSE ASSERTIONS
 
@@ -1088,7 +1088,7 @@
 
 	});
 
-	test("assertObject() - (RegExp) composite - strict 'value' checking", function() {
+	test("assertObject() exercises - (RegExp) composite [strict 'value' checking]", function() {
 
 	  // FALSE ASSERTIONS
 
@@ -1127,7 +1127,7 @@
 	});
 
 
-	test("assertObject() - (RegExp: /re/) composite - typed checking", function() {
+	test("assertObject() exercises - (RegExp: /re/) composite [typed checking]", function() {
 
 	  // FALSE ASSERTIONS
 
@@ -1165,7 +1165,7 @@
 
 	});
 
-	test("assertObject() - (RegExp: /re/) composite - strict 'value' checking", function() {
+	test("assertObject() exercises - (RegExp: /re/) composite [strict 'value' checking]", function() {
 
 	  // FALSE ASSERTIONS
 
@@ -1203,15 +1203,6 @@
 
 	});
 
-/*
-	test("createException()", function() {
-
-	});
-
-	test("createMockFromJSON()", function() {
-
-	});
-*/
 
 	/**
 	 *
@@ -1219,8 +1210,23 @@
 	 *
 	 */
 
-	module("qMock Interface");
+	module( "qMock Interface Unit Test" );
 
+	//module( "qMock Internal Integration Test" );
+	
+	/*
+
+  	test("createMockFromJSON()", function() {
+
+  	});
+
+  */
+  
+	
+	test("qMock registration and unloading", function () {
+    // ...
+  });
+  
 	/**
 	 * All tests follow this simple process:
 	 *
