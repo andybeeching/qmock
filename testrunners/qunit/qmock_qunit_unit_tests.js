@@ -16,7 +16,7 @@
 
 	/**
 	 *
-	 * Unit tests for atomic helper methods inside QMock
+	 * Unit tests Assay
 	 *
 	 */
 
@@ -49,7 +49,7 @@
     container[ "Assay" ] = initAssay();
 
     // Test interface
-    equals( assertHash( this.expectedAssayInterface, container[ "Assay" ] ), true, "initAssay() should return an Assay interface registered with the identifier 'Assay' on container" );
+    equals( assertHash( this.expectedAssayInterface, container[ "Assay" ] ), true, "initAssay() should return an Assay instance interface registered with the identifier 'Assay' on container" );
 
     // Test private methods NOT exposed
     ok( assertObject( undefined, container.Assay.hash._isHash ), "initAssay() without optional param should not expose private methods" );
@@ -58,7 +58,7 @@
     delete container[ "Assay" ];
 
     // Test successful removal
-    ok( assertObject( undefined, container.Assay ), "The property 'Assay' should not exist on container" );
+    ok( assertObject( undefined, container.Assay ), "Assay should be unloaded, and the associated identifier 'Assay' should not exist on container" );
 
 	});
 
@@ -72,7 +72,7 @@
     container[ "Assay" ] = initAssay( { "isTest": true } );
 
     // Test interface
-    equals( assertHash( this.expectedAssayInterface, container[ "Assay" ] ), true, "initAssay() should return an Assay interface registered with the identifier 'Assay' on container" );
+    equals( assertHash( this.expectedAssayInterface, container[ "Assay" ] ), true, "initAssay() should return an Assay instance interface registered to the identifier 'Assay' on container" );
 
     // Test private methods exposed
     ok( assertHash( {"get": Function, "set": Function, "restore": Function}, container.Assay.hash._isHash ), "initAssay() should expose accessors and mutators for the private function _isHash() on container.Assay.hash()" );
@@ -81,7 +81,7 @@
     delete container[ "Assay" ];
 
     // Test successful removal
-    ok( assertObject( undefined, container.Assay ), "The property 'Assay' should not exist on container" );
+    ok( assertObject( undefined, container.Assay ), "Assay should be unloaded, and the associated identifier 'Assay' should not exist on container" );
 
 	});
 
@@ -1275,7 +1275,6 @@
 	 *
 	 */
 
-	module( "qMock Interface Unit Test" );
 
 	//module( "qMock Internal Integration Test" );
 
@@ -1288,9 +1287,69 @@
   */
 
 
-	test("qMock registration and unloading", function () {
-    // ...
-  });
+	module("QMock Initialisation", {
+
+	  setup: function () {
+	    this.expectedQMockInterface = {
+        "version": String
+      };
+	  },
+
+	  teardown: function () {
+	    delete this.expectedQMockInterface;
+	  }
+
+	});
+
+	test("App initialisation & unloading [normal mode]", function () {
+
+	  expect( 3 );
+
+	  var container = {},
+	    // private Assay instance
+	      __Assay = initAssay();
+
+	  // Exercise inititaliser as common use case
+    container[ "QMock" ] = initQMock( __Assay && __Assay.object, { "expose": __Assay && __Assay.exposeObject } );
+    
+    // Test interface
+    equals( assertHash( this.expectedQMockInterface, container[ "QMock" ] ), true, "initQmock() should return a Qmock instance interface registered to the identifier 'QMock' on container" );
+
+    // Test private methods NOT exposed
+    ok( assertObject( undefined, container.QMock[ "_createMockFromJSON" ] ), "initQmock() without optional param should not expose the private method _createMockFromJSON()" );
+
+    // Unload Assay from container
+    delete container[ "QMock" ];
+
+    // Test successful removal
+    ok( assertObject( undefined, container.QMock ), "QMock should be unloaded, and the associated identifier 'Qmock' should not exist on container" );
+
+	});
+
+	test("App initialisation & unloading [exposed mode]", function () {
+
+	  expect( 3 );
+
+	  var container = {},
+  	    // private Assay instance
+	      __Assay = initAssay();
+
+    // Exercise inititaliser in exposed mode
+    container[ "QMock" ] = initQMock( __Assay && __Assay.object, { "isTest": true, "expose": __Assay && __Assay.exposeObject } );
+
+    // Test interface
+    equals( assertHash( this.expectedQMockInterface, container[ "QMock" ] ), true, "initQMock() should return a Qmock instance interface registered to the identifier 'Qmock' on container" );
+
+    // Test private methods exposed
+    ok( assertHash( {"get": Function, "set": Function, "restore": Function}, container.QMock[ "_createMockFromJSON" ] ), "initQMock( {isTest: true} ) should expose accessors and mutators for the private function _createMockFromJSON() on container.QMock" );
+
+    // Unload Assay from container
+    delete container[ "QMock" ];
+
+    // Test successful removal
+    ok( assertObject( undefined, container.QMock ), "QMock should be unloaded, and the associated identifier 'Qmock' should not exist on container" );
+
+	});
 
 	/**
 	 * All tests follow this simple process:
@@ -1301,6 +1360,8 @@
 	 *  4. Reset: [Optional] Call reset method on the mock to return it's internal state to the end of the setup phase. Sometimes located in the 'teardown' phase of the testrunner after each test phase.
 	 *
 	 */
+	
+	module( "qMock Interface Unit Test" );
 
 	test("w/ API: mock with single parameterless method (explicit execution call total, no return value)", function () {
 
