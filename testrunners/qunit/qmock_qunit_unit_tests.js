@@ -1,12 +1,7 @@
 (function scopeQMockTests () {
 
   // Closure scoped aliases to internal qMock functions
-  var assertObject = Assay.object,
-    assertCollection = Assay.collection,
-    assertHash = Assay.hash,
-    //createException = Mock["_createException"].get(),
-    createMockFromJSON = Mock["_createMockFromJSON"].get(),
-    undefined;
+  var undefined;
 
 	// Stub to test support for user-defined objects
 	function Custom () {};
@@ -49,16 +44,16 @@
     container[ "Assay" ] = initAssay();
 
     // Test interface
-    equals( assertHash( this.expectedAssayInterface, container[ "Assay" ] ), true, "initAssay() should return an Assay instance interface registered with the identifier 'Assay' on container" );
+    equals( Assay.hash( this.expectedAssayInterface, container[ "Assay" ] ), true, "initAssay() should return an Assay instance interface registered with the identifier 'Assay' on container" );
 
     // Test private methods NOT exposed
-    ok( assertObject( undefined, container.Assay.hash._isHash ), "initAssay() without optional param should not expose private methods" );
+    ok( Assay.object( undefined, container.Assay.hash._isHash ), "initAssay() without optional param should not expose private methods" );
 
     // Unload Assay from container
     delete container[ "Assay" ];
 
     // Test successful removal
-    ok( assertObject( undefined, container.Assay ), "Assay should be unloaded, and the associated identifier 'Assay' should not exist on container" );
+    ok( Assay.object( undefined, container.Assay ), "Assay should be unloaded, and the associated identifier 'Assay' should not exist on container" );
 
 	});
 
@@ -72,66 +67,70 @@
     container[ "Assay" ] = initAssay( { "isTest": true } );
 
     // Test interface
-    equals( assertHash( this.expectedAssayInterface, container[ "Assay" ] ), true, "initAssay() should return an Assay instance interface registered to the identifier 'Assay' on container" );
+    equals( Assay.hash( this.expectedAssayInterface, container[ "Assay" ] ), true, "initAssay() should return an Assay instance interface registered to the identifier 'Assay' on container" );
 
     // Test private methods exposed
-    ok( assertHash( {"get": Function, "set": Function, "restore": Function}, container.Assay.hash._isHash ), "initAssay() should expose accessors and mutators for the private function _isHash() on container.Assay.hash()" );
+    ok( Assay.hash( {"get": Function, "set": Function, "restore": Function}, container.Assay.hash._isHash ), "initAssay() should expose accessors and mutators for the private function _isHash() on container.Assay.hash()" );
 
     // Unload Assay from container
     delete container[ "Assay" ];
 
     // Test successful removal
-    ok( assertObject( undefined, container.Assay ), "Assay should be unloaded, and the associated identifier 'Assay' should not exist on container" );
+    ok( Assay.object( undefined, container.Assay ), "Assay should be unloaded, and the associated identifier 'Assay' should not exist on container" );
 
 	});
 
 	module("Assay lib // Interface unit test");
 
-	test("exposeObject() method - test parameter requirements", function () {
-	  // ...
+	test("Assay.exposeObject() method - test parameter requirements", function () {
+
+	  expect(  );
+
+
+
 	});
 
-	test("assertCollection() method - test parameter requirements", function () {
+	test("Assay.collection() method - test parameter requirements", function () {
 
-	  expect(5);
+	  expect( 5 );
 
 		// Test no arguments
 	  try {
-			assertCollection();
-	    ok(false, "assertCollection() should throw exception when passed No parameters");
+			Assay.collection();
+	    ok(false, "Assay.collection() should throw exception when passed No parameters");
 	  } catch (exception) {
-	    equals(exception.type, "MissingParametersException", "assertCollection() exception type should be MissingParametersException for less than two parameters (required). Result");
+	    equals(exception.type, "MissingParametersException", "Assay.collection() exception type should be MissingParametersException for less than two parameters (required). Result");
 	  }
 
-	  // Test malformed arguments to interface afforded by assertCollection()
+	  // Test malformed arguments to interface afforded by Assay.collection()
 	  try {
-			assertCollection( undefined, []	);
-	    ok(false, "assertCollection() should throw exception when passed incorrectly formatted parameters");
+			Assay.collection( undefined, []	);
+	    ok(false, "Assay.collection() should throw exception when passed incorrectly formatted parameters");
 	  } catch (exception) {
-	    equals(exception.type, "MalformedArgumentsException", "assertCollection() requires the 'expected' and 'actual' parameters to be Array-like objects. Result");
+	    equals(exception.type, "MalformedArgumentsException", "Assay.collection() requires the 'expected' and 'actual' parameters to be Array-like objects. Result");
 	  }
 
 	  try {
-			assertCollection( [], undefined );
-	    ok(false, "assertCollection() should throw exception when passed incorrectly formatted parameters");
+			Assay.collection( [], undefined );
+	    ok(false, "Assay.collection() should throw exception when passed incorrectly formatted parameters");
 	  } catch (exception) {
-	    equals(exception.type, "MalformedArgumentsException", "assertCollection() requires the 'expected' and 'actual' parameters to be Array-like objects. Result");
+	    equals(exception.type, "MalformedArgumentsException", "Assay.collection() requires the 'expected' and 'actual' parameters to be Array-like objects. Result");
 	  }
 
 	  // Test expected and actual collection of objects with different lengths
 
 		equals((function() {
-      return assertCollection([1,2], arguments);
-    })(1), false, "assertCollection() should return false if the 'expected' and 'actual' objects have mistmatched lengths");
+      return Assay.collection([1,2], arguments);
+    })(1), false, "Assay.collection() should return false if the 'expected' and 'actual' objects have mistmatched lengths");
 
 	  // Test passing in an 'arguments' array and returned object is a Boolean
     equals((function() {
-      return assertCollection([Boolean], arguments);
-    })(true)["constructor"], Boolean, "assertCollection() should allow Array-like objects to be passed-in (e.g arguments collections) AND return a Boolean. Result");
+      return Assay.collection([Boolean], arguments);
+    })(true)["constructor"], Boolean, "Assay.collection() should allow Array-like objects to be passed-in (e.g arguments collections) AND return a Boolean. Result");
 
 	});
 
-	test("assertCollection() method - type checking exercises", function () {
+	test("Assay.collection() method - type checking exercises", function () {
 
 	  expect(33);
 
@@ -141,56 +140,56 @@
 
 	  // Test mis-matched member types
 
-	  equals( assertCollection([10], [""]), false, "assertCollection() should be false with expected: [(Number: 10)] and actual: [(String: '')]. Result");
-	  equals( assertCollection([""], [10]), false, "assertCollection() should be false with expected: [(String: '')] and actual: [(Number: 10)]. Result");
-	  equals( assertCollection([{test: "one"}], [["test", 1]]), false, "assertCollection() should be false with expected: [(Object: {test: \"one\"})] and actual: [(Object: {test: 1})]. Result");
-	  equals( assertCollection([function() {}], []), false, "assertCollection() should be false with expected: [(Function: function() {})] and actual: [undefined]. Result");
-	  equals( assertCollection([null], [undefined]), false, "assertCollection() should be false with expected: [(null)] and actual: [(undefined)]. Result");
-	  equals( assertCollection([undefined], ["string"]), false, "assertCollection() should be false with expected: [(undefined)] and actual: [(String: 'string')]. Result");
-	  equals( assertCollection([/re/], [9]), false, "assertCollection() should be false: [(RegExp: /re/)], [(Number: 9)]. Result");
-	  equals( assertCollection([new Custom], [new Number]), false, "assertCollection() should be false: [(Custom: new Custom)], [(Number: new Number)]. Result");
+	  equals( Assay.collection([10], [""]), false, "Assay.collection() should be false with expected: [(Number: 10)] and actual: [(String: '')]. Result");
+	  equals( Assay.collection([""], [10]), false, "Assay.collection() should be false with expected: [(String: '')] and actual: [(Number: 10)]. Result");
+	  equals( Assay.collection([{test: "one"}], [["test", 1]]), false, "Assay.collection() should be false with expected: [(Object: {test: \"one\"})] and actual: [(Object: {test: 1})]. Result");
+	  equals( Assay.collection([function() {}], []), false, "Assay.collection() should be false with expected: [(Function: function() {})] and actual: [undefined]. Result");
+	  equals( Assay.collection([null], [undefined]), false, "Assay.collection() should be false with expected: [(null)] and actual: [(undefined)]. Result");
+	  equals( Assay.collection([undefined], ["string"]), false, "Assay.collection() should be false with expected: [(undefined)] and actual: [(String: 'string')]. Result");
+	  equals( Assay.collection([/re/], [9]), false, "Assay.collection() should be false: [(RegExp: /re/)], [(Number: 9)]. Result");
+	  equals( Assay.collection([new Custom], [new Number]), false, "Assay.collection() should be false: [(Custom: new Custom)], [(Number: new Number)]. Result");
 
 	  // Expected true evaluations
 
 	  // Test matching member types (but mis-matched values)
 
-	  equals( assertCollection([10], [1]), true, "assertCollection() should be true with expected: [(Number: 10)] and actual: [(Number: 1)]. Result");
-	  equals( assertCollection([""], ["different string"]), true, "assertCollection() should be true with expected: [(String: '')] and actual: [(String: 'different string')]. Result");
-	  equals( assertCollection([true], [false]), true, "assertCollection() should be true with expected: [(Boolean: true)] and actual: [(Boolean: false)]. Result");
-	  equals( assertCollection([false], [true]), true, "assertCollection() should be true with expected: [(Boolean: false)] and actual: [(Boolean: true)]. Result");
-	  equals( assertCollection([{test: "string"}], [{test: "different string"}]), true, "assertCollection() should be true with expected: [(Object: {test: 'string'})] and actual: [(Object: {test: 'different string'})]. Result");
-	  equals( assertCollection([new Date], [new Date(1970)]), true, "assertCollection() should be true with expected: [(Date: new Date)] and actual: [(Date: new Date(1970))]. Result");
-	  equals( assertCollection([new Custom], [new Custom]), true, "assertCollection() should be true with expected: [(Custom: new Custom)] and actual: [(Custom: new Custom)]. Result");
+	  equals( Assay.collection([10], [1]), true, "Assay.collection() should be true with expected: [(Number: 10)] and actual: [(Number: 1)]. Result");
+	  equals( Assay.collection([""], ["different string"]), true, "Assay.collection() should be true with expected: [(String: '')] and actual: [(String: 'different string')]. Result");
+	  equals( Assay.collection([true], [false]), true, "Assay.collection() should be true with expected: [(Boolean: true)] and actual: [(Boolean: false)]. Result");
+	  equals( Assay.collection([false], [true]), true, "Assay.collection() should be true with expected: [(Boolean: false)] and actual: [(Boolean: true)]. Result");
+	  equals( Assay.collection([{test: "string"}], [{test: "different string"}]), true, "Assay.collection() should be true with expected: [(Object: {test: 'string'})] and actual: [(Object: {test: 'different string'})]. Result");
+	  equals( Assay.collection([new Date], [new Date(1970)]), true, "Assay.collection() should be true with expected: [(Date: new Date)] and actual: [(Date: new Date(1970))]. Result");
+	  equals( Assay.collection([new Custom], [new Custom]), true, "Assay.collection() should be true with expected: [(Custom: new Custom)] and actual: [(Custom: new Custom)]. Result");
 
 	  // Test matching member values
-	  equals( assertCollection([10], [10]), true, "assertCollection() should be true with expected: [(Number: 10)] and actual: [(Number: 10)]. Result");
-	  equals( assertCollection(["string"], ["string"]), true, "assertCollection() should be true with expected: [(String: 'string')] and actual: [(String: 'string')]. Result");
-	  equals( assertCollection([true], [true]), true, "assertCollection() should be true with expected: [(Boolean: true)] and actual: [(Boolean: true)]. Result");
-	  equals( assertCollection([[]], [[]]), true, "assertCollection() should be true with expected: [(Array: [])] and actual: [(Array: [])]. Result");
-	  equals( assertCollection([{}], [{}]), true, "assertCollection() should be true with expected: [(Object: {})] and actual: [(Object: {})]. Result");
-	  equals( assertCollection([{test: "string"}], [{test: "string"}]), true, "assertCollection() should be true with expected: [(Object: {test: 'string'})] and actual: [(Object: {test: 'string'})]. Result");
-	  equals( assertCollection([["nested"]], [["nested"]]), true, "assertCollection() should be true with expected: [(Array: [[]])] and actual: [(Array: [[]])]. Result");
-	  equals( assertCollection([function() {}], [function() {}]), true, "assertCollection() should be true with expected: [(Function: function(){})] and actual: [(Function: function(){})]. Result");
-	  equals( assertCollection([/re/], [/re/]), true, "assertCollection() should be true with expected: [(RegExp: /re/)] and actual: [(RegExp: /re/)]. Result");
-	  equals( assertCollection([new Date], [new Date]), true, "assertCollection() should be true with expected: [(Date: new Date)] and actual: [(Date: new Date)]. Result");
+	  equals( Assay.collection([10], [10]), true, "Assay.collection() should be true with expected: [(Number: 10)] and actual: [(Number: 10)]. Result");
+	  equals( Assay.collection(["string"], ["string"]), true, "Assay.collection() should be true with expected: [(String: 'string')] and actual: [(String: 'string')]. Result");
+	  equals( Assay.collection([true], [true]), true, "Assay.collection() should be true with expected: [(Boolean: true)] and actual: [(Boolean: true)]. Result");
+	  equals( Assay.collection([[]], [[]]), true, "Assay.collection() should be true with expected: [(Array: [])] and actual: [(Array: [])]. Result");
+	  equals( Assay.collection([{}], [{}]), true, "Assay.collection() should be true with expected: [(Object: {})] and actual: [(Object: {})]. Result");
+	  equals( Assay.collection([{test: "string"}], [{test: "string"}]), true, "Assay.collection() should be true with expected: [(Object: {test: 'string'})] and actual: [(Object: {test: 'string'})]. Result");
+	  equals( Assay.collection([["nested"]], [["nested"]]), true, "Assay.collection() should be true with expected: [(Array: [[]])] and actual: [(Array: [[]])]. Result");
+	  equals( Assay.collection([function() {}], [function() {}]), true, "Assay.collection() should be true with expected: [(Function: function(){})] and actual: [(Function: function(){})]. Result");
+	  equals( Assay.collection([/re/], [/re/]), true, "Assay.collection() should be true with expected: [(RegExp: /re/)] and actual: [(RegExp: /re/)]. Result");
+	  equals( Assay.collection([new Date], [new Date]), true, "Assay.collection() should be true with expected: [(Date: new Date)] and actual: [(Date: new Date)]. Result");
 
 	  // Test falsy member values
 
-	  equals( assertCollection([0], [0]), true, "assertCollection() should be true with expected: [(Number: 0)] and actual: [(Number: 0)]. Result");
-	  equals( assertCollection([""], [""]), true, "assertCollection() should be true with expected: [(String: '')] and actual: [(String: '')]. Result");
-	  equals( assertCollection([false], [false]), true, "assertCollection() should be true with expected: [(Boolean: false)] and actual: [(Boolean: false)]. Result");
-	  equals( assertCollection([null], [null]), true, "assertCollection() should be true with expected: [(null)] and actual: [(null)]. Result");
-	  equals( assertCollection([undefined], [undefined]), true, "assertCollection() should be true with expected: [(undefined)] and actual: [(undefined)]. Result");
-	  equals( assertCollection([0,"string", true, [], {}, function() {}, null, undefined, /re/, new Date], [0,"string", true, [], {}, function() {}, null, undefined, /re/, new Date]), true, "assertCollection() should be true with expected: [ MANY TYPES ] and actual: [ MANY TYPES ]. Result");
+	  equals( Assay.collection([0], [0]), true, "Assay.collection() should be true with expected: [(Number: 0)] and actual: [(Number: 0)]. Result");
+	  equals( Assay.collection([""], [""]), true, "Assay.collection() should be true with expected: [(String: '')] and actual: [(String: '')]. Result");
+	  equals( Assay.collection([false], [false]), true, "Assay.collection() should be true with expected: [(Boolean: false)] and actual: [(Boolean: false)]. Result");
+	  equals( Assay.collection([null], [null]), true, "Assay.collection() should be true with expected: [(null)] and actual: [(null)]. Result");
+	  equals( Assay.collection([undefined], [undefined]), true, "Assay.collection() should be true with expected: [(undefined)] and actual: [(undefined)]. Result");
+	  equals( Assay.collection([0,"string", true, [], {}, function() {}, null, undefined, /re/, new Date], [0,"string", true, [], {}, function() {}, null, undefined, /re/, new Date]), true, "Assay.collection() should be true with expected: [ MANY TYPES ] and actual: [ MANY TYPES ]. Result");
 
 	  // Nested
 
-	  equals( assertCollection([[[["test"]]]], [[[["test"]]]]), true, "assertCollection() should be true with expected: [(Array: [[[['test']]]])] with actual: (Array: [[[['test']]]]). Result");
-	  equals( assertCollection(["one", ["two", ["three", ["four"]]]], ["one", ["two", ["three", ["four"]]]]), true, "assertCollection() should be true with expected: [ MANY NESTED [] ] and actual: [ MANY NESTED [] ]. Result");
+	  equals( Assay.collection([[[["test"]]]], [[[["test"]]]]), true, "Assay.collection() should be true with expected: [(Array: [[[['test']]]])] with actual: (Array: [[[['test']]]]). Result");
+	  equals( Assay.collection(["one", ["two", ["three", ["four"]]]], ["one", ["two", ["three", ["four"]]]]), true, "Assay.collection() should be true with expected: [ MANY NESTED [] ] and actual: [ MANY NESTED [] ]. Result");
 
 	});
 
-	test("assertCollection() method - strict value checking exercises", function () {
+	test("Assay.collection() method - strict value checking exercises", function () {
 
 	  expect(31)
 
@@ -200,94 +199,94 @@
 
 	  // Test mis-matched member types
 
-	  equals( assertCollection([10], [""], {strictValueChecking:true}), false, "assertCollection() should be false with expected: [(Number: 10)] and actual: [(String: '')]. Result");
-	  equals( assertCollection([""], [10], {strictValueChecking:true}), false, "assertCollection() should be false with expected: [(String: '')] and actual: [(Number: 10)]. Result");
-	  equals( assertCollection([{test: "one"}], [["test", 1]], {strictValueChecking:true}), false, "assertCollection() should be false with expected: [(Object: {test: \"one\"})] and actual: [(Object: {test: 1})]. Result");
-	  equals( assertCollection([function() {}], [], {strictValueChecking:true}), false, "assertCollection() should be false with expected: [(Function: function() {})] and actual: [undefined]. Result");
-	  equals( assertCollection([null], [undefined], {strictValueChecking:true}), false, "assertCollection() should be false with expected: [(null)] and actual: [(undefined)]. Result");
-	  equals( assertCollection([undefined], ["string"], {strictValueChecking:true}), false, "assertCollection() should be false with expected: [(undefined)] and actual: [(String: 'string')]. Result");
-	  equals( assertCollection([/re/], [9], {strictValueChecking:true}), false, "assertCollection() should be false: [(RegExp: /re/)], [(Number: 9)]. Result");
-	  equals( assertCollection([new Custom], [new Number], {strictValueChecking:true}), false, "assertCollection() should be false: [(Custom: new Custom)], [(Number: new Number)]. Result");
+	  equals( Assay.collection([10], [""], {strictValueChecking:true}), false, "Assay.collection() should be false with expected: [(Number: 10)] and actual: [(String: '')]. Result");
+	  equals( Assay.collection([""], [10], {strictValueChecking:true}), false, "Assay.collection() should be false with expected: [(String: '')] and actual: [(Number: 10)]. Result");
+	  equals( Assay.collection([{test: "one"}], [["test", 1]], {strictValueChecking:true}), false, "Assay.collection() should be false with expected: [(Object: {test: \"one\"})] and actual: [(Object: {test: 1})]. Result");
+	  equals( Assay.collection([function() {}], [], {strictValueChecking:true}), false, "Assay.collection() should be false with expected: [(Function: function() {})] and actual: [undefined]. Result");
+	  equals( Assay.collection([null], [undefined], {strictValueChecking:true}), false, "Assay.collection() should be false with expected: [(null)] and actual: [(undefined)]. Result");
+	  equals( Assay.collection([undefined], ["string"], {strictValueChecking:true}), false, "Assay.collection() should be false with expected: [(undefined)] and actual: [(String: 'string')]. Result");
+	  equals( Assay.collection([/re/], [9], {strictValueChecking:true}), false, "Assay.collection() should be false: [(RegExp: /re/)], [(Number: 9)]. Result");
+	  equals( Assay.collection([new Custom], [new Number], {strictValueChecking:true}), false, "Assay.collection() should be false: [(Custom: new Custom)], [(Number: new Number)]. Result");
 
 	  // Test mis-matched member values
 
-	  equals( assertCollection([10], [1], {strictValueChecking:true}), false, "assertCollection() should be false with expected: [(Number: 10)] and actual: [(Number: 1)]. Result");
-	  equals( assertCollection([""], ["different string"], {strictValueChecking:true}), false, "assertCollection() should be false with expected: [(String: '')] and actual: [(String: 'different string')]. Result");
-	  equals( assertCollection([true], [false], {strictValueChecking:true}), false, "assertCollection() should be false with expected: [(Boolean: true)] and actual: [(Boolean: false)]. Result");
-	  equals( assertCollection([false], [true], {strictValueChecking:true}), false, "assertCollection() should be false with expected: [(Boolean: false)] and actual: [(Boolean: true)]. Result");
-	  equals( assertCollection([{test: "string"}], [{test: "different string"}], {strictValueChecking:true}), false, "assertCollection() should be false with expected: [(Object: {test: 'string'})] and actual: [(Object: {test: 'different string'})]. Result");
-	  equals( assertCollection([new Date], [new Date(1970)], {strictValueChecking:true}), false, "assertCollection() should be false with expected: [(Date: new Date)] and actual: [(Date: new Date(1970))]. Result");
+	  equals( Assay.collection([10], [1], {strictValueChecking:true}), false, "Assay.collection() should be false with expected: [(Number: 10)] and actual: [(Number: 1)]. Result");
+	  equals( Assay.collection([""], ["different string"], {strictValueChecking:true}), false, "Assay.collection() should be false with expected: [(String: '')] and actual: [(String: 'different string')]. Result");
+	  equals( Assay.collection([true], [false], {strictValueChecking:true}), false, "Assay.collection() should be false with expected: [(Boolean: true)] and actual: [(Boolean: false)]. Result");
+	  equals( Assay.collection([false], [true], {strictValueChecking:true}), false, "Assay.collection() should be false with expected: [(Boolean: false)] and actual: [(Boolean: true)]. Result");
+	  equals( Assay.collection([{test: "string"}], [{test: "different string"}], {strictValueChecking:true}), false, "Assay.collection() should be false with expected: [(Object: {test: 'string'})] and actual: [(Object: {test: 'different string'})]. Result");
+	  equals( Assay.collection([new Date], [new Date(1970)], {strictValueChecking:true}), false, "Assay.collection() should be false with expected: [(Date: new Date)] and actual: [(Date: new Date(1970))]. Result");
 	  // commented out as revisting equality and identity rules around strict checking
-	  //equals( assertCollection([new Custom], [new Custom], {strictValueChecking:true}), false, "assertCollection() should be false with expected: [(Custom: new Custom)] and actual: [(Custom: new Custom)]. Result");
-	  equals( assertCollection([0,"string", true, [], {}, function() {}, null, undefined, /re/, new Date], [1,"string", true, [], {}, function() {}, null, undefined, /re/, new Date], {strictValueChecking:true}), false, "assertCollection() should be false with expected: [ MANY TYPES ] and actual: [ MANY TYPES ]");
+	  //equals( Assay.collection([new Custom], [new Custom], {strictValueChecking:true}), false, "Assay.collection() should be false with expected: [(Custom: new Custom)] and actual: [(Custom: new Custom)]. Result");
+	  equals( Assay.collection([0,"string", true, [], {}, function() {}, null, undefined, /re/, new Date], [1,"string", true, [], {}, function() {}, null, undefined, /re/, new Date], {strictValueChecking:true}), false, "Assay.collection() should be false with expected: [ MANY TYPES ] and actual: [ MANY TYPES ]");
 
 	  // Expected true evaluations
 
 	  // Test matching member values
-	  equals( assertCollection([10], [10], {strictValueChecking:true}), true, "assertCollection() should be true with expected: [(Number: 10)] and actual: [(Number: 10)]. Result");
-	  equals( assertCollection(["string"], ["string"], {strictValueChecking:true}), true, "assertCollection() should be true with expected: [(String: 'string')] and actual: [(String: 'string')]. Result");
-	  equals( assertCollection([true], [true], {strictValueChecking:true}), true, "assertCollection() should be true with expected: [(Boolean: true)] and actual: [(Boolean: true)]. Result");
-	  equals( assertCollection([[]], [[]], {strictValueChecking:true}), true, "assertCollection() should be true with expected: [(Array: [])] and actual: [(Array: [])]. Result");
-	  equals( assertCollection([{}], [{}], {strictValueChecking:true}), true, "assertCollection() should be true with expected: [(Object: {})] and actual: [(Object: {})]. Result");
-	  equals( assertCollection([{test: "string"}], [{test: "string"}], {strictValueChecking:true}), true, "assertCollection() should be true with expected: [(Object: {test: 'string'})] and actual: [(Object: {test: 'string'})]. Result");
-	  equals( assertCollection([["nested"]], [["nested"]], {strictValueChecking:true}), true, "assertCollection() should be true with expected: [(Array: [[]])] and actual: [(Array: [[]])]. Result");
-	  equals( assertCollection([function() {}], [function() {}], {strictValueChecking:true}), true, "assertCollection() should be true with expected: [(Function: function(){})] and actual: [(Function: function(){})]. Result");
-	  equals( assertCollection([/re/], [/re/], {strictValueChecking:true}), true, "assertCollection() should be true with expected: [(RegExp: /re/)] and actual: [(RegExp: /re/)]. Result");
+	  equals( Assay.collection([10], [10], {strictValueChecking:true}), true, "Assay.collection() should be true with expected: [(Number: 10)] and actual: [(Number: 10)]. Result");
+	  equals( Assay.collection(["string"], ["string"], {strictValueChecking:true}), true, "Assay.collection() should be true with expected: [(String: 'string')] and actual: [(String: 'string')]. Result");
+	  equals( Assay.collection([true], [true], {strictValueChecking:true}), true, "Assay.collection() should be true with expected: [(Boolean: true)] and actual: [(Boolean: true)]. Result");
+	  equals( Assay.collection([[]], [[]], {strictValueChecking:true}), true, "Assay.collection() should be true with expected: [(Array: [])] and actual: [(Array: [])]. Result");
+	  equals( Assay.collection([{}], [{}], {strictValueChecking:true}), true, "Assay.collection() should be true with expected: [(Object: {})] and actual: [(Object: {})]. Result");
+	  equals( Assay.collection([{test: "string"}], [{test: "string"}], {strictValueChecking:true}), true, "Assay.collection() should be true with expected: [(Object: {test: 'string'})] and actual: [(Object: {test: 'string'})]. Result");
+	  equals( Assay.collection([["nested"]], [["nested"]], {strictValueChecking:true}), true, "Assay.collection() should be true with expected: [(Array: [[]])] and actual: [(Array: [[]])]. Result");
+	  equals( Assay.collection([function() {}], [function() {}], {strictValueChecking:true}), true, "Assay.collection() should be true with expected: [(Function: function(){})] and actual: [(Function: function(){})]. Result");
+	  equals( Assay.collection([/re/], [/re/], {strictValueChecking:true}), true, "Assay.collection() should be true with expected: [(RegExp: /re/)] and actual: [(RegExp: /re/)]. Result");
 
 	  // Test matching member falsy values
 
-	  equals( assertCollection([0], [0], {strictValueChecking:true}), true, "assertCollection() should be true with expected: [(Number: 0)] and actual: [(Number: 0)]. Result");
-	  equals( assertCollection([""], [""], {strictValueChecking:true}), true, "assertCollection() should be true with expected: [(String: '')] and actual: [(String: '')]. Result");
-	  equals( assertCollection([false], [false], {strictValueChecking:true}), true, "assertCollection() should be true with expected: [(Boolean: false)] and actual: [(Boolean: false)]. Result");
-	  equals( assertCollection([null], [null], {strictValueChecking:true}), true, "assertCollection() should be true with expected: [(null)] and actual: [(null)]. Result");
-	  equals( assertCollection([undefined], [undefined], {strictValueChecking:true}), true, "assertCollection() should be true with expected: [(undefined)] and actual: [(undefined)]. Result");
+	  equals( Assay.collection([0], [0], {strictValueChecking:true}), true, "Assay.collection() should be true with expected: [(Number: 0)] and actual: [(Number: 0)]. Result");
+	  equals( Assay.collection([""], [""], {strictValueChecking:true}), true, "Assay.collection() should be true with expected: [(String: '')] and actual: [(String: '')]. Result");
+	  equals( Assay.collection([false], [false], {strictValueChecking:true}), true, "Assay.collection() should be true with expected: [(Boolean: false)] and actual: [(Boolean: false)]. Result");
+	  equals( Assay.collection([null], [null], {strictValueChecking:true}), true, "Assay.collection() should be true with expected: [(null)] and actual: [(null)]. Result");
+	  equals( Assay.collection([undefined], [undefined], {strictValueChecking:true}), true, "Assay.collection() should be true with expected: [(undefined)] and actual: [(undefined)]. Result");
 
 	  // Nested
 
-	  equals( assertCollection([[[["test"]]]], [[[["test"]]]], {strictValueChecking:true}), true, "assertCollection() should be true with expected: [(Array: [[[['test']]]])] with actual: (Array: [[[['test']]]]). Result");
-	  equals( assertCollection(["one", ["two", ["three", ["four"]]]], ["one", ["two", ["three", ["four"]]]], {strictValueChecking:true}), true, "assertCollection() should be true with expected: [ MANY NESTED [] ] and actual: [ MANY NESTED [] ]. Result");
+	  equals( Assay.collection([[[["test"]]]], [[[["test"]]]], {strictValueChecking:true}), true, "Assay.collection() should be true with expected: [(Array: [[[['test']]]])] with actual: (Array: [[[['test']]]]). Result");
+	  equals( Assay.collection(["one", ["two", ["three", ["four"]]]], ["one", ["two", ["three", ["four"]]]], {strictValueChecking:true}), true, "Assay.collection() should be true with expected: [ MANY NESTED [] ] and actual: [ MANY NESTED [] ]. Result");
 
 	});
 
-	test("assertHash() method - test parameter requirements", function () {
+	test("Assay.hash() method - test parameter requirements", function () {
 
 		// Expected false evaluations
 
 		// Test no arguments
 	  try {
-			assertHash();
-	    ok(false, "assertHash() should throw exception when passed No parameters");
+			Assay.hash();
+	    ok(false, "Assay.hash() should throw exception when passed No parameters");
 	  } catch (exception) {
-	    equals(exception.type, "MissingParametersException", "assertHash() exception type should be MissingParametersException for less than two parameters (required). Result");
+	    equals(exception.type, "MissingParametersException", "Assay.hash() exception type should be MissingParametersException for less than two parameters (required). Result");
 	  }
 
-	  // Test malformed arguments to interface afforded by assertHash() [see test suite for _isHash() for more examples]
+	  // Test malformed arguments to interface afforded by Assay.hash() [see test suite for _isHash() for more examples]
 	  try {
-			assertHash( undefined, {}	);
-	    ok(false, "assertHash() should throw exception when passed incorrectly formatted parameters");
+			Assay.hash( undefined, {}	);
+	    ok(false, "Assay.hash() should throw exception when passed incorrectly formatted parameters");
 	  } catch (exception) {
-	    equals(exception.type, "MalformedArgumentsException", "assertHash() requires the 'expected' and 'actual' parameters to be Hash-like objects. Result");
+	    equals(exception.type, "MalformedArgumentsException", "Assay.hash() requires the 'expected' and 'actual' parameters to be Hash-like objects. Result");
 	  }
 
 	  try {
-			assertHash( {}, undefined );
-	    ok(false, "assertHash() should throw exception when passed incorrectly formatted parameters");
+			Assay.hash( {}, undefined );
+	    ok(false, "Assay.hash() should throw exception when passed incorrectly formatted parameters");
 	  } catch (exception) {
-	    equals(exception.type, "MalformedArgumentsException", "assertHash() requires the 'expected' and 'actual' parameters to be Hash-like objects. Result");
+	    equals(exception.type, "MalformedArgumentsException", "Assay.hash() requires the 'expected' and 'actual' parameters to be Hash-like objects. Result");
 	  }
 
 	  // Expected true evaluations
 
 	  // Test passing in a hash-like objects [see other test groups fopr in-depth examples] and that returned value is a Boolean
     equals((function() {
-      return assertHash({}, {});
-    })(true)["constructor"], Boolean, "assertCollection() should allow Hash-like objects to be passed-in (e.g composite types and hashes) AND return a Boolean. Result");
+      return Assay.hash({}, {});
+    })(true)["constructor"], Boolean, "Assay.collection() should allow Hash-like objects to be passed-in (e.g composite types and hashes) AND return a Boolean. Result");
 
 	});
 
-	test("assertHash._isHash() [private] method - exercises", function () {
+	test("Assay.hash._isHash() [private] method - exercises", function () {
 
-	  var isHash = assertHash["_isHash"].get();
+	  var isHash = Assay.hash["_isHash"].get();
 
 	  // Expected False Evaluations
 
@@ -335,7 +334,7 @@
 
 	});
 
-	test("assertHash() method - type checking exercises", function () {
+	test("Assay.hash() method - type checking exercises", function () {
 
 	  expect(37);
 
@@ -361,8 +360,8 @@
 	  })();
 
 	  /* Authors note - there are many tests and I've strived to use the same ones for both type checking and value checking of member properties between expected and actual 'hashes'.
-	  * The as-is also implitly test the object checking callback (assertObject()) invoked within this function, as opposed to just the flow control logic that naively enumerates over hash-like objects, but this should be seen as a secondary concern to this test-suite.
-	  * I simply wanted to poke the method a lot to see what it could handle. assertObject() has it's own test-suite available which actually focuses on object type checking and value assertion
+	  * The as-is also implitly test the object checking callback (Assay.object()) invoked within this function, as opposed to just the flow control logic that naively enumerates over hash-like objects, but this should be seen as a secondary concern to this test-suite.
+	  * I simply wanted to poke the method a lot to see what it could handle. Assay.object() has it's own test-suite available which actually focuses on object type checking and value assertion
 	  */
 
 	  // Type checking assertions (default)
@@ -373,92 +372,92 @@
 
 	  // Single missing key
 	  try {
-	    assertHash({key: 'value'}, {}, {exceptionHandler: mockErrorHandler});
+	    Assay.hash({key: 'value'}, {}, {exceptionHandler: mockErrorHandler});
 	    mockErrorHandler.throwErrors();
-	    ok(false, "assertHash() should throw exception when passed an 'actual' object missing the 'key' property");
+	    ok(false, "Assay.hash() should throw exception when passed an 'actual' object missing the 'key' property");
 	  } catch (e) {
-	    equals( e[0].type, "MissingHashKeyException", "assertHash() should raise a 'MissingHashKeyException' with expected: (Object {key: 'value'}) and actual: (Object {}). Error raised was");
-	    equals( /expected: "key"/.test(e[0].message), true, "assertHash() should identify 'key' as the missing accessor with expected: (Object {key: 'value'}) and actual: (Object {}). Result");
+	    equals( e[0].type, "MissingHashKeyException", "Assay.hash() should raise a 'MissingHashKeyException' with expected: (Object {key: 'value'}) and actual: (Object {}). Error raised was");
+	    equals( /expected: "key"/.test(e[0].message), true, "Assay.hash() should identify 'key' as the missing accessor with expected: (Object {key: 'value'}) and actual: (Object {}). Result");
 	  }
 
 	  mockErrorHandler.reset();
 
 	  try {
-	    assertHash({key: 'value', key2: 'value2'}, {key: 'value'}, {exceptionHandler: mockErrorHandler});
+	    Assay.hash({key: 'value', key2: 'value2'}, {key: 'value'}, {exceptionHandler: mockErrorHandler});
 	    mockErrorHandler.throwErrors();
-	    ok(false, "assertHash() should throw exception when passed an 'actual' object missing the 'key2' property");
+	    ok(false, "Assay.hash() should throw exception when passed an 'actual' object missing the 'key2' property");
 	  } catch (e) {
-	    equals( e[0].type, "MissingHashKeyException", "assertHash() should raise a 'MissingHashKeyException' with expected: (Object {key: 'value', key2: 'value2'}) and actual: (Object {key: 'value'}). Error raised was");
-	    equals( /expected: "key2"/.test(e[0].message), true, "assertHash() should identify 'key2' as the missing accessor with expected: (Object {key: 'value', key2: 'value2'}) and actual: (Object {key: 'value'}). Result");
+	    equals( e[0].type, "MissingHashKeyException", "Assay.hash() should raise a 'MissingHashKeyException' with expected: (Object {key: 'value', key2: 'value2'}) and actual: (Object {key: 'value'}). Error raised was");
+	    equals( /expected: "key2"/.test(e[0].message), true, "Assay.hash() should identify 'key2' as the missing accessor with expected: (Object {key: 'value', key2: 'value2'}) and actual: (Object {key: 'value'}). Result");
 	  }
 
     mockErrorHandler.reset();
 
 	  try {
-	    assertHash({key: 'value', key2: 'value2', key3: 'value'}, {key: 'value', key2: 'value2'}, {exceptionHandler: mockErrorHandler});
+	    Assay.hash({key: 'value', key2: 'value2', key3: 'value'}, {key: 'value', key2: 'value2'}, {exceptionHandler: mockErrorHandler});
 	    mockErrorHandler.throwErrors();
-	    ok(false, "assertHash() should throw exception when passed an 'actual' object missing the 'key3' property");
+	    ok(false, "Assay.hash() should throw exception when passed an 'actual' object missing the 'key3' property");
 	  } catch (e) {
-	    equals( e[0].type, "MissingHashKeyException", "assertHash() should raise a 'MissingHashKeyException' be false with expected: (Object {key: 'value', key2: 'value2', key3: 'value'}) and actual: (Object {key: 'value', key2: 'value'}). Error raised was");
-	    equals( /expected: "key3"/.test(e[0].message), true, "assertHash() should identify 'key3' as the missing accessor with expected: (Object {key: 'value', key2: 'value2', key3: 'value'}) and actual: (Object {key: 'value', key2: 'value'}). Result");
+	    equals( e[0].type, "MissingHashKeyException", "Assay.hash() should raise a 'MissingHashKeyException' be false with expected: (Object {key: 'value', key2: 'value2', key3: 'value'}) and actual: (Object {key: 'value', key2: 'value'}). Error raised was");
+	    equals( /expected: "key3"/.test(e[0].message), true, "Assay.hash() should identify 'key3' as the missing accessor with expected: (Object {key: 'value', key2: 'value2', key3: 'value'}) and actual: (Object {key: 'value', key2: 'value'}). Result");
 	  }
 
 	  mockErrorHandler.reset();
 
 	  // Multiple missing keys
 	  try {
-	    assertHash({key: 'value', key2: 'value2', key3: 'value'}, {key: 'value'}, {exceptionHandler: mockErrorHandler});
+	    Assay.hash({key: 'value', key2: 'value2', key3: 'value'}, {key: 'value'}, {exceptionHandler: mockErrorHandler});
 	    mockErrorHandler.throwErrors();
-	    ok(false, "assertHash() should throw exception when passed an 'actual' object missing the 'key2' and 'key3' properties");
+	    ok(false, "Assay.hash() should throw exception when passed an 'actual' object missing the 'key2' and 'key3' properties");
 	  } catch (e) {
-	    equals( e[0].type, "MissingHashKeyException", "assertHash() should raise a 'MissingHashKeyException' be false with expected: (Object {key: 'value', key2: 'value2', key3: 'value'}) and actual: (Object {key: 'value'}). Error raised was");
-	    equals( /expected: "key2"/.test(e[0].message), true, "assertHash() should identify 'key2' as the missing accessor with expected: (Object {key: 'value', key2: 'value2', key3: 'value'}) and actual: (Object {key: 'value'}). Result");
-	    equals( e[1].type, "MissingHashKeyException", "assertHash() should raise a second 'MissingHashKeyException' be false with expected: (Object {key: 'value', key2: 'value2', key3: 'value'}) and actual: (Object {key: 'value'}). Error raised was");
-	    equals( /expected: "key3"/.test(e[1].message), true, "assertHash() should identify 'key3' as the missing accessor with expected: (Object {key: 'value', key2: 'value2', key3: 'value'}) and actual: (Object {key: 'value'}). Result");
+	    equals( e[0].type, "MissingHashKeyException", "Assay.hash() should raise a 'MissingHashKeyException' be false with expected: (Object {key: 'value', key2: 'value2', key3: 'value'}) and actual: (Object {key: 'value'}). Error raised was");
+	    equals( /expected: "key2"/.test(e[0].message), true, "Assay.hash() should identify 'key2' as the missing accessor with expected: (Object {key: 'value', key2: 'value2', key3: 'value'}) and actual: (Object {key: 'value'}). Result");
+	    equals( e[1].type, "MissingHashKeyException", "Assay.hash() should raise a second 'MissingHashKeyException' be false with expected: (Object {key: 'value', key2: 'value2', key3: 'value'}) and actual: (Object {key: 'value'}). Error raised was");
+	    equals( /expected: "key3"/.test(e[1].message), true, "Assay.hash() should identify 'key3' as the missing accessor with expected: (Object {key: 'value', key2: 'value2', key3: 'value'}) and actual: (Object {key: 'value'}). Result");
 	  }
 
 	  mockErrorHandler.reset();
 
 	  // Test mis-matched member types
 
-	  equals( assertHash({Number: 10}, {Number: "string"}), false, "assertHash() should be false with expected: (Object {Number: 10}) and actual: (Object {Number: 'string'}). Result");
-	  equals( assertHash({String: "string"}, {String: function() {}}), false, "assertHash() should be false with expected: (Object {String: 'string'}) and actual: (Object {String: function(){}}). Result");
-	  equals( assertHash({Array: []}, {Array: {}}), false, "assertHash() should be false with expected: (Object {Array: []}) and actual: (Object {Array: {}}). Result");
-	  equals( assertHash({Function: function() {}}, {Function: false}), false, "assertHash() should be false with expected: (Object {Function: function(){}}) and actual: (Object {Function: false}). Result");
-	  equals( assertHash({"null": null},{"null": undefined}), false, "assertHash() should be false with expected: (Object {'null': null}) and actual: (Object {'null': undefined}). Result");
-	  equals( assertHash({"undefined": undefined},{"undefined": null}), false, "assertHash() should be false with expected: (Object {'undefined': undefined}) and actual: (Object {'undefined': null}). Result");
-	  equals( assertHash({RegExp: /re/},{RegExp: "/re/"}), false, "assertHash() should be false with expected: (Object {RegExp: /re/}) and actual: (Object {RegExp: '/re/'}). Result");
-	  equals( assertHash({Custom: new Custom},{Custom: new Date}), false, "assertHash() should be false with expected: (Object {Custom: new Custom}) and actual: (Object {Custom: new Date})). Result");
+	  equals( Assay.hash({Number: 10}, {Number: "string"}), false, "Assay.hash() should be false with expected: (Object {Number: 10}) and actual: (Object {Number: 'string'}). Result");
+	  equals( Assay.hash({String: "string"}, {String: function() {}}), false, "Assay.hash() should be false with expected: (Object {String: 'string'}) and actual: (Object {String: function(){}}). Result");
+	  equals( Assay.hash({Array: []}, {Array: {}}), false, "Assay.hash() should be false with expected: (Object {Array: []}) and actual: (Object {Array: {}}). Result");
+	  equals( Assay.hash({Function: function() {}}, {Function: false}), false, "Assay.hash() should be false with expected: (Object {Function: function(){}}) and actual: (Object {Function: false}). Result");
+	  equals( Assay.hash({"null": null},{"null": undefined}), false, "Assay.hash() should be false with expected: (Object {'null': null}) and actual: (Object {'null': undefined}). Result");
+	  equals( Assay.hash({"undefined": undefined},{"undefined": null}), false, "Assay.hash() should be false with expected: (Object {'undefined': undefined}) and actual: (Object {'undefined': null}). Result");
+	  equals( Assay.hash({RegExp: /re/},{RegExp: "/re/"}), false, "Assay.hash() should be false with expected: (Object {RegExp: /re/}) and actual: (Object {RegExp: '/re/'}). Result");
+	  equals( Assay.hash({Custom: new Custom},{Custom: new Date}), false, "Assay.hash() should be false with expected: (Object {Custom: new Custom}) and actual: (Object {Custom: new Date})). Result");
 
 	  // Expected true evaluations
 	  // Test matching member types
-	  equals( assertHash({Number: 0}, {Number: 0}), true, "assertHash() should be true with expected: (Object {Number: 0}) and actual: (Object {Number: 0}). Result" );
-	  equals( assertHash({Number: 10}, {Number: 10}), true, "assertHash() should be true with expected: (Object {Number: 10}) and actual: (Object {Number: 10}). Result" );
-	  equals( assertHash({String: ""}, {String: ""}), true, "assertHash() should be true with expected: (Object {String: ''}) and actual: (Object {String: ''}). Result" );
-	  equals( assertHash({String: "string"}, {String: "string"}), true, "assertHash() should be true with expected: (Object {String: 'string'}) and actual: (Object {String: 'string'}). Result" );
-	  equals( assertHash({Boolean: false}, {Boolean: false}), true, "assertHash() should be true with expected: (Object {Boolean: false}) and actual: (Object {Boolean: false}). Result" );
-	  equals( assertHash({Boolean: true}, {Boolean: true}), true, "assertHash() should be true with expected: (Object {Boolean: true}) and actual: (Object {Boolean: true}). Result");
-	  equals( assertHash({Array: []}, {Array: []}), true, "assertHash() should be true with expected: (Object {Array: []}) and actual: (Object {Array: []}). Result");
-	  equals( assertHash({Array: ["one"]},{Array: ["one"]}), true, "assertHash() should be true with expected: (Object {Array: ['one']}) and actual: (Object {Array: ['one']}). Result");
-	  equals( assertHash({Object: {}}, {Object: {}}), true, "assertHash() should be true with expected: (Object {Object: {}}) and actual: (Object {Object: {}}). Result");
-	  equals( assertHash({Function: function() {}}, {Function: function() {}}), true, "assertHash() should be true with expected: (Object {Function: function(){}}) and actual: (Object {Function: function(){}}). Result");
-	  equals( assertHash({"null": null},{"null": null}), true, "assertHash() should be true with expected: (Object {'null': null}) and actual: (Object {'null': null}). Result");
-	  equals( assertHash({"undefined": undefined},{"undefined": undefined}), true, "assertHash() should be true with expected: (Object {'undefined': undefined}) and actual: (Object {'undefined': undefined}). Result");
-	  equals( assertHash({RegExp: /re/},{RegExp: /re/}), true, "assertHash() should be true with expected: (Object {RegExp: /re/}) and actual: (Object {RegExp: /re/}). Result");
-	  equals( assertHash({RegExp: /re/},{RegExp: /re2/}), true, "assertHash() should be true with expected: (Object {RegExp: /re/}) and actual: (Object {RegExp: /re2/}). Result");
-	  equals( assertHash({Date: new Date},{Date: new Date}), true, "assertHash() should be true with expected: (Object {Date: new Date}) and actual: (Object {Date: new Date}). Result");
-	  equals( assertHash({Date: new Date},{Date: new Date(1970)}), true, "assertHash() should be true with expected: (Object {Date: new Date}) and actual: (Object {Date: new Date(1970)}). Result");
-	  equals( assertHash({Custom: new Custom},{Custom: new Custom}), true, "assertHash() should be true with expected: (Object {Custom: new Custom}) and actual: (Object {Custom: new Custom}). Result");
-	  equals( assertHash({Number: 0,String: "string",Boolean: true,Array: [],Object: {},Function: function() {},"null": null,"undefined": undefined,RegExp: /re/,Date: new Date}, {Number: 0,String: "string",Boolean: true,Array: [],Object: {},Function: function() {},"null": null,"undefined": undefined,RegExp: /re/,Date: new Date}), true, "assertHash() should be true (Many native types). Result");
+	  equals( Assay.hash({Number: 0}, {Number: 0}), true, "Assay.hash() should be true with expected: (Object {Number: 0}) and actual: (Object {Number: 0}). Result" );
+	  equals( Assay.hash({Number: 10}, {Number: 10}), true, "Assay.hash() should be true with expected: (Object {Number: 10}) and actual: (Object {Number: 10}). Result" );
+	  equals( Assay.hash({String: ""}, {String: ""}), true, "Assay.hash() should be true with expected: (Object {String: ''}) and actual: (Object {String: ''}). Result" );
+	  equals( Assay.hash({String: "string"}, {String: "string"}), true, "Assay.hash() should be true with expected: (Object {String: 'string'}) and actual: (Object {String: 'string'}). Result" );
+	  equals( Assay.hash({Boolean: false}, {Boolean: false}), true, "Assay.hash() should be true with expected: (Object {Boolean: false}) and actual: (Object {Boolean: false}). Result" );
+	  equals( Assay.hash({Boolean: true}, {Boolean: true}), true, "Assay.hash() should be true with expected: (Object {Boolean: true}) and actual: (Object {Boolean: true}). Result");
+	  equals( Assay.hash({Array: []}, {Array: []}), true, "Assay.hash() should be true with expected: (Object {Array: []}) and actual: (Object {Array: []}). Result");
+	  equals( Assay.hash({Array: ["one"]},{Array: ["one"]}), true, "Assay.hash() should be true with expected: (Object {Array: ['one']}) and actual: (Object {Array: ['one']}). Result");
+	  equals( Assay.hash({Object: {}}, {Object: {}}), true, "Assay.hash() should be true with expected: (Object {Object: {}}) and actual: (Object {Object: {}}). Result");
+	  equals( Assay.hash({Function: function() {}}, {Function: function() {}}), true, "Assay.hash() should be true with expected: (Object {Function: function(){}}) and actual: (Object {Function: function(){}}). Result");
+	  equals( Assay.hash({"null": null},{"null": null}), true, "Assay.hash() should be true with expected: (Object {'null': null}) and actual: (Object {'null': null}). Result");
+	  equals( Assay.hash({"undefined": undefined},{"undefined": undefined}), true, "Assay.hash() should be true with expected: (Object {'undefined': undefined}) and actual: (Object {'undefined': undefined}). Result");
+	  equals( Assay.hash({RegExp: /re/},{RegExp: /re/}), true, "Assay.hash() should be true with expected: (Object {RegExp: /re/}) and actual: (Object {RegExp: /re/}). Result");
+	  equals( Assay.hash({RegExp: /re/},{RegExp: /re2/}), true, "Assay.hash() should be true with expected: (Object {RegExp: /re/}) and actual: (Object {RegExp: /re2/}). Result");
+	  equals( Assay.hash({Date: new Date},{Date: new Date}), true, "Assay.hash() should be true with expected: (Object {Date: new Date}) and actual: (Object {Date: new Date}). Result");
+	  equals( Assay.hash({Date: new Date},{Date: new Date(1970)}), true, "Assay.hash() should be true with expected: (Object {Date: new Date}) and actual: (Object {Date: new Date(1970)}). Result");
+	  equals( Assay.hash({Custom: new Custom},{Custom: new Custom}), true, "Assay.hash() should be true with expected: (Object {Custom: new Custom}) and actual: (Object {Custom: new Custom}). Result");
+	  equals( Assay.hash({Number: 0,String: "string",Boolean: true,Array: [],Object: {},Function: function() {},"null": null,"undefined": undefined,RegExp: /re/,Date: new Date}, {Number: 0,String: "string",Boolean: true,Array: [],Object: {},Function: function() {},"null": null,"undefined": undefined,RegExp: /re/,Date: new Date}), true, "Assay.hash() should be true (Many native types). Result");
 
 	  // Test nested object literals
-	  equals( assertHash({"one": {"two": {"three": {"four": "value"}}}}, {"one": {"two": {"three": {"four": "value"}}}}), true, "assertHash() should be true with matching nested object literals 4 levels deep. Result");
+	  equals( Assay.hash({"one": {"two": {"three": {"four": "value"}}}}, {"one": {"two": {"three": {"four": "value"}}}}), true, "Assay.hash() should be true with matching nested object literals 4 levels deep. Result");
 
 	  // Test shadowed native keys ({DontEnum} IE bug)
     // ????? meh ???????
   });
 
-  test("assertHash() method - strict value checking exercises", function () {
+  test("Assay.hash() method - strict value checking exercises", function () {
 
 	  expect(46);
 
@@ -489,77 +488,77 @@
 
 	  // Test mis-matched member types
 
-	  equals( assertHash({Number: 10}, {Number: "string"}, {strictValueChecking: true}), false, "assertHash() should be false with expected: (Object {Number: 10}) and actual: (Object {Number: 'string'}). Result");
-	  equals( assertHash({String: "string"}, {String: function() {}}, {strictValueChecking: true}), false, "assertHash() should be false with expected: (Object {String: 'string'}) and actual: (Object {String: function(){}}). Result");
-	  equals( assertHash({Array: []}, {Array: {}}, {strictValueChecking: true}), false, "assertHash() should be false with expected: (Object {Array: []}) and actual: (Object {Array: {}}). Result");
-	  equals( assertHash({Function: function() {}}, {Function: false}, {strictValueChecking: true}), false, "assertHash() should be false with expected: (Object {Function: function(){}}) and actual: (Object {Function: false}). Result");
-	  equals( assertHash({"null": null},{"null": undefined}, {strictValueChecking: true}), false, "assertHash() should be false with expected: (Object {'null': null}) and actual: (Object {'null': undefined}). Result");
-	  equals( assertHash({"undefined": undefined},{"undefined": null}, {strictValueChecking: true}), false, "assertHash() should be false with expected: (Object {'undefined': undefined}) and actual: (Object {'undefined': null}). Result");
-	  equals( assertHash({RegExp: /re/},{RegExp: "/re/"}, {strictValueChecking: true}), false, "assertHash() should be false with expected: (Object {RegExp: /re/}) and actual: (Object {RegExp: '/re/'}). Result");
-	  equals( assertHash({Custom: new Custom},{Custom: new Date}, {strictValueChecking: true}), false, "assertHash() should be false with expected: (Object {Custom: new Custom}) and actual: (Object {Custom: new Date})). Result");
+	  equals( Assay.hash({Number: 10}, {Number: "string"}, {strictValueChecking: true}), false, "Assay.hash() should be false with expected: (Object {Number: 10}) and actual: (Object {Number: 'string'}). Result");
+	  equals( Assay.hash({String: "string"}, {String: function() {}}, {strictValueChecking: true}), false, "Assay.hash() should be false with expected: (Object {String: 'string'}) and actual: (Object {String: function(){}}). Result");
+	  equals( Assay.hash({Array: []}, {Array: {}}, {strictValueChecking: true}), false, "Assay.hash() should be false with expected: (Object {Array: []}) and actual: (Object {Array: {}}). Result");
+	  equals( Assay.hash({Function: function() {}}, {Function: false}, {strictValueChecking: true}), false, "Assay.hash() should be false with expected: (Object {Function: function(){}}) and actual: (Object {Function: false}). Result");
+	  equals( Assay.hash({"null": null},{"null": undefined}, {strictValueChecking: true}), false, "Assay.hash() should be false with expected: (Object {'null': null}) and actual: (Object {'null': undefined}). Result");
+	  equals( Assay.hash({"undefined": undefined},{"undefined": null}, {strictValueChecking: true}), false, "Assay.hash() should be false with expected: (Object {'undefined': undefined}) and actual: (Object {'undefined': null}). Result");
+	  equals( Assay.hash({RegExp: /re/},{RegExp: "/re/"}, {strictValueChecking: true}), false, "Assay.hash() should be false with expected: (Object {RegExp: /re/}) and actual: (Object {RegExp: '/re/'}). Result");
+	  equals( Assay.hash({Custom: new Custom},{Custom: new Date}, {strictValueChecking: true}), false, "Assay.hash() should be false with expected: (Object {Custom: new Custom}) and actual: (Object {Custom: new Date})). Result");
 
 	  // Test mis-matched member values
 
-	  equals( assertHash({String: "string"}, {String: "different string"}, {strictValueChecking: true}), false, "assertHash() should be false with expected: (Object {String: 'string'}) and actual: (Object {String: 'different string'}). Result");
-	  equals( assertHash({Boolean: false}, {Boolean: true}, {strictValueChecking: true}), false, "assertHash() should be false with expected: (Object {Boolean: false}) and actual: (Object {Boolean: true}). Result");
-	  equals( assertHash({Number: 1}, {Number: 2}, {strictValueChecking: true}), false, "assertHash() should be false with expected: (Object {Number: 1}) and actual: (Object {Number: 2}). Result");
-	  equals( assertHash({RegExp: /re/}, {RegExp: /re2/}, {strictValueChecking: true}), false, "assertHash() should be false with expected: (Object {RegExp: /re/}) and actual: (Object {RegExp: /re2/}). Result");
-	  equals( assertHash({Array: ["one"]},{Array: ["two"]}, {strictValueChecking: true}), false, "assertHash() should be false with expected: (Object {Array: ['one']}) and actual: (Object {Array: ['two']}). Result");
-	  equals( assertHash({Object: {key: "value"}},{Object: {key: "value2"}}, {strictValueChecking: true}), false, "assertHash() should be false with expected: (Object {Object: {key: 'value'}}) and actual: (Object {Object: {key: 'value2'}}). Result");
-	  equals( assertHash({"null": null},{"null": undefined}, {strictValueChecking: true}), false, "assertHash() should be false with expected: (Object {'null': null}) and actual: (Object {'null': undefined}). Result");
-	  equals( assertHash({"undefined": undefined},{"undefined": null}, {strictValueChecking: true}), false, "assertHash() should be false with expected: (Object {'undefined': undefined}) and actual: (Object {'undefined': null}). Result");
-	  equals( assertHash({Date: new Date},{Date: new Date(1970)}, {strictValueChecking: true}), false, "assertHash() should be true with expected: (Object {Date: new Date}) and actual: (Object {Date: new Date(1970)}). Result");
-	  equals( assertHash({Number: 0,String: "string",Boolean: true,Array: [],Object: {},Function: function() {},"null": null,"undefined": undefined,RegExp: /re/,Date: new Date}, {Number: 1,String: "string",Boolean: true,Array: [],Object: {},Function: function() {},"null": null,"undefined": undefined,RegExp: /re/,Date: new Date}, {strictValueChecking: true}), false, "assertHash() should be false (Many native types). Result");
+	  equals( Assay.hash({String: "string"}, {String: "different string"}, {strictValueChecking: true}), false, "Assay.hash() should be false with expected: (Object {String: 'string'}) and actual: (Object {String: 'different string'}). Result");
+	  equals( Assay.hash({Boolean: false}, {Boolean: true}, {strictValueChecking: true}), false, "Assay.hash() should be false with expected: (Object {Boolean: false}) and actual: (Object {Boolean: true}). Result");
+	  equals( Assay.hash({Number: 1}, {Number: 2}, {strictValueChecking: true}), false, "Assay.hash() should be false with expected: (Object {Number: 1}) and actual: (Object {Number: 2}). Result");
+	  equals( Assay.hash({RegExp: /re/}, {RegExp: /re2/}, {strictValueChecking: true}), false, "Assay.hash() should be false with expected: (Object {RegExp: /re/}) and actual: (Object {RegExp: /re2/}). Result");
+	  equals( Assay.hash({Array: ["one"]},{Array: ["two"]}, {strictValueChecking: true}), false, "Assay.hash() should be false with expected: (Object {Array: ['one']}) and actual: (Object {Array: ['two']}). Result");
+	  equals( Assay.hash({Object: {key: "value"}},{Object: {key: "value2"}}, {strictValueChecking: true}), false, "Assay.hash() should be false with expected: (Object {Object: {key: 'value'}}) and actual: (Object {Object: {key: 'value2'}}). Result");
+	  equals( Assay.hash({"null": null},{"null": undefined}, {strictValueChecking: true}), false, "Assay.hash() should be false with expected: (Object {'null': null}) and actual: (Object {'null': undefined}). Result");
+	  equals( Assay.hash({"undefined": undefined},{"undefined": null}, {strictValueChecking: true}), false, "Assay.hash() should be false with expected: (Object {'undefined': undefined}) and actual: (Object {'undefined': null}). Result");
+	  equals( Assay.hash({Date: new Date},{Date: new Date(1970)}, {strictValueChecking: true}), false, "Assay.hash() should be true with expected: (Object {Date: new Date}) and actual: (Object {Date: new Date(1970)}). Result");
+	  equals( Assay.hash({Number: 0,String: "string",Boolean: true,Array: [],Object: {},Function: function() {},"null": null,"undefined": undefined,RegExp: /re/,Date: new Date}, {Number: 1,String: "string",Boolean: true,Array: [],Object: {},Function: function() {},"null": null,"undefined": undefined,RegExp: /re/,Date: new Date}, {strictValueChecking: true}), false, "Assay.hash() should be false (Many native types). Result");
 
 	  // Test falsy nested object literals
-	  equals( assertHash({"one": {"two": {"three": {"four": "value"}}}}, {"one": {"two": {"three": {"four": "string"}}}}, {strictValueChecking: true}), false, "assertHash() should be false with matching nested object literals 4 levels deep. Result");
+	  equals( Assay.hash({"one": {"two": {"three": {"four": "value"}}}}, {"one": {"two": {"three": {"four": "string"}}}}, {strictValueChecking: true}), false, "Assay.hash() should be false with matching nested object literals 4 levels deep. Result");
 
 	  // Test incomplete 'actual' object (vis-a-vis expected)...
 
 	  // Single missing key
 	  try {
-	    assertHash({key: 'value'}, {}, {exceptionHandler: mockErrorHandler});
+	    Assay.hash({key: 'value'}, {}, {exceptionHandler: mockErrorHandler});
 	    mockErrorHandler.throwErrors();
-	    ok(false, "assertHash() should throw exception when passed an 'actual' object missing the 'key' property");
+	    ok(false, "Assay.hash() should throw exception when passed an 'actual' object missing the 'key' property");
 	  } catch (e) {
-	    equals( e[0].type, "MissingHashKeyException", "assertHash() should raise a 'MissingHashKeyException' with expected: (Object {key: 'value'}) and actual: (Object {}). Error raised was");
-	    equals( /expected: "key"/.test(e[0].message), true, "assertHash() should identify 'key' as the missing accessor with expected: (Object {key: 'value'}) and actual: (Object {}). Result");
+	    equals( e[0].type, "MissingHashKeyException", "Assay.hash() should raise a 'MissingHashKeyException' with expected: (Object {key: 'value'}) and actual: (Object {}). Error raised was");
+	    equals( /expected: "key"/.test(e[0].message), true, "Assay.hash() should identify 'key' as the missing accessor with expected: (Object {key: 'value'}) and actual: (Object {}). Result");
 	  }
 
 	  mockErrorHandler.reset();
 
 	  try {
-	    assertHash({key: 'value', key2: 'value2'}, {key: 'value'}, {exceptionHandler: mockErrorHandler});
+	    Assay.hash({key: 'value', key2: 'value2'}, {key: 'value'}, {exceptionHandler: mockErrorHandler});
 	    mockErrorHandler.throwErrors();
-	    ok(false, "assertHash() should throw exception when passed an 'actual' object missing the 'key2' property");
+	    ok(false, "Assay.hash() should throw exception when passed an 'actual' object missing the 'key2' property");
 	  } catch (e) {
-	    equals( e[0].type, "MissingHashKeyException", "assertHash() should raise a 'MissingHashKeyException' with expected: (Object {key: 'value', key2: 'value2'}) and actual: (Object {key: 'value'}). Error raised was");
-	    equals( /expected: "key2"/.test(e[0].message), true, "assertHash() should identify 'key2' as the missing accessor with expected: (Object {key: 'value', key2: 'value2'}) and actual: (Object {key: 'value'}). Result");
+	    equals( e[0].type, "MissingHashKeyException", "Assay.hash() should raise a 'MissingHashKeyException' with expected: (Object {key: 'value', key2: 'value2'}) and actual: (Object {key: 'value'}). Error raised was");
+	    equals( /expected: "key2"/.test(e[0].message), true, "Assay.hash() should identify 'key2' as the missing accessor with expected: (Object {key: 'value', key2: 'value2'}) and actual: (Object {key: 'value'}). Result");
 	  }
 
 	  mockErrorHandler.reset();
 
 	  try {
-	    assertHash({key: 'value', key2: 'value2', key3: 'value'}, {key: 'value', key2: 'value2'}, {exceptionHandler: mockErrorHandler});
+	    Assay.hash({key: 'value', key2: 'value2', key3: 'value'}, {key: 'value', key2: 'value2'}, {exceptionHandler: mockErrorHandler});
 	    mockErrorHandler.throwErrors();
-	    ok(false, "assertHash() should throw exception when passed an 'actual' object missing the 'key3' property");
+	    ok(false, "Assay.hash() should throw exception when passed an 'actual' object missing the 'key3' property");
 	  } catch (e) {
-	    equals( e[0].type, "MissingHashKeyException", "assertHash() should raise a 'MissingHashKeyException' be false with expected: (Object {key: 'value', key2: 'value2', key3: 'value'}) and actual: (Object {key: 'value', key2: 'value'}). Error raised was");
-	    equals( /expected: "key3"/.test(e[0].message), true, "assertHash() should identify 'key3' as the missing accessor with expected: (Object {key: 'value', key2: 'value2', key3: 'value'}) and actual: (Object {key: 'value', key2: 'value'}). Result");
+	    equals( e[0].type, "MissingHashKeyException", "Assay.hash() should raise a 'MissingHashKeyException' be false with expected: (Object {key: 'value', key2: 'value2', key3: 'value'}) and actual: (Object {key: 'value', key2: 'value'}). Error raised was");
+	    equals( /expected: "key3"/.test(e[0].message), true, "Assay.hash() should identify 'key3' as the missing accessor with expected: (Object {key: 'value', key2: 'value2', key3: 'value'}) and actual: (Object {key: 'value', key2: 'value'}). Result");
 	  }
 
 	  mockErrorHandler.reset();
 
 	  // Multiple missing keys
 	  try {
-	    assertHash({key: 'value', key2: 'value2', key3: 'value'}, {key: 'value'}, {exceptionHandler: mockErrorHandler});
+	    Assay.hash({key: 'value', key2: 'value2', key3: 'value'}, {key: 'value'}, {exceptionHandler: mockErrorHandler});
 	    mockErrorHandler.throwErrors();
-	    ok(false, "assertHash() should throw exception when passed an 'actual' object missing the 'key2' and 'key3' properties");
+	    ok(false, "Assay.hash() should throw exception when passed an 'actual' object missing the 'key2' and 'key3' properties");
 	  } catch (e) {
-	    equals( e[0].type, "MissingHashKeyException", "assertHash() should raise a 'MissingHashKeyException' be false with expected: (Object {key: 'value', key2: 'value2', key3: 'value'}) and actual: (Object {key: 'value'}). Error raised was");
-	    equals( /expected: "key2"/.test(e[0].message), true, "assertHash() should identify 'key2' as the missing accessor with expected: (Object {key: 'value', key2: 'value2', key3: 'value'}) and actual: (Object {key: 'value'}). Result");
-	    equals( e[1].type, "MissingHashKeyException", "assertHash() should raise a second 'MissingHashKeyException' be false with expected: (Object {key: 'value', key2: 'value2', key3: 'value'}) and actual: (Object {key: 'value'}). Error raised was");
-	    equals( /expected: "key3"/.test(e[1].message), true, "assertHash() should identify 'key3' as the missing accessor with expected: (Object {key: 'value', key2: 'value2', key3: 'value'}) and actual: (Object {key: 'value'}). Result");
+	    equals( e[0].type, "MissingHashKeyException", "Assay.hash() should raise a 'MissingHashKeyException' be false with expected: (Object {key: 'value', key2: 'value2', key3: 'value'}) and actual: (Object {key: 'value'}). Error raised was");
+	    equals( /expected: "key2"/.test(e[0].message), true, "Assay.hash() should identify 'key2' as the missing accessor with expected: (Object {key: 'value', key2: 'value2', key3: 'value'}) and actual: (Object {key: 'value'}). Result");
+	    equals( e[1].type, "MissingHashKeyException", "Assay.hash() should raise a second 'MissingHashKeyException' be false with expected: (Object {key: 'value', key2: 'value2', key3: 'value'}) and actual: (Object {key: 'value'}). Error raised was");
+	    equals( /expected: "key3"/.test(e[1].message), true, "Assay.hash() should identify 'key3' as the missing accessor with expected: (Object {key: 'value', key2: 'value2', key3: 'value'}) and actual: (Object {key: 'value'}). Result");
 	  }
 
 	  mockErrorHandler.reset();
@@ -568,703 +567,703 @@
 
 	  // Test matching member values inc. potential false positives
 
-	  equals( assertHash({Number: 0}, {Number: 0}, true), true, "assertHash() should be true with expected: (Object {Number: 0}) and actual: (Object {Number: 0}). Result" );
-	  equals( assertHash({Number: 10}, {Number: 10}, true), true, "assertHash() should be true with expected: (Object {Number: 10}) and actual: (Object {Number: 10}). Result" );
-	  equals( assertHash({String: ""}, {String: ""}, true), true, "assertHash() should be true with expected: (Object {String: ''}) and actual: (Object {String: ''}). Result" );
-	  equals( assertHash({String: "string"}, {String: "string"}, true), true, "assertHash() should be true with expected: (Object {String: 'string'}) and actual: (Object {String: 'string'}). Result" );
-	  equals( assertHash({Boolean: false}, {Boolean: false}, true), true, "assertHash() should be true with expected: (Object {Boolean: false}) and actual: (Object {Boolean: false}). Result" );
-	  equals( assertHash({Boolean: true}, {Boolean: true}, true), true, "assertHash() should be true with expected: (Object {Boolean: true}) and actual: (Object {Boolean: true}). Result");
-	  equals( assertHash({Array: []}, {Array: []}, true), true, "assertHash() should be true with expected: (Object {Array: []}) and actual: (Object {Array: []}). Result");
-	  equals( assertHash({Array: ["one"]},{Array: ["one"]}, true), true, "assertHash() should be true with expected: (Object {Array: ['one']}) and actual: (Object {Array: ['one']}). Result");
-	  equals( assertHash({Object: {}}, {Object: {}}, true), true, "assertHash() should be true with expected: (Object {Object: {}}) and actual: (Object {Object: {}}). Result");
+	  equals( Assay.hash({Number: 0}, {Number: 0}, true), true, "Assay.hash() should be true with expected: (Object {Number: 0}) and actual: (Object {Number: 0}). Result" );
+	  equals( Assay.hash({Number: 10}, {Number: 10}, true), true, "Assay.hash() should be true with expected: (Object {Number: 10}) and actual: (Object {Number: 10}). Result" );
+	  equals( Assay.hash({String: ""}, {String: ""}, true), true, "Assay.hash() should be true with expected: (Object {String: ''}) and actual: (Object {String: ''}). Result" );
+	  equals( Assay.hash({String: "string"}, {String: "string"}, true), true, "Assay.hash() should be true with expected: (Object {String: 'string'}) and actual: (Object {String: 'string'}). Result" );
+	  equals( Assay.hash({Boolean: false}, {Boolean: false}, true), true, "Assay.hash() should be true with expected: (Object {Boolean: false}) and actual: (Object {Boolean: false}). Result" );
+	  equals( Assay.hash({Boolean: true}, {Boolean: true}, true), true, "Assay.hash() should be true with expected: (Object {Boolean: true}) and actual: (Object {Boolean: true}). Result");
+	  equals( Assay.hash({Array: []}, {Array: []}, true), true, "Assay.hash() should be true with expected: (Object {Array: []}) and actual: (Object {Array: []}). Result");
+	  equals( Assay.hash({Array: ["one"]},{Array: ["one"]}, true), true, "Assay.hash() should be true with expected: (Object {Array: ['one']}) and actual: (Object {Array: ['one']}). Result");
+	  equals( Assay.hash({Object: {}}, {Object: {}}, true), true, "Assay.hash() should be true with expected: (Object {Object: {}}) and actual: (Object {Object: {}}). Result");
 	  // Not sure what to do with this one - it's definitely an edge case... for now maybe just defer to a quick type check (if expectedType === Function?)
-	  equals( assertHash({Function: function() {}}, {Function: function() {}}, true), true, "assertHash() should be true with expected: (Object {Function: function(){}}) and actual: (Object {Function: function(){}}). Result");
-	  equals( assertHash({"null": null},{"null": null}, true), true, "assertHash() should be true with expected: (Object {'null': null}) and actual: (Object {'null': null}). Result");
-	  equals( assertHash({"undefined": undefined},{"undefined": undefined}, true), true, "assertHash() should be true with expected: (Object {'undefined': undefined}) and actual: (Object {'undefined': undefined}). Result");
-	  equals( assertHash({RegExp: /re/},{RegExp: /re/}, true), true, "assertHash() should be true with expected: (Object {RegExp: /re/}) and actual: (Object {RegExp: /re/}). Result");
-	  equals( assertHash({Date: new Date},{Date: new Date}, true), true, "assertHash() should be true with expected: (Object {Date: new Date}) and actual: (Object {Date: new Date}). Result");
-	  equals( assertHash({Custom: new Custom},{Custom: new Custom}, true), true, "assertHash() should be true with expected: (Object {Custom: new Custom}) and actual: (Object {Custom: new Custom}). Result");
-	  equals( assertHash({Number: 0,String: "string",Boolean: true,Array: [],Object: {},Function: function() {},"null": null,"undefined": undefined,RegExp: /re/,Date: new Date}, {Number: 0,String: "string",Boolean: true,Array: [],Object: {},Function: function() {},"null": null,"undefined": undefined,RegExp: /re/,Date: new Date}), true, "assertHash() should be true (Many native types). Result");
+	  equals( Assay.hash({Function: function() {}}, {Function: function() {}}, true), true, "Assay.hash() should be true with expected: (Object {Function: function(){}}) and actual: (Object {Function: function(){}}). Result");
+	  equals( Assay.hash({"null": null},{"null": null}, true), true, "Assay.hash() should be true with expected: (Object {'null': null}) and actual: (Object {'null': null}). Result");
+	  equals( Assay.hash({"undefined": undefined},{"undefined": undefined}, true), true, "Assay.hash() should be true with expected: (Object {'undefined': undefined}) and actual: (Object {'undefined': undefined}). Result");
+	  equals( Assay.hash({RegExp: /re/},{RegExp: /re/}, true), true, "Assay.hash() should be true with expected: (Object {RegExp: /re/}) and actual: (Object {RegExp: /re/}). Result");
+	  equals( Assay.hash({Date: new Date},{Date: new Date}, true), true, "Assay.hash() should be true with expected: (Object {Date: new Date}) and actual: (Object {Date: new Date}). Result");
+	  equals( Assay.hash({Custom: new Custom},{Custom: new Custom}, true), true, "Assay.hash() should be true with expected: (Object {Custom: new Custom}) and actual: (Object {Custom: new Custom}). Result");
+	  equals( Assay.hash({Number: 0,String: "string",Boolean: true,Array: [],Object: {},Function: function() {},"null": null,"undefined": undefined,RegExp: /re/,Date: new Date}, {Number: 0,String: "string",Boolean: true,Array: [],Object: {},Function: function() {},"null": null,"undefined": undefined,RegExp: /re/,Date: new Date}), true, "Assay.hash() should be true (Many native types). Result");
 
 	  // Test nested object literals
-	  equals( assertHash({"one": {"two": {"three": {"four": "value"}}}}, {"one": {"two": {"three": {"four": "value"}}}}, true), true, "assertHash() should be true with matching nested object literals 4 levels deep. Result");
+	  equals( Assay.hash({"one": {"two": {"three": {"four": "value"}}}}, {"one": {"two": {"three": {"four": "value"}}}}, true), true, "Assay.hash() should be true with matching nested object literals 4 levels deep. Result");
 
 	});
 
-	/*test("assertHash() - test *interface* assertion use case", function () {
+	/*test("Assay.hash() - test *interface* assertion use case", function () {
 
 	});*/
 
-	test("assertObject() method - test parameter requirements", function () {
+	test("Assay.object() method - test parameter requirements", function () {
 
 		/*// Test no arguments
 	  try {
-			assertCollection();
-	    ok(false, "assertCollection() should throw exception when passed No parameters");
+			Assay.collection();
+	    ok(false, "Assay.collection() should throw exception when passed No parameters");
 	  } catch (exception) {
-	    equals(exception.type, "MissingParametersException", "assertCollection() exception type should be MissingParametersException for less than two parameters (required)");
+	    equals(exception.type, "MissingParametersException", "Assay.collection() exception type should be MissingParametersException for less than two parameters (required)");
 	  }
 
-	  // Test malformed arguments to interface afforded by assertCollection()
+	  // Test malformed arguments to interface afforded by Assay.collection()
 	  try {
-			assertCollection( undefined, []	);
-	    ok(false, "assertCollection() should throw exception when passed incorrectly formatted parameters");
+			Assay.collection( undefined, []	);
+	    ok(false, "Assay.collection() should throw exception when passed incorrectly formatted parameters");
 	  } catch (exception) {
-	    equals(exception.type, "MalformedArgumentsException", "assertCollection() requires the 'expected' and 'actual' parameters to be Array-like objects");
+	    equals(exception.type, "MalformedArgumentsException", "Assay.collection() requires the 'expected' and 'actual' parameters to be Array-like objects");
 	  }
 
 	  try {
-			assertCollection( [], undefined );
-	    ok(false, "assertCollection() should throw exception when passed incorrectly formatted parameters");
+			Assay.collection( [], undefined );
+	    ok(false, "Assay.collection() should throw exception when passed incorrectly formatted parameters");
 	  } catch (exception) {
-	    equals(exception.type, "MalformedArgumentsException", "assertCollection() requires the 'expected' and 'actual' parameters to be Array-like objects");
+	    equals(exception.type, "MalformedArgumentsException", "Assay.collection() requires the 'expected' and 'actual' parameters to be Array-like objects");
 	  }
 
 	  // Test expected and actual collection of objects with different lengths
 		 equals((function() {
-          return assertCollection([1,2], arguments);
-      })(1), false, "assertCollection() should return false if the 'expected' and 'actual' objects have mistmatched lengths");
+          return Assay.collection([1,2], arguments);
+      })(1), false, "Assay.collection() should return false if the 'expected' and 'actual' objects have mistmatched lengths");
 
 	  // Test passing in an 'arguments' array
     equals((function() {
-      return assertCollection([Boolean], arguments);
-      })(true)["constructor"], Boolean, "assertCollection() should allow Array-like objects to be passed-in (e.g arguments collections) AND return a Boolean");
+      return Assay.collection([Boolean], arguments);
+      })(true)["constructor"], Boolean, "Assay.collection() should allow Array-like objects to be passed-in (e.g arguments collections) AND return a Boolean");
 		*/
 
 	});
 
 
-	test("assertObject() exercises - (Number: Constructor) primitive [typed checking]", function() {
+	test("Assay.object() exercises - (Number: Constructor) primitive [typed checking]", function() {
 
 	  // FALSE ASSERTIONS
 
 	  // Test invalid argument type - Constructors
-		equals( assertObject(Number, String), false, "assertObject() should return false with expected: (Number) and actual: (String)" );
-		equals( assertObject(Number, Boolean), false, "assertObject() should return false with expected: (Number) and actual: (Boolean)" );
-		equals( assertObject(Number, Array), false, "assertObject() should return false with expected: (Number) and actual: (Array)" );
-		equals( assertObject(Number, Object), false, "assertObject() should return false with expected: (Number) and actual: (Object)" );
-		equals( assertObject(Number, Function), false, "assertObject() should return false with expected: (Number) and actual: (Function)" );
-		equals( assertObject(Number, RegExp), false, "assertObject() should return false with expected: (Number) and actual: (RegExp)" );
-		equals( assertObject(Number, Date), false, "assertObject() should return false with expected: (Number) and actual: (Date)" );
-		equals( assertObject(Number, Custom), false, "assertObject() should return false with expected: (Number) and actual: (Custom)" );
+		equals( Assay.object(Number, String), false, "Assay.object() should return false with expected: (Number) and actual: (String)" );
+		equals( Assay.object(Number, Boolean), false, "Assay.object() should return false with expected: (Number) and actual: (Boolean)" );
+		equals( Assay.object(Number, Array), false, "Assay.object() should return false with expected: (Number) and actual: (Array)" );
+		equals( Assay.object(Number, Object), false, "Assay.object() should return false with expected: (Number) and actual: (Object)" );
+		equals( Assay.object(Number, Function), false, "Assay.object() should return false with expected: (Number) and actual: (Function)" );
+		equals( Assay.object(Number, RegExp), false, "Assay.object() should return false with expected: (Number) and actual: (RegExp)" );
+		equals( Assay.object(Number, Date), false, "Assay.object() should return false with expected: (Number) and actual: (Date)" );
+		equals( Assay.object(Number, Custom), false, "Assay.object() should return false with expected: (Number) and actual: (Custom)" );
 
 		// Test invalid argument type - Values (truthy)
 
-		equals( assertObject(Number, "string"), false, "assertObject() should return false with expected: (Number) and actual: (String: string)" );
-		equals( assertObject(Number, true), false, "assertObject() should return false with expected: (Number) and actual: (Boolean: true)" );
-		equals( assertObject(Number, []), false, "assertObject() should return false with expected: (Number) and actual: (Array: [])" );
-		equals( assertObject(Number, {}), false, "assertObject() should return false with expected: (Number) and actual: (Object: {})" );
-		equals( assertObject(Number, function(){}), false, "assertObject() should return false with expected: (Number) and actual: (Function: function(){})" );
-		equals( assertObject(Number, /test/), false, "assertObject() should return false with expected: (Number) and actual: (RegExp: /test/)" );
-		equals( assertObject(Number, new Date), false, "assertObject() should return false with expected: (Number) and actual: (Date: new instance)" );
-		equals( assertObject(Number, new Custom), false, "assertObject() should return false with expected: (Number) and actual: (Custom: new instance)" );
+		equals( Assay.object(Number, "string"), false, "Assay.object() should return false with expected: (Number) and actual: (String: string)" );
+		equals( Assay.object(Number, true), false, "Assay.object() should return false with expected: (Number) and actual: (Boolean: true)" );
+		equals( Assay.object(Number, []), false, "Assay.object() should return false with expected: (Number) and actual: (Array: [])" );
+		equals( Assay.object(Number, {}), false, "Assay.object() should return false with expected: (Number) and actual: (Object: {})" );
+		equals( Assay.object(Number, function(){}), false, "Assay.object() should return false with expected: (Number) and actual: (Function: function(){})" );
+		equals( Assay.object(Number, /test/), false, "Assay.object() should return false with expected: (Number) and actual: (RegExp: /test/)" );
+		equals( Assay.object(Number, new Date), false, "Assay.object() should return false with expected: (Number) and actual: (Date: new instance)" );
+		equals( Assay.object(Number, new Custom), false, "Assay.object() should return false with expected: (Number) and actual: (Custom: new instance)" );
 
 	  // Test invalid argument types - false values
 
-		equals( assertObject(Number, null), false, "assertObject() should return false with expected: (Number) and actual: (null)" );
-		equals( assertObject(Number, undefined), false, "assertObject() should return false with expected: (Number) and actual: (undefined)" );
+		equals( Assay.object(Number, null), false, "Assay.object() should return false with expected: (Number) and actual: (null)" );
+		equals( Assay.object(Number, undefined), false, "Assay.object() should return false with expected: (Number) and actual: (undefined)" );
 		// TRUE ASSERTIONS
-		equals( assertObject(Number, Number), true, "assertObject() should return true with expected: (Number) and actual: (Number)" );
-		equals( assertObject(Number, 1), true, "assertObject() should return true with expected: (Number) and actual: (Number: 1)" );
-		equals( assertObject(Number, 0), true, "assertObject() should return true with expected: (Number) and actual: (Number: 0)" );
+		equals( Assay.object(Number, Number), true, "Assay.object() should return true with expected: (Number) and actual: (Number)" );
+		equals( Assay.object(Number, 1), true, "Assay.object() should return true with expected: (Number) and actual: (Number: 1)" );
+		equals( Assay.object(Number, 0), true, "Assay.object() should return true with expected: (Number) and actual: (Number: 0)" );
 
 	});
 
-	test("assertObject() exercises - (Number: Constructor) primitive [strict value checking]", function() {
+	test("Assay.object() exercises - (Number: Constructor) primitive [strict value checking]", function() {
 
 	  // FALSE ASSERTIONS
 
 	  // Test invalid argument type - Constructors
-		equals( assertObject(Number, String, {strictValueChecking: true} ), false, "assertObject() should return false with expected: (Number) and actual: (String)" );
-		equals( assertObject(Number, Boolean, {strictValueChecking: true} ), false, "assertObject() should return false with expected: (Number) and actual: (Boolean)" );
-		equals( assertObject(Number, Array, {strictValueChecking: true} ), false, "assertObject() should return false with expected: (Number) and actual: (Array)" );
-		equals( assertObject(Number, Object, {strictValueChecking: true} ), false, "assertObject() should return false with expected: (Number) and actual: (Object)" );
-		equals( assertObject(Number, Function, {strictValueChecking: true} ), false, "assertObject() should return false with expected: (Number) and actual: (Function)" );
-		equals( assertObject(Number, RegExp, {strictValueChecking: true} ), false, "assertObject() should return false with expected: (Number) and actual: (RegExp)" );
-		equals( assertObject(Number, Date, {strictValueChecking: true} ), false, "assertObject() should return false with expected: (Number) and actual: (Date)" );
-		equals( assertObject(Number, Custom, {strictValueChecking: true} ), false, "assertObject() should return false with expected: (Number) and actual: (Custom)" );
+		equals( Assay.object(Number, String, {strictValueChecking: true} ), false, "Assay.object() should return false with expected: (Number) and actual: (String)" );
+		equals( Assay.object(Number, Boolean, {strictValueChecking: true} ), false, "Assay.object() should return false with expected: (Number) and actual: (Boolean)" );
+		equals( Assay.object(Number, Array, {strictValueChecking: true} ), false, "Assay.object() should return false with expected: (Number) and actual: (Array)" );
+		equals( Assay.object(Number, Object, {strictValueChecking: true} ), false, "Assay.object() should return false with expected: (Number) and actual: (Object)" );
+		equals( Assay.object(Number, Function, {strictValueChecking: true} ), false, "Assay.object() should return false with expected: (Number) and actual: (Function)" );
+		equals( Assay.object(Number, RegExp, {strictValueChecking: true} ), false, "Assay.object() should return false with expected: (Number) and actual: (RegExp)" );
+		equals( Assay.object(Number, Date, {strictValueChecking: true} ), false, "Assay.object() should return false with expected: (Number) and actual: (Date)" );
+		equals( Assay.object(Number, Custom, {strictValueChecking: true} ), false, "Assay.object() should return false with expected: (Number) and actual: (Custom)" );
 
 		// Test invalid argument type - Values (truthy)
 
-		equals( assertObject(Number, "string", {strictValueChecking: true} ), false, "assertObject() should return false with expected: (Number) and actual: (String: string)" );
-		equals( assertObject(Number, true, {strictValueChecking: true} ), false, "assertObject() should return false with expected: (Number) and actual: (Boolean: true)" );
-		equals( assertObject(Number, [], {strictValueChecking: true} ), false, "assertObject() should return false with expected: (Number) and actual: (Array: [])" );
-		equals( assertObject(Number, {}, {strictValueChecking: true} ), false, "assertObject() should return false with expected: (Number) and actual: (Object: {})" );
-		equals( assertObject(Number, function(){}, {strictValueChecking: true} ), false, "assertObject() should return false with expected: (Number) and actual: (Function: function(){})" );
-		equals( assertObject(Number, /test/, {strictValueChecking: true} ), false, "assertObject() should return false with expected: (Number) and actual: (RegExp: /test/)" );
-		equals( assertObject(Number, new Date, {strictValueChecking: true} ), false, "assertObject() should return false with expected: (Number) and actual: (Date: new instance)" );
-		equals( assertObject(Number, new Custom, {strictValueChecking: true} ), false, "assertObject() should return false with expected: (Number) and actual: (Custom: new instance)" );
+		equals( Assay.object(Number, "string", {strictValueChecking: true} ), false, "Assay.object() should return false with expected: (Number) and actual: (String: string)" );
+		equals( Assay.object(Number, true, {strictValueChecking: true} ), false, "Assay.object() should return false with expected: (Number) and actual: (Boolean: true)" );
+		equals( Assay.object(Number, [], {strictValueChecking: true} ), false, "Assay.object() should return false with expected: (Number) and actual: (Array: [])" );
+		equals( Assay.object(Number, {}, {strictValueChecking: true} ), false, "Assay.object() should return false with expected: (Number) and actual: (Object: {})" );
+		equals( Assay.object(Number, function(){}, {strictValueChecking: true} ), false, "Assay.object() should return false with expected: (Number) and actual: (Function: function(){})" );
+		equals( Assay.object(Number, /test/, {strictValueChecking: true} ), false, "Assay.object() should return false with expected: (Number) and actual: (RegExp: /test/)" );
+		equals( Assay.object(Number, new Date, {strictValueChecking: true} ), false, "Assay.object() should return false with expected: (Number) and actual: (Date: new instance)" );
+		equals( Assay.object(Number, new Custom, {strictValueChecking: true} ), false, "Assay.object() should return false with expected: (Number) and actual: (Custom: new instance)" );
 
 	  // Test invalid argument types - false values
 
-		equals( assertObject(Number, null, {strictValueChecking: true} ), false, "assertObject() should return false with expected: (Number) and actual: (null)" );
-		equals( assertObject(Number, undefined, {strictValueChecking: true} ), false, "assertObject() should return false with expected: (Number) and actual: (undefined)" );
+		equals( Assay.object(Number, null, {strictValueChecking: true} ), false, "Assay.object() should return false with expected: (Number) and actual: (null)" );
+		equals( Assay.object(Number, undefined, {strictValueChecking: true} ), false, "Assay.object() should return false with expected: (Number) and actual: (undefined)" );
 
 		// TRUE ASSERTIONS
-		equals( assertObject(Number, Number, {strictValueChecking: true} ), true, "assertObject() should return true with expected: (Number) and actual: (Number)" );
-		equals( assertObject(Number, 1, {strictValueChecking: true} ), false, "assertObject() should return true with expected: (Number) and actual: (Number: 1)" );
-		equals( assertObject(Number, 0, {strictValueChecking: true} ), false, "assertObject() should return true with expected: (Number) and actual: (Number: 0)" );
+		equals( Assay.object(Number, Number, {strictValueChecking: true} ), true, "Assay.object() should return true with expected: (Number) and actual: (Number)" );
+		equals( Assay.object(Number, 1, {strictValueChecking: true} ), false, "Assay.object() should return true with expected: (Number) and actual: (Number: 1)" );
+		equals( Assay.object(Number, 0, {strictValueChecking: true} ), false, "Assay.object() should return true with expected: (Number) and actual: (Number: 0)" );
 
 	});
 
-	test("assertObject() exercises - (Number: 1) primitive [typed checking]", function() {
+	test("Assay.object() exercises - (Number: 1) primitive [typed checking]", function() {
 
 	  // FALSE ASSERTIONS
 
 	  // Test invalid argument type - Constructors
 
-		equals( assertObject(1, String), false, "assertObject() should return false with expected: (Number: 1) and actual: (String)" );
-		equals( assertObject(1, Boolean), false, "assertObject() should return false with expected: (Number: 1) and actual: (Boolean)" );
-		equals( assertObject(1, Array), false, "assertObject() should return false with expected: (Number: 1) and actual: (Array)" );
-		equals( assertObject(1, Object), false, "assertObject() should return false with expected: (Number: 1) and actual: (Object)" );
-		equals( assertObject(1, Function), false, "assertObject() should return false with expected: (Number: 1) and actual: (Function)" );
-		equals( assertObject(1, RegExp), false, "assertObject() should return false with expected: (Number: 1) and actual: (RegExp)" );
-		equals( assertObject(1, Date), false, "assertObject() should return false with expected: (Number: 1) and actual: (Date)" );
-		equals( assertObject(1, Custom), false, "assertObject() should return false with expected: (Number: 1) and actual: (Custom)" );
+		equals( Assay.object(1, String), false, "Assay.object() should return false with expected: (Number: 1) and actual: (String)" );
+		equals( Assay.object(1, Boolean), false, "Assay.object() should return false with expected: (Number: 1) and actual: (Boolean)" );
+		equals( Assay.object(1, Array), false, "Assay.object() should return false with expected: (Number: 1) and actual: (Array)" );
+		equals( Assay.object(1, Object), false, "Assay.object() should return false with expected: (Number: 1) and actual: (Object)" );
+		equals( Assay.object(1, Function), false, "Assay.object() should return false with expected: (Number: 1) and actual: (Function)" );
+		equals( Assay.object(1, RegExp), false, "Assay.object() should return false with expected: (Number: 1) and actual: (RegExp)" );
+		equals( Assay.object(1, Date), false, "Assay.object() should return false with expected: (Number: 1) and actual: (Date)" );
+		equals( Assay.object(1, Custom), false, "Assay.object() should return false with expected: (Number: 1) and actual: (Custom)" );
 
 		// Test invalid argument type - Values (truthy)
 
-		equals( assertObject(1, "string"), false, "assertObject() should return false with expected: (Number: 1) and actual: (String: string)" );
-		equals( assertObject(1, true), false, "assertObject() should return false with expected: (Number: 1) and actual: (Boolean: true)" );
-		equals( assertObject(1, []), false, "assertObject() should return false with expected: (Number: 1) and actual: (Array: [])" );
-		equals( assertObject(1, {}), false, "assertObject() should return false with expected: (Number: 1) and actual: (Object: {})" );
-		equals( assertObject(1, function(){}), false, "assertObject() should return false with expected: (Number: 1) and actual: (Function: function(){})" );
-		equals( assertObject(1, /test/), false, "assertObject() should return false with expected: (Number: 1) and actual: (RegExp: /test/)" );
-		equals( assertObject(1, new Date), false, "assertObject() should return false with expected: (Number: 1) and actual: (Date: new instance)" );
-		equals( assertObject(1, new Custom), false, "assertObject() should return false with expected: (Number: 1) and actual: (Custom: new instance)" );
+		equals( Assay.object(1, "string"), false, "Assay.object() should return false with expected: (Number: 1) and actual: (String: string)" );
+		equals( Assay.object(1, true), false, "Assay.object() should return false with expected: (Number: 1) and actual: (Boolean: true)" );
+		equals( Assay.object(1, []), false, "Assay.object() should return false with expected: (Number: 1) and actual: (Array: [])" );
+		equals( Assay.object(1, {}), false, "Assay.object() should return false with expected: (Number: 1) and actual: (Object: {})" );
+		equals( Assay.object(1, function(){}), false, "Assay.object() should return false with expected: (Number: 1) and actual: (Function: function(){})" );
+		equals( Assay.object(1, /test/), false, "Assay.object() should return false with expected: (Number: 1) and actual: (RegExp: /test/)" );
+		equals( Assay.object(1, new Date), false, "Assay.object() should return false with expected: (Number: 1) and actual: (Date: new instance)" );
+		equals( Assay.object(1, new Custom), false, "Assay.object() should return false with expected: (Number: 1) and actual: (Custom: new instance)" );
 
 	  // Test invalid argument types - false values
 
-		equals( assertObject(1, null), false, "assertObject() should return false with expected: (Number: 1) and actual: (null)" );
-		equals( assertObject(1, undefined), false, "assertObject() should return false with expected: (Number: 1) and actual: (undefined)" );
+		equals( Assay.object(1, null), false, "Assay.object() should return false with expected: (Number: 1) and actual: (null)" );
+		equals( Assay.object(1, undefined), false, "Assay.object() should return false with expected: (Number: 1) and actual: (undefined)" );
 
 		// TRUE ASSERTIONS
-		equals( assertObject(1, Number), true, "assertObject() should return true with expected: (Number: 1) and actual: (Number)" );
-		equals( assertObject(1, 1), true, "assertObject() should return true with expected: (Number: 1) and actual: (Number: 1)" );
-		equals( assertObject(1, 0), true, "assertObject() should return true with expected: (Number: 1) and actual: (Number: 0)" );
+		equals( Assay.object(1, Number), true, "Assay.object() should return true with expected: (Number: 1) and actual: (Number)" );
+		equals( Assay.object(1, 1), true, "Assay.object() should return true with expected: (Number: 1) and actual: (Number: 1)" );
+		equals( Assay.object(1, 0), true, "Assay.object() should return true with expected: (Number: 1) and actual: (Number: 0)" );
 
 		// Expect Falsy Value
-		equals( assertObject(0, Number ), true, "assertObject() should return true with expected: (Number: 0) and actual: (Number)" );
-		equals( assertObject(0, 1 ), true, "assertObject() should return true with expected: (Number: 0) and actual: (Number: 1)" );
-		equals( assertObject(0, 0 ), true, "assertObject() should return true with expected: (Number: 0) and actual: (Number: 0)" );
+		equals( Assay.object(0, Number ), true, "Assay.object() should return true with expected: (Number: 0) and actual: (Number)" );
+		equals( Assay.object(0, 1 ), true, "Assay.object() should return true with expected: (Number: 0) and actual: (Number: 1)" );
+		equals( Assay.object(0, 0 ), true, "Assay.object() should return true with expected: (Number: 0) and actual: (Number: 0)" );
 
 	});
 
-	test("assertObject() exercises - (Number: 1) primitive [strict value checking]", function() {
+	test("Assay.object() exercises - (Number: 1) primitive [strict value checking]", function() {
 
 	  // FALSE ASSERTIONS
 
 	  // Test invalid argument type - Constructors
-		equals( assertObject(1, String, {strictValueChecking: true} ), false, "assertObject() should return false with expected: (Number: 1) and actual: (String)" );
-		equals( assertObject(1, Boolean, {strictValueChecking: true} ), false, "assertObject() should return false with expected: (Number: 1) and actual: (Boolean)" );
-		equals( assertObject(1, Array, {strictValueChecking: true} ), false, "assertObject() should return false with expected: (Number: 1) and actual: (Array)" );
-		equals( assertObject(1, Object, {strictValueChecking: true} ), false, "assertObject() should return false with expected: (Number: 1) and actual: (Object)" );
-		equals( assertObject(1, Function, {strictValueChecking: true} ), false, "assertObject() should return false with expected: (Number: 1) and actual: (Function)" );
-		equals( assertObject(1, RegExp, {strictValueChecking: true} ), false, "assertObject() should return false with expected: (Number: 1) and actual: (RegExp)" );
-		equals( assertObject(1, Date, {strictValueChecking: true} ), false, "assertObject() should return false with expected: (Number: 1) and actual: (Date)" );
-		equals( assertObject(1, Custom, {strictValueChecking: true} ), false, "assertObject() should return false with expected: (Number: 1) and actual: (Custom)" );
+		equals( Assay.object(1, String, {strictValueChecking: true} ), false, "Assay.object() should return false with expected: (Number: 1) and actual: (String)" );
+		equals( Assay.object(1, Boolean, {strictValueChecking: true} ), false, "Assay.object() should return false with expected: (Number: 1) and actual: (Boolean)" );
+		equals( Assay.object(1, Array, {strictValueChecking: true} ), false, "Assay.object() should return false with expected: (Number: 1) and actual: (Array)" );
+		equals( Assay.object(1, Object, {strictValueChecking: true} ), false, "Assay.object() should return false with expected: (Number: 1) and actual: (Object)" );
+		equals( Assay.object(1, Function, {strictValueChecking: true} ), false, "Assay.object() should return false with expected: (Number: 1) and actual: (Function)" );
+		equals( Assay.object(1, RegExp, {strictValueChecking: true} ), false, "Assay.object() should return false with expected: (Number: 1) and actual: (RegExp)" );
+		equals( Assay.object(1, Date, {strictValueChecking: true} ), false, "Assay.object() should return false with expected: (Number: 1) and actual: (Date)" );
+		equals( Assay.object(1, Custom, {strictValueChecking: true} ), false, "Assay.object() should return false with expected: (Number: 1) and actual: (Custom)" );
 
 		// Test invalid argument type - Values (truthy)
 
-		equals( assertObject(1, "string", {strictValueChecking: true} ), false, "assertObject() should return false with expected: (Number: 1) and actual: (String: string)" );
-		equals( assertObject(1, true, {strictValueChecking: true} ), false, "assertObject() should return false with expected: (Number: 1) and actual: (Boolean: true)" );
-		equals( assertObject(1, [], {strictValueChecking: true} ), false, "assertObject() should return false with expected: (Number: 1) and actual: (Array: [])" );
-		equals( assertObject(1, {}, {strictValueChecking: true} ), false, "assertObject() should return false with expected: (Number: 1) and actual: (Object: {})" );
-		equals( assertObject(1, function(){}, {strictValueChecking: true} ), false, "assertObject() should return false with expected: (Number: 1) and actual: (Function: function(){})" );
-		equals( assertObject(1, /test/, {strictValueChecking: true} ), false, "assertObject() should return false with expected: (Number: 1) and actual: (RegExp: /test/)" );
-		equals( assertObject(1, new Date, {strictValueChecking: true} ), false, "assertObject() should return false with expected: (Number: 1) and actual: (Date: new instance)" );
-		equals( assertObject(1, new Custom, {strictValueChecking: true} ), false, "assertObject() should return false with expected: (Number: 1) and actual: (Custom: new instance)" );
+		equals( Assay.object(1, "string", {strictValueChecking: true} ), false, "Assay.object() should return false with expected: (Number: 1) and actual: (String: string)" );
+		equals( Assay.object(1, true, {strictValueChecking: true} ), false, "Assay.object() should return false with expected: (Number: 1) and actual: (Boolean: true)" );
+		equals( Assay.object(1, [], {strictValueChecking: true} ), false, "Assay.object() should return false with expected: (Number: 1) and actual: (Array: [])" );
+		equals( Assay.object(1, {}, {strictValueChecking: true} ), false, "Assay.object() should return false with expected: (Number: 1) and actual: (Object: {})" );
+		equals( Assay.object(1, function(){}, {strictValueChecking: true} ), false, "Assay.object() should return false with expected: (Number: 1) and actual: (Function: function(){})" );
+		equals( Assay.object(1, /test/, {strictValueChecking: true} ), false, "Assay.object() should return false with expected: (Number: 1) and actual: (RegExp: /test/)" );
+		equals( Assay.object(1, new Date, {strictValueChecking: true} ), false, "Assay.object() should return false with expected: (Number: 1) and actual: (Date: new instance)" );
+		equals( Assay.object(1, new Custom, {strictValueChecking: true} ), false, "Assay.object() should return false with expected: (Number: 1) and actual: (Custom: new instance)" );
 
 	  // Test invalid argument types - false values
-		equals( assertObject(1, null, {strictValueChecking: true} ), false, "assertObject() should return false with expected: (Number: 1) and actual: (null)" );
-		equals( assertObject(1, undefined, {strictValueChecking: true} ), false, "assertObject() should return false with expected: (Number: 1) and actual: (undefined)" );
+		equals( Assay.object(1, null, {strictValueChecking: true} ), false, "Assay.object() should return false with expected: (Number: 1) and actual: (null)" );
+		equals( Assay.object(1, undefined, {strictValueChecking: true} ), false, "Assay.object() should return false with expected: (Number: 1) and actual: (undefined)" );
 
 		// TRUE ASSERTIONS
-		equals( assertObject(1, Number, {strictValueChecking: true} ), false, "assertObject() should return false with expected: (Number: 1) and actual: (Number)" );
-		equals( assertObject(1, 1, {strictValueChecking: true} ), true, "assertObject() should return true with expected: (Number: 1) and actual: (Number: 1)" );
-		equals( assertObject(1, 0, {strictValueChecking: true} ), false, "assertObject() should return false with expected: (Number: 1) and actual: (Number: 0)" );
+		equals( Assay.object(1, Number, {strictValueChecking: true} ), false, "Assay.object() should return false with expected: (Number: 1) and actual: (Number)" );
+		equals( Assay.object(1, 1, {strictValueChecking: true} ), true, "Assay.object() should return true with expected: (Number: 1) and actual: (Number: 1)" );
+		equals( Assay.object(1, 0, {strictValueChecking: true} ), false, "Assay.object() should return false with expected: (Number: 1) and actual: (Number: 0)" );
 
 		// Expect Falsy Value
-		equals( assertObject(0, Number, {strictValueChecking: true} ), false, "assertObject() should return false with expected: (Number: 0) and actual: (Number)" );
-		equals( assertObject(0, 1, {strictValueChecking: true} ), false, "assertObject() should return false with expected: (Number: 0) and actual: (Number: 1)" );
-		equals( assertObject(0, 0, {strictValueChecking: true} ), true, "assertObject() should return true with expected: (Number: 0) and actual: (Number: 0)" );
+		equals( Assay.object(0, Number, {strictValueChecking: true} ), false, "Assay.object() should return false with expected: (Number: 0) and actual: (Number)" );
+		equals( Assay.object(0, 1, {strictValueChecking: true} ), false, "Assay.object() should return false with expected: (Number: 0) and actual: (Number: 1)" );
+		equals( Assay.object(0, 0, {strictValueChecking: true} ), true, "Assay.object() should return true with expected: (Number: 0) and actual: (Number: 0)" );
 
 	});
 
-	test("assertObject() exercises - (String: Constructor) primitive [typed checking]", function() {
+	test("Assay.object() exercises - (String: Constructor) primitive [typed checking]", function() {
 
 	  // FALSE ASSERTIONS
 
 	  // Test invalid argument type - Constructors
 
-		equals( assertObject(String, Number), false, "assertObject() should return false with expected: (String) and actual: (Number)" );
-		equals( assertObject(String, Boolean), false, "assertObject() should return false with expected: (String) and actual: (Boolean)" );
-		equals( assertObject(String, Array), false, "assertObject() should return false with expected: (String) and actual: (Array)" );
-		equals( assertObject(String, Object), false, "assertObject() should return false with expected: (String) and actual: (Object)" );
-		equals( assertObject(String, Function), false, "assertObject() should return false with expected: (String) and actual: (Function)" );
-		equals( assertObject(String, RegExp), false, "assertObject() should return false with expected: (String) and actual: (RegExp)" );
-		equals( assertObject(String, Date), false, "assertObject() should return false with expected: (String) and actual: (Date)" );
-		equals( assertObject(String, Custom), false, "assertObject() should return false with expected: (String) and actual: (Custom)" );
+		equals( Assay.object(String, Number), false, "Assay.object() should return false with expected: (String) and actual: (Number)" );
+		equals( Assay.object(String, Boolean), false, "Assay.object() should return false with expected: (String) and actual: (Boolean)" );
+		equals( Assay.object(String, Array), false, "Assay.object() should return false with expected: (String) and actual: (Array)" );
+		equals( Assay.object(String, Object), false, "Assay.object() should return false with expected: (String) and actual: (Object)" );
+		equals( Assay.object(String, Function), false, "Assay.object() should return false with expected: (String) and actual: (Function)" );
+		equals( Assay.object(String, RegExp), false, "Assay.object() should return false with expected: (String) and actual: (RegExp)" );
+		equals( Assay.object(String, Date), false, "Assay.object() should return false with expected: (String) and actual: (Date)" );
+		equals( Assay.object(String, Custom), false, "Assay.object() should return false with expected: (String) and actual: (Custom)" );
 
 		// Test invalid argument type - Values (truthy)
 
-		equals( assertObject(String, 1), false, "assertObject() should return false with expected: (String) and actual: (Number: 1)" );
-		equals( assertObject(String, true), false, "assertObject() should return false with expected: (String) and actual: (Boolean: true)" );
-		equals( assertObject(String, []), false, "assertObject() should return false with expected: (String) and actual: (Array: [])" );
-		equals( assertObject(String, {}), false, "assertObject() should return false with expected: (String) and actual: (Object: {})" );
-		equals( assertObject(String, function(){}), false, "assertObject() should return false with expected: (String) and actual: (Function: function(){})" );
-		equals( assertObject(String, /test/), false, "assertObject() should return false with expected: (String) and actual: (RegExp: /test/)" );
-		equals( assertObject(String, new Date), false, "assertObject() should return false with expected: (String) and actual: (Date: new instance)" );
-		equals( assertObject(String, new Custom), false, "assertObject() should return false with expected: (String) and actual: (Custom: new instance)" );
+		equals( Assay.object(String, 1), false, "Assay.object() should return false with expected: (String) and actual: (Number: 1)" );
+		equals( Assay.object(String, true), false, "Assay.object() should return false with expected: (String) and actual: (Boolean: true)" );
+		equals( Assay.object(String, []), false, "Assay.object() should return false with expected: (String) and actual: (Array: [])" );
+		equals( Assay.object(String, {}), false, "Assay.object() should return false with expected: (String) and actual: (Object: {})" );
+		equals( Assay.object(String, function(){}), false, "Assay.object() should return false with expected: (String) and actual: (Function: function(){})" );
+		equals( Assay.object(String, /test/), false, "Assay.object() should return false with expected: (String) and actual: (RegExp: /test/)" );
+		equals( Assay.object(String, new Date), false, "Assay.object() should return false with expected: (String) and actual: (Date: new instance)" );
+		equals( Assay.object(String, new Custom), false, "Assay.object() should return false with expected: (String) and actual: (Custom: new instance)" );
 
 	  // Test invalid argument types - false values
 
-		equals( assertObject(String, null), false, "assertObject() should return false with expected: (String) and actual: (null)" );
-		equals( assertObject(String, undefined), false, "assertObject() should return false with expected: (String) and actual: (undefined)" );
+		equals( Assay.object(String, null), false, "Assay.object() should return false with expected: (String) and actual: (null)" );
+		equals( Assay.object(String, undefined), false, "Assay.object() should return false with expected: (String) and actual: (undefined)" );
 
 		// TRUE ASSERTIONS
-		equals( assertObject(String, String), true, "assertObject() should return true with expected: (String) and actual: (String)" );
-		equals( assertObject(String, "string"), true, "assertObject() should return true with expected: (String) and actual: (String: 'string')" );
-		equals( assertObject(String, ""), true, "assertObject() should return true with expected: (String) and actual: (String: '')" );
+		equals( Assay.object(String, String), true, "Assay.object() should return true with expected: (String) and actual: (String)" );
+		equals( Assay.object(String, "string"), true, "Assay.object() should return true with expected: (String) and actual: (String: 'string')" );
+		equals( Assay.object(String, ""), true, "Assay.object() should return true with expected: (String) and actual: (String: '')" );
 
 	});
 
-	test("assertObject() exercises - (String: Constructor) primitive [strict value checking]", function() {
+	test("Assay.object() exercises - (String: Constructor) primitive [strict value checking]", function() {
 
 	  // FALSE ASSERTIONS
 
 	  // Test invalid argument type - Constructors
 
-		equals( assertObject(String, Number, {strictValueChecking: true}), false, "assertObject() should return false with expected: (String) and actual: (Number)" );
-		equals( assertObject(String, Boolean, {strictValueChecking: true}), false, "assertObject() should return false with expected: (String) and actual: (Boolean)" );
-		equals( assertObject(String, Array, {strictValueChecking: true}), false, "assertObject() should return false with expected: (String) and actual: (Array)" );
-		equals( assertObject(String, Object, {strictValueChecking: true}), false, "assertObject() should return false with expected: (String) and actual: (Object)" );
-		equals( assertObject(String, Function, {strictValueChecking: true}), false, "assertObject() should return false with expected: (String) and actual: (Function)" );
-		equals( assertObject(String, RegExp, {strictValueChecking: true}), false, "assertObject() should return false with expected: (String) and actual: (RegExp)" );
-		equals( assertObject(String, Date, {strictValueChecking: true}), false, "assertObject() should return false with expected: (String) and actual: (Date)" );
-		equals( assertObject(String, Custom, {strictValueChecking: true}), false, "assertObject() should return false with expected: (String) and actual: (Custom)" );
+		equals( Assay.object(String, Number, {strictValueChecking: true}), false, "Assay.object() should return false with expected: (String) and actual: (Number)" );
+		equals( Assay.object(String, Boolean, {strictValueChecking: true}), false, "Assay.object() should return false with expected: (String) and actual: (Boolean)" );
+		equals( Assay.object(String, Array, {strictValueChecking: true}), false, "Assay.object() should return false with expected: (String) and actual: (Array)" );
+		equals( Assay.object(String, Object, {strictValueChecking: true}), false, "Assay.object() should return false with expected: (String) and actual: (Object)" );
+		equals( Assay.object(String, Function, {strictValueChecking: true}), false, "Assay.object() should return false with expected: (String) and actual: (Function)" );
+		equals( Assay.object(String, RegExp, {strictValueChecking: true}), false, "Assay.object() should return false with expected: (String) and actual: (RegExp)" );
+		equals( Assay.object(String, Date, {strictValueChecking: true}), false, "Assay.object() should return false with expected: (String) and actual: (Date)" );
+		equals( Assay.object(String, Custom, {strictValueChecking: true}), false, "Assay.object() should return false with expected: (String) and actual: (Custom)" );
 
 		// Test invalid argument type - Values (truthy)
 
-		equals( assertObject(String, 1, {strictValueChecking: true}), false, "assertObject() should return false with expected: (String) and actual: (Number: 1)" );
-		equals( assertObject(String, true, {strictValueChecking: true}), false, "assertObject() should return false with expected: (String) and actual: (Boolean: true)" );
-		equals( assertObject(String, [], {strictValueChecking: true}), false, "assertObject() should return false with expected: (String) and actual: (Array: [])" );
-		equals( assertObject(String, {}, {strictValueChecking: true}), false, "assertObject() should return false with expected: (String) and actual: (Object: {})" );
-		equals( assertObject(String, function(){}, {strictValueChecking: true}), false, "assertObject() should return false with expected: (String) and actual: (Function: function(){})" );
-		equals( assertObject(String, /test/, {strictValueChecking: true}), false, "assertObject() should return false with expected: (String) and actual: (RegExp: /test/)" );
-		equals( assertObject(String, new Date, {strictValueChecking: true}), false, "assertObject() should return false with expected: (String) and actual: (Date: new instance)" );
-		equals( assertObject(String, new Custom, {strictValueChecking: true}), false, "assertObject() should return false with expected: (String) and actual: (Custom: new instance)" );
+		equals( Assay.object(String, 1, {strictValueChecking: true}), false, "Assay.object() should return false with expected: (String) and actual: (Number: 1)" );
+		equals( Assay.object(String, true, {strictValueChecking: true}), false, "Assay.object() should return false with expected: (String) and actual: (Boolean: true)" );
+		equals( Assay.object(String, [], {strictValueChecking: true}), false, "Assay.object() should return false with expected: (String) and actual: (Array: [])" );
+		equals( Assay.object(String, {}, {strictValueChecking: true}), false, "Assay.object() should return false with expected: (String) and actual: (Object: {})" );
+		equals( Assay.object(String, function(){}, {strictValueChecking: true}), false, "Assay.object() should return false with expected: (String) and actual: (Function: function(){})" );
+		equals( Assay.object(String, /test/, {strictValueChecking: true}), false, "Assay.object() should return false with expected: (String) and actual: (RegExp: /test/)" );
+		equals( Assay.object(String, new Date, {strictValueChecking: true}), false, "Assay.object() should return false with expected: (String) and actual: (Date: new instance)" );
+		equals( Assay.object(String, new Custom, {strictValueChecking: true}), false, "Assay.object() should return false with expected: (String) and actual: (Custom: new instance)" );
 
 	  // Test invalid argument types - false values
 
-		equals( assertObject(String, null, {strictValueChecking: true}), false, "assertObject() should return false with expected: (String) and actual: (null)" );
-		equals( assertObject(String, undefined, {strictValueChecking: true}), false, "assertObject() should return false with expected: (String) and actual: (undefined)" );
+		equals( Assay.object(String, null, {strictValueChecking: true}), false, "Assay.object() should return false with expected: (String) and actual: (null)" );
+		equals( Assay.object(String, undefined, {strictValueChecking: true}), false, "Assay.object() should return false with expected: (String) and actual: (undefined)" );
 
 		// TRUE ASSERTIONS
-		equals( assertObject(String, String, {strictValueChecking: true}), true, "assertObject() should return true with expected: (String) and actual: (String)" );
-		equals( assertObject(String, "string", {strictValueChecking: true}), false, "assertObject() should return true with expected: (String) and actual: (String: 'string')" );
-		equals( assertObject(String, "", {strictValueChecking: true}), false, "assertObject() should return true with expected: (String) and actual: (String: '')" );
+		equals( Assay.object(String, String, {strictValueChecking: true}), true, "Assay.object() should return true with expected: (String) and actual: (String)" );
+		equals( Assay.object(String, "string", {strictValueChecking: true}), false, "Assay.object() should return true with expected: (String) and actual: (String: 'string')" );
+		equals( Assay.object(String, "", {strictValueChecking: true}), false, "Assay.object() should return true with expected: (String) and actual: (String: '')" );
 
 	});
 
-	test("assertObject() exercises - (String: 'string') primitive [typed checking]", function() {
+	test("Assay.object() exercises - (String: 'string') primitive [typed checking]", function() {
 
 	  // FALSE ASSERTIONS
 
 	  // Test invalid argument type - Constructors
 
-		equals( assertObject('string', Number), false, "assertObject() should return false with expected: (String: 'string') and actual: (Number)" );
-		equals( assertObject('string', Boolean), false, "assertObject() should return false with expected: (String: 'string') and actual: (Boolean)" );
-		equals( assertObject('string', Array), false, "assertObject() should return false with expected: (String: 'string') and actual: (Array)" );
-		equals( assertObject('string', Object), false, "assertObject() should return false with expected: (String: 'string') and actual: (Object)" );
-		equals( assertObject('string', Function), false, "assertObject() should return false with expected: (String: 'string') and actual: (Function)" );
-		equals( assertObject('string', RegExp), false, "assertObject() should return false with expected: (String: 'string') and actual: (RegExp)" );
-		equals( assertObject('string', Date), false, "assertObject() should return false with expected: (String: 'string') and actual: (Date)" );
-		equals( assertObject('string', Custom), false, "assertObject() should return false with expected: (String: 'string') and actual: (Custom)" );
+		equals( Assay.object('string', Number), false, "Assay.object() should return false with expected: (String: 'string') and actual: (Number)" );
+		equals( Assay.object('string', Boolean), false, "Assay.object() should return false with expected: (String: 'string') and actual: (Boolean)" );
+		equals( Assay.object('string', Array), false, "Assay.object() should return false with expected: (String: 'string') and actual: (Array)" );
+		equals( Assay.object('string', Object), false, "Assay.object() should return false with expected: (String: 'string') and actual: (Object)" );
+		equals( Assay.object('string', Function), false, "Assay.object() should return false with expected: (String: 'string') and actual: (Function)" );
+		equals( Assay.object('string', RegExp), false, "Assay.object() should return false with expected: (String: 'string') and actual: (RegExp)" );
+		equals( Assay.object('string', Date), false, "Assay.object() should return false with expected: (String: 'string') and actual: (Date)" );
+		equals( Assay.object('string', Custom), false, "Assay.object() should return false with expected: (String: 'string') and actual: (Custom)" );
 
 		// Test invalid argument type - Values (truthy)
 
-		equals( assertObject('string', 1), false, "assertObject() should return false with expected: (String: 'string') and actual: (Number: 1)" );
-		equals( assertObject('string', true), false, "assertObject() should return false with expected: (String: 'string') and actual: (Boolean: true)" );
-		equals( assertObject('string', []), false, "assertObject() should return false with expected: (String: 'string') and actual: (Array: [])" );
-		equals( assertObject('string', {}), false, "assertObject() should return false with expected: (String: 'string') and actual: (Object: {})" );
-		equals( assertObject('string', function(){}), false, "assertObject() should return false with expected: (String: 'string') and actual: (Function: function(){})" );
-		equals( assertObject('string', /test/), false, "assertObject() should return false with expected: (String: 'string') and actual: (RegExp: /test/)" );
-		equals( assertObject('string', new Date), false, "assertObject() should return false with expected: (String: 'string') and actual: (Date: new instance)" );
-		equals( assertObject('string', new Custom), false, "assertObject() should return false with expected: (String: 'string') and actual: (Custom: new instance)" );
+		equals( Assay.object('string', 1), false, "Assay.object() should return false with expected: (String: 'string') and actual: (Number: 1)" );
+		equals( Assay.object('string', true), false, "Assay.object() should return false with expected: (String: 'string') and actual: (Boolean: true)" );
+		equals( Assay.object('string', []), false, "Assay.object() should return false with expected: (String: 'string') and actual: (Array: [])" );
+		equals( Assay.object('string', {}), false, "Assay.object() should return false with expected: (String: 'string') and actual: (Object: {})" );
+		equals( Assay.object('string', function(){}), false, "Assay.object() should return false with expected: (String: 'string') and actual: (Function: function(){})" );
+		equals( Assay.object('string', /test/), false, "Assay.object() should return false with expected: (String: 'string') and actual: (RegExp: /test/)" );
+		equals( Assay.object('string', new Date), false, "Assay.object() should return false with expected: (String: 'string') and actual: (Date: new instance)" );
+		equals( Assay.object('string', new Custom), false, "Assay.object() should return false with expected: (String: 'string') and actual: (Custom: new instance)" );
 
 	  // Test invalid argument types - false values
 
-		equals( assertObject('string', null), false, "assertObject() should return false with expected: (String: 'string') and actual: (null)" );
-		equals( assertObject('string', undefined), false, "assertObject() should return false with expected: (String: 'string') and actual: (undefined)" );
+		equals( Assay.object('string', null), false, "Assay.object() should return false with expected: (String: 'string') and actual: (null)" );
+		equals( Assay.object('string', undefined), false, "Assay.object() should return false with expected: (String: 'string') and actual: (undefined)" );
 
 		// TRUE ASSERTIONS
-		equals( assertObject('string', String), true, "assertObject() should return true with expected: (String: 'string') and actual: (String)" );
-		equals( assertObject('string', "string"), true, "assertObject() should return true with expected: (String: 'string') and actual: (String: 'string')" );
-		equals( assertObject('string', ""), true, "assertObject() should return true with expected: (String: 'string') and actual: (String: '')" );
+		equals( Assay.object('string', String), true, "Assay.object() should return true with expected: (String: 'string') and actual: (String)" );
+		equals( Assay.object('string', "string"), true, "Assay.object() should return true with expected: (String: 'string') and actual: (String: 'string')" );
+		equals( Assay.object('string', ""), true, "Assay.object() should return true with expected: (String: 'string') and actual: (String: '')" );
 
 		// Expect Falsy Value
-		equals( assertObject('', String), true, "assertObject() should return true with expected: (String: '') and actual: (String)" );
-		equals( assertObject('', "string"), true, "assertObject() should return true with expected: (String: '') and actual: (String: 'string')" );
-		equals( assertObject('', ""), true, "assertObject() should return true with expected: (String: '') and actual: (String: '')" );
+		equals( Assay.object('', String), true, "Assay.object() should return true with expected: (String: '') and actual: (String)" );
+		equals( Assay.object('', "string"), true, "Assay.object() should return true with expected: (String: '') and actual: (String: 'string')" );
+		equals( Assay.object('', ""), true, "Assay.object() should return true with expected: (String: '') and actual: (String: '')" );
 
 	});
 
-	test("assertObject() exercises - (String: 'string') primitive [strict value checking]", function() {
+	test("Assay.object() exercises - (String: 'string') primitive [strict value checking]", function() {
 
 	  // FALSE ASSERTIONS
 
 	  // Test invalid argument type - Constructors
 
-		equals( assertObject('string', Number, {strictValueChecking: true}), false, "assertObject() should return false with expected: (String: 'string') and actual: (Number)" );
-		equals( assertObject('string', Boolean, {strictValueChecking: true}), false, "assertObject() should return false with expected: (String: 'string') and actual: (Boolean)" );
-		equals( assertObject('string', Array, {strictValueChecking: true}), false, "assertObject() should return false with expected: (String: 'string') and actual: (Array)" );
-		equals( assertObject('string', Object, {strictValueChecking: true}), false, "assertObject() should return false with expected: (String: 'string') and actual: (Object)" );
-		equals( assertObject('string', Function, {strictValueChecking: true}), false, "assertObject() should return false with expected: (String: 'string') and actual: (Function)" );
-		equals( assertObject('string', RegExp, {strictValueChecking: true}), false, "assertObject() should return false with expected: (String: 'string') and actual: (RegExp)" );
-		equals( assertObject('string', Date, {strictValueChecking: true}), false, "assertObject() should return false with expected: (String: 'string') and actual: (Date)" );
-		equals( assertObject('string', Custom, {strictValueChecking: true}), false, "assertObject() should return false with expected: (String: 'string') and actual: (Custom)" );
+		equals( Assay.object('string', Number, {strictValueChecking: true}), false, "Assay.object() should return false with expected: (String: 'string') and actual: (Number)" );
+		equals( Assay.object('string', Boolean, {strictValueChecking: true}), false, "Assay.object() should return false with expected: (String: 'string') and actual: (Boolean)" );
+		equals( Assay.object('string', Array, {strictValueChecking: true}), false, "Assay.object() should return false with expected: (String: 'string') and actual: (Array)" );
+		equals( Assay.object('string', Object, {strictValueChecking: true}), false, "Assay.object() should return false with expected: (String: 'string') and actual: (Object)" );
+		equals( Assay.object('string', Function, {strictValueChecking: true}), false, "Assay.object() should return false with expected: (String: 'string') and actual: (Function)" );
+		equals( Assay.object('string', RegExp, {strictValueChecking: true}), false, "Assay.object() should return false with expected: (String: 'string') and actual: (RegExp)" );
+		equals( Assay.object('string', Date, {strictValueChecking: true}), false, "Assay.object() should return false with expected: (String: 'string') and actual: (Date)" );
+		equals( Assay.object('string', Custom, {strictValueChecking: true}), false, "Assay.object() should return false with expected: (String: 'string') and actual: (Custom)" );
 
 		// Test invalid argument type - Values (truthy)
 
-		equals( assertObject('string', 1, {strictValueChecking: true}), false, "assertObject() should return false with expected: (String: 'string') and actual: (Number: 1)" );
-		equals( assertObject('string', true, {strictValueChecking: true}), false, "assertObject() should return false with expected: (String: 'string') and actual: (Boolean: true)" );
-		equals( assertObject('string', [], {strictValueChecking: true}), false, "assertObject() should return false with expected: (String: 'string') and actual: (Array: [])" );
-		equals( assertObject('string', {}, {strictValueChecking: true}), false, "assertObject() should return false with expected: (String: 'string') and actual: (Object: {})" );
-		equals( assertObject('string', function(){}, {strictValueChecking: true}), false, "assertObject() should return false with expected: (String: 'string') and actual: (Function: function(){})" );
-		equals( assertObject('string', /test/, {strictValueChecking: true}), false, "assertObject() should return false with expected: (String: 'string') and actual: (RegExp: /test/)" );
-		equals( assertObject('string', new Date, {strictValueChecking: true}), false, "assertObject() should return false with expected: (String: 'string') and actual: (Date: new instance)" );
-		equals( assertObject('string', new Custom, {strictValueChecking: true}), false, "assertObject() should return false with expected: (String: 'string') and actual: (Custom: new instance)" );
+		equals( Assay.object('string', 1, {strictValueChecking: true}), false, "Assay.object() should return false with expected: (String: 'string') and actual: (Number: 1)" );
+		equals( Assay.object('string', true, {strictValueChecking: true}), false, "Assay.object() should return false with expected: (String: 'string') and actual: (Boolean: true)" );
+		equals( Assay.object('string', [], {strictValueChecking: true}), false, "Assay.object() should return false with expected: (String: 'string') and actual: (Array: [])" );
+		equals( Assay.object('string', {}, {strictValueChecking: true}), false, "Assay.object() should return false with expected: (String: 'string') and actual: (Object: {})" );
+		equals( Assay.object('string', function(){}, {strictValueChecking: true}), false, "Assay.object() should return false with expected: (String: 'string') and actual: (Function: function(){})" );
+		equals( Assay.object('string', /test/, {strictValueChecking: true}), false, "Assay.object() should return false with expected: (String: 'string') and actual: (RegExp: /test/)" );
+		equals( Assay.object('string', new Date, {strictValueChecking: true}), false, "Assay.object() should return false with expected: (String: 'string') and actual: (Date: new instance)" );
+		equals( Assay.object('string', new Custom, {strictValueChecking: true}), false, "Assay.object() should return false with expected: (String: 'string') and actual: (Custom: new instance)" );
 
 	  // Test invalid argument types - false values
 
-		equals( assertObject('string', null, {strictValueChecking: true}), false, "assertObject() should return false with expected: (String: 'string') and actual: (null)" );
-		equals( assertObject('string', undefined, {strictValueChecking: true}), false, "assertObject() should return false with expected: (String: 'string') and actual: (undefined)" );
+		equals( Assay.object('string', null, {strictValueChecking: true}), false, "Assay.object() should return false with expected: (String: 'string') and actual: (null)" );
+		equals( Assay.object('string', undefined, {strictValueChecking: true}), false, "Assay.object() should return false with expected: (String: 'string') and actual: (undefined)" );
 
 		// TRUE ASSERTIONS
-		equals( assertObject('string', String, {strictValueChecking: true}), false, "assertObject() should return false with expected: (String: 'string') and actual: (String)" );
-		equals( assertObject('string', "string", {strictValueChecking: true}), true, "assertObject() should return true with expected: (String: 'string') and actual: (String: 'string')" );
-		equals( assertObject('string', "", {strictValueChecking: true}), false, "assertObject() should return false with expected: (String: 'string') and actual: (String: '')" );
+		equals( Assay.object('string', String, {strictValueChecking: true}), false, "Assay.object() should return false with expected: (String: 'string') and actual: (String)" );
+		equals( Assay.object('string', "string", {strictValueChecking: true}), true, "Assay.object() should return true with expected: (String: 'string') and actual: (String: 'string')" );
+		equals( Assay.object('string', "", {strictValueChecking: true}), false, "Assay.object() should return false with expected: (String: 'string') and actual: (String: '')" );
 
 		// Expect Falsy Value
-		equals( assertObject('', String, {strictValueChecking: true}), false, "assertObject() should return false with expected: (String: '') and actual: (String)" );
-		equals( assertObject('', "string", {strictValueChecking: true}), false, "assertObject() should return false with expected: (String: '') and actual: (String: 'string')" );
-		equals( assertObject('', "", {strictValueChecking: true}), true, "assertObject() should return true with expected: (String: '') and actual: (String: '')" );
+		equals( Assay.object('', String, {strictValueChecking: true}), false, "Assay.object() should return false with expected: (String: '') and actual: (String)" );
+		equals( Assay.object('', "string", {strictValueChecking: true}), false, "Assay.object() should return false with expected: (String: '') and actual: (String: 'string')" );
+		equals( Assay.object('', "", {strictValueChecking: true}), true, "Assay.object() should return true with expected: (String: '') and actual: (String: '')" );
 
 	});
 
-	test("assertObject() exercises - (Boolean: Constructor) primitive [typed checking]", function() {
+	test("Assay.object() exercises - (Boolean: Constructor) primitive [typed checking]", function() {
 
 	  // FALSE ASSERTIONS
 
 	  // Test invalid argument type - Constructors
 
-		equals( assertObject(Boolean, Number), false, "assertObject() should return false with expected: (Boolean) and actual: (Number)" );
-		equals( assertObject(Boolean, String), false, "assertObject() should return false with expected: (Boolean) and actual: (String)" );
-		equals( assertObject(Boolean, Array), false, "assertObject() should return false with expected: (Boolean) and actual: (Array)" );
-		equals( assertObject(Boolean, Object), false, "assertObject() should return false with expected: (Boolean) and actual: (Object)" );
-		equals( assertObject(Boolean, Function), false, "assertObject() should return false with expected: (Boolean) and actual: (Function)" );
-		equals( assertObject(Boolean, RegExp), false, "assertObject() should return false with expected: (Boolean) and actual: (RegExp)" );
-		equals( assertObject(Boolean, Date), false, "assertObject() should return false with expected: (Boolean) and actual: (Date)" );
-		equals( assertObject(Boolean, Custom), false, "assertObject() should return false with expected: (Boolean) and actual: (Custom)" );
+		equals( Assay.object(Boolean, Number), false, "Assay.object() should return false with expected: (Boolean) and actual: (Number)" );
+		equals( Assay.object(Boolean, String), false, "Assay.object() should return false with expected: (Boolean) and actual: (String)" );
+		equals( Assay.object(Boolean, Array), false, "Assay.object() should return false with expected: (Boolean) and actual: (Array)" );
+		equals( Assay.object(Boolean, Object), false, "Assay.object() should return false with expected: (Boolean) and actual: (Object)" );
+		equals( Assay.object(Boolean, Function), false, "Assay.object() should return false with expected: (Boolean) and actual: (Function)" );
+		equals( Assay.object(Boolean, RegExp), false, "Assay.object() should return false with expected: (Boolean) and actual: (RegExp)" );
+		equals( Assay.object(Boolean, Date), false, "Assay.object() should return false with expected: (Boolean) and actual: (Date)" );
+		equals( Assay.object(Boolean, Custom), false, "Assay.object() should return false with expected: (Boolean) and actual: (Custom)" );
 
 		// Test invalid argument type - Values (truthy)
 
-		equals( assertObject(Boolean, 1), false, "assertObject() should return false with expected: (Boolean) and actual: (Number: 1)" );
-		equals( assertObject(Boolean, "string"), false, "assertObject() should return false with expected: (Boolean) and actual: (String: string)" );
-		equals( assertObject(Boolean, []), false, "assertObject() should return false with expected: (Boolean) and actual: (Array: [])" );
-		equals( assertObject(Boolean, {}), false, "assertObject() should return false with expected: (Boolean) and actual: (Object: {})" );
-		equals( assertObject(Boolean, function(){}), false, "assertObject() should return false with expected: (Boolean) and actual: (Function: function(){})" );
-		equals( assertObject(Boolean, /test/), false, "assertObject() should return false with expected: (Boolean) and actual: (RegExp: /test/)" );
-		equals( assertObject(Boolean, new Date), false, "assertObject() should return false with expected: (Boolean) and actual: (Date: new instance)" );
-		equals( assertObject(Boolean, new Custom), false, "assertObject() should return false with expected: (Boolean) and actual: (Custom: new instance)" );
+		equals( Assay.object(Boolean, 1), false, "Assay.object() should return false with expected: (Boolean) and actual: (Number: 1)" );
+		equals( Assay.object(Boolean, "string"), false, "Assay.object() should return false with expected: (Boolean) and actual: (String: string)" );
+		equals( Assay.object(Boolean, []), false, "Assay.object() should return false with expected: (Boolean) and actual: (Array: [])" );
+		equals( Assay.object(Boolean, {}), false, "Assay.object() should return false with expected: (Boolean) and actual: (Object: {})" );
+		equals( Assay.object(Boolean, function(){}), false, "Assay.object() should return false with expected: (Boolean) and actual: (Function: function(){})" );
+		equals( Assay.object(Boolean, /test/), false, "Assay.object() should return false with expected: (Boolean) and actual: (RegExp: /test/)" );
+		equals( Assay.object(Boolean, new Date), false, "Assay.object() should return false with expected: (Boolean) and actual: (Date: new instance)" );
+		equals( Assay.object(Boolean, new Custom), false, "Assay.object() should return false with expected: (Boolean) and actual: (Custom: new instance)" );
 
 	  // Test invalid argument types - false values
 
-		equals( assertObject(Boolean, null), false, "assertObject() should return false with expected: (Boolean) and actual: (null)" );
-		equals( assertObject(Boolean, undefined), false, "assertObject() should return false with expected: (Boolean) and actual: (undefined)" );
+		equals( Assay.object(Boolean, null), false, "Assay.object() should return false with expected: (Boolean) and actual: (null)" );
+		equals( Assay.object(Boolean, undefined), false, "Assay.object() should return false with expected: (Boolean) and actual: (undefined)" );
 
 		// TRUE ASSERTIONS
-		equals( assertObject(Boolean, Boolean), true, "assertObject() should return true with expected: (Boolean) and actual: (Boolean)" );
-		equals( assertObject(Boolean, true), true, "assertObject() should return true with expected: (Boolean) and actual: (Boolean: true)" );
-		equals( assertObject(Boolean, false), true, "assertObject() should return true with expected: (Boolean) and actual: (Boolean: false)" );
+		equals( Assay.object(Boolean, Boolean), true, "Assay.object() should return true with expected: (Boolean) and actual: (Boolean)" );
+		equals( Assay.object(Boolean, true), true, "Assay.object() should return true with expected: (Boolean) and actual: (Boolean: true)" );
+		equals( Assay.object(Boolean, false), true, "Assay.object() should return true with expected: (Boolean) and actual: (Boolean: false)" );
 
 	});
 
-	test("assertObject() exercises - (Boolean: Constructor) primitive [strict value checking]", function() {
+	test("Assay.object() exercises - (Boolean: Constructor) primitive [strict value checking]", function() {
 
 	  // FALSE ASSERTIONS
 
 	  // Test invalid argument type - Constructors
 
-		equals( assertObject(Boolean, Number, {strictValueChecking: true}), false, "assertObject() should return false with expected: (Boolean) and actual: (Number)" );
-		equals( assertObject(Boolean, String, {strictValueChecking: true}), false, "assertObject() should return false with expected: (Boolean) and actual: (String)" );
-		equals( assertObject(Boolean, Array, {strictValueChecking: true}), false, "assertObject() should return false with expected: (Boolean) and actual: (Array)" );
-		equals( assertObject(Boolean, Object, {strictValueChecking: true}), false, "assertObject() should return false with expected: (Boolean) and actual: (Object)" );
-		equals( assertObject(Boolean, Function, {strictValueChecking: true}), false, "assertObject() should return false with expected: (Boolean) and actual: (Function)" );
-		equals( assertObject(Boolean, RegExp, {strictValueChecking: true}), false, "assertObject() should return false with expected: (Boolean) and actual: (RegExp)" );
-		equals( assertObject(Boolean, Date, {strictValueChecking: true}), false, "assertObject() should return false with expected: (Boolean) and actual: (Date)" );
-		equals( assertObject(Boolean, Custom, {strictValueChecking: true}), false, "assertObject() should return false with expected: (Boolean) and actual: (Custom)" );
+		equals( Assay.object(Boolean, Number, {strictValueChecking: true}), false, "Assay.object() should return false with expected: (Boolean) and actual: (Number)" );
+		equals( Assay.object(Boolean, String, {strictValueChecking: true}), false, "Assay.object() should return false with expected: (Boolean) and actual: (String)" );
+		equals( Assay.object(Boolean, Array, {strictValueChecking: true}), false, "Assay.object() should return false with expected: (Boolean) and actual: (Array)" );
+		equals( Assay.object(Boolean, Object, {strictValueChecking: true}), false, "Assay.object() should return false with expected: (Boolean) and actual: (Object)" );
+		equals( Assay.object(Boolean, Function, {strictValueChecking: true}), false, "Assay.object() should return false with expected: (Boolean) and actual: (Function)" );
+		equals( Assay.object(Boolean, RegExp, {strictValueChecking: true}), false, "Assay.object() should return false with expected: (Boolean) and actual: (RegExp)" );
+		equals( Assay.object(Boolean, Date, {strictValueChecking: true}), false, "Assay.object() should return false with expected: (Boolean) and actual: (Date)" );
+		equals( Assay.object(Boolean, Custom, {strictValueChecking: true}), false, "Assay.object() should return false with expected: (Boolean) and actual: (Custom)" );
 
 		// Test invalid argument type - Values (truthy)
 
-		equals( assertObject(Boolean, 1, {strictValueChecking: true}), false, "assertObject() should return false with expected: (Boolean) and actual: (Number: 1)" );
-		equals( assertObject(Boolean, "string", {strictValueChecking: true}), false, "assertObject() should return false with expected: (Boolean) and actual: (String: string)" );
-		equals( assertObject(Boolean, [], {strictValueChecking: true}), false, "assertObject() should return false with expected: (Boolean) and actual: (Array: [])" );
-		equals( assertObject(Boolean, {}, {strictValueChecking: true}), false, "assertObject() should return false with expected: (Boolean) and actual: (Object: {})" );
-		equals( assertObject(Boolean, function(){}, {strictValueChecking: true}), false, "assertObject() should return false with expected: (Boolean) and actual: (Function: function(){})" );
-		equals( assertObject(Boolean, /test/, {strictValueChecking: true}), false, "assertObject() should return false with expected: (Boolean) and actual: (RegExp: /test/)" );
-		equals( assertObject(Boolean, new Date, {strictValueChecking: true}), false, "assertObject() should return false with expected: (Boolean) and actual: (Date: new instance)" );
-		equals( assertObject(Boolean, new Custom, {strictValueChecking: true}), false, "assertObject() should return false with expected: (Boolean) and actual: (Custom: new instance)" );
+		equals( Assay.object(Boolean, 1, {strictValueChecking: true}), false, "Assay.object() should return false with expected: (Boolean) and actual: (Number: 1)" );
+		equals( Assay.object(Boolean, "string", {strictValueChecking: true}), false, "Assay.object() should return false with expected: (Boolean) and actual: (String: string)" );
+		equals( Assay.object(Boolean, [], {strictValueChecking: true}), false, "Assay.object() should return false with expected: (Boolean) and actual: (Array: [])" );
+		equals( Assay.object(Boolean, {}, {strictValueChecking: true}), false, "Assay.object() should return false with expected: (Boolean) and actual: (Object: {})" );
+		equals( Assay.object(Boolean, function(){}, {strictValueChecking: true}), false, "Assay.object() should return false with expected: (Boolean) and actual: (Function: function(){})" );
+		equals( Assay.object(Boolean, /test/, {strictValueChecking: true}), false, "Assay.object() should return false with expected: (Boolean) and actual: (RegExp: /test/)" );
+		equals( Assay.object(Boolean, new Date, {strictValueChecking: true}), false, "Assay.object() should return false with expected: (Boolean) and actual: (Date: new instance)" );
+		equals( Assay.object(Boolean, new Custom, {strictValueChecking: true}), false, "Assay.object() should return false with expected: (Boolean) and actual: (Custom: new instance)" );
 
 	  // Test invalid argument types - false values
 
-		equals( assertObject(Boolean, null, {strictValueChecking: true}), false, "assertObject() should return false with expected: (Boolean) and actual: (null)" );
-		equals( assertObject(Boolean, undefined, {strictValueChecking: true}), false, "assertObject() should return false with expected: (Boolean) and actual: (undefined)" );
+		equals( Assay.object(Boolean, null, {strictValueChecking: true}), false, "Assay.object() should return false with expected: (Boolean) and actual: (null)" );
+		equals( Assay.object(Boolean, undefined, {strictValueChecking: true}), false, "Assay.object() should return false with expected: (Boolean) and actual: (undefined)" );
 
 		// TRUE ASSERTIONS
-		equals( assertObject(Boolean, Boolean, {strictValueChecking: true}), true, "assertObject() should return true with expected: (Boolean) and actual: (Boolean)" );
-		equals( assertObject(Boolean, true, {strictValueChecking: true}), false, "assertObject() should return true with expected: (Boolean) and actual: (Boolean: true)" );
-		equals( assertObject(Boolean, false, {strictValueChecking: true}), false, "assertObject() should return true with expected: (Boolean) and actual: (Boolean: false)" );
+		equals( Assay.object(Boolean, Boolean, {strictValueChecking: true}), true, "Assay.object() should return true with expected: (Boolean) and actual: (Boolean)" );
+		equals( Assay.object(Boolean, true, {strictValueChecking: true}), false, "Assay.object() should return true with expected: (Boolean) and actual: (Boolean: true)" );
+		equals( Assay.object(Boolean, false, {strictValueChecking: true}), false, "Assay.object() should return true with expected: (Boolean) and actual: (Boolean: false)" );
 
 	});
 
-	test("assertObject() exercises - (Boolean: true) primitive [typed checking]", function() {
+	test("Assay.object() exercises - (Boolean: true) primitive [typed checking]", function() {
 
 	  // FALSE ASSERTIONS
 
 	  // Test invalid argument type - Constructors
 
-		equals( assertObject(true, Number), false, "assertObject() should return false with expected: (Boolean: true) and actual: (Number)" );
-		equals( assertObject(true, String), false, "assertObject() should return false with expected: (Boolean: true) and actual: (String)" );
-		equals( assertObject(true, Array), false, "assertObject() should return false with expected: (Boolean: true) and actual: (Array)" );
-		equals( assertObject(true, Object), false, "assertObject() should return false with expected: (Boolean: true) and actual: (Object)" );
-		equals( assertObject(true, Function), false, "assertObject() should return false with expected: (Boolean: true) and actual: (Function)" );
-		equals( assertObject(true, RegExp), false, "assertObject() should return false with expected: (Boolean: true) and actual: (RegExp)" );
-		equals( assertObject(true, Date), false, "assertObject() should return false with expected: (Boolean: true) and actual: (Date)" );
-		equals( assertObject(true, Custom), false, "assertObject() should return false with expected: (Boolean: true) and actual: (Custom)" );
+		equals( Assay.object(true, Number), false, "Assay.object() should return false with expected: (Boolean: true) and actual: (Number)" );
+		equals( Assay.object(true, String), false, "Assay.object() should return false with expected: (Boolean: true) and actual: (String)" );
+		equals( Assay.object(true, Array), false, "Assay.object() should return false with expected: (Boolean: true) and actual: (Array)" );
+		equals( Assay.object(true, Object), false, "Assay.object() should return false with expected: (Boolean: true) and actual: (Object)" );
+		equals( Assay.object(true, Function), false, "Assay.object() should return false with expected: (Boolean: true) and actual: (Function)" );
+		equals( Assay.object(true, RegExp), false, "Assay.object() should return false with expected: (Boolean: true) and actual: (RegExp)" );
+		equals( Assay.object(true, Date), false, "Assay.object() should return false with expected: (Boolean: true) and actual: (Date)" );
+		equals( Assay.object(true, Custom), false, "Assay.object() should return false with expected: (Boolean: true) and actual: (Custom)" );
 
 		// Test invalid argument type - Values (truthy)
 
-		equals( assertObject(true, 1), false, "assertObject() should return false with expected: (Boolean: true) and actual: (Number: 1)" );
-		equals( assertObject(true, "string"), false, "assertObject() should return false with expected: (Boolean: true) and actual: (String: string)" );
-		equals( assertObject(true, []), false, "assertObject() should return false with expected: (Boolean: true) and actual: (Array: [])" );
-		equals( assertObject(true, {}), false, "assertObject() should return false with expected: (Boolean: true) and actual: (Object: {})" );
-		equals( assertObject(true, function(){}), false, "assertObject() should return false with expected: (Boolean: true) and actual: (Function: function(){})" );
-		equals( assertObject(true, /test/), false, "assertObject() should return false with expected: (Boolean: true) and actual: (RegExp: /test/)" );
-		equals( assertObject(true, new Date), false, "assertObject() should return false with expected: (Boolean: true) and actual: (Date: new instance)" );
-		equals( assertObject(true, new Custom), false, "assertObject() should return false with expected: (Boolean: true) and actual: (Custom: new instance)" );
+		equals( Assay.object(true, 1), false, "Assay.object() should return false with expected: (Boolean: true) and actual: (Number: 1)" );
+		equals( Assay.object(true, "string"), false, "Assay.object() should return false with expected: (Boolean: true) and actual: (String: string)" );
+		equals( Assay.object(true, []), false, "Assay.object() should return false with expected: (Boolean: true) and actual: (Array: [])" );
+		equals( Assay.object(true, {}), false, "Assay.object() should return false with expected: (Boolean: true) and actual: (Object: {})" );
+		equals( Assay.object(true, function(){}), false, "Assay.object() should return false with expected: (Boolean: true) and actual: (Function: function(){})" );
+		equals( Assay.object(true, /test/), false, "Assay.object() should return false with expected: (Boolean: true) and actual: (RegExp: /test/)" );
+		equals( Assay.object(true, new Date), false, "Assay.object() should return false with expected: (Boolean: true) and actual: (Date: new instance)" );
+		equals( Assay.object(true, new Custom), false, "Assay.object() should return false with expected: (Boolean: true) and actual: (Custom: new instance)" );
 
 	  // Test invalid argument types - false values
 
-		equals( assertObject(true, null), false, "assertObject() should return false with expected: (Boolean: true) and actual: (null)" );
-		equals( assertObject(true, undefined), false, "assertObject() should return false with expected: (Boolean: true) and actual: (undefined)" );
+		equals( Assay.object(true, null), false, "Assay.object() should return false with expected: (Boolean: true) and actual: (null)" );
+		equals( Assay.object(true, undefined), false, "Assay.object() should return false with expected: (Boolean: true) and actual: (undefined)" );
 
 		// TRUE ASSERTIONS
-		equals( assertObject(true, Boolean), true, "assertObject() should return true with expected: (Boolean: true) and actual: (Boolean)" );
-		equals( assertObject(true, true), true, "assertObject() should return true with expected: (Boolean: true) and actual: (Boolean: true)" );
-		equals( assertObject(true, false), true, "assertObject() should return true with expected: (Boolean: true) and actual: (Boolean: false)" );
+		equals( Assay.object(true, Boolean), true, "Assay.object() should return true with expected: (Boolean: true) and actual: (Boolean)" );
+		equals( Assay.object(true, true), true, "Assay.object() should return true with expected: (Boolean: true) and actual: (Boolean: true)" );
+		equals( Assay.object(true, false), true, "Assay.object() should return true with expected: (Boolean: true) and actual: (Boolean: false)" );
 
 		// Expect Falsy Value
-		equals( assertObject(false, Boolean), true, "assertObject() should return true with expected: (Boolean: false) and actual: (Boolean)" );
-		equals( assertObject(false, true), true, "assertObject() should return true with expected: (Boolean: false) and actual: (Boolean: true)" );
-		equals( assertObject(false, false), true, "assertObject() should return true with expected: (Boolean: false) and actual: (Boolean: false)" );
+		equals( Assay.object(false, Boolean), true, "Assay.object() should return true with expected: (Boolean: false) and actual: (Boolean)" );
+		equals( Assay.object(false, true), true, "Assay.object() should return true with expected: (Boolean: false) and actual: (Boolean: true)" );
+		equals( Assay.object(false, false), true, "Assay.object() should return true with expected: (Boolean: false) and actual: (Boolean: false)" );
 
 	});
 
-	test("assertObject() exercises - (Boolean: true) primitive [strict value checking]", function() {
+	test("Assay.object() exercises - (Boolean: true) primitive [strict value checking]", function() {
 
 	  // FALSE ASSERTIONS
 
 	  // Test invalid argument type - Constructors
 
-		equals( assertObject(true, Number, {strictValueChecking: true}), false, "assertObject() should return false with expected: (Boolean: true) and actual: (Number)" );
-		equals( assertObject(true, String, {strictValueChecking: true}), false, "assertObject() should return false with expected: (Boolean: true) and actual: (String)" );
-		equals( assertObject(true, Array, {strictValueChecking: true}), false, "assertObject() should return false with expected: (Boolean: true) and actual: (Array)" );
-		equals( assertObject(true, Object, {strictValueChecking: true}), false, "assertObject() should return false with expected: (Boolean: true) and actual: (Object)" );
-		equals( assertObject(true, Function, {strictValueChecking: true}), false, "assertObject() should return false with expected: (Boolean: true) and actual: (Function)" );
-		equals( assertObject(true, RegExp, {strictValueChecking: true}), false, "assertObject() should return false with expected: (Boolean: true) and actual: (RegExp)" );
-		equals( assertObject(true, Date, {strictValueChecking: true}), false, "assertObject() should return false with expected: (Boolean: true) and actual: (Date)" );
-		equals( assertObject(true, Custom, {strictValueChecking: true}), false, "assertObject() should return false with expected: (Boolean: true) and actual: (Custom)" );
+		equals( Assay.object(true, Number, {strictValueChecking: true}), false, "Assay.object() should return false with expected: (Boolean: true) and actual: (Number)" );
+		equals( Assay.object(true, String, {strictValueChecking: true}), false, "Assay.object() should return false with expected: (Boolean: true) and actual: (String)" );
+		equals( Assay.object(true, Array, {strictValueChecking: true}), false, "Assay.object() should return false with expected: (Boolean: true) and actual: (Array)" );
+		equals( Assay.object(true, Object, {strictValueChecking: true}), false, "Assay.object() should return false with expected: (Boolean: true) and actual: (Object)" );
+		equals( Assay.object(true, Function, {strictValueChecking: true}), false, "Assay.object() should return false with expected: (Boolean: true) and actual: (Function)" );
+		equals( Assay.object(true, RegExp, {strictValueChecking: true}), false, "Assay.object() should return false with expected: (Boolean: true) and actual: (RegExp)" );
+		equals( Assay.object(true, Date, {strictValueChecking: true}), false, "Assay.object() should return false with expected: (Boolean: true) and actual: (Date)" );
+		equals( Assay.object(true, Custom, {strictValueChecking: true}), false, "Assay.object() should return false with expected: (Boolean: true) and actual: (Custom)" );
 
 		// Test invalid argument type - Values (truthy)
 
-		equals( assertObject(true, 1, {strictValueChecking: true}), false, "assertObject() should return false with expected: (Boolean: true) and actual: (Number: 1)" );
-		equals( assertObject(true, "string", {strictValueChecking: true}), false, "assertObject() should return false with expected: (Boolean: true) and actual: (String: string)" );
-		equals( assertObject(true, [], {strictValueChecking: true}), false, "assertObject() should return false with expected: (Boolean: true) and actual: (Array: [])" );
-		equals( assertObject(true, {}, {strictValueChecking: true}), false, "assertObject() should return false with expected: (Boolean: true) and actual: (Object: {})" );
-		equals( assertObject(true, function(){}, {strictValueChecking: true}), false, "assertObject() should return false with expected: (Boolean: true) and actual: (Function: function(){})" );
-		equals( assertObject(true, /test/, {strictValueChecking: true}), false, "assertObject() should return false with expected: (Boolean: true) and actual: (RegExp: /test/)" );
-		equals( assertObject(true, new Date, {strictValueChecking: true}), false, "assertObject() should return false with expected: (Boolean: true) and actual: (Date: new instance)" );
-		equals( assertObject(true, new Custom, {strictValueChecking: true}), false, "assertObject() should return false with expected: (Boolean: true) and actual: (Custom: new instance)" );
+		equals( Assay.object(true, 1, {strictValueChecking: true}), false, "Assay.object() should return false with expected: (Boolean: true) and actual: (Number: 1)" );
+		equals( Assay.object(true, "string", {strictValueChecking: true}), false, "Assay.object() should return false with expected: (Boolean: true) and actual: (String: string)" );
+		equals( Assay.object(true, [], {strictValueChecking: true}), false, "Assay.object() should return false with expected: (Boolean: true) and actual: (Array: [])" );
+		equals( Assay.object(true, {}, {strictValueChecking: true}), false, "Assay.object() should return false with expected: (Boolean: true) and actual: (Object: {})" );
+		equals( Assay.object(true, function(){}, {strictValueChecking: true}), false, "Assay.object() should return false with expected: (Boolean: true) and actual: (Function: function(){})" );
+		equals( Assay.object(true, /test/, {strictValueChecking: true}), false, "Assay.object() should return false with expected: (Boolean: true) and actual: (RegExp: /test/)" );
+		equals( Assay.object(true, new Date, {strictValueChecking: true}), false, "Assay.object() should return false with expected: (Boolean: true) and actual: (Date: new instance)" );
+		equals( Assay.object(true, new Custom, {strictValueChecking: true}), false, "Assay.object() should return false with expected: (Boolean: true) and actual: (Custom: new instance)" );
 
 	  // Test invalid argument types - false values
 
-		equals( assertObject(true, null, {strictValueChecking: true}), false, "assertObject() should return false with expected: (Boolean: true) and actual: (null)" );
-		equals( assertObject(true, undefined, {strictValueChecking: true}), false, "assertObject() should return false with expected: (Boolean: true) and actual: (undefined)" );
+		equals( Assay.object(true, null, {strictValueChecking: true}), false, "Assay.object() should return false with expected: (Boolean: true) and actual: (null)" );
+		equals( Assay.object(true, undefined, {strictValueChecking: true}), false, "Assay.object() should return false with expected: (Boolean: true) and actual: (undefined)" );
 
 		// TRUE ASSERTIONS
-		equals( assertObject(true, Boolean, {strictValueChecking: true}), false, "assertObject() should return true with expected: (Boolean: true) and actual: (Boolean)" );
-		equals( assertObject(true, true, {strictValueChecking: true}), true, "assertObject() should return true with expected: (Boolean: true) and actual: (Boolean: true)" );
-		equals( assertObject(true, false, {strictValueChecking: true}), false, "assertObject() should return true with expected: (Boolean: true) and actual: (Boolean: false)" );
+		equals( Assay.object(true, Boolean, {strictValueChecking: true}), false, "Assay.object() should return true with expected: (Boolean: true) and actual: (Boolean)" );
+		equals( Assay.object(true, true, {strictValueChecking: true}), true, "Assay.object() should return true with expected: (Boolean: true) and actual: (Boolean: true)" );
+		equals( Assay.object(true, false, {strictValueChecking: true}), false, "Assay.object() should return true with expected: (Boolean: true) and actual: (Boolean: false)" );
 
 		// Expect Falsy Value
-		equals( assertObject(false, Boolean, {strictValueChecking: true}), false, "assertObject() should return false with expected: (Boolean: false) and actual: (Boolean)" );
-		equals( assertObject(false, true, {strictValueChecking: true}), false, "assertObject() should return false with expected: (Boolean: false) and actual: (Boolean: true)" );
-		equals( assertObject(false, false, {strictValueChecking: true}), true, "assertObject() should return true with expected: (Boolean: false) and actual: (Boolean: false)" );
+		equals( Assay.object(false, Boolean, {strictValueChecking: true}), false, "Assay.object() should return false with expected: (Boolean: false) and actual: (Boolean)" );
+		equals( Assay.object(false, true, {strictValueChecking: true}), false, "Assay.object() should return false with expected: (Boolean: false) and actual: (Boolean: true)" );
+		equals( Assay.object(false, false, {strictValueChecking: true}), true, "Assay.object() should return true with expected: (Boolean: false) and actual: (Boolean: false)" );
 
 	});
 
-	test("assertObject() exercises - (RegExp) composite [typed checking]", function() {
+	test("Assay.object() exercises - (RegExp) composite [typed checking]", function() {
 
 	  // FALSE ASSERTIONS
 
 	  // Test invalid argument type - Constructors
 
-		equals( assertObject(RegExp, Number), false, "assertObject() should return false with expected: (RegExp) and actual: (Number)" );
-		equals( assertObject(RegExp, String), false, "assertObject() should return false with expected: (RegExp) and actual: (String)" );
-		equals( assertObject(RegExp, Boolean), false, "assertObject() should return false with expected: (RegExp) and actual: (Boolean)" );
-		equals( assertObject(RegExp, Array), false, "assertObject() should return false with expected: (RegExp) and actual: (Array)" );
-		equals( assertObject(RegExp, Object), false, "assertObject() should return false with expected: (RegExp) and actual: (Object)" );
-		equals( assertObject(RegExp, Function), false, "assertObject() should return false with expected: (RegExp) and actual: (Function)" );
-		equals( assertObject(RegExp, Date), false, "assertObject() should return false with expected: (RegExp) and actual: (Date)" );
-		equals( assertObject(RegExp, Custom), false, "assertObject() should return false with expected: (RegExp) and actual: (Custom)" );
+		equals( Assay.object(RegExp, Number), false, "Assay.object() should return false with expected: (RegExp) and actual: (Number)" );
+		equals( Assay.object(RegExp, String), false, "Assay.object() should return false with expected: (RegExp) and actual: (String)" );
+		equals( Assay.object(RegExp, Boolean), false, "Assay.object() should return false with expected: (RegExp) and actual: (Boolean)" );
+		equals( Assay.object(RegExp, Array), false, "Assay.object() should return false with expected: (RegExp) and actual: (Array)" );
+		equals( Assay.object(RegExp, Object), false, "Assay.object() should return false with expected: (RegExp) and actual: (Object)" );
+		equals( Assay.object(RegExp, Function), false, "Assay.object() should return false with expected: (RegExp) and actual: (Function)" );
+		equals( Assay.object(RegExp, Date), false, "Assay.object() should return false with expected: (RegExp) and actual: (Date)" );
+		equals( Assay.object(RegExp, Custom), false, "Assay.object() should return false with expected: (RegExp) and actual: (Custom)" );
 
 		// Test invalid argument type - Values (truthy)
 
-		equals( assertObject(RegExp, 1), false, "assertObject() should return false with expected: (RegExp) and actual: (Number: 1)" );
-		equals( assertObject(RegExp, "string"), false, "assertObject() should return false with expected: (RegExp) and actual: (String: string)" );
-		equals( assertObject(RegExp, true), false, "assertObject() should return false with expected: (RegExp) and actual: (Boolean: true)" );
-		equals( assertObject(RegExp, []), false, "assertObject() should return false with expected: (RegExp) and actual: (Array: [])" );
-		equals( assertObject(RegExp, {}), false, "assertObject() should return false with expected: (RegExp) and actual: (Object: {})" );
-		equals( assertObject(RegExp, function(){}), false, "assertObject() should return false with expected: (RegExp) and actual: (Function: function(){})" );
-		equals( assertObject(RegExp, new Date), false, "assertObject() should return false with expected: (RegExp) and actual: (Date: new instance)" );
-		equals( assertObject(RegExp, new Custom), false, "assertObject() should return false with expected: (RegExp) and actual: (Custom: new instance)" );
+		equals( Assay.object(RegExp, 1), false, "Assay.object() should return false with expected: (RegExp) and actual: (Number: 1)" );
+		equals( Assay.object(RegExp, "string"), false, "Assay.object() should return false with expected: (RegExp) and actual: (String: string)" );
+		equals( Assay.object(RegExp, true), false, "Assay.object() should return false with expected: (RegExp) and actual: (Boolean: true)" );
+		equals( Assay.object(RegExp, []), false, "Assay.object() should return false with expected: (RegExp) and actual: (Array: [])" );
+		equals( Assay.object(RegExp, {}), false, "Assay.object() should return false with expected: (RegExp) and actual: (Object: {})" );
+		equals( Assay.object(RegExp, function(){}), false, "Assay.object() should return false with expected: (RegExp) and actual: (Function: function(){})" );
+		equals( Assay.object(RegExp, new Date), false, "Assay.object() should return false with expected: (RegExp) and actual: (Date: new instance)" );
+		equals( Assay.object(RegExp, new Custom), false, "Assay.object() should return false with expected: (RegExp) and actual: (Custom: new instance)" );
 
 	  // Test invalid argument types - false values
 
-		equals( assertObject(RegExp, null), false, "assertObject() should return false with expected: (RegExp) and actual: (null)" );
-		equals( assertObject(RegExp, undefined), false, "assertObject() should return false with expected: (RegExp) and actual: (undefined)" );
+		equals( Assay.object(RegExp, null), false, "Assay.object() should return false with expected: (RegExp) and actual: (null)" );
+		equals( Assay.object(RegExp, undefined), false, "Assay.object() should return false with expected: (RegExp) and actual: (undefined)" );
 
 		// TRUE ASSERTIONS
-		equals( assertObject(RegExp, RegExp), true, "assertObject() should return true with expected: (RegExp) and actual: (RegExp)" );
-		equals( assertObject(RegExp, /re/), true, "assertObject() should return true with expected: (RegExp) and actual: (RegExp: /re/)" );
-		equals( assertObject(RegExp, new RegExp(/re/)), true, "assertObject() should return true with expected: (RegExp) and actual: (RegExp: new RegExp(/re/))" );
+		equals( Assay.object(RegExp, RegExp), true, "Assay.object() should return true with expected: (RegExp) and actual: (RegExp)" );
+		equals( Assay.object(RegExp, /re/), true, "Assay.object() should return true with expected: (RegExp) and actual: (RegExp: /re/)" );
+		equals( Assay.object(RegExp, new RegExp(/re/)), true, "Assay.object() should return true with expected: (RegExp) and actual: (RegExp: new RegExp(/re/))" );
 
 	});
 
-	test("assertObject() exercises - (RegExp) composite [strict 'value' checking]", function() {
+	test("Assay.object() exercises - (RegExp) composite [strict 'value' checking]", function() {
 
 	  // FALSE ASSERTIONS
 
 	  // Test invalid argument type - Constructors
 
-		equals( assertObject(RegExp, Number, {strictValueChecking: true}), false, "assertObject() should return false with expected: (RegExp) and actual: (Number)" );
-		equals( assertObject(RegExp, String, {strictValueChecking: true}), false, "assertObject() should return false with expected: (RegExp) and actual: (String)" );
-		equals( assertObject(RegExp, Boolean, {strictValueChecking: true}), false, "assertObject() should return false with expected: (RegExp) and actual: (Boolean)" );
-		equals( assertObject(RegExp, Array, {strictValueChecking: true}), false, "assertObject() should return false with expected: (RegExp) and actual: (Array)" );
-		equals( assertObject(RegExp, Object, {strictValueChecking: true}), false, "assertObject() should return false with expected: (RegExp) and actual: (Object)" );
-		equals( assertObject(RegExp, Function, {strictValueChecking: true}), false, "assertObject() should return false with expected: (RegExp) and actual: (Function)" );
-		equals( assertObject(RegExp, Date, {strictValueChecking: true}), false, "assertObject() should return false with expected: (RegExp) and actual: (Date)" );
-		equals( assertObject(RegExp, Custom, {strictValueChecking: true}), false, "assertObject() should return false with expected: (RegExp) and actual: (Custom)" );
+		equals( Assay.object(RegExp, Number, {strictValueChecking: true}), false, "Assay.object() should return false with expected: (RegExp) and actual: (Number)" );
+		equals( Assay.object(RegExp, String, {strictValueChecking: true}), false, "Assay.object() should return false with expected: (RegExp) and actual: (String)" );
+		equals( Assay.object(RegExp, Boolean, {strictValueChecking: true}), false, "Assay.object() should return false with expected: (RegExp) and actual: (Boolean)" );
+		equals( Assay.object(RegExp, Array, {strictValueChecking: true}), false, "Assay.object() should return false with expected: (RegExp) and actual: (Array)" );
+		equals( Assay.object(RegExp, Object, {strictValueChecking: true}), false, "Assay.object() should return false with expected: (RegExp) and actual: (Object)" );
+		equals( Assay.object(RegExp, Function, {strictValueChecking: true}), false, "Assay.object() should return false with expected: (RegExp) and actual: (Function)" );
+		equals( Assay.object(RegExp, Date, {strictValueChecking: true}), false, "Assay.object() should return false with expected: (RegExp) and actual: (Date)" );
+		equals( Assay.object(RegExp, Custom, {strictValueChecking: true}), false, "Assay.object() should return false with expected: (RegExp) and actual: (Custom)" );
 
 		// Test invalid argument type - Values (truthy)
 
-		equals( assertObject(RegExp, 1, {strictValueChecking: true}), false, "assertObject() should return false with expected: (RegExp) and actual: (Number: 1)" );
-		equals( assertObject(RegExp, "string", {strictValueChecking: true}), false, "assertObject() should return false with expected: (RegExp) and actual: (String: string)" );
-		equals( assertObject(RegExp, true, {strictValueChecking: true}), false, "assertObject() should return false with expected: (RegExp) and actual: (Boolean: true)" );
-		equals( assertObject(RegExp, [], {strictValueChecking: true}), false, "assertObject() should return false with expected: (RegExp) and actual: (Array: [])" );
-		equals( assertObject(RegExp, {}, {strictValueChecking: true}), false, "assertObject() should return false with expected: (RegExp) and actual: (Object: {})" );
-		equals( assertObject(RegExp, function(){}, {strictValueChecking: true}), false, "assertObject() should return false with expected: (RegExp) and actual: (Function: function(){})" );
-		equals( assertObject(RegExp, new Date, {strictValueChecking: true}), false, "assertObject() should return false with expected: (RegExp) and actual: (Date: new instance)" );
-		equals( assertObject(RegExp, new Custom, {strictValueChecking: true}), false, "assertObject() should return false with expected: (RegExp) and actual: (Custom: new instance)" );
+		equals( Assay.object(RegExp, 1, {strictValueChecking: true}), false, "Assay.object() should return false with expected: (RegExp) and actual: (Number: 1)" );
+		equals( Assay.object(RegExp, "string", {strictValueChecking: true}), false, "Assay.object() should return false with expected: (RegExp) and actual: (String: string)" );
+		equals( Assay.object(RegExp, true, {strictValueChecking: true}), false, "Assay.object() should return false with expected: (RegExp) and actual: (Boolean: true)" );
+		equals( Assay.object(RegExp, [], {strictValueChecking: true}), false, "Assay.object() should return false with expected: (RegExp) and actual: (Array: [])" );
+		equals( Assay.object(RegExp, {}, {strictValueChecking: true}), false, "Assay.object() should return false with expected: (RegExp) and actual: (Object: {})" );
+		equals( Assay.object(RegExp, function(){}, {strictValueChecking: true}), false, "Assay.object() should return false with expected: (RegExp) and actual: (Function: function(){})" );
+		equals( Assay.object(RegExp, new Date, {strictValueChecking: true}), false, "Assay.object() should return false with expected: (RegExp) and actual: (Date: new instance)" );
+		equals( Assay.object(RegExp, new Custom, {strictValueChecking: true}), false, "Assay.object() should return false with expected: (RegExp) and actual: (Custom: new instance)" );
 
 	  // Test invalid argument types - false values
 
-		equals( assertObject(RegExp, null, {strictValueChecking: true}), false, "assertObject() should return false with expected: (RegExp) and actual: (null)" );
-		equals( assertObject(RegExp, undefined, {strictValueChecking: true}), false, "assertObject() should return false with expected: (RegExp) and actual: (undefined)" );
+		equals( Assay.object(RegExp, null, {strictValueChecking: true}), false, "Assay.object() should return false with expected: (RegExp) and actual: (null)" );
+		equals( Assay.object(RegExp, undefined, {strictValueChecking: true}), false, "Assay.object() should return false with expected: (RegExp) and actual: (undefined)" );
 
 		// TRUE ASSERTIONS
-		equals( assertObject(RegExp, RegExp, {strictValueChecking: true}), true, "assertObject() should return true with expected: (RegExp) and actual: (RegExp)" );
-		equals( assertObject(RegExp, /re/, {strictValueChecking: true}), false, "assertObject() should return true with expected: (RegExp) and actual: (RegExp: /re/)" );
-		equals( assertObject(RegExp, new RegExp(/re/), {strictValueChecking: true}), false, "assertObject() should return true with expected: (RegExp) and actual: (RegExp: new RegExp(/re/))" );
+		equals( Assay.object(RegExp, RegExp, {strictValueChecking: true}), true, "Assay.object() should return true with expected: (RegExp) and actual: (RegExp)" );
+		equals( Assay.object(RegExp, /re/, {strictValueChecking: true}), false, "Assay.object() should return true with expected: (RegExp) and actual: (RegExp: /re/)" );
+		equals( Assay.object(RegExp, new RegExp(/re/), {strictValueChecking: true}), false, "Assay.object() should return true with expected: (RegExp) and actual: (RegExp: new RegExp(/re/))" );
 
 	});
 
 
-	test("assertObject() exercises - (RegExp: /re/) composite [typed checking]", function() {
+	test("Assay.object() exercises - (RegExp: /re/) composite [typed checking]", function() {
 
 	  // FALSE ASSERTIONS
 
 	  // Test invalid argument type - Constructors
 
-		equals( assertObject(/re/, Number), false, "assertObject() should return false with expected: (RegExp: /re/) and actual: (Number)" );
-		equals( assertObject(/re/, String), false, "assertObject() should return false with expected: (RegExp: /re/) and actual: (String)" );
-		equals( assertObject(/re/, Boolean), false, "assertObject() should return false with expected: (RegExp: /re/) and actual: (Boolean)" );
-		equals( assertObject(/re/, Array), false, "assertObject() should return false with expected: (RegExp: /re/) and actual: (Array)" );
-		equals( assertObject(/re/, Object), false, "assertObject() should return false with expected: (RegExp: /re/) and actual: (Object)" );
-		equals( assertObject(/re/, Function), false, "assertObject() should return false with expected: (RegExp: /re/) and actual: (Function)" );
-		equals( assertObject(/re/, Date), false, "assertObject() should return false with expected: (RegExp: /re/) and actual: (Date)" );
-		equals( assertObject(/re/, Custom), false, "assertObject() should return false with expected: (RegExp: /re/) and actual: (Custom)" );
+		equals( Assay.object(/re/, Number), false, "Assay.object() should return false with expected: (RegExp: /re/) and actual: (Number)" );
+		equals( Assay.object(/re/, String), false, "Assay.object() should return false with expected: (RegExp: /re/) and actual: (String)" );
+		equals( Assay.object(/re/, Boolean), false, "Assay.object() should return false with expected: (RegExp: /re/) and actual: (Boolean)" );
+		equals( Assay.object(/re/, Array), false, "Assay.object() should return false with expected: (RegExp: /re/) and actual: (Array)" );
+		equals( Assay.object(/re/, Object), false, "Assay.object() should return false with expected: (RegExp: /re/) and actual: (Object)" );
+		equals( Assay.object(/re/, Function), false, "Assay.object() should return false with expected: (RegExp: /re/) and actual: (Function)" );
+		equals( Assay.object(/re/, Date), false, "Assay.object() should return false with expected: (RegExp: /re/) and actual: (Date)" );
+		equals( Assay.object(/re/, Custom), false, "Assay.object() should return false with expected: (RegExp: /re/) and actual: (Custom)" );
 
 		// Test invalid argument type - Values (truthy)
 
-		equals( assertObject(/re/, 1), false, "assertObject() should return false with expected: (RegExp: /re/) and actual: (Number: 1)" );
-		equals( assertObject(/re/, "string"), false, "assertObject() should return false with expected: (RegExp: /re/) and actual: (String: string)" );
-		equals( assertObject(/re/, true), false, "assertObject() should return false with expected: (RegExp: /re/) and actual: (Boolean: true)" );
-		equals( assertObject(/re/, []), false, "assertObject() should return false with expected: (RegExp: /re/) and actual: (Array: [])" );
-		equals( assertObject(/re/, {}), false, "assertObject() should return false with expected: (RegExp: /re/) and actual: (Object: {})" );
-		equals( assertObject(/re/, function(){}), false, "assertObject() should return false with expected: (RegExp: /re/) and actual: (Function: function(){})" );
-		equals( assertObject(/re/, new Date), false, "assertObject() should return false with expected: (RegExp: /re/) and actual: (Date: new instance)" );
-		equals( assertObject(/re/, new Custom), false, "assertObject() should return false with expected: (RegExp: /re/) and actual: (Custom: new instance)" );
+		equals( Assay.object(/re/, 1), false, "Assay.object() should return false with expected: (RegExp: /re/) and actual: (Number: 1)" );
+		equals( Assay.object(/re/, "string"), false, "Assay.object() should return false with expected: (RegExp: /re/) and actual: (String: string)" );
+		equals( Assay.object(/re/, true), false, "Assay.object() should return false with expected: (RegExp: /re/) and actual: (Boolean: true)" );
+		equals( Assay.object(/re/, []), false, "Assay.object() should return false with expected: (RegExp: /re/) and actual: (Array: [])" );
+		equals( Assay.object(/re/, {}), false, "Assay.object() should return false with expected: (RegExp: /re/) and actual: (Object: {})" );
+		equals( Assay.object(/re/, function(){}), false, "Assay.object() should return false with expected: (RegExp: /re/) and actual: (Function: function(){})" );
+		equals( Assay.object(/re/, new Date), false, "Assay.object() should return false with expected: (RegExp: /re/) and actual: (Date: new instance)" );
+		equals( Assay.object(/re/, new Custom), false, "Assay.object() should return false with expected: (RegExp: /re/) and actual: (Custom: new instance)" );
 
 	  // Test invalid argument types - false values
 
-		equals( assertObject(/re/, null), false, "assertObject() should return false with expected: (RegExp: /re/) and actual: (null)" );
-		equals( assertObject(/re/, undefined), false, "assertObject() should return false with expected: (RegExp: /re/) and actual: (undefined)" );
+		equals( Assay.object(/re/, null), false, "Assay.object() should return false with expected: (RegExp: /re/) and actual: (null)" );
+		equals( Assay.object(/re/, undefined), false, "Assay.object() should return false with expected: (RegExp: /re/) and actual: (undefined)" );
 
 		// TRUE ASSERTIONS
-		equals( assertObject(/re/, RegExp), true, "assertObject() should return true with expected: (RegExp: /re/) and actual: (RegExp)" );
-		equals( assertObject(/re/, /re/), true, "assertObject() should return true with expected: (RegExp: /re/) and actual: (RegExp: /re/)" );
-		equals( assertObject(/re/, new RegExp(/re/)), true, "assertObject() should return true with expected: (RegExp: /re/) and actual: (RegExp: new RegExp(/re/))" );
+		equals( Assay.object(/re/, RegExp), true, "Assay.object() should return true with expected: (RegExp: /re/) and actual: (RegExp)" );
+		equals( Assay.object(/re/, /re/), true, "Assay.object() should return true with expected: (RegExp: /re/) and actual: (RegExp: /re/)" );
+		equals( Assay.object(/re/, new RegExp(/re/)), true, "Assay.object() should return true with expected: (RegExp: /re/) and actual: (RegExp: new RegExp(/re/))" );
 
 	});
 
-	test("assertObject() exercises - (RegExp: /re/) composite [strict 'value' checking]", function() {
+	test("Assay.object() exercises - (RegExp: /re/) composite [strict 'value' checking]", function() {
 
 	  // FALSE ASSERTIONS
 
 	  // Test invalid argument type - Constructors
 
-		equals( assertObject(/re/, Number, {strictValueChecking: true}), false, "assertObject() should return false with expected: (RegExp: /re/) and actual: (Number)" );
-		equals( assertObject(/re/, String, {strictValueChecking: true}), false, "assertObject() should return false with expected: (RegExp: /re/) and actual: (String)" );
-		equals( assertObject(/re/, Boolean, {strictValueChecking: true}), false, "assertObject() should return false with expected: (RegExp: /re/) and actual: (Boolean)" );
-		equals( assertObject(/re/, Array, {strictValueChecking: true}), false, "assertObject() should return false with expected: (RegExp: /re/) and actual: (Array)" );
-		equals( assertObject(/re/, Object, {strictValueChecking: true}), false, "assertObject() should return false with expected: (RegExp: /re/) and actual: (Object)" );
-		equals( assertObject(/re/, Function, {strictValueChecking: true}), false, "assertObject() should return false with expected: (RegExp: /re/) and actual: (Function)" );
-		equals( assertObject(/re/, Date, {strictValueChecking: true}), false, "assertObject() should return false with expected: (RegExp: /re/) and actual: (Date)" );
-		equals( assertObject(/re/, Custom, {strictValueChecking: true}), false, "assertObject() should return false with expected: (RegExp: /re/) and actual: (Custom)" );
+		equals( Assay.object(/re/, Number, {strictValueChecking: true}), false, "Assay.object() should return false with expected: (RegExp: /re/) and actual: (Number)" );
+		equals( Assay.object(/re/, String, {strictValueChecking: true}), false, "Assay.object() should return false with expected: (RegExp: /re/) and actual: (String)" );
+		equals( Assay.object(/re/, Boolean, {strictValueChecking: true}), false, "Assay.object() should return false with expected: (RegExp: /re/) and actual: (Boolean)" );
+		equals( Assay.object(/re/, Array, {strictValueChecking: true}), false, "Assay.object() should return false with expected: (RegExp: /re/) and actual: (Array)" );
+		equals( Assay.object(/re/, Object, {strictValueChecking: true}), false, "Assay.object() should return false with expected: (RegExp: /re/) and actual: (Object)" );
+		equals( Assay.object(/re/, Function, {strictValueChecking: true}), false, "Assay.object() should return false with expected: (RegExp: /re/) and actual: (Function)" );
+		equals( Assay.object(/re/, Date, {strictValueChecking: true}), false, "Assay.object() should return false with expected: (RegExp: /re/) and actual: (Date)" );
+		equals( Assay.object(/re/, Custom, {strictValueChecking: true}), false, "Assay.object() should return false with expected: (RegExp: /re/) and actual: (Custom)" );
 
 		// Test invalid argument type - Values (truthy)
 
-		equals( assertObject(/re/, 1, {strictValueChecking: true}), false, "assertObject() should return false with expected: (RegExp: /re/) and actual: (Number: 1)" );
-		equals( assertObject(/re/, "string", {strictValueChecking: true}), false, "assertObject() should return false with expected: (RegExp: /re/) and actual: (String: string)" );
-		equals( assertObject(/re/, true, {strictValueChecking: true}), false, "assertObject() should return false with expected: (RegExp: /re/) and actual: (Boolean: true)" );
-		equals( assertObject(/re/, [], {strictValueChecking: true}), false, "assertObject() should return false with expected: (RegExp: /re/) and actual: (Array: [])" );
-		equals( assertObject(/re/, {}, {strictValueChecking: true}), false, "assertObject() should return false with expected: (RegExp: /re/) and actual: (Object: {})" );
-		equals( assertObject(/re/, function(){}, {strictValueChecking: true}), false, "assertObject() should return false with expected: (RegExp: /re/) and actual: (Function: function(){})" );
-		equals( assertObject(/re/, new Date, {strictValueChecking: true}), false, "assertObject() should return false with expected: (RegExp: /re/) and actual: (Date: new instance)" );
-		equals( assertObject(/re/, new Custom, {strictValueChecking: true}), false, "assertObject() should return false with expected: (RegExp: /re/) and actual: (Custom: new instance)" );
+		equals( Assay.object(/re/, 1, {strictValueChecking: true}), false, "Assay.object() should return false with expected: (RegExp: /re/) and actual: (Number: 1)" );
+		equals( Assay.object(/re/, "string", {strictValueChecking: true}), false, "Assay.object() should return false with expected: (RegExp: /re/) and actual: (String: string)" );
+		equals( Assay.object(/re/, true, {strictValueChecking: true}), false, "Assay.object() should return false with expected: (RegExp: /re/) and actual: (Boolean: true)" );
+		equals( Assay.object(/re/, [], {strictValueChecking: true}), false, "Assay.object() should return false with expected: (RegExp: /re/) and actual: (Array: [])" );
+		equals( Assay.object(/re/, {}, {strictValueChecking: true}), false, "Assay.object() should return false with expected: (RegExp: /re/) and actual: (Object: {})" );
+		equals( Assay.object(/re/, function(){}, {strictValueChecking: true}), false, "Assay.object() should return false with expected: (RegExp: /re/) and actual: (Function: function(){})" );
+		equals( Assay.object(/re/, new Date, {strictValueChecking: true}), false, "Assay.object() should return false with expected: (RegExp: /re/) and actual: (Date: new instance)" );
+		equals( Assay.object(/re/, new Custom, {strictValueChecking: true}), false, "Assay.object() should return false with expected: (RegExp: /re/) and actual: (Custom: new instance)" );
 
 	  // Test invalid argument types - false values
 
-		equals( assertObject(/re/, null, {strictValueChecking: true}), false, "assertObject() should return false with expected: (RegExp: /re/) and actual: (null)" );
-		equals( assertObject(/re/, undefined, {strictValueChecking: true}), false, "assertObject() should return false with expected: (RegExp: /re/) and actual: (undefined)" );
+		equals( Assay.object(/re/, null, {strictValueChecking: true}), false, "Assay.object() should return false with expected: (RegExp: /re/) and actual: (null)" );
+		equals( Assay.object(/re/, undefined, {strictValueChecking: true}), false, "Assay.object() should return false with expected: (RegExp: /re/) and actual: (undefined)" );
 
 		// TRUE ASSERTIONS
-		equals( assertObject(/re/, RegExp, {strictValueChecking: true}), false, "assertObject() should return true with expected: (RegExp: /re/) and actual: (RegExp)" );
-		equals( assertObject(/re/, /re/, {strictValueChecking: true}), true, "assertObject() should return true with expected: (RegExp: /re/) and actual: (RegExp: /re/)" );
-		equals( assertObject(/re/, new RegExp(/re/), {strictValueChecking: true}), true, "assertObject() should return true with expected: (RegExp: /re/) and actual: (RegExp: new RegExp(/re/))" );
+		equals( Assay.object(/re/, RegExp, {strictValueChecking: true}), false, "Assay.object() should return true with expected: (RegExp: /re/) and actual: (RegExp)" );
+		equals( Assay.object(/re/, /re/, {strictValueChecking: true}), true, "Assay.object() should return true with expected: (RegExp: /re/) and actual: (RegExp: /re/)" );
+		equals( Assay.object(/re/, new RegExp(/re/), {strictValueChecking: true}), true, "Assay.object() should return true with expected: (RegExp: /re/) and actual: (RegExp: new RegExp(/re/))" );
 
 	});
 
@@ -1329,16 +1328,16 @@
     container[ "QMock" ] = initQMock( __Assay && __Assay.object, { "expose": __Assay && __Assay.exposeObject } );
 
     // Test interface
-    equals( assertHash( this.expectedQMockInterface, container[ "QMock" ] ), true, "initQmock() should return a Qmock instance interface registered to the identifier 'QMock' on container" );
+    equals( Assay.hash( this.expectedQMockInterface, container[ "QMock" ] ), true, "initQmock() should return a Qmock instance interface registered to the identifier 'QMock' on container" );
 
     // Test private methods NOT exposed
-    ok( assertObject( undefined, container.QMock[ "_createMockFromJSON" ] ), "initQmock() without optional param should not expose the private method _createMockFromJSON()" );
+    ok( Assay.object( undefined, container.QMock[ "_createMockFromJSON" ] ), "initQmock() without optional param should not expose the private method _createMockFromJSON()" );
 
     // Unload Assay from container
     delete container[ "QMock" ];
 
     // Test successful removal
-    ok( assertObject( undefined, container.QMock ), "QMock should be unloaded, and the associated identifier 'Qmock' should not exist on container" );
+    ok( Assay.object( undefined, container.QMock ), "QMock should be unloaded, and the associated identifier 'Qmock' should not exist on container" );
 
 	});
 
@@ -1354,16 +1353,16 @@
     container[ "QMock" ] = initQMock( __Assay && __Assay.object, { "isTest": true, "expose": __Assay && __Assay.exposeObject } );
 
     // Test interface
-    equals( assertHash( this.expectedQMockInterface, container[ "QMock" ] ), true, "initQMock() should return a Qmock instance interface registered to the identifier 'Qmock' on container" );
+    equals( Assay.hash( this.expectedQMockInterface, container[ "QMock" ] ), true, "initQMock() should return a Qmock instance interface registered to the identifier 'Qmock' on container" );
 
     // Test private methods exposed
-    ok( assertHash( {"get": Function, "set": Function, "restore": Function}, container.QMock[ "_createMockFromJSON" ] ), "initQMock( {isTest: true} ) should expose accessors and mutators for the private function _createMockFromJSON() on container.QMock" );
+    ok( Assay.hash( {"get": Function, "set": Function, "restore": Function}, container.QMock[ "_createMockFromJSON" ] ), "initQMock( {isTest: true} ) should expose accessors and mutators for the private function _createMockFromJSON() on container.QMock" );
 
     // Unload Assay from container
     delete container[ "QMock" ];
 
     // Test successful removal
-    ok( assertObject( undefined, container.QMock ), "QMock should be unloaded, and the associated identifier 'Qmock' should not exist on container" );
+    ok( Assay.object( undefined, container.QMock ), "QMock should be unloaded, and the associated identifier 'Qmock' should not exist on container" );
 
 	});
 
@@ -1973,15 +1972,15 @@
 	      .withValue(new Custom);
 
 	  // No need to exercise - all stubs
-	  ok( assertObject( wizard["number"], 1, true ), "wizard mock object should have a stubbed property of 'number' with a value of (Number: 1)");
-	  ok( assertObject( wizard["boolean"], true, true ), "wizard mock object should have a stubbed property of 'number' with a value of (Boolean: true)");
-	  ok( assertObject( wizard["null"], null, true ), "wizard mock object should have a stubbed property of 'null' with a value of (null)");
-	  ok( assertObject( wizard["function"], function() {}, true ), "wizard mock object should have a stubbed property of 'function' with a value of (Function: function stubbedFunction () {})");
-	  ok( assertObject( wizard["object"], {}, true ), "wizard mock object should have a stubbed property of 'object' with a value of (Object: {})");
-	  ok( assertObject( wizard["array"], [], true ), "wizard mock object should have a stubbed property of 'array' with a value of (Array: [])");
-	  ok( assertObject( wizard["regExp"], /RegExp/, true ), "wizard mock object should have a stubbed property of 'regExp' with a value of (RegExp: /RegExp/)");
-	  ok( assertObject( wizard["date"], new Date(1970), true ), "wizard mock object should have a stubbed property of 'date' with a value of (Date: new Date)");
-	  ok( assertObject( wizard["custom object"], new Custom, true ), "wizard mock object should have a stubbed property of 'custom object' with a value of (Custom: new Custom)");
+	  ok( Assay.object( wizard["number"], 1, true ), "wizard mock object should have a stubbed property of 'number' with a value of (Number: 1)");
+	  ok( Assay.object( wizard["boolean"], true, true ), "wizard mock object should have a stubbed property of 'number' with a value of (Boolean: true)");
+	  ok( Assay.object( wizard["null"], null, true ), "wizard mock object should have a stubbed property of 'null' with a value of (null)");
+	  ok( Assay.object( wizard["function"], function() {}, true ), "wizard mock object should have a stubbed property of 'function' with a value of (Function: function stubbedFunction () {})");
+	  ok( Assay.object( wizard["object"], {}, true ), "wizard mock object should have a stubbed property of 'object' with a value of (Object: {})");
+	  ok( Assay.object( wizard["array"], [], true ), "wizard mock object should have a stubbed property of 'array' with a value of (Array: [])");
+	  ok( Assay.object( wizard["regExp"], /RegExp/, true ), "wizard mock object should have a stubbed property of 'regExp' with a value of (RegExp: /RegExp/)");
+	  ok( Assay.object( wizard["date"], new Date(1970), true ), "wizard mock object should have a stubbed property of 'date' with a value of (Date: new Date)");
+	  ok( Assay.object( wizard["custom object"], new Custom, true ), "wizard mock object should have a stubbed property of 'custom object' with a value of (Custom: new Custom)");
 
 	});
 
@@ -2064,15 +2063,15 @@
     });
 
 	  // No need to exercise - all stubs
-	  ok( assertObject( wizard["number"], 1, true ), "wizard mock object should have a stubbed property of 'number' with a value of (Number: 1)");
-	  ok( assertObject( wizard["boolean"], true, true ), "wizard mock object should have a stubbed property of 'number' with a value of (Boolean: true)");
-	  ok( assertObject( wizard["null"], null, true ), "wizard mock object should have a stubbed property of 'null' with a value of (null)");
-	  ok( assertObject( wizard["function"], function() {}, true ), "wizard mock object should have a stubbed property of 'function' with a value of (Function: function stubbedFunction () {})");
-	  ok( assertObject( wizard["object"], {}, true ), "wizard mock object should have a stubbed property of 'object' with a value of (Object: {})");
-	  ok( assertObject( wizard["array"], [], true ), "wizard mock object should have a stubbed property of 'array' with a value of (Array: [])");
-	  ok( assertObject( wizard["regExp"], /RegExp/, true ), "wizard mock object should have a stubbed property of 'regExp' with a value of (RegExp: /RegExp/)");
-	  ok( assertObject( wizard["date"], new Date(1970), true ), "wizard mock object should have a stubbed property of 'date' with a value of (Date: new Date)");
-	  ok( assertObject( wizard["custom object"], new Custom, true ), "wizard mock object should have a stubbed property of 'custom object' with a value of (Custom: new Custom)");
+	  ok( Assay.object( wizard["number"], 1, true ), "wizard mock object should have a stubbed property of 'number' with a value of (Number: 1)");
+	  ok( Assay.object( wizard["boolean"], true, true ), "wizard mock object should have a stubbed property of 'number' with a value of (Boolean: true)");
+	  ok( Assay.object( wizard["null"], null, true ), "wizard mock object should have a stubbed property of 'null' with a value of (null)");
+	  ok( Assay.object( wizard["function"], function() {}, true ), "wizard mock object should have a stubbed property of 'function' with a value of (Function: function stubbedFunction () {})");
+	  ok( Assay.object( wizard["object"], {}, true ), "wizard mock object should have a stubbed property of 'object' with a value of (Object: {})");
+	  ok( Assay.object( wizard["array"], [], true ), "wizard mock object should have a stubbed property of 'array' with a value of (Array: [])");
+	  ok( Assay.object( wizard["regExp"], /RegExp/, true ), "wizard mock object should have a stubbed property of 'regExp' with a value of (RegExp: /RegExp/)");
+	  ok( Assay.object( wizard["date"], new Date(1970), true ), "wizard mock object should have a stubbed property of 'date' with a value of (Date: new Date)");
+	  ok( Assay.object( wizard["custom object"], new Custom, true ), "wizard mock object should have a stubbed property of 'custom object' with a value of (Custom: new Custom)");
 
 	});
 
@@ -2110,19 +2109,19 @@
 	    .andExpects(1)
 	      .method('getEmptyObjectValue').returns({ });
 
-  	ok( assertObject( mock.getNumericValue(), 10, true ), "getNumericValue() on mock should return (Number: 10)");
-    ok( assertObject( mock.getStringValue(), 'data', true ), "getStringValue() on mock should return (String: data)");
-    ok( assertObject( mock.getArrayValue(), [ 1, 2, 3 ], true ), "getArrayValue() on mock should return (Array: [ 1, 2, 3 ])");
-    ok( assertObject( mock.getFunctionValue()(), 'function', true ), "getFunctionValue() on mock, when invoked, should return (String: 'function')");
-    ok( assertObject( mock.getObjectValue(), { id: 5, value: 'value' }, true ), "getObjectValue() on mock should return (Object: {id: 5, value: 'value'})");
-    ok( assertObject( mock.getNullValue(), null, true ), "getNullValue() on mock should return (null)");
-    ok( assertObject( mock.getUndefinedValue(), undefined, true ), "getUndefinedValue() on mock should return (undefined)");
-    ok( assertObject( mock.getEmptyStringValue(), "", true ), "getEmptyStringValue() on mock should return (String '')");
-    ok( assertObject( mock.getZeroValue(), 0, true ), "getZeroValue() on mock should return (Number: 0)");
-    ok( assertObject( mock.getTrueValue(), true, true ), "getTrueValue() on mock should return (Boolean: true)");
-    ok( assertObject( mock.getFalseValue(), false, true ), "getFalseValue() on mock should return (Boolean: false)");
-    ok( assertObject( mock.getEmptyArrayValue(), [], true ), "getEmptyArrayValue() on mock should return (Array: [])");
-    ok( assertObject( mock.getEmptyObjectValue(), {}, true ), "getEmptyObjectValue() on mock should return (Object: {})");
+  	ok( Assay.object( mock.getNumericValue(), 10, true ), "getNumericValue() on mock should return (Number: 10)");
+    ok( Assay.object( mock.getStringValue(), 'data', true ), "getStringValue() on mock should return (String: data)");
+    ok( Assay.object( mock.getArrayValue(), [ 1, 2, 3 ], true ), "getArrayValue() on mock should return (Array: [ 1, 2, 3 ])");
+    ok( Assay.object( mock.getFunctionValue()(), 'function', true ), "getFunctionValue() on mock, when invoked, should return (String: 'function')");
+    ok( Assay.object( mock.getObjectValue(), { id: 5, value: 'value' }, true ), "getObjectValue() on mock should return (Object: {id: 5, value: 'value'})");
+    ok( Assay.object( mock.getNullValue(), null, true ), "getNullValue() on mock should return (null)");
+    ok( Assay.object( mock.getUndefinedValue(), undefined, true ), "getUndefinedValue() on mock should return (undefined)");
+    ok( Assay.object( mock.getEmptyStringValue(), "", true ), "getEmptyStringValue() on mock should return (String '')");
+    ok( Assay.object( mock.getZeroValue(), 0, true ), "getZeroValue() on mock should return (Number: 0)");
+    ok( Assay.object( mock.getTrueValue(), true, true ), "getTrueValue() on mock should return (Boolean: true)");
+    ok( Assay.object( mock.getFalseValue(), false, true ), "getFalseValue() on mock should return (Boolean: false)");
+    ok( Assay.object( mock.getEmptyArrayValue(), [], true ), "getEmptyArrayValue() on mock should return (Array: [])");
+    ok( Assay.object( mock.getEmptyObjectValue(), {}, true ), "getEmptyObjectValue() on mock should return (Object: {})");
     ok(mock.verify(), "verify() should be true");
 
 	});
@@ -2173,19 +2172,19 @@
 	    }
 	  });
 
-  	ok( assertObject( mock.getNumericValue(), 10, true ), "getNumericValue() on mock should return (Number: 10)");
-    ok( assertObject( mock.getStringValue(), 'data', true ), "getStringValue() on mock should return (String: data)");
-    ok( assertObject( mock.getArrayValue(), [ 1, 2, 3 ], true ), "getArrayValue() on mock should return (Array: [ 1, 2, 3 ])");
-    ok( assertObject( mock.getFunctionValue()(), 'function', true ), "getFunctionValue() on mock, when invoked, should return (String: 'function')");
-    ok( assertObject( mock.getObjectValue(), { id: 5, value: 'value' }, true ), "getObjectValue() on mock should return (Object: {id: 5, value: 'value'})");
-    ok( assertObject( mock.getNullValue(), null, true ), "getNullValue() on mock should return (null)");
-    ok( assertObject( mock.getUndefinedValue(), undefined, true ), "getUndefinedValue() on mock should return (undefined)");
-    ok( assertObject( mock.getEmptyStringValue(), "", true ), "getEmptyStringValue() on mock should return (String '')");
-    ok( assertObject( mock.getZeroValue(), 0, true ), "getZeroValue() on mock should return (Number: 0)");
-    ok( assertObject( mock.getTrueValue(), true, true ), "getTrueValue() on mock should return (Boolean: true)");
-    ok( assertObject( mock.getFalseValue(), false, true ), "getFalseValue() on mock should return (Boolean: false)");
-    ok( assertObject( mock.getEmptyArrayValue(), [], true ), "getEmptyArrayValue() on mock should return (Array: [])");
-    ok( assertObject( mock.getEmptyObjectValue(), {}, true ), "getEmptyObjectValue() on mock should return (Object: {})");
+  	ok( Assay.object( mock.getNumericValue(), 10, true ), "getNumericValue() on mock should return (Number: 10)");
+    ok( Assay.object( mock.getStringValue(), 'data', true ), "getStringValue() on mock should return (String: data)");
+    ok( Assay.object( mock.getArrayValue(), [ 1, 2, 3 ], true ), "getArrayValue() on mock should return (Array: [ 1, 2, 3 ])");
+    ok( Assay.object( mock.getFunctionValue()(), 'function', true ), "getFunctionValue() on mock, when invoked, should return (String: 'function')");
+    ok( Assay.object( mock.getObjectValue(), { id: 5, value: 'value' }, true ), "getObjectValue() on mock should return (Object: {id: 5, value: 'value'})");
+    ok( Assay.object( mock.getNullValue(), null, true ), "getNullValue() on mock should return (null)");
+    ok( Assay.object( mock.getUndefinedValue(), undefined, true ), "getUndefinedValue() on mock should return (undefined)");
+    ok( Assay.object( mock.getEmptyStringValue(), "", true ), "getEmptyStringValue() on mock should return (String '')");
+    ok( Assay.object( mock.getZeroValue(), 0, true ), "getZeroValue() on mock should return (Number: 0)");
+    ok( Assay.object( mock.getTrueValue(), true, true ), "getTrueValue() on mock should return (Boolean: true)");
+    ok( Assay.object( mock.getFalseValue(), false, true ), "getFalseValue() on mock should return (Boolean: false)");
+    ok( Assay.object( mock.getEmptyArrayValue(), [], true ), "getEmptyArrayValue() on mock should return (Array: [])");
+    ok( Assay.object( mock.getEmptyObjectValue(), {}, true ), "getEmptyObjectValue() on mock should return (Object: {})");
     ok(mock.verify(), "verify() should be true");
 
 	});
