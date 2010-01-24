@@ -233,8 +233,8 @@ function initAssay ( opt ) {
     function assertObject ( expected, actual, opt ) {
 
       // Delegate straight to assertCollection if a presentation to an interface
-      if ( opt && opt.isDelegate ) {
-        delete opt.isDelegate;
+      if ( opt && opt.delegate === true ) {
+        delete opt.delegate;
         return assertCollection.apply( null, arguments );
       }
 
@@ -806,7 +806,7 @@ function initQMock ( assert, opt ) {
                                 "exceptionType": (strictValueChecking) ? "IncorrectArgumentValueException" : "IncorrectArgumentTypeException",
                                 "exceptionHandler": throwMockException,
                                 "descriptor": name,
-                                "isDelegate": true
+                                "delegate": true
                               }
                             )
                           ) {
@@ -874,7 +874,7 @@ function initQMock ( assert, opt ) {
             {
               "strictValueChecking": mock.strictValueChecking,
               "exceptionHandler": throwMockException,
-              "isDelegate": true,
+              "delegate": true,
               "descriptor": "Mock Constructor"
             }
           );
