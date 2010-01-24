@@ -84,9 +84,37 @@
 
 	test("Assay.exposeObject() method - test parameter requirements", function () {
 
-	  expect(  );
+	  expect( 1 );
 
+    // Test no arguments
+	  try {
+			Assay.exposeObject();
+	    ok(false, "Assay.exposeObject() should throw exception when passed No parameters");
+	  } catch (exception) {
+	    equals(exception.type, "MissingParametersException", "Assay.exposeObject() exception type should be MissingParametersException for less than three parameters (required). Result");
+	  }
 
+	});
+
+	test("Assay.exposeObject() method - exercises", function () {
+
+	  expect( 4 );
+
+    var container = {},
+        privateObj = "foo";
+
+	  // Test three required params
+	  Assay.exposeObject( privateObj, "_test", container );
+
+	  // Exercise with all options [default]
+	  ok( Assay.hash( {"get": Function, "set": Function, "restore": Function}, container[ "_test" ] ), "exposeObject() should expose accessors and mutators for privateObj on container" );
+    equals("foo", container._test.get(), "container._test.get() should return 'foo'. Result");
+		// Mutate value of privateObj
+		container._test.set("bar");
+    equals("bar", container._test.get(), "container._test.get() should return 'bar'. Result");
+    // Restore value of privateObj
+		container._test.restore();
+    equals("foo", container._test.get(), "container._test.get() should return 'foo'. Result");
 
 	});
 
@@ -118,7 +146,6 @@
 	  }
 
 	  // Test expected and actual collection of objects with different lengths
-
 		equals((function() {
       return Assay.collection([1,2], arguments);
     })(1), false, "Assay.collection() should return false if the 'expected' and 'actual' objects have mistmatched lengths");
