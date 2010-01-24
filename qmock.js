@@ -67,11 +67,22 @@ function initAssay ( opt ) {
 
     // Function to expose private objects on a target object for testing (plus injection of mocks/stubs and reset functionality)
     // Be able to pass object detailing which methods to return (maybe config? {get:true, set:true, reset:true} - default would be false?)
-    function exposeObject ( obj, descriptor, container ) {
+    function exposeObject ( obj, descriptor, container, opt_Filter ) {
 
       var cachedObj = obj, // can this part be improved by one cache for all or many atomic caches?
           // defaults
-          container = container || this;
+          container = container || this,
+          map = {
+            get: function () {
+              return obj;
+            },
+            set: function ( newObj ) {
+              obj = newObj || null;
+            },
+            restore: function () {
+              obj = cachedObj;
+            }
+          };
 
       // parameter checks
       if ( arguments.length < 3 ) {
@@ -81,18 +92,17 @@ function initAssay ( opt ) {
         }
       }
 
-      // attach accessors & mutators
-      container[ descriptor ] = {
-        get: function () {
-          return obj;
-        },
-        set: function () {
-          obj = arguments[ 0 ] || null;
-        },
-        restore: function () {
-          obj = cachedObj;
+      // Filter map of getters and setters
+      if ( opt_Filter !== undefined ) {
+        for ( var key in map ) {
+          if ( ( !opt_Filter.hasOwnProperty( key ) || opt_Filter[ key ] !== true ) && ( key in map ) ) {
+            delete map[ key ];
+          }
         }
       }
+
+      // attach accessors & mutators
+      container[ descriptor ] = map;
 
       // successful exposé
       return true;

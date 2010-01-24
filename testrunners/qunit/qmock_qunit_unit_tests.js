@@ -98,20 +98,42 @@
 
 	test("Assay.exposeObject() method - exercises", function () {
 
-	  expect( 4 );
+	  expect( 12 );
 
     var container = {},
         privateObj = "foo";
 
-	  // Test three required params
-	  Assay.exposeObject( privateObj, "_test", container );
+	  // Test three required params with filter (6 permutations)
+	  Assay.exposeObject( privateObj, "_test", container, {get: true} );
+	  ok( Assay.hash( {"get": Function}, container[ "_test" ] ), "exposeObject() should expose get() accessor for privateObj on container" );
+	  ok( Assay.object( undefined, container[ "_test" ].set ), "exposeObject() should not expose set() mutator for privateObj on container" );
+	  ok( Assay.object( undefined, container[ "_test" ].restore ), "exposeObject() should not expose restore() mutator for privateObj on container" );
+
+    // etc...
+	  Assay.exposeObject( privateObj, "_test", container, {set: true} );
+	  ok( Assay.hash( {"set": Function}, container[ "_test" ] ), "exposeObject() should expose only set() mutator for privateObj on container" );
+
+	  Assay.exposeObject( privateObj, "_test", container, {restore: true} );
+	  ok( Assay.hash( {"restore": Function}, container[ "_test" ] ), "exposeObject() should expose only restore() mutator for privateObj on container" );
+
+	  Assay.exposeObject( privateObj, "_test", container, {get: true, set: true} );
+	  ok( Assay.hash( {"get": Function, "set": Function}, container[ "_test" ] ), "exposeObject() should expose get() and set() accessors and mutators for privateObj on container" );
+
+	  Assay.exposeObject( privateObj, "_test", container, {set: true, restore: true} );
+	  ok( Assay.hash( {"set": Function, "restore": Function}, container[ "_test" ] ), "exposeObject() should expose set() and restore() mutators for privateObj on container" );
+
+	  Assay.exposeObject( privateObj, "_test", container, {get: true, restore: true} );
+	  ok( Assay.hash( {"get": Function, "restore": Function}, container[ "_test" ] ), "exposeObject() should expose get() and restore() accessors and mutators for privateObj on container" );
 
 	  // Exercise with all options [default]
+	  Assay.exposeObject( privateObj, "_test", container );
 	  ok( Assay.hash( {"get": Function, "set": Function, "restore": Function}, container[ "_test" ] ), "exposeObject() should expose accessors and mutators for privateObj on container" );
     equals("foo", container._test.get(), "container._test.get() should return 'foo'. Result");
+
 		// Mutate value of privateObj
 		container._test.set("bar");
     equals("bar", container._test.get(), "container._test.get() should return 'bar'. Result");
+
     // Restore value of privateObj
 		container._test.restore();
     equals("foo", container._test.get(), "container._test.get() should return 'foo'. Result");
