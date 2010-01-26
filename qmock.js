@@ -232,6 +232,96 @@ function initAssay ( opt ) {
     // Key function to test objects against each other.
     function assertObject ( expected, actual, opt ) {
 
+      // http://perfectionkills.com/instanceof-considered-harmful-or-how-to-write-a-robust-isarray/
+      // http://gist.github.com/47997
+      // Function name can't be can't be typeof or typeOf because Safari barfs on
+      // the reserved word use.  Non-IE browsers report the browser object classes
+      // in the toString e.g. '[object HTMLDivElement]', but IE always returns
+      // '[object Object]' for DOM objects and methods because they are COM objects
+      function _getTypeof ( obj ) {
+        TYPES = {
+          "[object Number]"   : "Number",
+          "[object Boolean]"  : "Boolean",
+          "[object String]"   : "String",
+          "[object Function]" : "Function",
+          "[object RegExp]"   : "Regexp",
+          "[object Array]"    : "Array",
+          "[object Date]"     : "Date",
+          "[object Error]"    : "Error"
+        };
+        return ( obj === undefined )
+          ? 'undefined'
+          : TYPES[ Object.prototype.toString.call( obj ) ]
+            || ( obj ? 'object' : 'null' );
+      }
+
+      // Only returns true for Native constructors - not host objects
+      // Native object types have {DontEnum} internal attribute set to true
+      // Note: reference to undefined is from reference trapped in Assay scope (safer)
+      function _isNativeType ( obj ) {
+
+        // Enumeration test
+        for( var key in ( obj || {} ) ) {}
+
+        // Return Boolean - null and undefined // true
+        return !!( ( obj === null || obj === undefined )
+          || ( key === undefined ) && ( typeof obj === "function" ) );
+
+      }
+
+      // Grab the identifier of a function object
+      // Most useful called on function declarations, or named function expressions (or with displayName)
+      // Otherwise will just return ['anonymous']
+      // Not re-using _getTypeof to reduce dependencies
+      /**
+       *
+    	 * Function that returns a function name by decompilation or the Function.name property.
+    	 *
+    	 */
+
+    	// cache compiled RegExp in memory
+    	var _getKlassName = ( function ( fnIdentifier ) {
+
+    	  return function ( fn ) {
+
+          // Check if dealing with a function object
+          if ( Object.prototype.toString.call( fn ) !== "[object Function]" ) {
+            return false;
+          }
+
+          // Firefox supports Function.name, so try that first, else decompile and use RegExp
+          // IE returns null for anonymous functions, so provide fallback array
+          // We don't use displayName as that can be manipulated more easily to mess up the 'Klass' inference.
+          var id = ( !fn.ID )
+            ? ( !fn.name )
+            ? ( fn + "" ).match( fnIdentifier )[ 1 ]
+            : fn.name
+            : fn.ID;
+
+          // Cache result to avoid future lookups
+          return fn[ "ID" ] = fn.name || id || "anonymous()";
+
+        };
+
+    	})(/function +([\w$]*) *\(/);
+
+      function _setKlassName ( fn, identifier ) {
+
+        // Check if dealing with a function object
+        if ( Object.prototype.toString.call( fn ) !== "[object Function]" ) {
+          return false;
+        }
+
+        // make sure identifier is String
+        if ( !identifier || identifier.constructor !== String ) {
+          return false;
+        }
+
+        // assign and return success
+        return !!( fn[ "ID" ] = identifier );
+
+      }
+
       // Delegate straight to assertCollection if a presentation to an interface
       if ( opt && opt.delegate === true ) {
         delete opt.delegate;
@@ -302,8 +392,8 @@ function initAssay ( opt ) {
             isRegExp = true;
           }
 
-          // set collection flag
-          // We use hasOwnProperty() because a lookup a force to Boolean lookup generates false positives (e.g. 0), and the 'in' operator crawls the prototype chain
+          // set collection flag via duck-typing test
+          // We use hasOwnProperty() because a force to Boolean lookup generates false positives (e.g. 0), and the 'in' operator crawls the prototype chain
           if ( expected.hasOwnProperty && expected.hasOwnProperty('length') ) {
             isCollection = true;
           }
