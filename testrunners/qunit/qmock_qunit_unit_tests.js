@@ -23,8 +23,15 @@
         "collection": Function,
         "object": Function,
         "hash": Function,
-        "exposeObject": Function,
-        "Variable": Function
+        "Variable": Function,
+        "Utils" : {
+          "isHash": Function,
+          "exposeObject": Function,
+          "isNativeType": Function,
+          "getTypeOf": Function,
+          "getKlassName": Function,
+          "setKlassName": Function
+        }
       };
 	  },
 
@@ -34,9 +41,9 @@
 
 	});
 
-	test("Setup & teardown [normal mode]", function () {
+	test("Setup & teardown", function () {
 
-	  expect( 3 );
+	  expect( 2 );
 
 	  var container = {};
 
@@ -45,32 +52,6 @@
 
     // Test interface
     equals( Assay.hash( this.expectedAssayInterface, container[ "Assay" ] ), true, "initAssay() should return an Assay instance interface registered with the identifier 'Assay' on container" );
-
-    // Test private methods NOT exposed
-    ok( Assay.object( undefined, container.Assay.hash._isHash ), "initAssay() without optional param should not expose private methods" );
-
-    // Unload Assay from container
-    delete container[ "Assay" ];
-
-    // Test successful removal
-    ok( Assay.object( undefined, container.Assay ), "Assay should be unloaded, and the associated identifier 'Assay' should not exist on container" );
-
-	});
-
-	test("Setup & teardown [exposed mode]", function () {
-
-	  expect( 3 );
-
-	  var container = {};
-
-    // Exercise inititaliser in exposed mode
-    container[ "Assay" ] = initAssay( { "isTest": true } );
-
-    // Test interface
-    equals( Assay.hash( this.expectedAssayInterface, container[ "Assay" ] ), true, "initAssay() should return an Assay instance interface registered to the identifier 'Assay' on container" );
-
-    // Test private methods exposed
-    ok( Assay.hash( {"get": Function, "set": Function, "restore": Function}, container.Assay.hash._isHash ), "initAssay() should expose accessors and mutators for the private function _isHash() on container.Assay.hash()" );
 
     // Unload Assay from container
     delete container[ "Assay" ];
@@ -82,13 +63,13 @@
 
 	module("Assay lib // Interface unit test");
 
-	test("Assay.exposeObject() method - test parameter requirements", function () {
+	test("Assay.Utils.exposeObject() method - test parameter requirements", function () {
 
 	  expect( 1 );
 
     // Test no arguments
 	  try {
-			Assay.exposeObject();
+			Assay.Utils.exposeObject();
 	    ok(false, "Assay.exposeObject() should throw exception when passed No parameters");
 	  } catch (exception) {
 	    equals(exception.type, "MissingParametersException", "Assay.exposeObject() exception type should be MissingParametersException for less than three parameters (required). Result");
@@ -96,7 +77,7 @@
 
 	});
 
-	test("Assay.exposeObject() method - exercises", function () {
+	test("Assay.Utils.exposeObject() method - exercises", function () {
 
 	  expect( 12 );
 
@@ -104,29 +85,29 @@
         privateObj = "foo";
 
 	  // Test three required params with filter (6 permutations)
-	  Assay.exposeObject( privateObj, "_test", container, {get: true} );
+	  Assay.Utils.exposeObject( privateObj, "_test", container, {get: true} );
 	  ok( Assay.hash( {"get": Function}, container[ "_test" ] ), "exposeObject() should expose get() accessor for privateObj on container" );
 	  ok( Assay.object( undefined, container[ "_test" ].set ), "exposeObject() should not expose set() mutator for privateObj on container" );
 	  ok( Assay.object( undefined, container[ "_test" ].restore ), "exposeObject() should not expose restore() mutator for privateObj on container" );
 
     // etc...
-	  Assay.exposeObject( privateObj, "_test", container, {set: true} );
+	  Assay.Utils.exposeObject( privateObj, "_test", container, {set: true} );
 	  ok( Assay.hash( {"set": Function}, container[ "_test" ] ), "exposeObject() should expose only set() mutator for privateObj on container" );
 
-	  Assay.exposeObject( privateObj, "_test", container, {restore: true} );
+	  Assay.Utils.exposeObject( privateObj, "_test", container, {restore: true} );
 	  ok( Assay.hash( {"restore": Function}, container[ "_test" ] ), "exposeObject() should expose only restore() mutator for privateObj on container" );
 
-	  Assay.exposeObject( privateObj, "_test", container, {get: true, set: true} );
+	  Assay.Utils.exposeObject( privateObj, "_test", container, {get: true, set: true} );
 	  ok( Assay.hash( {"get": Function, "set": Function}, container[ "_test" ] ), "exposeObject() should expose get() and set() accessors and mutators for privateObj on container" );
 
-	  Assay.exposeObject( privateObj, "_test", container, {set: true, restore: true} );
+	  Assay.Utils.exposeObject( privateObj, "_test", container, {set: true, restore: true} );
 	  ok( Assay.hash( {"set": Function, "restore": Function}, container[ "_test" ] ), "exposeObject() should expose set() and restore() mutators for privateObj on container" );
 
-	  Assay.exposeObject( privateObj, "_test", container, {get: true, restore: true} );
+	  Assay.Utils.exposeObject( privateObj, "_test", container, {get: true, restore: true} );
 	  ok( Assay.hash( {"get": Function, "restore": Function}, container[ "_test" ] ), "exposeObject() should expose get() and restore() accessors and mutators for privateObj on container" );
 
 	  // Exercise with all options [default]
-	  Assay.exposeObject( privateObj, "_test", container );
+	  Assay.Utils.exposeObject( privateObj, "_test", container );
 	  ok( Assay.hash( {"get": Function, "set": Function, "restore": Function}, container[ "_test" ] ), "exposeObject() should expose accessors and mutators for privateObj on container" );
     equals("foo", container._test.get(), "container._test.get() should return 'foo'. Result");
 
@@ -333,9 +314,9 @@
 
 	});
 
-	test("Assay.hash._isHash() [private] method - exercises", function () {
+	test("Assay.Utils.isHash() - exercises", function () {
 
-	  var isHash = Assay.hash["_isHash"].get();
+	  var isHash = Assay.Utils.isHash;
 
 	  // Expected False Evaluations
 
@@ -681,9 +662,9 @@
 
 	});
 
-	test("Assay.object._isNativeType() [private] method - exercises", function () {
+	test("Assay.Utils.isNativeType() - exercises", function () {
 
-	  var isNativeType = Assay.object["_isNativeType"].get();
+	  var isNativeType = Assay.Utils.isNativeType;
 
     function augmentNative ( obj ) {
       obj.prototype[ "foo" ] = "bar";
@@ -718,24 +699,24 @@
 
 	  // Test composite data types
 
-	  equals( isNativeType( Object(0) ), false, "isNativeType() should be true with 'obj' parameter: (Number: Object(0)). Result");
-	  equals( isNativeType( Object(1) ), false, "isNativeType() should be true with 'obj' parameter: (Number: Object(1)). Result");
-	  equals( isNativeType( Object("") ), false, "isNativeType() should be true with 'obj' parameter: (String: Object('')). Result");
-	  equals( isNativeType( Object('string composite type') ), false, "isNativeType() should be true with 'obj' parameter: (String: Object('string compositive type')). Result");
-	  equals( isNativeType( Object(false) ), false, "isNativeType() should be true with 'obj' parameter: (Boolean: false). Result");
-	  equals( isNativeType( Object(true) ), false, "isNativeType() should be true with 'obj' parameter: (Boolean: true). Result");
-	  equals( isNativeType( /re/ ), false, "isNativeType() should be true with 'obj' parameter: (RegExp: /re/). Result");
-	  equals( isNativeType( function() {} ), false, "isNativeType() should be true with 'obj' parameter: (Function: function(){}). Result");
-	  equals( isNativeType( {} ), false, "isNativeType() should be true with 'obj' parameter: (Object: {}). Result");
-	  equals( isNativeType( [] ), false, "isNativeType() should be true with 'obj' parameter: (Array: []). Result");
-	  equals( isNativeType( new Date ), false, "isNativeType() should be true with 'obj' parameter: (Date: new Date). Result");
-	  equals( isNativeType( new Custom ), false, "isNativeType() should be true with 'obj' parameter: (Custom: new Custom). Result");
+	  equals( isNativeType( Object(0) ), false, "isNativeType() should be false with 'obj' parameter: (Number: Object(0)). Result");
+	  equals( isNativeType( Object(1) ), false, "isNativeType() should be false with 'obj' parameter: (Number: Object(1)). Result");
+	  equals( isNativeType( Object("") ), false, "isNativeType() should be false with 'obj' parameter: (String: Object('')). Result");
+	  equals( isNativeType( Object('string composite type') ), false, "isNativeType() should be false with 'obj' parameter: (String: Object('string compositive type')). Result");
+	  equals( isNativeType( Object(false) ), false, "isNativeType() should be false with 'obj' parameter: (Boolean: false). Result");
+	  equals( isNativeType( Object(true) ), false, "isNativeType() should be false with 'obj' parameter: (Boolean: true). Result");
+	  equals( isNativeType( /re/ ), false, "isNativeType() should be false with 'obj' parameter: (RegExp: /re/). Result");
+	  equals( isNativeType( function() {} ), false, "isNativeType() should be false with 'obj' parameter: (Function: function(){}). Result");
+	  equals( isNativeType( {} ), false, "isNativeType() should be false with 'obj' parameter: (Object: {}). Result");
+	  equals( isNativeType( [] ), false, "isNativeType() should be false with 'obj' parameter: (Array: []). Result");
+	  equals( isNativeType( new Date ), false, "isNativeType() should be false with 'obj' parameter: (Date: new Date). Result");
+	  equals( isNativeType( new Custom ), false, "isNativeType() should be false with 'obj' parameter: (Custom: new Custom). Result");
 
 	  // Native / Host Objects
 	  // Math is not a Type but a native object
-	  equals( isNativeType( Math ), false, "isNativeType() should be true with 'obj' parameter: (Math). Result");
+	  equals( isNativeType( Math ), false, "isNativeType() should be false with 'obj' parameter: (Math). Result");
 	  // need check for DOM / BOM before executing these (mainly for ssjs)
-	  equals( isNativeType( document ), false, "isNativeType() should be true with 'obj' parameter: (document HostObject). Result");
+	  equals( isNativeType( document ), false, "isNativeType() should be false with 'obj' parameter: (HostObject: document). Result");
 
 	  // Custom Objects
 	  equals( isNativeType( Custom ), false, "isNativeType() should be false with 'obj' parameter: (Custom). Result");
@@ -773,9 +754,9 @@
 
 	});
 
-	test("Assay.object._getTypeOf() [private] method - exercises", function () {
+	test("Assay.Utils.getTypeOf() - exercises", function () {
 
-	  var getTypeOf = Assay.object["_getTypeOf"].get();
+	  var getTypeOf = Assay.Utils.getTypeOf;
 
 	  // Expected True Evalutions
 
@@ -829,9 +810,9 @@
 
 	});
 
-	test("Assay.object._getKlassName() [private] method - exercises", function () {
+	test("Assay.Utils.getKlassName() - exercises", function () {
 
-	  var isHash = Assay.object["_getKlassName"].get();
+	  var isHash = Assay.Utils.getKlassName;
 
     /*
 
@@ -883,9 +864,9 @@
 
 	});
 
-	test("Assay.object._setKlassName() [private] method - exercises", function () {
+	test("Assay.Utils.setKlassName() - exercises", function () {
 
-	  var isHash = Assay.object["_setKlassName"].get();
+	  var isHash = Assay.Utils.setKlassName;
 
     /*
 
@@ -1654,7 +1635,7 @@
 	      __Assay = initAssay();
 
     // Exercise inititaliser in exposed mode
-    container[ "QMock" ] = initQMock( __Assay && __Assay.object, { "isTest": true, "expose": __Assay && __Assay.exposeObject } );
+    container[ "QMock" ] = initQMock( __Assay && __Assay.object, { "isTest": true, "expose": __Assay && __Assay.Utils.exposeObject } );
 
     // Test interface
     equals( Assay.hash( this.expectedQMockInterface, container[ "QMock" ] ), true, "initQMock() should return a Qmock instance interface registered to the identifier 'Qmock' on container" );
