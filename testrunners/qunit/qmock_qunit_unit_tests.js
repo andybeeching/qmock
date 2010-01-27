@@ -346,7 +346,7 @@
 	  equals( isHash( NaN ), false, "isHash() should be false with 'obj' parameter: (NaN). Result");
 	  equals( isHash( 0 ), false, "isHash() should be false with 'obj' parameter: (Number: 0). Result");
 	  equals( isHash( 1 ), false, "isHash() should be false with 'obj' parameter: (Number: 1). Result");
-	  //equals( isHash( "" ), false, "isHash() should be false with 'obj' parameter: (String: ""). Result");
+	  equals( isHash( "" ), false, "isHash() should be false with 'obj' parameter: (String: ''). Result");
 	  equals( isHash( "string primitive type" ), false, "isHash() should be false with 'obj' parameter: (String: 'string primitive type'). Result");
 	  equals( isHash( false ), false, "isHash() should be false with 'obj' parameter: (Boolean: false). Result");
 	  equals( isHash( true ), false, "isHash() should be false with 'obj' parameter: (Boolean: true). Result");
@@ -681,6 +681,261 @@
 
 	});
 
+	test("Assay.object._isNativeType() [private] method - exercises", function () {
+
+	  var isNativeType = Assay.object["_isNativeType"].get();
+
+    function augmentNative ( obj ) {
+      obj.prototype[ "foo" ] = "bar";
+      return obj;
+    }
+
+    function cleanNatives () {
+      for (
+        var i = 0,
+            types = [Number, String, Boolean, RegExp, Date, Function, Array, Object, Error],
+            len = types.length;
+          i < len;
+          i++ ) {
+        delete types[ i ][ "prototype" ][ "foo" ];
+      }
+    }
+
+    expect( 44 );
+
+	  // Expected False Evaluations
+
+	  // Test falsy types and primitive data types
+
+	  equals( isNativeType( NaN ), false, "isNativeType() should be false with 'obj' parameter: (NaN). Result");
+	  equals( isNativeType( Infinity ), false, "isNativeType() should be false with 'obj' parameter: (NaN). Result");
+	  equals( isNativeType( 0 ), false, "isNativeType() should be false with 'obj' parameter: (Number: 0). Result");
+	  equals( isNativeType( 1 ), false, "isNativeType() should be false with 'obj' parameter: (Number: 1). Result");
+	  equals( isNativeType( "" ), false, "isNativeType() should be false with 'obj' parameter: (String: ''). Result");
+	  equals( isNativeType( "string primitive type" ), false, "isNativeType() should be false with 'obj' parameter: (String: 'string primitive type'). Result");
+	  equals( isNativeType( false ), false, "isNativeType() should be false with 'obj' parameter: (Boolean: false). Result");
+	  equals( isNativeType( true ), false, "isNativeType() should be false with 'obj' parameter: (Boolean: true). Result");
+
+	  // Test composite data types
+
+	  equals( isNativeType( Object(0) ), false, "isNativeType() should be true with 'obj' parameter: (Number: Object(0)). Result");
+	  equals( isNativeType( Object(1) ), false, "isNativeType() should be true with 'obj' parameter: (Number: Object(1)). Result");
+	  equals( isNativeType( Object("") ), false, "isNativeType() should be true with 'obj' parameter: (String: Object('')). Result");
+	  equals( isNativeType( Object('string composite type') ), false, "isNativeType() should be true with 'obj' parameter: (String: Object('string compositive type')). Result");
+	  equals( isNativeType( Object(false) ), false, "isNativeType() should be true with 'obj' parameter: (Boolean: false). Result");
+	  equals( isNativeType( Object(true) ), false, "isNativeType() should be true with 'obj' parameter: (Boolean: true). Result");
+	  equals( isNativeType( /re/ ), false, "isNativeType() should be true with 'obj' parameter: (RegExp: /re/). Result");
+	  equals( isNativeType( function() {} ), false, "isNativeType() should be true with 'obj' parameter: (Function: function(){}). Result");
+	  equals( isNativeType( {} ), false, "isNativeType() should be true with 'obj' parameter: (Object: {}). Result");
+	  equals( isNativeType( [] ), false, "isNativeType() should be true with 'obj' parameter: (Array: []). Result");
+	  equals( isNativeType( new Date ), false, "isNativeType() should be true with 'obj' parameter: (Date: new Date). Result");
+	  equals( isNativeType( new Custom ), false, "isNativeType() should be true with 'obj' parameter: (Custom: new Custom). Result");
+
+	  // Native / Host Objects
+	  // Math is not a Type but a native object
+	  equals( isNativeType( Math ), false, "isNativeType() should be true with 'obj' parameter: (Math). Result");
+	  // need check for DOM / BOM before executing these (mainly for ssjs)
+	  equals( isNativeType( document ), false, "isNativeType() should be true with 'obj' parameter: (document HostObject). Result");
+
+	  // Custom Objects
+	  equals( isNativeType( Custom ), false, "isNativeType() should be false with 'obj' parameter: (Custom). Result");
+	  equals( isNativeType( focus ), false, "isNativeType() should be false with 'obj' parameter: (Event: focus). Result");
+
+	  // Expected True Evalutions
+
+	  // Test native objects
+    equals( isNativeType( null ), true, "isNativeType() should be true with 'obj' parameter: (null). Result");
+	  equals( isNativeType( undefined ), true, "isNativeType() should be true with 'obj' parameter: (undefined). Result");
+	  equals( isNativeType( Number ), true, "isNativeType() should be true with 'obj' parameter: (Number). Result");
+	  equals( isNativeType( String ), true, "isNativeType() should be true with 'obj' parameter: (String). Result");
+	  equals( isNativeType( Boolean ), true, "isNativeType() should be true with 'obj' parameter: (Boolean). Result");
+	  equals( isNativeType( RegExp ), true, "isNativeType() should be true with 'obj' parameter: (RegExp). Result");
+	  equals( isNativeType( Date ), true, "isNativeType() should be true with 'obj' parameter: (Date). Result");
+	  equals( isNativeType( Function ), true, "isNativeType() should be true with 'obj' parameter: (Function). Result");
+	  equals( isNativeType( Array ), true, "isNativeType() should be true with 'obj' parameter: (Array). Result");
+	  equals( isNativeType( Object ), true, "isNativeType() should be true with 'obj' parameter: (Object). Result");
+	  equals( isNativeType( Error ), true, "isNativeType() should be true with 'obj' parameter: (Object). Result");
+
+	  // Test native objects - augmented
+
+	  equals( isNativeType( augmentNative( Number ) ), true, "isNativeType() should be true with 'obj' parameter: (Number [augmented]). Result");
+	  equals( isNativeType( augmentNative( String ) ), true, "isNativeType() should be true with 'obj' parameter: (String [augmented]). Result");
+	  equals( isNativeType( augmentNative( Boolean ) ), true, "isNativeType() should be true with 'obj' parameter: (Boolean [augmented]). Result");
+	  equals( isNativeType( augmentNative( RegExp ) ), true, "isNativeType() should be true with 'obj' parameter: (RegExp [augmented]). Result");
+	  equals( isNativeType( augmentNative( Date ) ), true, "isNativeType() should be true with 'obj' parameter: (Date [augmented]). Result");
+	  equals( isNativeType( augmentNative( Function ) ), true, "isNativeType() should be true with 'obj' parameter: (Function [augmented]). Result");
+	  equals( isNativeType( augmentNative( Array ) ), true, "isNativeType() should be true with 'obj' parameter: (Array [augmented]). Result");
+	  equals( isNativeType( augmentNative( Object ) ), true, "isNativeType() should be true with 'obj' parameter: (Object [augmented]). Result");
+	  equals( isNativeType( augmentNative( Error ) ), true, "isNativeType() should be true with 'obj' parameter: (Error [augmented]). Result");
+
+    // Clean-up so as not to mitigate false positive/negatives in other tests
+    cleanNatives();
+
+	});
+
+	test("Assay.object._getTypeOf() [private] method - exercises", function () {
+
+	  var getTypeOf = Assay.object["_getTypeOf"].get();
+
+	  // Expected True Evalutions
+
+	  // Test falsy types and primitive data types
+
+	  equals( getTypeOf( null ), "null", "getTypeOf() should return 'null' with 'obj' parameter: (null). Result");
+	  equals( getTypeOf( undefined ), "undefined", "getTypeOf() should return 'undefined' with 'obj' parameter: (undefined). Result");
+	  equals( getTypeOf( NaN ), "number", "getTypeOf() should return 'Number' with 'obj' parameter: (NaN). Result");
+	  equals( getTypeOf( Infinity ), "number", "getTypeOf() should return 'Number' with 'obj' parameter: (NaN). Result");
+	  equals( getTypeOf( 0 ), "number", "getTypeOf() should return 'Number' with 'obj' parameter: (Number: 0). Result");
+	  equals( getTypeOf( 1 ), "number", "getTypeOf() should return 'Number' with 'obj' parameter: (Number: 1). Result");
+	  equals( getTypeOf( "" ), "string", "getTypeOf() should return 'String' with 'obj' parameter: (String: \"\"). Result");
+	  equals( getTypeOf( "foo" ), "string", "getTypeOf() should return 'String' with 'obj' parameter: (String: 'string primitive type'). Result");
+	  equals( getTypeOf( false ), "boolean", "getTypeOf() should return 'Boolean' with 'obj' parameter: (Boolean: false). Result");
+	  equals( getTypeOf( true ), "boolean", "getTypeOf() should return 'Boolean' with 'obj' parameter: (Boolean: true). Result");
+
+	  // Test composite data types
+
+	  equals( getTypeOf( Object(0) ), "number", "getTypeOf() should return 'Number' with 'obj' parameter: (Number: Object(0)). Result");
+	  equals( getTypeOf( Object(1) ), "number", "getTypeOf() should return 'Number' with 'obj' parameter: (Number: Object(1)). Result");
+	  equals( getTypeOf( Object("") ), "string", "getTypeOf() should return 'String' with 'obj' parameter: (String: Object('')). Result");
+	  equals( getTypeOf( Object("foo") ), "string", "getTypeOf() should return 'String' with 'obj' parameter: (String: Object('string compositive type')). Result");
+	  equals( getTypeOf( Object(false) ), "boolean", "getTypeOf() should return 'Boolean' with 'obj' parameter: (Boolean: false). Result");
+	  equals( getTypeOf( Object(true) ), "boolean", "getTypeOf() should return 'Boolean' with 'obj' parameter: (Boolean: true). Result");
+	  equals( getTypeOf( /re/ ), "regexp", "getTypeOf() should return 'RegExp' with 'obj' parameter: (RegExp: /re/). Result");
+	  equals( getTypeOf( function() {} ), "function", "getTypeOf() should return 'Function' with 'obj' parameter: (Function: function(){}). Result");
+	  equals( getTypeOf( {} ), "object", "getTypeOf() should return 'Object' with 'obj' parameter: (Object: {}). Result");
+	  equals( getTypeOf( [] ), "array", "getTypeOf() should return 'Array' with 'obj' parameter: (Array: []). Result");
+	  equals( getTypeOf( new Date ), "date", "getTypeOf() should return 'Date' with 'obj' parameter: (Date: new Date). Result");
+	  equals( getTypeOf( new Custom ), "object", "getTypeOf() should return 'Object' with 'obj' parameter: (Custom: new Custom). Result");
+
+	  // Test native & custom constructors
+
+	  equals( getTypeOf( Number ), "function", "getTypeOf() should return 'Function' with 'obj' parameter: (Number). Result");
+	  equals( getTypeOf( String ), "function", "getTypeOf() should return 'Function' with 'obj' parameter: (String). Result");
+	  equals( getTypeOf( Boolean ), "function", "getTypeOf() should return 'Function' with 'obj' parameter: (Boolean). Result");
+	  equals( getTypeOf( RegExp ), "function", "getTypeOf() should return 'Function' with 'obj' parameter: (RegExp). Result");
+	  equals( getTypeOf( Date ), "function", "getTypeOf() should return 'Function' with 'obj' parameter: (Date). Result");
+	  equals( getTypeOf( Function ), "function", "getTypeOf() should return 'Function' with 'obj' parameter: (Function). Result");
+	  equals( getTypeOf( Array ), "function", "getTypeOf() should return 'Function' with 'obj' parameter: (Array). Result");
+	  equals( getTypeOf( Object ), "function", "getTypeOf() should return 'Function' with 'obj' parameter: (Object). Result");
+	  equals( getTypeOf( Custom ), "function", "getTypeOf() should return 'Function' with 'obj' parameter: (Custom). Result");
+	  equals( getTypeOf( Custom.prototype ), "object", "getTypeOf() should return 'Function' with 'obj' parameter: (Custom.prototype). Result");
+	  equals( getTypeOf( Custom.constructor ), "function", "getTypeOf() should return 'Function' with 'obj' parameter: (Custom.constructor). Result");
+	  equals( getTypeOf( Custom.__proto__ ), "function", "getTypeOf() should return 'Function' with 'obj' parameter: (Custom.__proto__). Result");
+
+	  // Test native / host objects
+
+	  equals( getTypeOf( Math ), "object", "getTypeOf() should return 'Object' with 'obj' parameter: (Math). Result");
+	  equals( getTypeOf( focus ), "function", "getTypeOf() should return 'Function' with 'obj' parameter: (Event: focus). Result");
+
+	});
+
+	test("Assay.object._getKlassName() [private] method - exercises", function () {
+
+	  var isHash = Assay.object["_getKlassName"].get();
+
+    /*
+
+	  // Expected False Evaluations
+
+	  // Test falsy types and primitive data types
+
+	  equals( isHash( null ), false, "isHash() should be false with 'obj' parameter: (null). Result");
+	  equals( isHash( undefined ), false, "isHash() should be false with 'obj' parameter: (undefined). Result");
+	  equals( isHash( NaN ), false, "isHash() should be false with 'obj' parameter: (NaN). Result");
+	  equals( isHash( 0 ), false, "isHash() should be false with 'obj' parameter: (Number: 0). Result");
+	  equals( isHash( 1 ), false, "isHash() should be false with 'obj' parameter: (Number: 1). Result");
+	  //equals( isHash( "" ), false, "isHash() should be false with 'obj' parameter: (String: ""). Result");
+	  equals( isHash( "string primitive type" ), false, "isHash() should be false with 'obj' parameter: (String: 'string primitive type'). Result");
+	  equals( isHash( false ), false, "isHash() should be false with 'obj' parameter: (Boolean: false). Result");
+	  equals( isHash( true ), false, "isHash() should be false with 'obj' parameter: (Boolean: true). Result");
+
+	  // Expected True Evalutions
+
+	  // Test native & custom constructors
+
+	  equals( isHash( Number ), true, "isHash() should be true with 'obj' parameter: (Number). Result");
+	  equals( isHash( String ), true, "isHash() should be true with 'obj' parameter: (String). Result");
+	  equals( isHash( Boolean ), true, "isHash() should be true with 'obj' parameter: (Boolean). Result");
+	  equals( isHash( RegExp ), true, "isHash() should be true with 'obj' parameter: (RegExp). Result");
+	  equals( isHash( Date ), true, "isHash() should be true with 'obj' parameter: (Date). Result");
+	  equals( isHash( Function ), true, "isHash() should be true with 'obj' parameter: (Function). Result");
+	  equals( isHash( Math ), true, "isHash() should be true with 'obj' parameter: (Math). Result");
+	  equals( isHash( Array ), true, "isHash() should be true with 'obj' parameter: (Array). Result");
+	  equals( isHash( Object ), true, "isHash() should be true with 'obj' parameter: (Object). Result");
+	  equals( isHash( Custom ), true, "isHash() should be true with 'obj' parameter: (Custom). Result");
+
+	  // Test composite data types
+
+	  equals( isHash( Object(0) ), true, "isHash() should be true with 'obj' parameter: (Number: Object(0)). Result");
+	  equals( isHash( Object(1) ), true, "isHash() should be true with 'obj' parameter: (Number: Object(1)). Result");
+	  equals( isHash( Object("") ), true, "isHash() should be true with 'obj' parameter: (String: Object('')). Result");
+	  equals( isHash( Object('string composite type') ), true, "isHash() should be true with 'obj' parameter: (String: Object('string compositive type')). Result");
+	  equals( isHash( Object(false) ), true, "isHash() should be true with 'obj' parameter: (Boolean: false). Result");
+	  equals( isHash( Object(true) ), true, "isHash() should be true with 'obj' parameter: (Boolean: true). Result");
+	  equals( isHash( /re/ ), true, "isHash() should be true with 'obj' parameter: (RegExp: /re/). Result");
+	  equals( isHash( function() {} ), true, "isHash() should be true with 'obj' parameter: (Function: function(){}). Result");
+	  equals( isHash( {} ), true, "isHash() should be true with 'obj' parameter: (Object: {}). Result");
+	  equals( isHash( [] ), true, "isHash() should be true with 'obj' parameter: (Array: []). Result");
+	  equals( isHash( new Date ), true, "isHash() should be true with 'obj' parameter: (Date: new Date). Result");
+	  equals( isHash( new Custom ), true, "isHash() should be true with 'obj' parameter: (Custom: new Custom). Result");
+
+  */
+
+	});
+
+	test("Assay.object._setKlassName() [private] method - exercises", function () {
+
+	  var isHash = Assay.object["_setKlassName"].get();
+
+    /*
+
+	  // Expected False Evaluations
+
+	  // Test falsy types and primitive data types
+
+	  equals( isHash( null ), false, "isHash() should be false with 'obj' parameter: (null). Result");
+	  equals( isHash( undefined ), false, "isHash() should be false with 'obj' parameter: (undefined). Result");
+	  equals( isHash( NaN ), false, "isHash() should be false with 'obj' parameter: (NaN). Result");
+	  equals( isHash( 0 ), false, "isHash() should be false with 'obj' parameter: (Number: 0). Result");
+	  equals( isHash( 1 ), false, "isHash() should be false with 'obj' parameter: (Number: 1). Result");
+	  //equals( isHash( "" ), false, "isHash() should be false with 'obj' parameter: (String: ""). Result");
+	  equals( isHash( "string primitive type" ), false, "isHash() should be false with 'obj' parameter: (String: 'string primitive type'). Result");
+	  equals( isHash( false ), false, "isHash() should be false with 'obj' parameter: (Boolean: false). Result");
+	  equals( isHash( true ), false, "isHash() should be false with 'obj' parameter: (Boolean: true). Result");
+
+	  // Expected True Evalutions
+
+	  // Test native & custom constructors
+
+	  equals( isHash( Number ), true, "isHash() should be true with 'obj' parameter: (Number). Result");
+	  equals( isHash( String ), true, "isHash() should be true with 'obj' parameter: (String). Result");
+	  equals( isHash( Boolean ), true, "isHash() should be true with 'obj' parameter: (Boolean). Result");
+	  equals( isHash( RegExp ), true, "isHash() should be true with 'obj' parameter: (RegExp). Result");
+	  equals( isHash( Date ), true, "isHash() should be true with 'obj' parameter: (Date). Result");
+	  equals( isHash( Function ), true, "isHash() should be true with 'obj' parameter: (Function). Result");
+	  equals( isHash( Math ), true, "isHash() should be true with 'obj' parameter: (Math). Result");
+	  equals( isHash( Array ), true, "isHash() should be true with 'obj' parameter: (Array). Result");
+	  equals( isHash( Object ), true, "isHash() should be true with 'obj' parameter: (Object). Result");
+	  equals( isHash( Custom ), true, "isHash() should be true with 'obj' parameter: (Custom). Result");
+
+	  // Test composite data types
+
+	  equals( isHash( Object(0) ), true, "isHash() should be true with 'obj' parameter: (Number: Object(0)). Result");
+	  equals( isHash( Object(1) ), true, "isHash() should be true with 'obj' parameter: (Number: Object(1)). Result");
+	  equals( isHash( Object("") ), true, "isHash() should be true with 'obj' parameter: (String: Object('')). Result");
+	  equals( isHash( Object('string composite type') ), true, "isHash() should be true with 'obj' parameter: (String: Object('string compositive type')). Result");
+	  equals( isHash( Object(false) ), true, "isHash() should be true with 'obj' parameter: (Boolean: false). Result");
+	  equals( isHash( Object(true) ), true, "isHash() should be true with 'obj' parameter: (Boolean: true). Result");
+	  equals( isHash( /re/ ), true, "isHash() should be true with 'obj' parameter: (RegExp: /re/). Result");
+	  equals( isHash( function() {} ), true, "isHash() should be true with 'obj' parameter: (Function: function(){}). Result");
+	  equals( isHash( {} ), true, "isHash() should be true with 'obj' parameter: (Object: {}). Result");
+	  equals( isHash( [] ), true, "isHash() should be true with 'obj' parameter: (Array: []). Result");
+	  equals( isHash( new Date ), true, "isHash() should be true with 'obj' parameter: (Date: new Date). Result");
+	  equals( isHash( new Custom ), true, "isHash() should be true with 'obj' parameter: (Custom: new Custom). Result");
+
+  */
+
+	});
 
 	test("Assay.object() exercises - (Number: Constructor) primitive [typed checking]", function() {
 
