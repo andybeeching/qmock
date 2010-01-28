@@ -222,7 +222,7 @@ function initAssay () {
       // We don't use displayName as that can be manipulated more easily to mess up the 'Klass' inference.
       var id = ( !fn.ID )
         ? ( !fn.name )
-        ? ( fn + "" ).match( /function +([\w$]*) *\(/ )[ 1 ] // decompiles function and strips available name
+        ? ( fn + "" ).match( /function +([\w$]*) *\(/ )[ 1 ] // decompiles function and grabs identifier if named
         : fn.name
         : fn.ID;
 
@@ -230,24 +230,7 @@ function initAssay () {
       return fn[ "ID" ] = fn.name || id || "anonymous()";
 
     };
-
-    function _setKlassName ( fn, identifier ) {
-
-      // Check if dealing with a function object
-      if ( Object.prototype.toString.call( fn ) !== "[object Function]" ) {
-        return false;
-      }
-
-      // make sure identifier is String
-      if ( !identifier || identifier.constructor !== String ) {
-        return false;
-      }
-
-      // assign and return success
-      return !!( fn[ "ID" ] = identifier );
-
-    }
-
+    
     // Priviledged function to compare two hash-like objects
     function assertHash ( expected, actual, opt ) {
 

@@ -810,7 +810,7 @@
 
 	});
 
-	test("Assay.Utils.getKlassName() - exercises", function () {
+	test("Assay.Utils.getFunctionName() - exercises", function () {
 
 	  var isHash = Assay.Utils.getKlassName;
 
@@ -864,7 +864,7 @@
 
 	});
 
-	test("Assay.Utils.setKlassName() - exercises", function () {
+	test("Assay.Utils.setFunctionID() - exercises", function () {
 
 	  var isHash = Assay.Utils.setKlassName;
 
