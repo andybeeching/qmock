@@ -53,7 +53,7 @@
  * TODO: Make autoMockConstructor thing work for constructors (i.e. call)
  * Refactor hasOWnProperty into method()
  * TODO: Allow deep option for recursing through trees - typed or stric (or even varied?)
- 
+
  */
 
 function initAssay () {
@@ -68,7 +68,7 @@ function initAssay () {
 
     // Function to expose private objects on a target object for testing (plus injection of mocks/stubs and reset functionality)
     // Be able to pass object detailing which methods to return (maybe config? {get:true, set:true, reset:true} - default would be false?)
-    function _exposeObject ( obj, descriptor, container, opt_Filter ) {
+    function _exposeObject ( obj, descriptor, container, opt_filter ) {
 
       var cachedObj = obj, // can this part be improved by one cache for all or many atomic caches?
           // defaults
@@ -94,9 +94,9 @@ function initAssay () {
       }
 
       // Filter map of getters and setters
-      if ( opt_Filter !== undefined ) {
+      if ( opt_filter !== undefined ) {
         for ( var key in map ) {
-          if ( ( !opt_Filter.hasOwnProperty( key ) || opt_Filter[ key ] !== true ) && ( key in map ) ) {
+          if ( ( !opt_filter.hasOwnProperty( key ) || opt_filter[ key ] !== true ) && ( key in map ) ) {
             delete map[ key ];
           }
         }
@@ -138,13 +138,19 @@ function initAssay () {
     // Note: reference to undefined is from reference trapped in Assay scope (safer)
     function _isNativeType ( obj ) {
 
+      // Early exclusions
+      if ( obj !== null
+        && obj !== undefined
+        && Object.prototype.toString.call( obj ) !== "[object Function]" ) {
+          return false;
+        }
+
       // Enumeration test
       // If Natives have not been modified (either locally or prototypically)
       // then inner for..in loop never reached.
       // If augmented in any way then do an identity check against globally available references
       // Not bullet-proof but *fairly* robust (susceptible to cross-frame pollution)
       for( var key in ( obj || {} ) ) {
-
         // Only iterated once
         for (
           var i = 0,
@@ -165,8 +171,7 @@ function initAssay () {
       }
 
       // Return Boolean - null and undefined // true
-      return !!( ( obj === null || obj === undefined )
-        || ( ( key === undefined ) && ( typeof obj === "function" ) ) );
+      return true;
 
     }
 
@@ -218,7 +223,7 @@ function initAssay () {
       if ( Object.prototype.toString.call( fn ) !== "[object Function]" ) {
         return false;
       }
-      
+
       // Firefox supports Function.name, so try that first, else decompile and use RegExp
       // IE returns null for anonymous functions, so provide fallback array
       // We don't use displayName as that can be manipulated more easily to mess up the 'Klass' inference.
@@ -232,7 +237,7 @@ function initAssay () {
       return fn[ "ID" ] = fn.name || id || "anonymous()";
 
     };
-    
+
     // Priviledged function to compare two hash-like objects
     function assertHash ( expected, actual, opt ) {
 
