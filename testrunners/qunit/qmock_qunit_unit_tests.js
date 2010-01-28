@@ -370,7 +370,7 @@
 	  equals( Assay.collection([{test: "one"}], [["test", 1]]), false, "Assay.collection() should be false with expected: [(Object: {test: \"one\"})] and actual: [(Object: {test: 1})]. Result");
 	  equals( Assay.collection([function() {}], []), false, "Assay.collection() should be false with expected: [(Function: function() {})] and actual: [undefined]. Result");
 	  equals( Assay.collection([null], [undefined]), false, "Assay.collection() should be false with expected: [(null)] and actual: [(undefined)]. Result");
-	  equals( Assay.collection([undefined], ["string"]), false, "Assay.collection() should be false with expected: [(undefined)] and actual: [(String: 'string')]. Result");
+	  equals( Assay.collection([undefined], ["string"]), false, "Assay.collection() should be false with expected: [(undefined)] and actual: [(String: 'foo')]. Result");
 	  equals( Assay.collection([/re/], [9]), false, "Assay.collection() should be false: [(RegExp: /re/)], [(Number: 9)]. Result");
 	  equals( Assay.collection([new Custom], [new Number]), false, "Assay.collection() should be false: [(Custom: new Custom)], [(Number: new Number)]. Result");
 
@@ -382,17 +382,17 @@
 	  equals( Assay.collection([""], ["different string"]), true, "Assay.collection() should be true with expected: [(String: '')] and actual: [(String: 'different string')]. Result");
 	  equals( Assay.collection([true], [false]), true, "Assay.collection() should be true with expected: [(Boolean: true)] and actual: [(Boolean: false)]. Result");
 	  equals( Assay.collection([false], [true]), true, "Assay.collection() should be true with expected: [(Boolean: false)] and actual: [(Boolean: true)]. Result");
-	  equals( Assay.collection([{test: "string"}], [{test: "different string"}]), true, "Assay.collection() should be true with expected: [(Object: {test: 'string'})] and actual: [(Object: {test: 'different string'})]. Result");
+	  equals( Assay.collection([{test: "string"}], [{test: "different string"}]), true, "Assay.collection() should be true with expected: [(Object: {test: 'foo'})] and actual: [(Object: {test: 'different string'})]. Result");
 	  equals( Assay.collection([new Date], [new Date(1970)]), true, "Assay.collection() should be true with expected: [(Date: new Date)] and actual: [(Date: new Date(1970))]. Result");
 	  equals( Assay.collection([new Custom], [new Custom]), true, "Assay.collection() should be true with expected: [(Custom: new Custom)] and actual: [(Custom: new Custom)]. Result");
 
 	  // Test matching member values
 	  equals( Assay.collection([10], [10]), true, "Assay.collection() should be true with expected: [(Number: 10)] and actual: [(Number: 10)]. Result");
-	  equals( Assay.collection(["string"], ["string"]), true, "Assay.collection() should be true with expected: [(String: 'string')] and actual: [(String: 'string')]. Result");
+	  equals( Assay.collection(["string"], ["string"]), true, "Assay.collection() should be true with expected: [(String: 'foo')] and actual: [(String: 'foo')]. Result");
 	  equals( Assay.collection([true], [true]), true, "Assay.collection() should be true with expected: [(Boolean: true)] and actual: [(Boolean: true)]. Result");
 	  equals( Assay.collection([[]], [[]]), true, "Assay.collection() should be true with expected: [(Array: [])] and actual: [(Array: [])]. Result");
 	  equals( Assay.collection([{}], [{}]), true, "Assay.collection() should be true with expected: [(Object: {})] and actual: [(Object: {})]. Result");
-	  equals( Assay.collection([{test: "string"}], [{test: "string"}]), true, "Assay.collection() should be true with expected: [(Object: {test: 'string'})] and actual: [(Object: {test: 'string'})]. Result");
+	  equals( Assay.collection([{test: "string"}], [{test: "string"}]), true, "Assay.collection() should be true with expected: [(Object: {test: 'foo'})] and actual: [(Object: {test: 'foo'})]. Result");
 	  equals( Assay.collection([["nested"]], [["nested"]]), true, "Assay.collection() should be true with expected: [(Array: [[]])] and actual: [(Array: [[]])]. Result");
 	  equals( Assay.collection([function() {}], [function() {}]), true, "Assay.collection() should be true with expected: [(Function: function(){})] and actual: [(Function: function(){})]. Result");
 	  equals( Assay.collection([/re/], [/re/]), true, "Assay.collection() should be true with expected: [(RegExp: /re/)] and actual: [(RegExp: /re/)]. Result");
@@ -429,7 +429,7 @@
 	  equals( Assay.collection([{test: "one"}], [["test", 1]], {strictValueChecking:true}), false, "Assay.collection() should be false with expected: [(Object: {test: \"one\"})] and actual: [(Object: {test: 1})]. Result");
 	  equals( Assay.collection([function() {}], [], {strictValueChecking:true}), false, "Assay.collection() should be false with expected: [(Function: function() {})] and actual: [undefined]. Result");
 	  equals( Assay.collection([null], [undefined], {strictValueChecking:true}), false, "Assay.collection() should be false with expected: [(null)] and actual: [(undefined)]. Result");
-	  equals( Assay.collection([undefined], ["string"], {strictValueChecking:true}), false, "Assay.collection() should be false with expected: [(undefined)] and actual: [(String: 'string')]. Result");
+	  equals( Assay.collection([undefined], ["string"], {strictValueChecking:true}), false, "Assay.collection() should be false with expected: [(undefined)] and actual: [(String: 'foo')]. Result");
 	  equals( Assay.collection([/re/], [9], {strictValueChecking:true}), false, "Assay.collection() should be false: [(RegExp: /re/)], [(Number: 9)]. Result");
 	  equals( Assay.collection([new Custom], [new Number], {strictValueChecking:true}), false, "Assay.collection() should be false: [(Custom: new Custom)], [(Number: new Number)]. Result");
 
@@ -439,7 +439,7 @@
 	  equals( Assay.collection([""], ["different string"], {strictValueChecking:true}), false, "Assay.collection() should be false with expected: [(String: '')] and actual: [(String: 'different string')]. Result");
 	  equals( Assay.collection([true], [false], {strictValueChecking:true}), false, "Assay.collection() should be false with expected: [(Boolean: true)] and actual: [(Boolean: false)]. Result");
 	  equals( Assay.collection([false], [true], {strictValueChecking:true}), false, "Assay.collection() should be false with expected: [(Boolean: false)] and actual: [(Boolean: true)]. Result");
-	  equals( Assay.collection([{test: "string"}], [{test: "different string"}], {strictValueChecking:true}), false, "Assay.collection() should be false with expected: [(Object: {test: 'string'})] and actual: [(Object: {test: 'different string'})]. Result");
+	  equals( Assay.collection([{test: "string"}], [{test: "different string"}], {strictValueChecking:true}), false, "Assay.collection() should be false with expected: [(Object: {test: 'foo'})] and actual: [(Object: {test: 'different string'})]. Result");
 	  equals( Assay.collection([new Date], [new Date(1970)], {strictValueChecking:true}), false, "Assay.collection() should be false with expected: [(Date: new Date)] and actual: [(Date: new Date(1970))]. Result");
 	  // commented out as revisting equality and identity rules around strict checking
 	  //equals( Assay.collection([new Custom], [new Custom], {strictValueChecking:true}), false, "Assay.collection() should be false with expected: [(Custom: new Custom)] and actual: [(Custom: new Custom)]. Result");
@@ -449,11 +449,11 @@
 
 	  // Test matching member values
 	  equals( Assay.collection([10], [10], {strictValueChecking:true}), true, "Assay.collection() should be true with expected: [(Number: 10)] and actual: [(Number: 10)]. Result");
-	  equals( Assay.collection(["string"], ["string"], {strictValueChecking:true}), true, "Assay.collection() should be true with expected: [(String: 'string')] and actual: [(String: 'string')]. Result");
+	  equals( Assay.collection(["string"], ["string"], {strictValueChecking:true}), true, "Assay.collection() should be true with expected: [(String: 'foo')] and actual: [(String: 'foo')]. Result");
 	  equals( Assay.collection([true], [true], {strictValueChecking:true}), true, "Assay.collection() should be true with expected: [(Boolean: true)] and actual: [(Boolean: true)]. Result");
 	  equals( Assay.collection([[]], [[]], {strictValueChecking:true}), true, "Assay.collection() should be true with expected: [(Array: [])] and actual: [(Array: [])]. Result");
 	  equals( Assay.collection([{}], [{}], {strictValueChecking:true}), true, "Assay.collection() should be true with expected: [(Object: {})] and actual: [(Object: {})]. Result");
-	  equals( Assay.collection([{test: "string"}], [{test: "string"}], {strictValueChecking:true}), true, "Assay.collection() should be true with expected: [(Object: {test: 'string'})] and actual: [(Object: {test: 'string'})]. Result");
+	  equals( Assay.collection([{test: "string"}], [{test: "string"}], {strictValueChecking:true}), true, "Assay.collection() should be true with expected: [(Object: {test: 'foo'})] and actual: [(Object: {test: 'foo'})]. Result");
 	  equals( Assay.collection([["nested"]], [["nested"]], {strictValueChecking:true}), true, "Assay.collection() should be true with expected: [(Array: [[]])] and actual: [(Array: [[]])]. Result");
 	  equals( Assay.collection([function() {}], [function() {}], {strictValueChecking:true}), true, "Assay.collection() should be true with expected: [(Function: function(){})] and actual: [(Function: function(){})]. Result");
 	  equals( Assay.collection([/re/], [/re/], {strictValueChecking:true}), true, "Assay.collection() should be true with expected: [(RegExp: /re/)] and actual: [(RegExp: /re/)]. Result");
@@ -595,8 +595,8 @@
 
 	  // Test mis-matched member types
 
-	  equals( Assay.hash({Number: 10}, {Number: "string"}), false, "Assay.hash() should be false with expected: (Object {Number: 10}) and actual: (Object {Number: 'string'}). Result");
-	  equals( Assay.hash({String: "string"}, {String: function() {}}), false, "Assay.hash() should be false with expected: (Object {String: 'string'}) and actual: (Object {String: function(){}}). Result");
+	  equals( Assay.hash({Number: 10}, {Number: "string"}), false, "Assay.hash() should be false with expected: (Object {Number: 10}) and actual: (Object {Number: 'foo'}). Result");
+	  equals( Assay.hash({String: "string"}, {String: function() {}}), false, "Assay.hash() should be false with expected: (Object {String: 'foo'}) and actual: (Object {String: function(){}}). Result");
 	  equals( Assay.hash({Array: []}, {Array: {}}), false, "Assay.hash() should be false with expected: (Object {Array: []}) and actual: (Object {Array: {}}). Result");
 	  equals( Assay.hash({Function: function() {}}, {Function: false}), false, "Assay.hash() should be false with expected: (Object {Function: function(){}}) and actual: (Object {Function: false}). Result");
 	  equals( Assay.hash({"null": null},{"null": undefined}), false, "Assay.hash() should be false with expected: (Object {'null': null}) and actual: (Object {'null': undefined}). Result");
@@ -609,7 +609,7 @@
 	  equals( Assay.hash({Number: 0}, {Number: 0}), true, "Assay.hash() should be true with expected: (Object {Number: 0}) and actual: (Object {Number: 0}). Result" );
 	  equals( Assay.hash({Number: 10}, {Number: 10}), true, "Assay.hash() should be true with expected: (Object {Number: 10}) and actual: (Object {Number: 10}). Result" );
 	  equals( Assay.hash({String: ""}, {String: ""}), true, "Assay.hash() should be true with expected: (Object {String: ''}) and actual: (Object {String: ''}). Result" );
-	  equals( Assay.hash({String: "string"}, {String: "string"}), true, "Assay.hash() should be true with expected: (Object {String: 'string'}) and actual: (Object {String: 'string'}). Result" );
+	  equals( Assay.hash({String: "string"}, {String: "string"}), true, "Assay.hash() should be true with expected: (Object {String: 'foo'}) and actual: (Object {String: 'foo'}). Result" );
 	  equals( Assay.hash({Boolean: false}, {Boolean: false}), true, "Assay.hash() should be true with expected: (Object {Boolean: false}) and actual: (Object {Boolean: false}). Result" );
 	  equals( Assay.hash({Boolean: true}, {Boolean: true}), true, "Assay.hash() should be true with expected: (Object {Boolean: true}) and actual: (Object {Boolean: true}). Result");
 	  equals( Assay.hash({Array: []}, {Array: []}), true, "Assay.hash() should be true with expected: (Object {Array: []}) and actual: (Object {Array: []}). Result");
@@ -663,8 +663,8 @@
 
 	  // Test mis-matched member types
 
-	  equals( Assay.hash({Number: 10}, {Number: "string"}, {strictValueChecking: true}), false, "Assay.hash() should be false with expected: (Object {Number: 10}) and actual: (Object {Number: 'string'}). Result");
-	  equals( Assay.hash({String: "string"}, {String: function() {}}, {strictValueChecking: true}), false, "Assay.hash() should be false with expected: (Object {String: 'string'}) and actual: (Object {String: function(){}}). Result");
+	  equals( Assay.hash({Number: 10}, {Number: "string"}, {strictValueChecking: true}), false, "Assay.hash() should be false with expected: (Object {Number: 10}) and actual: (Object {Number: 'foo'}). Result");
+	  equals( Assay.hash({String: "string"}, {String: function() {}}, {strictValueChecking: true}), false, "Assay.hash() should be false with expected: (Object {String: 'foo'}) and actual: (Object {String: function(){}}). Result");
 	  equals( Assay.hash({Array: []}, {Array: {}}, {strictValueChecking: true}), false, "Assay.hash() should be false with expected: (Object {Array: []}) and actual: (Object {Array: {}}). Result");
 	  equals( Assay.hash({Function: function() {}}, {Function: false}, {strictValueChecking: true}), false, "Assay.hash() should be false with expected: (Object {Function: function(){}}) and actual: (Object {Function: false}). Result");
 	  equals( Assay.hash({"null": null},{"null": undefined}, {strictValueChecking: true}), false, "Assay.hash() should be false with expected: (Object {'null': null}) and actual: (Object {'null': undefined}). Result");
@@ -674,7 +674,7 @@
 
 	  // Test mis-matched member values
 
-	  equals( Assay.hash({String: "string"}, {String: "different string"}, {strictValueChecking: true}), false, "Assay.hash() should be false with expected: (Object {String: 'string'}) and actual: (Object {String: 'different string'}). Result");
+	  equals( Assay.hash({String: "string"}, {String: "different string"}, {strictValueChecking: true}), false, "Assay.hash() should be false with expected: (Object {String: 'foo'}) and actual: (Object {String: 'different string'}). Result");
 	  equals( Assay.hash({Boolean: false}, {Boolean: true}, {strictValueChecking: true}), false, "Assay.hash() should be false with expected: (Object {Boolean: false}) and actual: (Object {Boolean: true}). Result");
 	  equals( Assay.hash({Number: 1}, {Number: 2}, {strictValueChecking: true}), false, "Assay.hash() should be false with expected: (Object {Number: 1}) and actual: (Object {Number: 2}). Result");
 	  equals( Assay.hash({RegExp: /re/}, {RegExp: /re2/}, {strictValueChecking: true}), false, "Assay.hash() should be false with expected: (Object {RegExp: /re/}) and actual: (Object {RegExp: /re2/}). Result");
@@ -745,7 +745,7 @@
 	  equals( Assay.hash({Number: 0}, {Number: 0}, true), true, "Assay.hash() should be true with expected: (Object {Number: 0}) and actual: (Object {Number: 0}). Result" );
 	  equals( Assay.hash({Number: 10}, {Number: 10}, true), true, "Assay.hash() should be true with expected: (Object {Number: 10}) and actual: (Object {Number: 10}). Result" );
 	  equals( Assay.hash({String: ""}, {String: ""}, true), true, "Assay.hash() should be true with expected: (Object {String: ''}) and actual: (Object {String: ''}). Result" );
-	  equals( Assay.hash({String: "string"}, {String: "string"}, true), true, "Assay.hash() should be true with expected: (Object {String: 'string'}) and actual: (Object {String: 'string'}). Result" );
+	  equals( Assay.hash({String: "string"}, {String: "string"}, true), true, "Assay.hash() should be true with expected: (Object {String: 'foo'}) and actual: (Object {String: 'foo'}). Result" );
 	  equals( Assay.hash({Boolean: false}, {Boolean: false}, true), true, "Assay.hash() should be true with expected: (Object {Boolean: false}) and actual: (Object {Boolean: false}). Result" );
 	  equals( Assay.hash({Boolean: true}, {Boolean: true}, true), true, "Assay.hash() should be true with expected: (Object {Boolean: true}) and actual: (Object {Boolean: true}). Result");
 	  equals( Assay.hash({Array: []}, {Array: []}, true), true, "Assay.hash() should be true with expected: (Object {Array: []}) and actual: (Object {Array: []}). Result");
@@ -997,7 +997,7 @@
 
 		// TRUE ASSERTIONS
 		equals( Assay.object(String, String), true, "Assay.object() should return true with expected: (String) and actual: (String)" );
-		equals( Assay.object(String, "string"), true, "Assay.object() should return true with expected: (String) and actual: (String: 'string')" );
+		equals( Assay.object(String, "string"), true, "Assay.object() should return true with expected: (String) and actual: (String: 'foo')" );
 		equals( Assay.object(String, ""), true, "Assay.object() should return true with expected: (String) and actual: (String: '')" );
 
 	});
@@ -1035,94 +1035,94 @@
 
 		// TRUE ASSERTIONS
 		equals( Assay.object(String, String, {strictValueChecking: true}), true, "Assay.object() should return true with expected: (String) and actual: (String)" );
-		equals( Assay.object(String, "string", {strictValueChecking: true}), false, "Assay.object() should return true with expected: (String) and actual: (String: 'string')" );
+		equals( Assay.object(String, "string", {strictValueChecking: true}), false, "Assay.object() should return true with expected: (String) and actual: (String: 'foo')" );
 		equals( Assay.object(String, "", {strictValueChecking: true}), false, "Assay.object() should return true with expected: (String) and actual: (String: '')" );
 
 	});
 
-	test("Assay.object() exercises - (String: 'string') primitive [typed checking]", function() {
+	test("Assay.object() exercises - (String: 'foo') primitive [typed checking]", function() {
 
 	  // FALSE ASSERTIONS
 
 	  // Test invalid argument type - Constructors
 
-		equals( Assay.object('string', Number), false, "Assay.object() should return false with expected: (String: 'string') and actual: (Number)" );
-		equals( Assay.object('string', Boolean), false, "Assay.object() should return false with expected: (String: 'string') and actual: (Boolean)" );
-		equals( Assay.object('string', Array), false, "Assay.object() should return false with expected: (String: 'string') and actual: (Array)" );
-		equals( Assay.object('string', Object), false, "Assay.object() should return false with expected: (String: 'string') and actual: (Object)" );
-		equals( Assay.object('string', Function), false, "Assay.object() should return false with expected: (String: 'string') and actual: (Function)" );
-		equals( Assay.object('string', RegExp), false, "Assay.object() should return false with expected: (String: 'string') and actual: (RegExp)" );
-		equals( Assay.object('string', Date), false, "Assay.object() should return false with expected: (String: 'string') and actual: (Date)" );
-		equals( Assay.object('string', Custom), false, "Assay.object() should return false with expected: (String: 'string') and actual: (Custom)" );
+		equals( Assay.object('foo', Number), false, "Assay.object() should return false with expected: (String: 'foo') and actual: (Number)" );
+		equals( Assay.object('foo', Boolean), false, "Assay.object() should return false with expected: (String: 'foo') and actual: (Boolean)" );
+		equals( Assay.object('foo', Array), false, "Assay.object() should return false with expected: (String: 'foo') and actual: (Array)" );
+		equals( Assay.object('foo', Object), false, "Assay.object() should return false with expected: (String: 'foo') and actual: (Object)" );
+		equals( Assay.object('foo', Function), false, "Assay.object() should return false with expected: (String: 'foo') and actual: (Function)" );
+		equals( Assay.object('foo', RegExp), false, "Assay.object() should return false with expected: (String: 'foo') and actual: (RegExp)" );
+		equals( Assay.object('foo', Date), false, "Assay.object() should return false with expected: (String: 'foo') and actual: (Date)" );
+		equals( Assay.object('foo', Custom), false, "Assay.object() should return false with expected: (String: 'foo') and actual: (Custom)" );
 
 		// Test invalid argument type - Values (truthy)
 
-		equals( Assay.object('string', 1), false, "Assay.object() should return false with expected: (String: 'string') and actual: (Number: 1)" );
-		equals( Assay.object('string', true), false, "Assay.object() should return false with expected: (String: 'string') and actual: (Boolean: true)" );
-		equals( Assay.object('string', []), false, "Assay.object() should return false with expected: (String: 'string') and actual: (Array: [])" );
-		equals( Assay.object('string', {}), false, "Assay.object() should return false with expected: (String: 'string') and actual: (Object: {})" );
-		equals( Assay.object('string', function(){}), false, "Assay.object() should return false with expected: (String: 'string') and actual: (Function: function(){})" );
-		equals( Assay.object('string', /test/), false, "Assay.object() should return false with expected: (String: 'string') and actual: (RegExp: /test/)" );
-		equals( Assay.object('string', new Date), false, "Assay.object() should return false with expected: (String: 'string') and actual: (Date: new instance)" );
-		equals( Assay.object('string', new Custom), false, "Assay.object() should return false with expected: (String: 'string') and actual: (Custom: new instance)" );
+		equals( Assay.object('foo', 1), false, "Assay.object() should return false with expected: (String: 'foo') and actual: (Number: 1)" );
+		equals( Assay.object('foo', true), false, "Assay.object() should return false with expected: (String: 'foo') and actual: (Boolean: true)" );
+		equals( Assay.object('foo', []), false, "Assay.object() should return false with expected: (String: 'foo') and actual: (Array: [])" );
+		equals( Assay.object('foo', {}), false, "Assay.object() should return false with expected: (String: 'foo') and actual: (Object: {})" );
+		equals( Assay.object('foo', function(){}), false, "Assay.object() should return false with expected: (String: 'foo') and actual: (Function: function(){})" );
+		equals( Assay.object('foo', /test/), false, "Assay.object() should return false with expected: (String: 'foo') and actual: (RegExp: /test/)" );
+		equals( Assay.object('foo', new Date), false, "Assay.object() should return false with expected: (String: 'foo') and actual: (Date: new instance)" );
+		equals( Assay.object('foo', new Custom), false, "Assay.object() should return false with expected: (String: 'foo') and actual: (Custom: new instance)" );
 
 	  // Test invalid argument types - false values
 
-		equals( Assay.object('string', null), false, "Assay.object() should return false with expected: (String: 'string') and actual: (null)" );
-		equals( Assay.object('string', undefined), false, "Assay.object() should return false with expected: (String: 'string') and actual: (undefined)" );
+		equals( Assay.object('foo', null), false, "Assay.object() should return false with expected: (String: 'foo') and actual: (null)" );
+		equals( Assay.object('foo', undefined), false, "Assay.object() should return false with expected: (String: 'foo') and actual: (undefined)" );
 
 		// TRUE ASSERTIONS
-		equals( Assay.object('string', String), true, "Assay.object() should return true with expected: (String: 'string') and actual: (String)" );
-		equals( Assay.object('string', "string"), true, "Assay.object() should return true with expected: (String: 'string') and actual: (String: 'string')" );
-		equals( Assay.object('string', ""), true, "Assay.object() should return true with expected: (String: 'string') and actual: (String: '')" );
+		equals( Assay.object('foo', String), true, "Assay.object() should return true with expected: (String: 'foo') and actual: (String)" );
+	  equals( Assay.object('foo', 'foo'), true, "Assay.object() should return true with expected: (String: 'foo') and actual: (String: 'foo')" );
+		equals( Assay.object('foo', ""), true, "Assay.object() should return true with expected: (String: 'foo') and actual: (String: '')" );
 
 		// Expect Falsy Value
 		equals( Assay.object('', String), true, "Assay.object() should return true with expected: (String: '') and actual: (String)" );
-		equals( Assay.object('', "string"), true, "Assay.object() should return true with expected: (String: '') and actual: (String: 'string')" );
-		equals( Assay.object('', ""), true, "Assay.object() should return true with expected: (String: '') and actual: (String: '')" );
+		equals( Assay.object('', "foo"), true, "Assay.object() should return true with expected: (String: '') and actual: (String: 'foo')" );
+		equals( Assay.object('', ''), true, "Assay.object() should return true with expected: (String: '') and actual: (String: '')" );
 
 	});
 
-	test("Assay.object() exercises - (String: 'string') primitive [strict value checking]", function() {
+	test("Assay.object() exercises - (String: 'foo') primitive [strict value checking]", function() {
 
 	  // FALSE ASSERTIONS
 
 	  // Test invalid argument type - Constructors
 
-		equals( Assay.object('string', Number, {strictValueChecking: true}), false, "Assay.object() should return false with expected: (String: 'string') and actual: (Number)" );
-		equals( Assay.object('string', Boolean, {strictValueChecking: true}), false, "Assay.object() should return false with expected: (String: 'string') and actual: (Boolean)" );
-		equals( Assay.object('string', Array, {strictValueChecking: true}), false, "Assay.object() should return false with expected: (String: 'string') and actual: (Array)" );
-		equals( Assay.object('string', Object, {strictValueChecking: true}), false, "Assay.object() should return false with expected: (String: 'string') and actual: (Object)" );
-		equals( Assay.object('string', Function, {strictValueChecking: true}), false, "Assay.object() should return false with expected: (String: 'string') and actual: (Function)" );
-		equals( Assay.object('string', RegExp, {strictValueChecking: true}), false, "Assay.object() should return false with expected: (String: 'string') and actual: (RegExp)" );
-		equals( Assay.object('string', Date, {strictValueChecking: true}), false, "Assay.object() should return false with expected: (String: 'string') and actual: (Date)" );
-		equals( Assay.object('string', Custom, {strictValueChecking: true}), false, "Assay.object() should return false with expected: (String: 'string') and actual: (Custom)" );
+		equals( Assay.object('foo', Number, {strictValueChecking: true}), false, "Assay.object() should return false with expected: (String: 'foo') and actual: (Number)" );
+		equals( Assay.object('foo', Boolean, {strictValueChecking: true}), false, "Assay.object() should return false with expected: (String: 'foo') and actual: (Boolean)" );
+		equals( Assay.object('foo', Array, {strictValueChecking: true}), false, "Assay.object() should return false with expected: (String: 'foo') and actual: (Array)" );
+		equals( Assay.object('foo', Object, {strictValueChecking: true}), false, "Assay.object() should return false with expected: (String: 'foo') and actual: (Object)" );
+		equals( Assay.object('foo', Function, {strictValueChecking: true}), false, "Assay.object() should return false with expected: (String: 'foo') and actual: (Function)" );
+		equals( Assay.object('foo', RegExp, {strictValueChecking: true}), false, "Assay.object() should return false with expected: (String: 'foo') and actual: (RegExp)" );
+		equals( Assay.object('foo', Date, {strictValueChecking: true}), false, "Assay.object() should return false with expected: (String: 'foo') and actual: (Date)" );
+		equals( Assay.object('foo', Custom, {strictValueChecking: true}), false, "Assay.object() should return false with expected: (String: 'foo') and actual: (Custom)" );
 
 		// Test invalid argument type - Values (truthy)
 
-		equals( Assay.object('string', 1, {strictValueChecking: true}), false, "Assay.object() should return false with expected: (String: 'string') and actual: (Number: 1)" );
-		equals( Assay.object('string', true, {strictValueChecking: true}), false, "Assay.object() should return false with expected: (String: 'string') and actual: (Boolean: true)" );
-		equals( Assay.object('string', [], {strictValueChecking: true}), false, "Assay.object() should return false with expected: (String: 'string') and actual: (Array: [])" );
-		equals( Assay.object('string', {}, {strictValueChecking: true}), false, "Assay.object() should return false with expected: (String: 'string') and actual: (Object: {})" );
-		equals( Assay.object('string', function(){}, {strictValueChecking: true}), false, "Assay.object() should return false with expected: (String: 'string') and actual: (Function: function(){})" );
-		equals( Assay.object('string', /test/, {strictValueChecking: true}), false, "Assay.object() should return false with expected: (String: 'string') and actual: (RegExp: /test/)" );
-		equals( Assay.object('string', new Date, {strictValueChecking: true}), false, "Assay.object() should return false with expected: (String: 'string') and actual: (Date: new instance)" );
-		equals( Assay.object('string', new Custom, {strictValueChecking: true}), false, "Assay.object() should return false with expected: (String: 'string') and actual: (Custom: new instance)" );
+		equals( Assay.object('foo', 1, {strictValueChecking: true}), false, "Assay.object() should return false with expected: (String: 'foo') and actual: (Number: 1)" );
+		equals( Assay.object('foo', true, {strictValueChecking: true}), false, "Assay.object() should return false with expected: (String: 'foo') and actual: (Boolean: true)" );
+		equals( Assay.object('foo', [], {strictValueChecking: true}), false, "Assay.object() should return false with expected: (String: 'foo') and actual: (Array: [])" );
+		equals( Assay.object('foo', {}, {strictValueChecking: true}), false, "Assay.object() should return false with expected: (String: 'foo') and actual: (Object: {})" );
+		equals( Assay.object('foo', function(){}, {strictValueChecking: true}), false, "Assay.object() should return false with expected: (String: 'foo') and actual: (Function: function(){})" );
+		equals( Assay.object('foo', /test/, {strictValueChecking: true}), false, "Assay.object() should return false with expected: (String: 'foo') and actual: (RegExp: /test/)" );
+		equals( Assay.object('foo', new Date, {strictValueChecking: true}), false, "Assay.object() should return false with expected: (String: 'foo') and actual: (Date: new instance)" );
+		equals( Assay.object('foo', new Custom, {strictValueChecking: true}), false, "Assay.object() should return false with expected: (String: 'foo') and actual: (Custom: new instance)" );
 
 	  // Test invalid argument types - false values
 
-		equals( Assay.object('string', null, {strictValueChecking: true}), false, "Assay.object() should return false with expected: (String: 'string') and actual: (null)" );
-		equals( Assay.object('string', undefined, {strictValueChecking: true}), false, "Assay.object() should return false with expected: (String: 'string') and actual: (undefined)" );
+		equals( Assay.object('foo', null, {strictValueChecking: true}), false, "Assay.object() should return false with expected: (String: 'foo') and actual: (null)" );
+		equals( Assay.object('foo', undefined, {strictValueChecking: true}), false, "Assay.object() should return false with expected: (String: 'foo') and actual: (undefined)" );
 
 		// TRUE ASSERTIONS
-		equals( Assay.object('string', String, {strictValueChecking: true}), false, "Assay.object() should return false with expected: (String: 'string') and actual: (String)" );
-		equals( Assay.object('string', "string", {strictValueChecking: true}), true, "Assay.object() should return true with expected: (String: 'string') and actual: (String: 'string')" );
-		equals( Assay.object('string', "", {strictValueChecking: true}), false, "Assay.object() should return false with expected: (String: 'string') and actual: (String: '')" );
+		equals( Assay.object('foo', String, {strictValueChecking: true}), false, "Assay.object() should return false with expected: (String: 'foo') and actual: (String)" );
+		equals( Assay.object('foo', 'foo', {strictValueChecking: true}), true, "Assay.object() should return true with expected: (String: 'foo') and actual: (String: 'foo')" );
+		equals( Assay.object('foo', '', {strictValueChecking: true}), false, "Assay.object() should return false with expected: (String: 'foo') and actual: (String: '')" );
 
 		// Expect Falsy Value
 		equals( Assay.object('', String, {strictValueChecking: true}), false, "Assay.object() should return false with expected: (String: '') and actual: (String)" );
-		equals( Assay.object('', "string", {strictValueChecking: true}), false, "Assay.object() should return false with expected: (String: '') and actual: (String: 'string')" );
-		equals( Assay.object('', "", {strictValueChecking: true}), true, "Assay.object() should return true with expected: (String: '') and actual: (String: '')" );
+		equals( Assay.object('', 'foo', {strictValueChecking: true}), false, "Assay.object() should return false with expected: (String: '') and actual: (String: 'foo')" );
+		equals( Assay.object('', '', {strictValueChecking: true}), true, "Assay.object() should return true with expected: (String: '') and actual: (String: '')" );
 
 	});
 
@@ -1453,8 +1453,8 @@
 	  equals( Assay.type( Infinity ), "number", "Assay.type() should return 'Number' with 'obj' parameter: (NaN). Result");
 	  equals( Assay.type( 0 ), "number", "Assay.type() should return 'Number' with 'obj' parameter: (Number: 0). Result");
 	  equals( Assay.type( 1 ), "number", "Assay.type() should return 'Number' with 'obj' parameter: (Number: 1). Result");
-	  equals( Assay.type( "" ), "string", "Assay.type() should return 'String' with 'obj' parameter: (String: \"\"). Result");
-	  equals( Assay.type( "foo" ), "string", "Assay.type() should return 'String' with 'obj' parameter: (String: 'string primitive type'). Result");
+	  equals( Assay.type( "" ), "string", "Assay.type() should return 'foo' with 'obj' parameter: (String: \"\"). Result");
+	  equals( Assay.type( "foo" ), "string", "Assay.type() should return 'foo' with 'obj' parameter: (String: 'string primitive type'). Result");
 	  equals( Assay.type( false ), "boolean", "Assay.type() should return 'Boolean' with 'obj' parameter: (Boolean: false). Result");
 	  equals( Assay.type( true ), "boolean", "Assay.type() should return 'Boolean' with 'obj' parameter: (Boolean: true). Result");
 
@@ -1462,8 +1462,8 @@
 
 	  equals( Assay.type( Object(0) ), "number", "Assay.type() should return 'Number' with 'obj' parameter: (Number: Object(0)). Result");
 	  equals( Assay.type( Object(1) ), "number", "Assay.type() should return 'Number' with 'obj' parameter: (Number: Object(1)). Result");
-	  equals( Assay.type( Object("") ), "string", "Assay.type() should return 'String' with 'obj' parameter: (String: Object('')). Result");
-	  equals( Assay.type( Object("foo") ), "string", "Assay.type() should return 'String' with 'obj' parameter: (String: Object('string compositive type')). Result");
+	  equals( Assay.type( Object("") ), "string", "Assay.type() should return 'foo' with 'obj' parameter: (String: Object('')). Result");
+	  equals( Assay.type( Object("foo") ), "string", "Assay.type() should return 'foo' with 'obj' parameter: (String: Object('string compositive type')). Result");
 	  equals( Assay.type( Object(false) ), "boolean", "Assay.type() should return 'Boolean' with 'obj' parameter: (Boolean: false). Result");
 	  equals( Assay.type( Object(true) ), "boolean", "Assay.type() should return 'Boolean' with 'obj' parameter: (Boolean: true). Result");
 	  equals( Assay.type( /re/ ), "regexp", "Assay.type() should return 'RegExp' with 'obj' parameter: (RegExp: /re/). Result");
@@ -4106,7 +4106,7 @@
 
 	  // Correct Usage
 
-	  ninja.setSkills(['accepts', 'any', 'string']);
+	  ninja.setSkills(['accepts', 'any', 'foo']);
 	  ok(ninja.verify(), "verify() should be true");
 
 	});
