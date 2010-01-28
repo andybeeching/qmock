@@ -52,6 +52,8 @@
  * TODO: Add ability for desciptor on Mock Constructors
  * TODO: Make autoMockConstructor thing work for constructors (i.e. call)
  * Refactor hasOWnProperty into method()
+ * TODO: Allow deep option for recursing through trees - typed or stric (or even varied?)
+ 
  */
 
 function initAssay () {
@@ -210,7 +212,7 @@ function initAssay () {
   	 *
   	 */
 
-    function _getKlassName ( fn ) {
+    function _getFunctionName ( fn ) {
 
       // Check if dealing with a function object
       if ( Object.prototype.toString.call( fn ) !== "[object Function]" ) {
@@ -469,12 +471,11 @@ function initAssay () {
       "object": assertObject,
       "hash": assertHash,
       "collection": assertCollection,
+      "type": _getTypeOf,
       "Variable": Variable,
       "Utils": {
-        "exposeObject": _exposeObject,
-        "getTypeOf": _getTypeOf,
-        "getKlassName": _getKlassName,
-        "setKlassName": _setKlassName,
+        "expose": _exposeObject,
+        "getFunctionName": _getFunctionName,
         "isHash": _isHash,
         "isNativeType": _isNativeType
       }
@@ -488,10 +489,7 @@ function initAssay () {
 // Register Assay Public Interface
 (function bootstrapAssay ( container ) {
 
-  container.Assay = initAssay(
-    // opt (Hash)
-    {isTest: true}
-  );
+  container.Assay = initAssay();
 
 })( ( typeof exports === "undefined" ) ? this : exports );
 
@@ -1041,12 +1039,12 @@ function initQMock ( assert, opt ) {
 
   // Initialise QMock
   container.Mock = initQMock(
-     // assert (Function)
+    // assert (Function)
     (Assay && Assay.object),
     // opt (Hash)
     {
       "isTest": true,
-      "expose": (Assay && Assay.Utils.exposeObject)
+      "expose": (Assay && Assay.Utils.expose)
     }
   );
 

@@ -23,14 +23,13 @@
         "collection": Function,
         "object": Function,
         "hash": Function,
+        "type": Function,
         "Variable": Function,
         "Utils" : {
+          "expose": Function,
+          "getFunctionName": Function,
           "isHash": Function,
-          "exposeObject": Function,
-          "isNativeType": Function,
-          "getTypeOf": Function,
-          "getKlassName": Function,
-          "setKlassName": Function
+          "isNativeType": Function
         }
       };
 	  },
@@ -44,7 +43,6 @@
 	test("Setup & teardown", function () {
 
 	  expect( 2 );
-
 	  var container = {};
 
 	  // Exercise inititaliser as common use case
@@ -63,13 +61,13 @@
 
 	module("Assay lib // Interface unit test");
 
-	test("Assay.Utils.exposeObject() method - test parameter requirements", function () {
+	test("Assay.Utils.expose() method - test parameter requirements", function () {
 
 	  expect( 1 );
 
     // Test no arguments
 	  try {
-			Assay.Utils.exposeObject();
+			Assay.Utils.expose();
 	    ok(false, "Assay.exposeObject() should throw exception when passed No parameters");
 	  } catch (exception) {
 	    equals(exception.type, "MissingParametersException", "Assay.exposeObject() exception type should be MissingParametersException for less than three parameters (required). Result");
@@ -77,7 +75,7 @@
 
 	});
 
-	test("Assay.Utils.exposeObject() method - exercises", function () {
+	test("Assay.Utils.expose() method - exercises", function () {
 
 	  expect( 12 );
 
@@ -85,29 +83,29 @@
         privateObj = "foo";
 
 	  // Test three required params with filter (6 permutations)
-	  Assay.Utils.exposeObject( privateObj, "_test", container, {get: true} );
+	  Assay.Utils.expose( privateObj, "_test", container, {get: true} );
 	  ok( Assay.hash( {"get": Function}, container[ "_test" ] ), "exposeObject() should expose get() accessor for privateObj on container" );
 	  ok( Assay.object( undefined, container[ "_test" ].set ), "exposeObject() should not expose set() mutator for privateObj on container" );
 	  ok( Assay.object( undefined, container[ "_test" ].restore ), "exposeObject() should not expose restore() mutator for privateObj on container" );
 
     // etc...
-	  Assay.Utils.exposeObject( privateObj, "_test", container, {set: true} );
+	  Assay.Utils.expose( privateObj, "_test", container, {set: true} );
 	  ok( Assay.hash( {"set": Function}, container[ "_test" ] ), "exposeObject() should expose only set() mutator for privateObj on container" );
 
-	  Assay.Utils.exposeObject( privateObj, "_test", container, {restore: true} );
+	  Assay.Utils.expose( privateObj, "_test", container, {restore: true} );
 	  ok( Assay.hash( {"restore": Function}, container[ "_test" ] ), "exposeObject() should expose only restore() mutator for privateObj on container" );
 
-	  Assay.Utils.exposeObject( privateObj, "_test", container, {get: true, set: true} );
+	  Assay.Utils.expose( privateObj, "_test", container, {get: true, set: true} );
 	  ok( Assay.hash( {"get": Function, "set": Function}, container[ "_test" ] ), "exposeObject() should expose get() and set() accessors and mutators for privateObj on container" );
 
-	  Assay.Utils.exposeObject( privateObj, "_test", container, {set: true, restore: true} );
+	  Assay.Utils.expose( privateObj, "_test", container, {set: true, restore: true} );
 	  ok( Assay.hash( {"set": Function, "restore": Function}, container[ "_test" ] ), "exposeObject() should expose set() and restore() mutators for privateObj on container" );
 
-	  Assay.Utils.exposeObject( privateObj, "_test", container, {get: true, restore: true} );
+	  Assay.Utils.expose( privateObj, "_test", container, {get: true, restore: true} );
 	  ok( Assay.hash( {"get": Function, "restore": Function}, container[ "_test" ] ), "exposeObject() should expose get() and restore() accessors and mutators for privateObj on container" );
 
 	  // Exercise with all options [default]
-	  Assay.Utils.exposeObject( privateObj, "_test", container );
+	  Assay.Utils.expose( privateObj, "_test", container );
 	  ok( Assay.hash( {"get": Function, "set": Function, "restore": Function}, container[ "_test" ] ), "exposeObject() should expose accessors and mutators for privateObj on container" );
     equals("foo", container._test.get(), "container._test.get() should return 'foo'. Result");
 
@@ -754,119 +752,63 @@
 
 	});
 
-	test("Assay.Utils.getTypeOf() - exercises", function () {
-
-	  var getTypeOf = Assay.Utils.getTypeOf;
+	test("Assay.type() - exercises", function () {
 
 	  // Expected True Evalutions
 
 	  // Test falsy types and primitive data types
 
-	  equals( getTypeOf( null ), "null", "getTypeOf() should return 'null' with 'obj' parameter: (null). Result");
-	  equals( getTypeOf( undefined ), "undefined", "getTypeOf() should return 'undefined' with 'obj' parameter: (undefined). Result");
-	  equals( getTypeOf( NaN ), "number", "getTypeOf() should return 'Number' with 'obj' parameter: (NaN). Result");
-	  equals( getTypeOf( Infinity ), "number", "getTypeOf() should return 'Number' with 'obj' parameter: (NaN). Result");
-	  equals( getTypeOf( 0 ), "number", "getTypeOf() should return 'Number' with 'obj' parameter: (Number: 0). Result");
-	  equals( getTypeOf( 1 ), "number", "getTypeOf() should return 'Number' with 'obj' parameter: (Number: 1). Result");
-	  equals( getTypeOf( "" ), "string", "getTypeOf() should return 'String' with 'obj' parameter: (String: \"\"). Result");
-	  equals( getTypeOf( "foo" ), "string", "getTypeOf() should return 'String' with 'obj' parameter: (String: 'string primitive type'). Result");
-	  equals( getTypeOf( false ), "boolean", "getTypeOf() should return 'Boolean' with 'obj' parameter: (Boolean: false). Result");
-	  equals( getTypeOf( true ), "boolean", "getTypeOf() should return 'Boolean' with 'obj' parameter: (Boolean: true). Result");
+	  equals( Assay.type( null ), "null", "Assay.type() should return 'null' with 'obj' parameter: (null). Result");
+	  equals( Assay.type( undefined ), "undefined", "Assay.type() should return 'undefined' with 'obj' parameter: (undefined). Result");
+	  equals( Assay.type( NaN ), "number", "Assay.type() should return 'Number' with 'obj' parameter: (NaN). Result");
+	  equals( Assay.type( Infinity ), "number", "Assay.type() should return 'Number' with 'obj' parameter: (NaN). Result");
+	  equals( Assay.type( 0 ), "number", "Assay.type() should return 'Number' with 'obj' parameter: (Number: 0). Result");
+	  equals( Assay.type( 1 ), "number", "Assay.type() should return 'Number' with 'obj' parameter: (Number: 1). Result");
+	  equals( Assay.type( "" ), "string", "Assay.type() should return 'String' with 'obj' parameter: (String: \"\"). Result");
+	  equals( Assay.type( "foo" ), "string", "Assay.type() should return 'String' with 'obj' parameter: (String: 'string primitive type'). Result");
+	  equals( Assay.type( false ), "boolean", "Assay.type() should return 'Boolean' with 'obj' parameter: (Boolean: false). Result");
+	  equals( Assay.type( true ), "boolean", "Assay.type() should return 'Boolean' with 'obj' parameter: (Boolean: true). Result");
 
 	  // Test composite data types
 
-	  equals( getTypeOf( Object(0) ), "number", "getTypeOf() should return 'Number' with 'obj' parameter: (Number: Object(0)). Result");
-	  equals( getTypeOf( Object(1) ), "number", "getTypeOf() should return 'Number' with 'obj' parameter: (Number: Object(1)). Result");
-	  equals( getTypeOf( Object("") ), "string", "getTypeOf() should return 'String' with 'obj' parameter: (String: Object('')). Result");
-	  equals( getTypeOf( Object("foo") ), "string", "getTypeOf() should return 'String' with 'obj' parameter: (String: Object('string compositive type')). Result");
-	  equals( getTypeOf( Object(false) ), "boolean", "getTypeOf() should return 'Boolean' with 'obj' parameter: (Boolean: false). Result");
-	  equals( getTypeOf( Object(true) ), "boolean", "getTypeOf() should return 'Boolean' with 'obj' parameter: (Boolean: true). Result");
-	  equals( getTypeOf( /re/ ), "regexp", "getTypeOf() should return 'RegExp' with 'obj' parameter: (RegExp: /re/). Result");
-	  equals( getTypeOf( function() {} ), "function", "getTypeOf() should return 'Function' with 'obj' parameter: (Function: function(){}). Result");
-	  equals( getTypeOf( {} ), "object", "getTypeOf() should return 'Object' with 'obj' parameter: (Object: {}). Result");
-	  equals( getTypeOf( [] ), "array", "getTypeOf() should return 'Array' with 'obj' parameter: (Array: []). Result");
-	  equals( getTypeOf( new Date ), "date", "getTypeOf() should return 'Date' with 'obj' parameter: (Date: new Date). Result");
-	  equals( getTypeOf( new Custom ), "object", "getTypeOf() should return 'Object' with 'obj' parameter: (Custom: new Custom). Result");
+	  equals( Assay.type( Object(0) ), "number", "Assay.type() should return 'Number' with 'obj' parameter: (Number: Object(0)). Result");
+	  equals( Assay.type( Object(1) ), "number", "Assay.type() should return 'Number' with 'obj' parameter: (Number: Object(1)). Result");
+	  equals( Assay.type( Object("") ), "string", "Assay.type() should return 'String' with 'obj' parameter: (String: Object('')). Result");
+	  equals( Assay.type( Object("foo") ), "string", "Assay.type() should return 'String' with 'obj' parameter: (String: Object('string compositive type')). Result");
+	  equals( Assay.type( Object(false) ), "boolean", "Assay.type() should return 'Boolean' with 'obj' parameter: (Boolean: false). Result");
+	  equals( Assay.type( Object(true) ), "boolean", "Assay.type() should return 'Boolean' with 'obj' parameter: (Boolean: true). Result");
+	  equals( Assay.type( /re/ ), "regexp", "Assay.type() should return 'RegExp' with 'obj' parameter: (RegExp: /re/). Result");
+	  equals( Assay.type( function() {} ), "function", "Assay.type() should return 'Function' with 'obj' parameter: (Function: function(){}). Result");
+	  equals( Assay.type( {} ), "object", "Assay.type() should return 'Object' with 'obj' parameter: (Object: {}). Result");
+	  equals( Assay.type( [] ), "array", "Assay.type() should return 'Array' with 'obj' parameter: (Array: []). Result");
+	  equals( Assay.type( new Date ), "date", "Assay.type() should return 'Date' with 'obj' parameter: (Date: new Date). Result");
+	  equals( Assay.type( new Custom ), "object", "Assay.type() should return 'Object' with 'obj' parameter: (Custom: new Custom). Result");
 
 	  // Test native & custom constructors
 
-	  equals( getTypeOf( Number ), "function", "getTypeOf() should return 'Function' with 'obj' parameter: (Number). Result");
-	  equals( getTypeOf( String ), "function", "getTypeOf() should return 'Function' with 'obj' parameter: (String). Result");
-	  equals( getTypeOf( Boolean ), "function", "getTypeOf() should return 'Function' with 'obj' parameter: (Boolean). Result");
-	  equals( getTypeOf( RegExp ), "function", "getTypeOf() should return 'Function' with 'obj' parameter: (RegExp). Result");
-	  equals( getTypeOf( Date ), "function", "getTypeOf() should return 'Function' with 'obj' parameter: (Date). Result");
-	  equals( getTypeOf( Function ), "function", "getTypeOf() should return 'Function' with 'obj' parameter: (Function). Result");
-	  equals( getTypeOf( Array ), "function", "getTypeOf() should return 'Function' with 'obj' parameter: (Array). Result");
-	  equals( getTypeOf( Object ), "function", "getTypeOf() should return 'Function' with 'obj' parameter: (Object). Result");
-	  equals( getTypeOf( Custom ), "function", "getTypeOf() should return 'Function' with 'obj' parameter: (Custom). Result");
-	  equals( getTypeOf( Custom.prototype ), "object", "getTypeOf() should return 'Function' with 'obj' parameter: (Custom.prototype). Result");
-	  equals( getTypeOf( Custom.constructor ), "function", "getTypeOf() should return 'Function' with 'obj' parameter: (Custom.constructor). Result");
-	  equals( getTypeOf( Custom.__proto__ ), "function", "getTypeOf() should return 'Function' with 'obj' parameter: (Custom.__proto__). Result");
+	  equals( Assay.type( Number ), "function", "Assay.type() should return 'Function' with 'obj' parameter: (Number). Result");
+	  equals( Assay.type( String ), "function", "Assay.type() should return 'Function' with 'obj' parameter: (String). Result");
+	  equals( Assay.type( Boolean ), "function", "Assay.type() should return 'Function' with 'obj' parameter: (Boolean). Result");
+	  equals( Assay.type( RegExp ), "function", "Assay.type() should return 'Function' with 'obj' parameter: (RegExp). Result");
+	  equals( Assay.type( Date ), "function", "Assay.type() should return 'Function' with 'obj' parameter: (Date). Result");
+	  equals( Assay.type( Function ), "function", "Assay.type() should return 'Function' with 'obj' parameter: (Function). Result");
+	  equals( Assay.type( Array ), "function", "Assay.type() should return 'Function' with 'obj' parameter: (Array). Result");
+	  equals( Assay.type( Object ), "function", "Assay.type() should return 'Function' with 'obj' parameter: (Object). Result");
+	  equals( Assay.type( Custom ), "function", "Assay.type() should return 'Function' with 'obj' parameter: (Custom). Result");
+	  equals( Assay.type( Custom.prototype ), "object", "Assay.type() should return 'Function' with 'obj' parameter: (Custom.prototype). Result");
+	  equals( Assay.type( Custom.constructor ), "function", "Assay.type() should return 'Function' with 'obj' parameter: (Custom.constructor). Result");
+	  equals( Assay.type( Custom.__proto__ ), "function", "Assay.type() should return 'Function' with 'obj' parameter: (Custom.__proto__). Result");
 
 	  // Test native / host objects
 
-	  equals( getTypeOf( Math ), "object", "getTypeOf() should return 'Object' with 'obj' parameter: (Math). Result");
-	  equals( getTypeOf( focus ), "function", "getTypeOf() should return 'Function' with 'obj' parameter: (Event: focus). Result");
+	  equals( Assay.type( Math ), "object", "Assay.type() should return 'Object' with 'obj' parameter: (Math). Result");
+	  equals( Assay.type( focus ), "function", "Assay.type() should return 'Function' with 'obj' parameter: (Event: focus). Result");
 
 	});
 
 	test("Assay.Utils.getFunctionName() - exercises", function () {
 
-	  var isHash = Assay.Utils.getKlassName;
-
-    /*
-
-	  // Expected False Evaluations
-
-	  // Test falsy types and primitive data types
-
-	  equals( isHash( null ), false, "isHash() should be false with 'obj' parameter: (null). Result");
-	  equals( isHash( undefined ), false, "isHash() should be false with 'obj' parameter: (undefined). Result");
-	  equals( isHash( NaN ), false, "isHash() should be false with 'obj' parameter: (NaN). Result");
-	  equals( isHash( 0 ), false, "isHash() should be false with 'obj' parameter: (Number: 0). Result");
-	  equals( isHash( 1 ), false, "isHash() should be false with 'obj' parameter: (Number: 1). Result");
-	  //equals( isHash( "" ), false, "isHash() should be false with 'obj' parameter: (String: ""). Result");
-	  equals( isHash( "string primitive type" ), false, "isHash() should be false with 'obj' parameter: (String: 'string primitive type'). Result");
-	  equals( isHash( false ), false, "isHash() should be false with 'obj' parameter: (Boolean: false). Result");
-	  equals( isHash( true ), false, "isHash() should be false with 'obj' parameter: (Boolean: true). Result");
-
-	  // Expected True Evalutions
-
-	  // Test native & custom constructors
-
-	  equals( isHash( Number ), true, "isHash() should be true with 'obj' parameter: (Number). Result");
-	  equals( isHash( String ), true, "isHash() should be true with 'obj' parameter: (String). Result");
-	  equals( isHash( Boolean ), true, "isHash() should be true with 'obj' parameter: (Boolean). Result");
-	  equals( isHash( RegExp ), true, "isHash() should be true with 'obj' parameter: (RegExp). Result");
-	  equals( isHash( Date ), true, "isHash() should be true with 'obj' parameter: (Date). Result");
-	  equals( isHash( Function ), true, "isHash() should be true with 'obj' parameter: (Function). Result");
-	  equals( isHash( Math ), true, "isHash() should be true with 'obj' parameter: (Math). Result");
-	  equals( isHash( Array ), true, "isHash() should be true with 'obj' parameter: (Array). Result");
-	  equals( isHash( Object ), true, "isHash() should be true with 'obj' parameter: (Object). Result");
-	  equals( isHash( Custom ), true, "isHash() should be true with 'obj' parameter: (Custom). Result");
-
-	  // Test composite data types
-
-	  equals( isHash( Object(0) ), true, "isHash() should be true with 'obj' parameter: (Number: Object(0)). Result");
-	  equals( isHash( Object(1) ), true, "isHash() should be true with 'obj' parameter: (Number: Object(1)). Result");
-	  equals( isHash( Object("") ), true, "isHash() should be true with 'obj' parameter: (String: Object('')). Result");
-	  equals( isHash( Object('string composite type') ), true, "isHash() should be true with 'obj' parameter: (String: Object('string compositive type')). Result");
-	  equals( isHash( Object(false) ), true, "isHash() should be true with 'obj' parameter: (Boolean: false). Result");
-	  equals( isHash( Object(true) ), true, "isHash() should be true with 'obj' parameter: (Boolean: true). Result");
-	  equals( isHash( /re/ ), true, "isHash() should be true with 'obj' parameter: (RegExp: /re/). Result");
-	  equals( isHash( function() {} ), true, "isHash() should be true with 'obj' parameter: (Function: function(){}). Result");
-	  equals( isHash( {} ), true, "isHash() should be true with 'obj' parameter: (Object: {}). Result");
-	  equals( isHash( [] ), true, "isHash() should be true with 'obj' parameter: (Array: []). Result");
-	  equals( isHash( new Date ), true, "isHash() should be true with 'obj' parameter: (Date: new Date). Result");
-	  equals( isHash( new Custom ), true, "isHash() should be true with 'obj' parameter: (Custom: new Custom). Result");
-
-  */
-
-	});
-
-	test("Assay.Utils.setFunctionID() - exercises", function () {
-
-	  var isHash = Assay.Utils.setKlassName;
+	  var isHash = Assay.Utils.getFunctionName;
 
     /*
 
@@ -1635,7 +1577,7 @@
 	      __Assay = initAssay();
 
     // Exercise inititaliser in exposed mode
-    container[ "QMock" ] = initQMock( __Assay && __Assay.object, { "isTest": true, "expose": __Assay && __Assay.Utils.exposeObject } );
+    container[ "QMock" ] = initQMock( __Assay && __Assay.object, { "isTest": true, "expose": __Assay && __Assay.Utils.expose } );
 
     // Test interface
     equals( Assay.hash( this.expectedQMockInterface, container[ "QMock" ] ), true, "initQMock() should return a Qmock instance interface registered to the identifier 'Qmock' on container" );
