@@ -5,9 +5,9 @@
 
 	// Stub to test support for user-defined objects
 	function Custom () {};
-	
+
 	function Named () {}
-  
+
 
 	// Stub for CSS selector parameter expectation (e.g. mock jQuery)
 	var Selector = Mock.Variable;
@@ -121,7 +121,7 @@
     equals("foo", container._test.get(), "container._test.get() should return 'foo'. Result");
 
 	});
-	
+
 	test("Assay.Utils.isHash() - exercises", function () {
 
 	  var isHash = Assay.Utils.isHash;
@@ -171,7 +171,7 @@
 	  equals( isHash( new Custom ), true, "isHash() should be true with 'obj' parameter: (Custom: new Custom). Result");
 
 	});
-	
+
 	/*test("Assay.Utils.isNativeType() - exercises", function () {
 
 	  var isNativeType = Assay.Utils.isNativeType;
@@ -264,13 +264,13 @@
     cleanNatives();
 
 	});*/
-	
+
 	test("Assay.Utils.getFunctionName() - exercises", function () {
 
 	  var getFunctionName = Assay.Utils.getFunctionName;
-	  
+
 	  // Expected False Evaluations
-	  
+
 	  // Test non-function objects, primitive and composite types
 
 	  equals( getFunctionName( null ), false, "getFunctionName() should be false with 'obj' parameter: (null). Result");
@@ -294,15 +294,19 @@
 	  // Expected True Evalutions
 
 	  // Test various function constructs
-	  
+
 	  function functionDeclaration () {};
 
 	  equals( getFunctionName( functionDeclaration ), "functionDeclaration", "getFunctionName() should be true with 'obj' parameter: (functionDeclaration). Result");
 	  equals( getFunctionName( function functionExpression () {} ), "functionExpression", "getFunctionName() should be true with 'obj' parameter: (functionExpression). Result");
-	  equals( getFunctionName( function () {} ), "anonymous()", "getFunctionName() should be true with 'obj' parameter: (anonymous function). Result");
+	  equals( getFunctionName( function () {} ), "anonymous", "getFunctionName() should be true with 'obj' parameter: (anonymous function). Result");
+    // Test for BOM
+	  if ( focus ) {
+	    equals( getFunctionName( focus ), "focus", "getFunctionName() should be true with 'obj' parameter: (focus). Result");
+	  }
 
     // Native & Custom Cnstructors
-    
+
 	  equals( getFunctionName( Number ), "Number", "getFunctionName() should be true with 'obj' parameter: (Number: Constructor). Result");
 	  equals( getFunctionName( String ), "String", "getFunctionName() should be true with 'obj' parameter: (String: Constructor). Result");
 	  equals( getFunctionName( Boolean ), "Boolean", "getFunctionName() should be true with 'obj' parameter: (Boolean: Constructor). Result");
@@ -885,7 +889,6 @@
 	  // FALSE ASSERTIONS
 
 	  // Test invalid argument type - Constructors
-
 		equals( Assay.object(1, String), false, "Assay.object() should return false with expected: (Number: 1) and actual: (String)" );
 		equals( Assay.object(1, Boolean), false, "Assay.object() should return false with expected: (Number: 1) and actual: (Boolean)" );
 		equals( Assay.object(1, Array), false, "Assay.object() should return false with expected: (Number: 1) and actual: (Array)" );
@@ -954,6 +957,7 @@
 
 		// TRUE ASSERTIONS
 		equals( Assay.object(1, Number, {strictValueChecking: true} ), false, "Assay.object() should return false with expected: (Number: 1) and actual: (Number)" );
+		debugger;
 		equals( Assay.object(1, 1, {strictValueChecking: true} ), true, "Assay.object() should return true with expected: (Number: 1) and actual: (Number: 1)" );
 		equals( Assay.object(1, 0, {strictValueChecking: true} ), false, "Assay.object() should return false with expected: (Number: 1) and actual: (Number: 0)" );
 
@@ -1440,7 +1444,7 @@
 		equals( Assay.object(/re/, new RegExp(/re/), {strictValueChecking: true}), true, "Assay.object() should return true with expected: (RegExp: /re/) and actual: (RegExp: new RegExp(/re/))" );
 
 	});
-	
+
 	test("Assay.type() - exercises", function () {
 
 	  // Expected True Evalutions

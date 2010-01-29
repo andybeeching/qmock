@@ -234,7 +234,7 @@ function initAssay () {
         : fn.ID;
 
       // Cache result to avoid future lookups
-      return fn[ "ID" ] = fn.name || id || "anonymous()";
+      return fn[ "ID" ] = fn.name || id || "anonymous";
 
     };
 
@@ -319,7 +319,6 @@ function initAssay () {
 
       // Return a Boolean for recursive calls, exceptions handled in opt_exceptionsHandler.
       return !!result;
-
     }
 
     // Key function to test objects against each other.
@@ -331,49 +330,131 @@ function initAssay () {
         return assertCollection.apply( null, arguments );
       }
 
+      function __checkType ( expected, actual, expectedType ) {
+        // If function passed use as constructor, else find instance constructor (if exists)
+        var klass = ( expectedType === "function" ) ? expected : expected && expected.constructor;
+        // Some comment
+        return !!(
+          // First, fairly robust check
+          Object( actual ) instanceof ( klass || Function )
+          // More robust cross-frame check
+          || _getTypeOf( actual ) === expectedType
+          // simple identity check
+          || actual === klass
+        );
+      }
+
+      function __setExpectedType ( obj ) {
+
+        var Klass = _getTypeOf( obj );
+        // some comment
+        return ( Klass !== "function" ) ? Klass : _getFunctionName( obj );
+      }
+
+      function __isComparison ( type ) {
+        return /^(?:number|string|boolean|date|regexp)$/.test( type );
+      }
+
+      function __isCollection ( obj ) {
+        return !!( obj.hasOwnProperty && obj.hasOwnProperty('length') );
+      }
+
+      function __compare ( expected, actual, deserialize ) {
+        // Should throw error if deserialize method not found on object?
+        return ( expected && expected[deserialize] && expected[deserialize]() ) === ( actual && actual[deserialize] && actual[deserialize]() )
+      }
+      var expectedType = __setExpectedType( expected ),
+
+
       // Test whether expected is a constructor for native object types (aside from null // undefined)
-      var expectedType = ( expected !== null && expected !== undefined ) ? expected.constructor : expected,
+      //var expectedType = ( expected !== null && expected !== undefined ) ? expected.constructor : expected,
         /*expectedType = (expected !== null && expected !== undefined)
           ? ( expected.constructor === Function ) // but also matches function literals :-(
             ? expected
             : expected.constructor
               : expected,*/
-        isValue = false,
-        isRegExp = false,
-        isCollection = false,
-        strictValueChecking = (opt && opt.strictValueChecking) || false,
-        exceptionType = (opt && opt.exceptionType) || ( strictValueChecking === true ? "IncorrectArgumentValueException" : "IncorrectArgumentTypeException"),
-        // What happened to isNative fn?!? - see Kangax blog... damn me and my lack of self-documentation sometimes.
-        nativeTypes = [Number, String, Boolean, Date, Function, Object, Array, RegExp, Variable],
-        result = true,
-        // WTF?
-        descriptor = (opt && opt.descriptor) || "getClass()",
-        raiseError = (opt && opt.exceptionHandler) || null;
 
-      function _compare ( expected, actual, deserialize ) {
-        // Should throw error if deserialize method not found on object?
-        return ( expected && expected[deserialize] && expected[deserialize]() ) === ( actual && actual[deserialize] && actual[deserialize]() )
+        // Set flags
+
+        isCollection = __isCollection( expected ),
+        isComparison = __isComparison( expectedType ),
+        // Set options
+        strict = (opt && opt.strictValueChecking) || false,
+        exceptionType = (opt && opt.exceptionType) || ( strict === true ? "IncorrectArgumentValueException" : "IncorrectArgumentTypeException"),
+        // What happened to isNative fn?!? - see Kangax blog... damn me and my lack of self-documentation sometimes.
+        //nativeTypes = [Number, String, Boolean, Date, Function, Object, Array, RegExp, Variable],
+        descriptor = ( opt && opt.descriptor ) || "getClass()",
+        raiseError = ( opt && opt.exceptionHandler ) || null,
+        deepCheck = ( opt && opt.deepCheck ) || true;
+        result = true;
+
+      // 1. Check actual type
+      result = __checkType( expected, actual, expectedType );
+
+      // If strict then look at comparison
+      if ( result && strict ) {
+
+        if ( isComparison ) {
+          result = __compare( expected, actual, ( expectedType === "regexp" ) ? "valueOf" : "toString" );
+        }
+
+        else {
+          try {
+             result = ( ( isCollection === true )
+                          ? assertCollection
+                          : assertHash )(
+                            expected,
+                            actual,
+                            {
+                              "strictValueChecking": !!deepCheck,
+                              "exceptionType": exceptionType,
+                              "exceptionHandler": (isCollection === true) ? null : raiseError,
+                              "descriptor": descriptor
+                            }
+                          );
+          }
+            catch ( exception ) {
+            // If MissingHashKeyException thrown then create custom error listing the missing keys.
+            if ( exception && exception.type && exception.type === "MalformedArgumentsException" ) {
+              raiseError && raiseError( expected, actual, exception.type, descriptor );
+            } else {
+              throw exception;
+            }
+            // Ensure normal flow control plays out
+            result = false;
+          }
+        }
+
       }
 
-      assertNativeType:
+      // Throw error if negative match
+      if ( result === false ) {
+        raiseError && raiseError( expected, actual, exceptionType, descriptor ); // Need to inject correct className
+      }
+
+
+
+
+
+      /*assertNativeType:
         for ( var i = 0, len = nativeTypes.length; i < len; i++ ) {
           if ( expected === nativeTypes[i] ) {
             expectedType = expected;
             break assertNativeType;
           }
-        }
+        }*/
 
       // n.b. switch statements check by identity (aka strict === rather than ... ? See Nyman talk)
+      /*setFlags:
       switch( expectedType ) {
 
         // Pass-through
-        case Variable:
-          break;
+        //case "Variable":
+          //break;
 
         // False (however unlikely) - compare by type
-        case null:
-        case undefined:
-        // case NaN: TBD
+        case "null":
+        case "undefined":
           if ( expected !== actual ) {
             raiseError && raiseError( expected, actual, exceptionType, descriptor );
             result = false;
@@ -381,12 +462,13 @@ function initAssay () {
           break;
 
         // Primitives (plus Date) - compare by prototype or value (where strictValue === true)
-        case Date:
-        case Number:
-        case String:
-        case Boolean:
+        case "Date":
+        case "Number":
+        case "String":
+        case "Boolean":
           // set Primitive flag
           isValue = true;
+          break;
 
         default:
 
@@ -412,11 +494,12 @@ function initAssay () {
           } else {
             // Otherwise throw exception
             throwException(exceptionType, name, "getClass() - Number/String/Boolean/Array/Object", actual); // Need to inject correct className
-          }*/
+          }
           // Use of Object() converts primitve literal values into objects which plays nice with the instanceof operator (n.b. [[Prototype]] *is* setup, e.g. "".constuctor (which lives on __proto__, the prototype of the constructor function, exists)).
           // I'd love to know why! instanceof crawls [[Prototype]]
 
-          if ( Object ( actual ) instanceof expectedType || actual === expectedType ) {
+          // Type Test
+          if ( __checkType( expectedType, actual ) === true ) {
 
             // If strict then 'deep' assertion
             if ( strictValueChecking === true ) {
@@ -451,10 +534,10 @@ function initAssay () {
                 result = false;
               }
 
-          }
+          }*/
           // Handle expected object literals whose Type match all types (aside from falsy types)
           // aka check Object actually is an Object instance
-          else if ( ( expectedType === Object ) && ( actual && actual.constructor !== Object.prototype.constructor ) ) {
+          /*else if ( ( expectedType === Object ) && ( actual && actual.constructor !== Object.prototype.constructor ) ) {
             result = false;
           }
 
@@ -466,7 +549,7 @@ function initAssay () {
         if ( result === false ) {
           raiseError && raiseError( expected, actual, exceptionType, descriptor ); // Need to inject correct className
         }
-      } // end switch
+      } // end switch*/
        return result;
     }
 
