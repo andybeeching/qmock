@@ -328,12 +328,12 @@ function initAssay () {
         delete opt.delegate;
         return assertCollection.apply( null, arguments );
       }
-      
-      // Might have to move this into QMock as it's not actually very intuitive for Number to match both instances and other functions 
+
+      // Might have to move this into QMock as it's not actually very intuitive for Number to match both instances and other functions
       function __checkType ( expected, actual, expectedType, opt_typed ) {
 
         // If function passed use as constructor, else find instance constructor (if exists)
-        var klass = ( opt_typed && _getTypeOf( expected ) === "function" ) ? expected : expected && expected.constructor;
+        var klass = ( opt_typed && _getTypeOf( expected ) === "function" ) ? expected : expected.constructor || expected;
 
         // Some comment
         return !!(
