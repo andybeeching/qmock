@@ -328,12 +328,13 @@ function initAssay () {
         delete opt.delegate;
         return assertCollection.apply( null, arguments );
       }
+      
+      // Might have to move this into QMock as it's not actually very intuitive for Number to match both instances and other functions 
+      function __checkType ( expected, actual, expectedType, opt_typed ) {
 
-      function __checkType ( expected, actual, expectedType ) {
-        
         // If function passed use as constructor, else find instance constructor (if exists)
-        var klass = ( _getTypeOf( expected ) === "function" ) ? expected : expected && expected.constructor;
-        
+        var klass = ( opt_typed && _getTypeOf( expected ) === "function" ) ? expected : expected && expected.constructor;
+
         // Some comment
         return !!(
           // First, fairly robust check
@@ -361,7 +362,7 @@ function initAssay () {
       }
 
       function __compare ( expected, actual, expectedType ) {
-        
+
         // Some defaults
         var ROUTINES = {
               "number": "valueOf",
@@ -372,10 +373,10 @@ function initAssay () {
               // We already know the type of the actual is correct - strict matching disable by default for function objects
               "function": null
             },
-            
-            // 
+
+            //
             CUSTOM_ROUTINES = {},
-            
+
             //
             utils = {
 
@@ -392,25 +393,25 @@ function initAssay () {
               }
 
             },
-            
+
             //
             fn = CUSTOM_ROUTINES[ expectedType ] || ROUTINES[ expectedType ] || null;
 
         // Should throw error if deserialize method not found on object?
-        return ( fn ) 
-        
+        return ( fn )
+
           ? _getTypeOf( fn ) === "function"
-        
+
             // if function supplied for object type then invoke
             ? fn.apply( null, arguments )
-        
+
             // else call method on instances
             : ( expected && expected[ fn ] && expected[ fn ]() ) === ( actual && actual[ fn ] && actual[ fn ]() )
-          
+
           // else set flag to to deep comparison
           : fn;
       }
-      
+
       var expectedType = _getTypeOf( expected ),
 
 
@@ -428,6 +429,7 @@ function initAssay () {
         //isComparison = __isComparison( expectedType ),
         // Set options
         strict = (opt && opt.strictValueChecking) || false,
+        typed = (opt && opt.typed) || false,
         exceptionType = (opt && opt.exceptionType) || ( strict === true ? "IncorrectArgumentValueException" : "IncorrectArgumentTypeException"),
         // What happened to isNative fn?!? - see Kangax blog... damn me and my lack of self-documentation sometimes.
         //nativeTypes = [Number, String, Boolean, Date, Function, Object, Array, RegExp, Variable],
@@ -437,7 +439,7 @@ function initAssay () {
         result = true;
 
       // Top-level type check
-      result = __checkType( expected, actual, expectedType );
+      result = __checkType( expected, actual, expectedType, typed );
 
       // If strict then look at comparison
       if ( result && strict ) {
@@ -446,7 +448,7 @@ function initAssay () {
         result = __compare( expected, actual, expectedType );
 
         if ( result === null ) {
-          
+
           // Deep comparison
           try {
             result = ( ( isCollection === true )
