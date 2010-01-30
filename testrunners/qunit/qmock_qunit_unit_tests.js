@@ -815,23 +815,12 @@
 
 	  // FALSE ASSERTIONS
 
-	  // Test invalid argument type - Constructors
-		equals( Assay.object(Number, String), false, "Assay.object() should return false with expected: (Number) and actual: (String)" );
-		equals( Assay.object(Number, Boolean), false, "Assay.object() should return false with expected: (Number) and actual: (Boolean)" );
-		equals( Assay.object(Number, Array), false, "Assay.object() should return false with expected: (Number) and actual: (Array)" );
-		equals( Assay.object(Number, Object), false, "Assay.object() should return false with expected: (Number) and actual: (Object)" );
-		equals( Assay.object(Number, Function), false, "Assay.object() should return false with expected: (Number) and actual: (Function)" );
-		equals( Assay.object(Number, RegExp), false, "Assay.object() should return false with expected: (Number) and actual: (RegExp)" );
-		equals( Assay.object(Number, Date), false, "Assay.object() should return false with expected: (Number) and actual: (Date)" );
-		equals( Assay.object(Number, Custom), false, "Assay.object() should return false with expected: (Number) and actual: (Custom)" );
-
 		// Test invalid argument type - Values (truthy)
 
 		equals( Assay.object(Number, "string"), false, "Assay.object() should return false with expected: (Number) and actual: (String: string)" );
 		equals( Assay.object(Number, true), false, "Assay.object() should return false with expected: (Number) and actual: (Boolean: true)" );
 		equals( Assay.object(Number, []), false, "Assay.object() should return false with expected: (Number) and actual: (Array: [])" );
 		equals( Assay.object(Number, {}), false, "Assay.object() should return false with expected: (Number) and actual: (Object: {})" );
-		equals( Assay.object(Number, function(){}), false, "Assay.object() should return false with expected: (Number) and actual: (Function: function(){})" );
 		equals( Assay.object(Number, /test/), false, "Assay.object() should return false with expected: (Number) and actual: (RegExp: /test/)" );
 		equals( Assay.object(Number, new Date), false, "Assay.object() should return false with expected: (Number) and actual: (Date: new instance)" );
 		equals( Assay.object(Number, new Custom), false, "Assay.object() should return false with expected: (Number) and actual: (Custom: new instance)" );
@@ -840,10 +829,22 @@
 
 		equals( Assay.object(Number, null), false, "Assay.object() should return false with expected: (Number) and actual: (null)" );
 		equals( Assay.object(Number, undefined), false, "Assay.object() should return false with expected: (Number) and actual: (undefined)" );
+		
 		// TRUE ASSERTIONS
-		equals( Assay.object(Number, Number), true, "Assay.object() should return true with expected: (Number) and actual: (Number)" );
 		equals( Assay.object(Number, 1), true, "Assay.object() should return true with expected: (Number) and actual: (Number: 1)" );
 		equals( Assay.object(Number, 0), true, "Assay.object() should return true with expected: (Number) and actual: (Number: 0)" );
+		
+		// Test invalid argument type - Constructors
+		equals( Assay.object(Number, function(){}), true, "Assay.object() should return false with expected: (Number) and actual: (Function: function(){})" );
+		equals( Assay.object(Number, Number), true, "Assay.object() should return true with expected: (Number) and actual: (Number)" );
+		equals( Assay.object(Number, String), true, "Assay.object() should return false with expected: (Number) and actual: (String)" );
+		equals( Assay.object(Number, Boolean), true, "Assay.object() should return false with expected: (Number) and actual: (Boolean)" );
+		equals( Assay.object(Number, Array), true, "Assay.object() should return false with expected: (Number) and actual: (Array)" );
+		equals( Assay.object(Number, Object), true, "Assay.object() should return false with expected: (Number) and actual: (Object)" );
+		equals( Assay.object(Number, Function), true, "Assay.object() should return false with expected: (Number) and actual: (Function)" );
+		equals( Assay.object(Number, RegExp), true, "Assay.object() should return false with expected: (Number) and actual: (RegExp)" );
+		equals( Assay.object(Number, Date), true, "Assay.object() should return false with expected: (Number) and actual: (Date)" );
+		equals( Assay.object(Number, Custom), true, "Assay.object() should return false with expected: (Number) and actual: (Custom)" );
 
 	});
 
@@ -889,6 +890,7 @@
 	  // FALSE ASSERTIONS
 
 	  // Test invalid argument type - Constructors
+		equals( Assay.object(1, Number), false, "Assay.object() should return false with expected: (Number: 1) and actual: (Number)" );
 		equals( Assay.object(1, String), false, "Assay.object() should return false with expected: (Number: 1) and actual: (String)" );
 		equals( Assay.object(1, Boolean), false, "Assay.object() should return false with expected: (Number: 1) and actual: (Boolean)" );
 		equals( Assay.object(1, Array), false, "Assay.object() should return false with expected: (Number: 1) and actual: (Array)" );
@@ -897,7 +899,7 @@
 		equals( Assay.object(1, RegExp), false, "Assay.object() should return false with expected: (Number: 1) and actual: (RegExp)" );
 		equals( Assay.object(1, Date), false, "Assay.object() should return false with expected: (Number: 1) and actual: (Date)" );
 		equals( Assay.object(1, Custom), false, "Assay.object() should return false with expected: (Number: 1) and actual: (Custom)" );
-
+		
 		// Test invalid argument type - Values (truthy)
 
 		equals( Assay.object(1, "string"), false, "Assay.object() should return false with expected: (Number: 1) and actual: (String: string)" );
@@ -915,7 +917,6 @@
 		equals( Assay.object(1, undefined), false, "Assay.object() should return false with expected: (Number: 1) and actual: (undefined)" );
 
 		// TRUE ASSERTIONS
-		equals( Assay.object(1, Number), true, "Assay.object() should return true with expected: (Number: 1) and actual: (Number)" );
 		equals( Assay.object(1, 1), true, "Assay.object() should return true with expected: (Number: 1) and actual: (Number: 1)" );
 		equals( Assay.object(1, 0), true, "Assay.object() should return true with expected: (Number: 1) and actual: (Number: 0)" );
 
@@ -957,7 +958,6 @@
 
 		// TRUE ASSERTIONS
 		equals( Assay.object(1, Number, {strictValueChecking: true} ), false, "Assay.object() should return false with expected: (Number: 1) and actual: (Number)" );
-		debugger;
 		equals( Assay.object(1, 1, {strictValueChecking: true} ), true, "Assay.object() should return true with expected: (Number: 1) and actual: (Number: 1)" );
 		equals( Assay.object(1, 0, {strictValueChecking: true} ), false, "Assay.object() should return false with expected: (Number: 1) and actual: (Number: 0)" );
 

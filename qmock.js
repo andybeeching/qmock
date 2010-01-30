@@ -204,7 +204,6 @@ function initAssay () {
         ? 'undefined'
         : TYPES[ Object.prototype.toString.call( obj ) ]
           || ( obj ? 'object' : 'null' );
-
     }
 
     // Grab the identifier of a function object
@@ -229,12 +228,12 @@ function initAssay () {
       // We don't use displayName as that can be manipulated more easily to mess up the 'Klass' inference.
       var id = ( !fn.ID )
         ? ( !fn.name )
-        ? ( fn + "" ).match( /function +([\w$]*) *\(/ )[ 1 ] // decompiles function and grabs identifier if named
-        : fn.name
+          ? ( fn + "" ).match( /function +([\w$]*) *\(/ )[ 1 ] // decompiles function and grabs identifier if named
+          : fn.name
         : fn.ID;
 
       // Cache result to avoid future lookups
-      return fn[ "ID" ] = fn.name || id || "anonymous";
+      return fn[ "ID" ] = fn.ID || id || "anonymous";
 
     };
 
@@ -331,16 +330,16 @@ function initAssay () {
       }
 
       function __checkType ( expected, actual, expectedType ) {
+        
         // If function passed use as constructor, else find instance constructor (if exists)
-        var klass = ( expectedType === "function" ) ? expected : expected && expected.constructor;
+        var klass = ( _getTypeOf( expected ) === "function" ) ? expected : expected && expected.constructor;
+        
         // Some comment
         return !!(
           // First, fairly robust check
           Object( actual ) instanceof ( klass || Function )
           // More robust cross-frame check
           || _getTypeOf( actual ) === expectedType
-          // simple identity check
-          || actual === klass
         );
       }
 
@@ -351,19 +350,68 @@ function initAssay () {
         return ( Klass !== "function" ) ? Klass : _getFunctionName( obj );
       }
 
-      function __isComparison ( type ) {
+      /*function __isComparison ( type ) {
         return /^(?:number|string|boolean|date|regexp)$/.test( type );
+      }*/
+
+      function __isCollection ( obj, expectedType ) {
+        return ( expectedType === "function" )
+          ? false
+          : !!( obj.hasOwnProperty && obj.hasOwnProperty('length') );
       }
 
-      function __isCollection ( obj ) {
-        return !!( obj.hasOwnProperty && obj.hasOwnProperty('length') );
-      }
+      function __compare ( expected, actual, expectedType ) {
+        
+        // Some defaults
+        var ROUTINES = {
+              "number": "valueOf",
+              "string": "valueOf",
+              "boolean": "valueOf",
+              "date": "valueOf",
+              "regexp": "toString",
+              // We already know the type of the actual is correct - strict matching disable by default for function objects
+              "function": null
+            },
+            
+            // 
+            CUSTOM_ROUTINES = {},
+            
+            //
+            utils = {
 
-      function __compare ( expected, actual, deserialize ) {
+              setCompare: function ( obj, callback ) {
+                CUSTOM_ROUTINES[ obj ] = callback;
+              },
+
+              removeCompare: function ( obj ) {
+                delete CUSTOM_ROUTINES[ obj ];
+              },
+
+              restoreCompare: function () {
+                CUSTOM_ROUTINES = {};
+              }
+
+            },
+            
+            //
+            fn = CUSTOM_ROUTINES[ expectedType ] || ROUTINES[ expectedType ] || null;
+
         // Should throw error if deserialize method not found on object?
-        return ( expected && expected[deserialize] && expected[deserialize]() ) === ( actual && actual[deserialize] && actual[deserialize]() )
+        return ( fn ) 
+        
+          ? _getTypeOf( fn ) === "function"
+        
+            // if function supplied for object type then invoke
+            ? fn.apply( null, arguments )
+        
+            // else call method on instances
+            : ( expected && expected[ fn ] && expected[ fn ]() ) === ( actual && actual[ fn ] && actual[ fn ]() )
+          
+          // else set flag to to deep comparison
+          : fn;
       }
-      var expectedType = __setExpectedType( expected ),
+      
+      var expectedType = _getTypeOf( expected ),
 
 
       // Test whether expected is a constructor for native object types (aside from null // undefined)
@@ -376,8 +424,8 @@ function initAssay () {
 
         // Set flags
 
-        isCollection = __isCollection( expected ),
-        isComparison = __isComparison( expectedType ),
+        isCollection = __isCollection( expected, expectedType ),
+        //isComparison = __isComparison( expectedType ),
         // Set options
         strict = (opt && opt.strictValueChecking) || false,
         exceptionType = (opt && opt.exceptionType) || ( strict === true ? "IncorrectArgumentValueException" : "IncorrectArgumentTypeException"),
@@ -388,19 +436,20 @@ function initAssay () {
         deepCheck = ( opt && opt.deepCheck ) || true;
         result = true;
 
-      // 1. Check actual type
+      // Top-level type check
       result = __checkType( expected, actual, expectedType );
 
       // If strict then look at comparison
       if ( result && strict ) {
 
-        if ( isComparison ) {
-          result = __compare( expected, actual, ( expectedType === "regexp" ) ? "valueOf" : "toString" );
-        }
+        // Shallow comparison
+        result = __compare( expected, actual, expectedType );
 
-        else {
+        if ( result === null ) {
+          
+          // Deep comparison
           try {
-             result = ( ( isCollection === true )
+            result = ( ( isCollection === true )
                           ? assertCollection
                           : assertHash )(
                             expected,
