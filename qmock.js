@@ -333,7 +333,7 @@ function initAssay () {
       function __checkType ( expected, actual, expectedType, opt_typed ) {
 
         // If function passed use as constructor, else find instance constructor (if exists)
-        var klass = ( opt_typed && _getTypeOf( expected ) === "function" ) ? expected : expected.constructor || expected;
+        var klass = ( opt_typed && _getTypeOf( expected ) === "function" ) ? expected : Object(expected) && expected.constructor;
 
         // Some comment
         return !!(
@@ -356,7 +356,7 @@ function initAssay () {
       }*/
 
       function __isCollection ( obj, expectedType ) {
-        return ( obj.hasOwnProperty && obj.hasOwnProperty('length') );
+        return !!( obj && obj.hasOwnProperty && obj.hasOwnProperty('length') );
       }
 
       function __compare ( expected, actual, expectedType, opt_typed ) {

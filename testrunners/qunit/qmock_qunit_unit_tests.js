@@ -50,13 +50,11 @@
 
 	  // Exercise inititaliser as common use case
     container[ "Assay" ] = initAssay();
-
     // Test interface
-    equals( Assay.hash( this.expectedAssayInterface, container[ "Assay" ] ), true, "initAssay() should return an Assay instance interface registered with the identifier 'Assay' on container" );
+    equals( Assay.hash( this.expectedAssayInterface, container[ "Assay" ], {typed: true} ), true, "initAssay() should return an Assay instance interface registered with the identifier 'Assay' on container" );
 
     // Unload Assay from container
     delete container[ "Assay" ];
-
     // Test successful removal
     ok( Assay.object( undefined, container.Assay ), "Assay should be unloaded, and the associated identifier 'Assay' should not exist on container" );
 
@@ -298,13 +296,13 @@
 
 	  function functionDeclaration () {};
 
-	  equals( getFunctionName( functionDeclaration ), "functionDeclaration", "getFunctionName() should be true with 'obj' parameter: (functionDeclaration). Result");
-	  equals( getFunctionName( function functionExpression () {} ), "functionExpression", "getFunctionName() should be true with 'obj' parameter: (functionExpression). Result");
-	  equals( getFunctionName( function () {} ), "anonymous", "getFunctionName() should be true with 'obj' parameter: (anonymous function). Result");
-    // Test for BOM
-	  if ( focus ) {
+	  equals( getFunctionName( functionDeclaration ), "functionDeclaration", "getFunctionName() should be true with 'obj' parameter: (Function: functionDeclaration). Result");
+	  equals( getFunctionName( function functionExpression () {} ), "functionExpression", "getFunctionName() should be true with 'obj' parameter: (Function: functionExpression). Result");
+	  equals( getFunctionName( function () {} ), "anonymous", "getFunctionName() should be true with 'obj' parameter: (Function: anonymous). Result");
+    // Test for event callback functions - varies across browsers whether this is named or not (e.g. FF/Y, CH/N)
+	  /*if ( focus ) {
 	    equals( getFunctionName( focus ), "focus", "getFunctionName() should be true with 'obj' parameter: (focus). Result");
-	  }
+	  }*/
 
     // Native & Custom Cnstructors
 
