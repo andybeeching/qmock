@@ -163,7 +163,7 @@
 	  equals( isHash( Object('string composite type') ), true, "isHash() should be true with 'obj' parameter: (String: Object('string compositive type')). Result");
 	  equals( isHash( Object(false) ), true, "isHash() should be true with 'obj' parameter: (Boolean: false). Result");
 	  equals( isHash( Object(true) ), true, "isHash() should be true with 'obj' parameter: (Boolean: true). Result");
-	  equals( isHash( /re/ ), true, "isHash() should be true with 'obj' parameter: (RegExp: /re/). Result");
+	  equals( isHash( /foo/ ), true, "isHash() should be true with 'obj' parameter: (RegExp: /foo/). Result");
 	  equals( isHash( function() {} ), true, "isHash() should be true with 'obj' parameter: (Function: function(){}). Result");
 	  equals( isHash( {} ), true, "isHash() should be true with 'obj' parameter: (Object: {}). Result");
 	  equals( isHash( [] ), true, "isHash() should be true with 'obj' parameter: (Array: []). Result");
@@ -214,7 +214,7 @@
 	  equals( isNativeType( Object('string composite type') ), false, "isNativeType() should be false with 'obj' parameter: (String: Object('string compositive type')). Result");
 	  equals( isNativeType( Object(false) ), false, "isNativeType() should be false with 'obj' parameter: (Boolean: false). Result");
 	  equals( isNativeType( Object(true) ), false, "isNativeType() should be false with 'obj' parameter: (Boolean: true). Result");
-	  equals( isNativeType( /re/ ), false, "isNativeType() should be false with 'obj' parameter: (RegExp: /re/). Result");
+	  equals( isNativeType( /foo/ ), false, "isNativeType() should be false with 'obj' parameter: (RegExp: /foo/). Result");
 	  // debugger;
 	  equals( isNativeType( Named), false, "isNativeType() should be false with 'obj' parameter: (Function: function(){}). Result");
 	  equals( isNativeType( {} ), false, "isNativeType() should be false with 'obj' parameter: (Object: {}). Result");
@@ -285,7 +285,7 @@
 	  equals( getFunctionName( Object(1) ), false, "getFunctionName() should be false with 'obj' parameter: (Number: Object(1)). Result");
 	  equals( getFunctionName( Object("foo") ), false, "getFunctionName() should be false with 'obj' parameter: (String: Object('foo'')). Result");
 	  equals( getFunctionName( Object(true) ), false, "getFunctionName() should be false with 'obj' parameter: (Boolean: true). Result");
-	  equals( getFunctionName( /re/ ), false, "getFunctionName() should be false with 'obj' parameter: (RegExp: /re/). Result");
+	  equals( getFunctionName( /foo/ ), false, "getFunctionName() should be false with 'obj' parameter: (RegExp: /foo/). Result");
 	  equals( getFunctionName( {} ), false, "getFunctionName() should be false with 'obj' parameter: (Object: {}). Result");
 	  equals( getFunctionName( [] ), false, "getFunctionName() should be false with 'obj' parameter: (Array: []). Result");
 	  equals( getFunctionName( new Date ), false, "getFunctionName() should be false with 'obj' parameter: (Date: new Date). Result");
@@ -375,7 +375,7 @@
 	  equals( Assay.collection([function() {}], []), false, "Assay.collection() should be false with expected: [(Function: function() {})] and actual: [undefined]. Result");
 	  equals( Assay.collection([null], [undefined]), false, "Assay.collection() should be false with expected: [(null)] and actual: [(undefined)]. Result");
 	  equals( Assay.collection([undefined], ["string"]), false, "Assay.collection() should be false with expected: [(undefined)] and actual: [(String: 'foo')]. Result");
-	  equals( Assay.collection([/re/], [9]), false, "Assay.collection() should be false: [(RegExp: /re/)], [(Number: 9)]. Result");
+	  equals( Assay.collection([/foo/], [9]), false, "Assay.collection() should be false: [(RegExp: /foo/)], [(Number: 9)]. Result");
 	  equals( Assay.collection([new Custom], [new Number]), false, "Assay.collection() should be false: [(Custom: new Custom)], [(Number: new Number)]. Result");
 
 	  // Expected true evaluations
@@ -399,7 +399,7 @@
 	  equals( Assay.collection([{test: "string"}], [{test: "string"}]), true, "Assay.collection() should be true with expected: [(Object: {test: 'foo'})] and actual: [(Object: {test: 'foo'})]. Result");
 	  equals( Assay.collection([["nested"]], [["nested"]]), true, "Assay.collection() should be true with expected: [(Array: [[]])] and actual: [(Array: [[]])]. Result");
 	  equals( Assay.collection([function() {}], [function() {}]), true, "Assay.collection() should be true with expected: [(Function: function(){})] and actual: [(Function: function(){})]. Result");
-	  equals( Assay.collection([/re/], [/re/]), true, "Assay.collection() should be true with expected: [(RegExp: /re/)] and actual: [(RegExp: /re/)]. Result");
+	  equals( Assay.collection([/foo/], [/foo/]), true, "Assay.collection() should be true with expected: [(RegExp: /foo/)] and actual: [(RegExp: /foo/)]. Result");
 	  equals( Assay.collection([new Date], [new Date]), true, "Assay.collection() should be true with expected: [(Date: new Date)] and actual: [(Date: new Date)]. Result");
 
 	  // Test falsy member values
@@ -409,7 +409,7 @@
 	  equals( Assay.collection([false], [false]), true, "Assay.collection() should be true with expected: [(Boolean: false)] and actual: [(Boolean: false)]. Result");
 	  equals( Assay.collection([null], [null]), true, "Assay.collection() should be true with expected: [(null)] and actual: [(null)]. Result");
 	  equals( Assay.collection([undefined], [undefined]), true, "Assay.collection() should be true with expected: [(undefined)] and actual: [(undefined)]. Result");
-	  equals( Assay.collection([0,"string", true, [], {}, function() {}, null, undefined, /re/, new Date], [0,"string", true, [], {}, function() {}, null, undefined, /re/, new Date]), true, "Assay.collection() should be true with expected: [ MANY TYPES ] and actual: [ MANY TYPES ]. Result");
+	  equals( Assay.collection([0,"string", true, [], {}, function() {}, null, undefined, /foo/, new Date], [0,"string", true, [], {}, function() {}, null, undefined, /foo/, new Date]), true, "Assay.collection() should be true with expected: [ MANY TYPES ] and actual: [ MANY TYPES ]. Result");
 
 	  // Nested
 
@@ -434,7 +434,7 @@
 	  equals( Assay.collection([function() {}], [], {strictValueChecking:true}), false, "Assay.collection() should be false with expected: [(Function: function() {})] and actual: [undefined]. Result");
 	  equals( Assay.collection([null], [undefined], {strictValueChecking:true}), false, "Assay.collection() should be false with expected: [(null)] and actual: [(undefined)]. Result");
 	  equals( Assay.collection([undefined], ["string"], {strictValueChecking:true}), false, "Assay.collection() should be false with expected: [(undefined)] and actual: [(String: 'foo')]. Result");
-	  equals( Assay.collection([/re/], [9], {strictValueChecking:true}), false, "Assay.collection() should be false: [(RegExp: /re/)], [(Number: 9)]. Result");
+	  equals( Assay.collection([/foo/], [9], {strictValueChecking:true}), false, "Assay.collection() should be false: [(RegExp: /foo/)], [(Number: 9)]. Result");
 	  equals( Assay.collection([new Custom], [new Number], {strictValueChecking:true}), false, "Assay.collection() should be false: [(Custom: new Custom)], [(Number: new Number)]. Result");
 
 	  // Test mis-matched member values
@@ -447,7 +447,7 @@
 	  equals( Assay.collection([new Date], [new Date(1970)], {strictValueChecking:true}), false, "Assay.collection() should be false with expected: [(Date: new Date)] and actual: [(Date: new Date(1970))]. Result");
 	  // commented out as revisting equality and identity rules around strict checking
 	  //equals( Assay.collection([new Custom], [new Custom], {strictValueChecking:true}), false, "Assay.collection() should be false with expected: [(Custom: new Custom)] and actual: [(Custom: new Custom)]. Result");
-	  equals( Assay.collection([0,"string", true, [], {}, function() {}, null, undefined, /re/, new Date], [1,"string", true, [], {}, function() {}, null, undefined, /re/, new Date], {strictValueChecking:true}), false, "Assay.collection() should be false with expected: [ MANY TYPES ] and actual: [ MANY TYPES ]");
+	  equals( Assay.collection([0,"string", true, [], {}, function() {}, null, undefined, /foo/, new Date], [1,"string", true, [], {}, function() {}, null, undefined, /foo/, new Date], {strictValueChecking:true}), false, "Assay.collection() should be false with expected: [ MANY TYPES ] and actual: [ MANY TYPES ]");
 
 	  // Expected true evaluations
 
@@ -460,7 +460,7 @@
 	  equals( Assay.collection([{test: "string"}], [{test: "string"}], {strictValueChecking:true}), true, "Assay.collection() should be true with expected: [(Object: {test: 'foo'})] and actual: [(Object: {test: 'foo'})]. Result");
 	  equals( Assay.collection([["nested"]], [["nested"]], {strictValueChecking:true}), true, "Assay.collection() should be true with expected: [(Array: [[]])] and actual: [(Array: [[]])]. Result");
 	  equals( Assay.collection([function() {}], [function() {}], {strictValueChecking:true}), true, "Assay.collection() should be true with expected: [(Function: function(){})] and actual: [(Function: function(){})]. Result");
-	  equals( Assay.collection([/re/], [/re/], {strictValueChecking:true}), true, "Assay.collection() should be true with expected: [(RegExp: /re/)] and actual: [(RegExp: /re/)]. Result");
+	  equals( Assay.collection([/foo/], [/foo/], {strictValueChecking:true}), true, "Assay.collection() should be true with expected: [(RegExp: /foo/)] and actual: [(RegExp: /foo/)]. Result");
 
 	  // Test matching member falsy values
 
@@ -605,7 +605,7 @@
 	  equals( Assay.hash({Function: function() {}}, {Function: false}), false, "Assay.hash() should be false with expected: (Object {Function: function(){}}) and actual: (Object {Function: false}). Result");
 	  equals( Assay.hash({"null": null},{"null": undefined}), false, "Assay.hash() should be false with expected: (Object {'null': null}) and actual: (Object {'null': undefined}). Result");
 	  equals( Assay.hash({"undefined": undefined},{"undefined": null}), false, "Assay.hash() should be false with expected: (Object {'undefined': undefined}) and actual: (Object {'undefined': null}). Result");
-	  equals( Assay.hash({RegExp: /re/},{RegExp: "/re/"}), false, "Assay.hash() should be false with expected: (Object {RegExp: /re/}) and actual: (Object {RegExp: '/re/'}). Result");
+	  equals( Assay.hash({RegExp: /foo/},{RegExp: "/foo/"}), false, "Assay.hash() should be false with expected: (Object {RegExp: /foo/}) and actual: (Object {RegExp: '/foo/'}). Result");
 	  equals( Assay.hash({Custom: new Custom},{Custom: new Date}), false, "Assay.hash() should be false with expected: (Object {Custom: new Custom}) and actual: (Object {Custom: new Date})). Result");
 
 	  // Expected true evaluations
@@ -622,12 +622,12 @@
 	  equals( Assay.hash({Function: function() {}}, {Function: function() {}}), true, "Assay.hash() should be true with expected: (Object {Function: function(){}}) and actual: (Object {Function: function(){}}). Result");
 	  equals( Assay.hash({"null": null},{"null": null}), true, "Assay.hash() should be true with expected: (Object {'null': null}) and actual: (Object {'null': null}). Result");
 	  equals( Assay.hash({"undefined": undefined},{"undefined": undefined}), true, "Assay.hash() should be true with expected: (Object {'undefined': undefined}) and actual: (Object {'undefined': undefined}). Result");
-	  equals( Assay.hash({RegExp: /re/},{RegExp: /re/}), true, "Assay.hash() should be true with expected: (Object {RegExp: /re/}) and actual: (Object {RegExp: /re/}). Result");
-	  equals( Assay.hash({RegExp: /re/},{RegExp: /re2/}), true, "Assay.hash() should be true with expected: (Object {RegExp: /re/}) and actual: (Object {RegExp: /re2/}). Result");
+	  equals( Assay.hash({RegExp: /foo/},{RegExp: /foo/}), true, "Assay.hash() should be true with expected: (Object {RegExp: /foo/}) and actual: (Object {RegExp: /foo/}). Result");
+	  equals( Assay.hash({RegExp: /foo/},{RegExp: /bar/}), true, "Assay.hash() should be true with expected: (Object {RegExp: /foo/}) and actual: (Object {RegExp: /bar/}). Result");
 	  equals( Assay.hash({Date: new Date},{Date: new Date}), true, "Assay.hash() should be true with expected: (Object {Date: new Date}) and actual: (Object {Date: new Date}). Result");
 	  equals( Assay.hash({Date: new Date},{Date: new Date(1970)}), true, "Assay.hash() should be true with expected: (Object {Date: new Date}) and actual: (Object {Date: new Date(1970)}). Result");
 	  equals( Assay.hash({Custom: new Custom},{Custom: new Custom}), true, "Assay.hash() should be true with expected: (Object {Custom: new Custom}) and actual: (Object {Custom: new Custom}). Result");
-	  equals( Assay.hash({Number: 0,String: "string",Boolean: true,Array: [],Object: {},Function: function() {},"null": null,"undefined": undefined,RegExp: /re/,Date: new Date}, {Number: 0,String: "string",Boolean: true,Array: [],Object: {},Function: function() {},"null": null,"undefined": undefined,RegExp: /re/,Date: new Date}), true, "Assay.hash() should be true (Many native types). Result");
+	  equals( Assay.hash({Number: 0,String: "string",Boolean: true,Array: [],Object: {},Function: function() {},"null": null,"undefined": undefined,RegExp: /foo/,Date: new Date}, {Number: 0,String: "string",Boolean: true,Array: [],Object: {},Function: function() {},"null": null,"undefined": undefined,RegExp: /foo/,Date: new Date}), true, "Assay.hash() should be true (Many native types). Result");
 
 	  // Test nested object literals
 	  equals( Assay.hash({"one": {"two": {"three": {"four": "value"}}}}, {"one": {"two": {"three": {"four": "value"}}}}), true, "Assay.hash() should be true with matching nested object literals 4 levels deep. Result");
@@ -673,7 +673,7 @@
 	  equals( Assay.hash({Function: function() {}}, {Function: false}, {strictValueChecking: true}), false, "Assay.hash() should be false with expected: (Object {Function: function(){}}) and actual: (Object {Function: false}). Result");
 	  equals( Assay.hash({"null": null},{"null": undefined}, {strictValueChecking: true}), false, "Assay.hash() should be false with expected: (Object {'null': null}) and actual: (Object {'null': undefined}). Result");
 	  equals( Assay.hash({"undefined": undefined},{"undefined": null}, {strictValueChecking: true}), false, "Assay.hash() should be false with expected: (Object {'undefined': undefined}) and actual: (Object {'undefined': null}). Result");
-	  equals( Assay.hash({RegExp: /re/},{RegExp: "/re/"}, {strictValueChecking: true}), false, "Assay.hash() should be false with expected: (Object {RegExp: /re/}) and actual: (Object {RegExp: '/re/'}). Result");
+	  equals( Assay.hash({RegExp: /foo/},{RegExp: "/foo/"}, {strictValueChecking: true}), false, "Assay.hash() should be false with expected: (Object {RegExp: /foo/}) and actual: (Object {RegExp: '/foo/'}). Result");
 	  equals( Assay.hash({Custom: new Custom},{Custom: new Date}, {strictValueChecking: true}), false, "Assay.hash() should be false with expected: (Object {Custom: new Custom}) and actual: (Object {Custom: new Date})). Result");
 
 	  // Test mis-matched member values
@@ -681,13 +681,13 @@
 	  equals( Assay.hash({String: "string"}, {String: "different string"}, {strictValueChecking: true}), false, "Assay.hash() should be false with expected: (Object {String: 'foo'}) and actual: (Object {String: 'different string'}). Result");
 	  equals( Assay.hash({Boolean: false}, {Boolean: true}, {strictValueChecking: true}), false, "Assay.hash() should be false with expected: (Object {Boolean: false}) and actual: (Object {Boolean: true}). Result");
 	  equals( Assay.hash({Number: 1}, {Number: 2}, {strictValueChecking: true}), false, "Assay.hash() should be false with expected: (Object {Number: 1}) and actual: (Object {Number: 2}). Result");
-	  equals( Assay.hash({RegExp: /re/}, {RegExp: /re2/}, {strictValueChecking: true}), false, "Assay.hash() should be false with expected: (Object {RegExp: /re/}) and actual: (Object {RegExp: /re2/}). Result");
+	  equals( Assay.hash({RegExp: /foo/}, {RegExp: /bar/}, {strictValueChecking: true}), false, "Assay.hash() should be false with expected: (Object {RegExp: /foo/}) and actual: (Object {RegExp: /bar/}). Result");
 	  equals( Assay.hash({Array: ["one"]},{Array: ["two"]}, {strictValueChecking: true}), false, "Assay.hash() should be false with expected: (Object {Array: ['one']}) and actual: (Object {Array: ['two']}). Result");
 	  equals( Assay.hash({Object: {key: "value"}},{Object: {key: "value2"}}, {strictValueChecking: true}), false, "Assay.hash() should be false with expected: (Object {Object: {key: 'value'}}) and actual: (Object {Object: {key: 'value2'}}). Result");
 	  equals( Assay.hash({"null": null},{"null": undefined}, {strictValueChecking: true}), false, "Assay.hash() should be false with expected: (Object {'null': null}) and actual: (Object {'null': undefined}). Result");
 	  equals( Assay.hash({"undefined": undefined},{"undefined": null}, {strictValueChecking: true}), false, "Assay.hash() should be false with expected: (Object {'undefined': undefined}) and actual: (Object {'undefined': null}). Result");
 	  equals( Assay.hash({Date: new Date},{Date: new Date(1970)}, {strictValueChecking: true}), false, "Assay.hash() should be true with expected: (Object {Date: new Date}) and actual: (Object {Date: new Date(1970)}). Result");
-	  equals( Assay.hash({Number: 0,String: "string",Boolean: true,Array: [],Object: {},Function: function() {},"null": null,"undefined": undefined,RegExp: /re/,Date: new Date}, {Number: 1,String: "string",Boolean: true,Array: [],Object: {},Function: function() {},"null": null,"undefined": undefined,RegExp: /re/,Date: new Date}, {strictValueChecking: true}), false, "Assay.hash() should be false (Many native types). Result");
+	  equals( Assay.hash({Number: 0,String: "string",Boolean: true,Array: [],Object: {},Function: function() {},"null": null,"undefined": undefined,RegExp: /foo/,Date: new Date}, {Number: 1,String: "string",Boolean: true,Array: [],Object: {},Function: function() {},"null": null,"undefined": undefined,RegExp: /foo/,Date: new Date}, {strictValueChecking: true}), false, "Assay.hash() should be false (Many native types). Result");
 
 	  // Test falsy nested object literals
 	  equals( Assay.hash({"one": {"two": {"three": {"four": "value"}}}}, {"one": {"two": {"three": {"four": "string"}}}}, {strictValueChecking: true}), false, "Assay.hash() should be false with matching nested object literals 4 levels deep. Result");
@@ -759,10 +759,10 @@
 	  equals( Assay.hash({Function: function() {}}, {Function: function() {}}, true), true, "Assay.hash() should be true with expected: (Object {Function: function(){}}) and actual: (Object {Function: function(){}}). Result");
 	  equals( Assay.hash({"null": null},{"null": null}, true), true, "Assay.hash() should be true with expected: (Object {'null': null}) and actual: (Object {'null': null}). Result");
 	  equals( Assay.hash({"undefined": undefined},{"undefined": undefined}, true), true, "Assay.hash() should be true with expected: (Object {'undefined': undefined}) and actual: (Object {'undefined': undefined}). Result");
-	  equals( Assay.hash({RegExp: /re/},{RegExp: /re/}, true), true, "Assay.hash() should be true with expected: (Object {RegExp: /re/}) and actual: (Object {RegExp: /re/}). Result");
+	  equals( Assay.hash({RegExp: /foo/},{RegExp: /foo/}, true), true, "Assay.hash() should be true with expected: (Object {RegExp: /foo/}) and actual: (Object {RegExp: /foo/}). Result");
 	  equals( Assay.hash({Date: new Date},{Date: new Date}, true), true, "Assay.hash() should be true with expected: (Object {Date: new Date}) and actual: (Object {Date: new Date}). Result");
 	  equals( Assay.hash({Custom: new Custom},{Custom: new Custom}, true), true, "Assay.hash() should be true with expected: (Object {Custom: new Custom}) and actual: (Object {Custom: new Custom}). Result");
-	  equals( Assay.hash({Number: 0,String: "string",Boolean: true,Array: [],Object: {},Function: function() {},"null": null,"undefined": undefined,RegExp: /re/,Date: new Date}, {Number: 0,String: "string",Boolean: true,Array: [],Object: {},Function: function() {},"null": null,"undefined": undefined,RegExp: /re/,Date: new Date}), true, "Assay.hash() should be true (Many native types). Result");
+	  equals( Assay.hash({Number: 0,String: "string",Boolean: true,Array: [],Object: {},Function: function() {},"null": null,"undefined": undefined,RegExp: /foo/,Date: new Date}, {Number: 0,String: "string",Boolean: true,Array: [],Object: {},Function: function() {},"null": null,"undefined": undefined,RegExp: /foo/,Date: new Date}), true, "Assay.hash() should be true (Many native types). Result");
 
 	  // Test nested object literals
 	  equals( Assay.hash({"one": {"two": {"three": {"four": "value"}}}}, {"one": {"two": {"three": {"four": "value"}}}}, true), true, "Assay.hash() should be true with matching nested object literals 4 levels deep. Result");
@@ -1341,8 +1341,8 @@
 		equals( Assay.object(RegExp, {}), false, "Assay.object() should return false with expected: (RegExp) and actual: (Object: {})" );
 		equals( Assay.object(RegExp, new Date), false, "Assay.object() should return false with expected: (RegExp) and actual: (Date: new instance)" );
 		equals( Assay.object(RegExp, new Custom), false, "Assay.object() should return false with expected: (RegExp) and actual: (Custom: new instance)" );
-		equals( Assay.object(RegExp, /re/), false, "Assay.object() should return false with expected: (RegExp) and actual: (RegExp: /re/)" );
-		equals( Assay.object(RegExp, new RegExp(/re/)), false, "Assay.object() should return false with expected: (RegExp) and actual: (RegExp: new RegExp(/re/))" );
+		equals( Assay.object(RegExp, /foo/), false, "Assay.object() should return false with expected: (RegExp) and actual: (RegExp: /foo/)" );
+		equals( Assay.object(RegExp, new RegExp(/foo/)), false, "Assay.object() should return false with expected: (RegExp) and actual: (RegExp: new RegExp(/foo/))" );
 
 	  // Test invalid argument types - false values
 
@@ -1362,8 +1362,8 @@
 		equals( Assay.object(RegExp, Custom), true, "Assay.object() should return true with expected: (RegExp) and actual: (Custom)" );
 
     // Typed mode
-    equals( Assay.object(RegExp, /re/, {typed:true}), true, "Assay.object() in 'typed' mode should return true with expected: (RegExp) and actual: (RegExp: /re/)" );
-		equals( Assay.object(RegExp, new RegExp(/re/), {typed:true}), true, "Assay.object() in 'typed' mode should return true with expected: (RegExp) and actual: (RegExp: new RegExp(/re/))" );
+    equals( Assay.object(RegExp, /foo/, {typed:true}), true, "Assay.object() in 'typed' mode should return true with expected: (RegExp) and actual: (RegExp: /foo/)" );
+		equals( Assay.object(RegExp, new RegExp(/foo/), {typed:true}), true, "Assay.object() in 'typed' mode should return true with expected: (RegExp) and actual: (RegExp: new RegExp(/foo/))" );
 
 	});
 
@@ -1392,8 +1392,8 @@
 		equals( Assay.object(RegExp, function(){}, {strictValueChecking: true}), false, "Assay.object() should return false with expected: (RegExp) and actual: (Function: function(){})" );
 		equals( Assay.object(RegExp, new Date, {strictValueChecking: true}), false, "Assay.object() should return false with expected: (RegExp) and actual: (Date: new instance)" );
 		equals( Assay.object(RegExp, new Custom, {strictValueChecking: true}), false, "Assay.object() should return false with expected: (RegExp) and actual: (Custom: new instance)" );
-		equals( Assay.object(RegExp, /re/, {strictValueChecking: true}), false, "Assay.object() should return true with expected: (RegExp) and actual: (RegExp: /re/)" );
-		equals( Assay.object(RegExp, new RegExp(/re/), {strictValueChecking: true}), false, "Assay.object() should return true with expected: (RegExp) and actual: (RegExp: new RegExp(/re/))" );
+		equals( Assay.object(RegExp, /foo/, {strictValueChecking: true}), false, "Assay.object() should return true with expected: (RegExp) and actual: (RegExp: /foo/)" );
+		equals( Assay.object(RegExp, new RegExp(/foo/), {strictValueChecking: true}), false, "Assay.object() should return true with expected: (RegExp) and actual: (RegExp: new RegExp(/foo/))" );
 
 	  // Test invalid argument types - false values
 
@@ -1404,92 +1404,92 @@
 		equals( Assay.object(RegExp, RegExp, {strictValueChecking: true}), true, "Assay.object() should return true with expected: (RegExp) and actual: (RegExp)" );
 
     // Typed mode
-    equals( Assay.object(RegExp, /re/, {strictValueChecking: true, typed:true}), true, "Assay.object() in 'typed' mode should return true with expected: (RegExp) and actual: (RegExp: /re/)" );
-		equals( Assay.object(RegExp, new RegExp(/re/), {strictValueChecking: true, typed:true}), true, "Assay.object() in 'typed' mode should return true with expected: (RegExp) and actual: (RegExp: new RegExp(/re/))" );
+    equals( Assay.object(RegExp, /foo/, {strictValueChecking: true, typed:true}), true, "Assay.object() in 'typed' mode should return true with expected: (RegExp) and actual: (RegExp: /foo/)" );
+		equals( Assay.object(RegExp, new RegExp(/foo/), {strictValueChecking: true, typed:true}), true, "Assay.object() in 'typed' mode should return true with expected: (RegExp) and actual: (RegExp: new RegExp(/foo/))" );
 
 	});
 
 
-	test("Assay.object() exercises - (RegExp: /re/) composite [typed checking]", function() {
+	test("Assay.object() exercises - (RegExp: /foo/) composite [typed checking]", function() {
 
 	  // FALSE ASSERTIONS
 
 	  // Test invalid argument type - Constructors
 
-		equals( Assay.object(/re/, Number), false, "Assay.object() should return false with expected: (RegExp: /re/) and actual: (Number)" );
-		equals( Assay.object(/re/, String), false, "Assay.object() should return false with expected: (RegExp: /re/) and actual: (String)" );
-		equals( Assay.object(/re/, Boolean), false, "Assay.object() should return false with expected: (RegExp: /re/) and actual: (Boolean)" );
-		equals( Assay.object(/re/, Array), false, "Assay.object() should return false with expected: (RegExp: /re/) and actual: (Array)" );
-		equals( Assay.object(/re/, Object), false, "Assay.object() should return false with expected: (RegExp: /re/) and actual: (Object)" );
-		equals( Assay.object(/re/, Function), false, "Assay.object() should return false with expected: (RegExp: /re/) and actual: (Function)" );
-		equals( Assay.object(/re/, RegExp), false, "Assay.object() should return false with expected: (RegExp: /re/) and actual: (RegExp)" );
-		equals( Assay.object(/re/, Date), false, "Assay.object() should return false with expected: (RegExp: /re/) and actual: (Date)" );
-		equals( Assay.object(/re/, Custom), false, "Assay.object() should return false with expected: (RegExp: /re/) and actual: (Custom)" );
+		equals( Assay.object(/foo/, Number), false, "Assay.object() should return false with expected: (RegExp: /foo/) and actual: (Number)" );
+		equals( Assay.object(/foo/, String), false, "Assay.object() should return false with expected: (RegExp: /foo/) and actual: (String)" );
+		equals( Assay.object(/foo/, Boolean), false, "Assay.object() should return false with expected: (RegExp: /foo/) and actual: (Boolean)" );
+		equals( Assay.object(/foo/, Array), false, "Assay.object() should return false with expected: (RegExp: /foo/) and actual: (Array)" );
+		equals( Assay.object(/foo/, Object), false, "Assay.object() should return false with expected: (RegExp: /foo/) and actual: (Object)" );
+		equals( Assay.object(/foo/, Function), false, "Assay.object() should return false with expected: (RegExp: /foo/) and actual: (Function)" );
+		equals( Assay.object(/foo/, RegExp), false, "Assay.object() should return false with expected: (RegExp: /foo/) and actual: (RegExp)" );
+		equals( Assay.object(/foo/, Date), false, "Assay.object() should return false with expected: (RegExp: /foo/) and actual: (Date)" );
+		equals( Assay.object(/foo/, Custom), false, "Assay.object() should return false with expected: (RegExp: /foo/) and actual: (Custom)" );
 
 		// Test invalid argument type - Values (truthy)
 
-		equals( Assay.object(/re/, 1), false, "Assay.object() should return false with expected: (RegExp: /re/) and actual: (Number: 1)" );
-		equals( Assay.object(/re/, 'foo'), false, "Assay.object() should return false with expected: (RegExp: /re/) and actual: (String: 'foo')" );
-		equals( Assay.object(/re/, true), false, "Assay.object() should return false with expected: (RegExp: /re/) and actual: (Boolean: true)" );
-		equals( Assay.object(/re/, []), false, "Assay.object() should return false with expected: (RegExp: /re/) and actual: (Array: [])" );
-		equals( Assay.object(/re/, {}), false, "Assay.object() should return false with expected: (RegExp: /re/) and actual: (Object: {})" );
-		equals( Assay.object(/re/, function(){}), false, "Assay.object() should return false with expected: (RegExp: /re/) and actual: (Function: function(){})" );
-		equals( Assay.object(/re/, new Date), false, "Assay.object() should return false with expected: (RegExp: /re/) and actual: (Date: new instance)" );
-		equals( Assay.object(/re/, new Custom), false, "Assay.object() should return false with expected: (RegExp: /re/) and actual: (Custom: new instance)" );
+		equals( Assay.object(/foo/, 1), false, "Assay.object() should return false with expected: (RegExp: /foo/) and actual: (Number: 1)" );
+		equals( Assay.object(/foo/, 'foo'), false, "Assay.object() should return false with expected: (RegExp: /foo/) and actual: (String: 'foo')" );
+		equals( Assay.object(/foo/, true), false, "Assay.object() should return false with expected: (RegExp: /foo/) and actual: (Boolean: true)" );
+		equals( Assay.object(/foo/, []), false, "Assay.object() should return false with expected: (RegExp: /foo/) and actual: (Array: [])" );
+		equals( Assay.object(/foo/, {}), false, "Assay.object() should return false with expected: (RegExp: /foo/) and actual: (Object: {})" );
+		equals( Assay.object(/foo/, function(){}), false, "Assay.object() should return false with expected: (RegExp: /foo/) and actual: (Function: function(){})" );
+		equals( Assay.object(/foo/, new Date), false, "Assay.object() should return false with expected: (RegExp: /foo/) and actual: (Date: new instance)" );
+		equals( Assay.object(/foo/, new Custom), false, "Assay.object() should return false with expected: (RegExp: /foo/) and actual: (Custom: new instance)" );
 
 	  // Test invalid argument types - false values
 
-		equals( Assay.object(/re/, null), false, "Assay.object() should return false with expected: (RegExp: /re/) and actual: (null)" );
-		equals( Assay.object(/re/, undefined), false, "Assay.object() should return false with expected: (RegExp: /re/) and actual: (undefined)" );
+		equals( Assay.object(/foo/, null), false, "Assay.object() should return false with expected: (RegExp: /foo/) and actual: (null)" );
+		equals( Assay.object(/foo/, undefined), false, "Assay.object() should return false with expected: (RegExp: /foo/) and actual: (undefined)" );
 
 		// TRUE ASSERTIONS
-		equals( Assay.object(/re/, /re/), true, "Assay.object() should return true with expected: (RegExp: /re/) and actual: (RegExp: /re/)" );
-		equals( Assay.object(/re/, new RegExp(/re/)), true, "Assay.object() should return true with expected: (RegExp: /re/) and actual: (RegExp: new RegExp(/re/))" );
-		equals( Assay.object(/re/, /re2/), true, "Assay.object() should return true with expected: (RegExp: /re/) and actual: (RegExp: /re2/)" );
-		equals( Assay.object(/re/, /re/, {typed: true}), true, "Assay.object() in 'typed' mode should return true with expected: (RegExp: /re/) and actual: (RegExp: /re/)" );
-		equals( Assay.object(/re/, new RegExp(/re/), {typed: true}), true, "Assay.object() in 'typed' mode should return true with expected: (RegExp: /re/) and actual: (RegExp: new RegExp(/re/))" );
+		equals( Assay.object(/foo/, /foo/), true, "Assay.object() should return true with expected: (RegExp: /foo/) and actual: (RegExp: /foo/)" );
+		equals( Assay.object(/foo/, new RegExp(/foo/)), true, "Assay.object() should return true with expected: (RegExp: /foo/) and actual: (RegExp: new RegExp(/foo/))" );
+		equals( Assay.object(/foo/, /bar/), true, "Assay.object() should return true with expected: (RegExp: /foo/) and actual: (RegExp: /bar/)" );
+		equals( Assay.object(/foo/, /foo/, {typed: true}), true, "Assay.object() in 'typed' mode should return true with expected: (RegExp: /foo/) and actual: (RegExp: /foo/)" );
+		equals( Assay.object(/foo/, new RegExp(/foo/), {typed: true}), true, "Assay.object() in 'typed' mode should return true with expected: (RegExp: /foo/) and actual: (RegExp: new RegExp(/foo/))" );
 
 	});
 
-	test("Assay.object() exercises - (RegExp: /re/) composite [strict 'value' checking]", function() {
+	test("Assay.object() exercises - (RegExp: /foo/) composite [strict 'value' checking]", function() {
 
 	  // FALSE ASSERTIONS
 
 	  // Test invalid argument type - Constructors
 
-		equals( Assay.object(/re/, Number, {strictValueChecking: true}), false, "Assay.object() should return false with expected: (RegExp: /re/) and actual: (Number)" );
-		equals( Assay.object(/re/, String, {strictValueChecking: true}), false, "Assay.object() should return false with expected: (RegExp: /re/) and actual: (String)" );
-		equals( Assay.object(/re/, Boolean, {strictValueChecking: true}), false, "Assay.object() should return false with expected: (RegExp: /re/) and actual: (Boolean)" );
-		equals( Assay.object(/re/, Array, {strictValueChecking: true}), false, "Assay.object() should return false with expected: (RegExp: /re/) and actual: (Array)" );
-		equals( Assay.object(/re/, Object, {strictValueChecking: true}), false, "Assay.object() should return false with expected: (RegExp: /re/) and actual: (Object)" );
-		equals( Assay.object(/re/, RegExp, {strictValueChecking: true}), false, "Assay.object() should return true with expected: (RegExp: /re/) and actual: (RegExp)" );
-		equals( Assay.object(/re/, Function, {strictValueChecking: true}), false, "Assay.object() should return false with expected: (RegExp: /re/) and actual: (Function)" );
-		equals( Assay.object(/re/, Date, {strictValueChecking: true}), false, "Assay.object() should return false with expected: (RegExp: /re/) and actual: (Date)" );
-		equals( Assay.object(/re/, Custom, {strictValueChecking: true}), false, "Assay.object() should return false with expected: (RegExp: /re/) and actual: (Custom)" );
+		equals( Assay.object(/foo/, Number, {strictValueChecking: true}), false, "Assay.object() should return false with expected: (RegExp: /foo/) and actual: (Number)" );
+		equals( Assay.object(/foo/, String, {strictValueChecking: true}), false, "Assay.object() should return false with expected: (RegExp: /foo/) and actual: (String)" );
+		equals( Assay.object(/foo/, Boolean, {strictValueChecking: true}), false, "Assay.object() should return false with expected: (RegExp: /foo/) and actual: (Boolean)" );
+		equals( Assay.object(/foo/, Array, {strictValueChecking: true}), false, "Assay.object() should return false with expected: (RegExp: /foo/) and actual: (Array)" );
+		equals( Assay.object(/foo/, Object, {strictValueChecking: true}), false, "Assay.object() should return false with expected: (RegExp: /foo/) and actual: (Object)" );
+		equals( Assay.object(/foo/, RegExp, {strictValueChecking: true}), false, "Assay.object() should return true with expected: (RegExp: /foo/) and actual: (RegExp)" );
+		equals( Assay.object(/foo/, Function, {strictValueChecking: true}), false, "Assay.object() should return false with expected: (RegExp: /foo/) and actual: (Function)" );
+		equals( Assay.object(/foo/, Date, {strictValueChecking: true}), false, "Assay.object() should return false with expected: (RegExp: /foo/) and actual: (Date)" );
+		equals( Assay.object(/foo/, Custom, {strictValueChecking: true}), false, "Assay.object() should return false with expected: (RegExp: /foo/) and actual: (Custom)" );
 
 		// Test invalid argument type - Values (truthy)
 
-		equals( Assay.object(/re/, 1, {strictValueChecking: true}), false, "Assay.object() should return false with expected: (RegExp: /re/) and actual: (Number: 1)" );
-		equals( Assay.object(/re/, "string", {strictValueChecking: true}), false, "Assay.object() should return false with expected: (RegExp: /re/) and actual: (String: string)" );
-		equals( Assay.object(/re/, true, {strictValueChecking: true}), false, "Assay.object() should return false with expected: (RegExp: /re/) and actual: (Boolean: true)" );
-		equals( Assay.object(/re/, [], {strictValueChecking: true}), false, "Assay.object() should return false with expected: (RegExp: /re/) and actual: (Array: [])" );
-		equals( Assay.object(/re/, {}, {strictValueChecking: true}), false, "Assay.object() should return false with expected: (RegExp: /re/) and actual: (Object: {})" );
-		equals( Assay.object(/re/, /re2/, {strictValueChecking: true}), false, "Assay.object() should return false with expected: (RegExp: /re/) and actual: (RegExp: /re2/)" );
-		equals( Assay.object(/re/, function(){}, {strictValueChecking: true}), false, "Assay.object() should return false with expected: (RegExp: /re/) and actual: (Function: function(){})" );
-		equals( Assay.object(/re/, new Date, {strictValueChecking: true}), false, "Assay.object() should return false with expected: (RegExp: /re/) and actual: (Date: new instance)" );
-		equals( Assay.object(/re/, new Custom, {strictValueChecking: true}), false, "Assay.object() should return false with expected: (RegExp: /re/) and actual: (Custom: new instance)" );
+		equals( Assay.object(/foo/, 1, {strictValueChecking: true}), false, "Assay.object() should return false with expected: (RegExp: /foo/) and actual: (Number: 1)" );
+		equals( Assay.object(/foo/, "string", {strictValueChecking: true}), false, "Assay.object() should return false with expected: (RegExp: /foo/) and actual: (String: string)" );
+		equals( Assay.object(/foo/, true, {strictValueChecking: true}), false, "Assay.object() should return false with expected: (RegExp: /foo/) and actual: (Boolean: true)" );
+		equals( Assay.object(/foo/, [], {strictValueChecking: true}), false, "Assay.object() should return false with expected: (RegExp: /foo/) and actual: (Array: [])" );
+		equals( Assay.object(/foo/, {}, {strictValueChecking: true}), false, "Assay.object() should return false with expected: (RegExp: /foo/) and actual: (Object: {})" );
+		equals( Assay.object(/foo/, /bar/, {strictValueChecking: true}), false, "Assay.object() should return false with expected: (RegExp: /foo/) and actual: (RegExp: /bar/)" );
+		equals( Assay.object(/foo/, function(){}, {strictValueChecking: true}), false, "Assay.object() should return false with expected: (RegExp: /foo/) and actual: (Function: function(){})" );
+		equals( Assay.object(/foo/, new Date, {strictValueChecking: true}), false, "Assay.object() should return false with expected: (RegExp: /foo/) and actual: (Date: new instance)" );
+		equals( Assay.object(/foo/, new Custom, {strictValueChecking: true}), false, "Assay.object() should return false with expected: (RegExp: /foo/) and actual: (Custom: new instance)" );
 
 	  // Test invalid argument types - false values
 
-		equals( Assay.object(/re/, null, {strictValueChecking: true}), false, "Assay.object() should return false with expected: (RegExp: /re/) and actual: (null)" );
-		equals( Assay.object(/re/, undefined, {strictValueChecking: true}), false, "Assay.object() should return false with expected: (RegExp: /re/) and actual: (undefined)" );
+		equals( Assay.object(/foo/, null, {strictValueChecking: true}), false, "Assay.object() should return false with expected: (RegExp: /foo/) and actual: (null)" );
+		equals( Assay.object(/foo/, undefined, {strictValueChecking: true}), false, "Assay.object() should return false with expected: (RegExp: /foo/) and actual: (undefined)" );
 
 		// TRUE ASSERTIONS
-		equals( Assay.object(/re/, /re/, {strictValueChecking: true}), true, "Assay.object() should return true with expected: (RegExp: /re/) and actual: (RegExp: /re/)" );
-		equals( Assay.object(/re/, new RegExp(/re/), {strictValueChecking: true}), true, "Assay.object() should return true with expected: (RegExp: /re/) and actual: (RegExp: new RegExp(/re/))" );
-		equals( Assay.object(/re/, /re2/, {strictValueChecking: true, typed: true}), false, "Assay.object() in 'typed' mode should return false with expected: (RegExp: /re/) and actual: (RegExp: /re2/)" );
-		equals( Assay.object(/re/, /re/, {strictValueChecking: true, typed: true}), true, "Assay.object() in 'typed' mode should return true with expected: (RegExp: /re/) and actual: (RegExp: /re/)" );
-		equals( Assay.object(/re/, new RegExp(/re/), {strictValueChecking: true, typed: true}), true, "Assay.object() in 'typed' mode should return true with expected: (RegExp: /re/) and actual: (RegExp: new RegExp(/re/))" );
+		equals( Assay.object(/foo/, /foo/, {strictValueChecking: true}), true, "Assay.object() should return true with expected: (RegExp: /foo/) and actual: (RegExp: /foo/)" );
+		equals( Assay.object(/foo/, new RegExp(/foo/), {strictValueChecking: true}), true, "Assay.object() should return true with expected: (RegExp: /foo/) and actual: (RegExp: new RegExp(/foo/))" );
+		equals( Assay.object(/foo/, /bar/, {strictValueChecking: true, typed: true}), false, "Assay.object() in 'typed' mode should return false with expected: (RegExp: /foo/) and actual: (RegExp: /bar/)" );
+		equals( Assay.object(/foo/, /foo/, {strictValueChecking: true, typed: true}), true, "Assay.object() in 'typed' mode should return true with expected: (RegExp: /foo/) and actual: (RegExp: /foo/)" );
+		equals( Assay.object(/foo/, new RegExp(/foo/), {strictValueChecking: true, typed: true}), true, "Assay.object() in 'typed' mode should return true with expected: (RegExp: /foo/) and actual: (RegExp: new RegExp(/foo/))" );
 
 	});
 
@@ -1518,7 +1518,7 @@
 	  equals( Assay.type( Object("foo") ), "string", "Assay.type() should return 'foo' with 'obj' parameter: (String: Object('string compositive type')). Result");
 	  equals( Assay.type( Object(false) ), "boolean", "Assay.type() should return 'Boolean' with 'obj' parameter: (Boolean: false). Result");
 	  equals( Assay.type( Object(true) ), "boolean", "Assay.type() should return 'Boolean' with 'obj' parameter: (Boolean: true). Result");
-	  equals( Assay.type( /re/ ), "regexp", "Assay.type() should return 'RegExp' with 'obj' parameter: (RegExp: /re/). Result");
+	  equals( Assay.type( /foo/ ), "regexp", "Assay.type() should return 'RegExp' with 'obj' parameter: (RegExp: /foo/). Result");
 	  equals( Assay.type( function() {} ), "function", "Assay.type() should return 'Function' with 'obj' parameter: (Function: function(){}). Result");
 	  equals( Assay.type( {} ), "object", "Assay.type() should return 'Object' with 'obj' parameter: (Object: {}). Result");
 	  equals( Assay.type( [] ), "array", "Assay.type() should return 'Array' with 'obj' parameter: (Array: []). Result");
