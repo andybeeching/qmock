@@ -55,6 +55,7 @@
 
     // Unload Assay from container
     delete container[ "Assay" ];
+    debugger;
     // Test successful removal
     ok( Assay.object( undefined, container.Assay ), "Assay should be unloaded, and the associated identifier 'Assay' should not exist on container" );
 

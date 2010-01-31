@@ -333,7 +333,7 @@ function initAssay () {
       function __checkType ( expected, actual, expectedType, opt_typed ) {
 
         // If function passed use as constructor, else find instance constructor (if exists)
-        var klass = ( opt_typed && _getTypeOf( expected ) === "function" ) ? expected : Object(expected) && expected.constructor;
+        var klass = ( opt_typed && _getTypeOf( expected ) === "function" ) ? expected : expected && Object(expected) && expected.constructor;
 
         // Some comment
         return !!(
