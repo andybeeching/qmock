@@ -329,21 +329,21 @@ function initAssay () {
         return assertCollection.apply( null, arguments );
       }
 
-      // Might have to move this into QMock as it's not actually very intuitive for Number to match both instances and other functions
       function __checkType ( expected, actual, expectedType, opt_typed ) {
 
-        // If function passed use as constructor, else find instance constructor (if exists)
-        var klass = ( opt_typed && _getTypeOf( expected ) === "function" ) 
+        // If function passed use as constructor, else lookup constructor (if available)
+        var klass = ( opt_typed && _getTypeOf( expected ) === "function" )
           ? expected
           : (expected !== null && expected !== undefined) && expected.constructor;
 
         // Some comment
-        return !!(
-          // First, fairly robust check
-          Object( actual ) instanceof ( klass || Function )
-          // More robust cross-frame check
-          || _getTypeOf( actual ) === expectedType
-        );
+        return ( opt_typed && expected === Object )
+          // Since everything inherits from Object we have a different check for objects
+          ? ( actual && actual.constructor === Object.prototype.constructor )
+          : ( // Sandboxed check
+              Object( actual ) instanceof ( klass || Function )
+              // More robust cross-frame check
+              || _getTypeOf( actual ) === expectedType );
       }
 
       function __setExpectedType ( obj ) {
@@ -362,13 +362,17 @@ function initAssay () {
       }
 
       function __compare ( expected, actual, expectedType, opt_typed ) {
-        
+
         function _identityCheck ( expected, actual ) {
           return expected === actual;
         }
 
         // Some defaults
         var ROUTINES = {
+              // We don't use an identity check for primitives, because if created through Object then actually comparing by reference rather than value.
+              // Object('foo') === 'foo' // false
+              // typeof Object('foo') === "object" // true
+              // Object('foo').constructor === String // true (!)
               "number": "valueOf",
               "string": "valueOf",
               "boolean": "valueOf",
@@ -413,7 +417,7 @@ function initAssay () {
             // else call method on instances
             : ( expected && expected[ fn ] && expected[ fn ]() ) === ( actual && actual[ fn ] && actual[ fn ]() )
 
-          // else set flag to to deep comparison
+          // else set flag for deep comparison
           : fn;
       }
 
@@ -456,7 +460,7 @@ function initAssay () {
 
           // Deep comparison
           try {
-            result = ( ( isCollection === true )
+            result = ( ( isCollection )
                           ? assertCollection
                           : assertHash )
                             .apply(
