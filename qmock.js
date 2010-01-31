@@ -362,6 +362,10 @@ function initAssay () {
       }
 
       function __compare ( expected, actual, expectedType, opt_typed ) {
+        
+        function _identityCheck ( expected, actual ) {
+          return expected === actual;
+        }
 
         // Some defaults
         var ROUTINES = {
@@ -371,7 +375,9 @@ function initAssay () {
               "date": "valueOf",
               "regexp": "toString",
               // We already know the type of the actual is correct - strict matching disable by default for function objects
-              "function": ( !opt_typed ) ? function ( expected, actual ) { return expected === actual; } : function (){ return true; }
+              "function": ( !opt_typed ) ? _identityCheck : function (){ return true; },
+              "null": _identityCheck,
+              "undefined": _identityCheck
             },
 
             //
@@ -397,7 +403,6 @@ function initAssay () {
             //
             fn = CUSTOM_ROUTINES[ expectedType ] || ROUTINES[ expectedType ] || null;
 
-        // Should throw error if deserialize method not found on object?
         return ( fn )
 
           ? _getTypeOf( fn ) === "function"
@@ -453,16 +458,20 @@ function initAssay () {
           try {
             result = ( ( isCollection === true )
                           ? assertCollection
-                          : assertHash )(
-                            expected,
-                            actual,
-                            {
-                              "strictValueChecking": !!deepCheck,
-                              "exceptionType": exceptionType,
-                              "exceptionHandler": (isCollection === true) ? null : raiseError,
-                              "descriptor": descriptor
-                            }
-                          );
+                          : assertHash )
+                            .apply(
+                              null,
+                              [
+                                expected,
+                                actual,
+                                {
+                                  "strictValueChecking": !!deepCheck,
+                                  "exceptionType": exceptionType,
+                                  "exceptionHandler": (isCollection === true) ? null : raiseError,
+                                  "descriptor": descriptor
+                                }
+                              ]
+                            );
           }
             catch ( exception ) {
             // If MissingHashKeyException thrown then create custom error listing the missing keys.

@@ -358,7 +358,7 @@
 
 	});
 
-	test("Assay.collection() method - type checking exercises", function () {
+	test("Assay.collection() exercises [default type check mode]", function () {
 
 	  expect(33);
 
@@ -370,10 +370,10 @@
 
 	  equals( Assay.collection([10], [""]), false, "Assay.collection() should be false with expected: [(Number: 10)] and actual: [(String: '')]. Result");
 	  equals( Assay.collection([""], [10]), false, "Assay.collection() should be false with expected: [(String: '')] and actual: [(Number: 10)]. Result");
-	  equals( Assay.collection([{test: "one"}], [["test", 1]]), false, "Assay.collection() should be false with expected: [(Object: {test: \"one\"})] and actual: [(Object: {test: 1})]. Result");
+	  equals( Assay.collection([{test: "foo"}], [["test", 1]]), false, "Assay.collection() should be false with expected: [(Object: {test: 'foo'})] and actual: [(Object: {test: 1})]. Result");
 	  equals( Assay.collection([function() {}], []), false, "Assay.collection() should be false with expected: [(Function: function() {})] and actual: [undefined]. Result");
 	  equals( Assay.collection([null], [undefined]), false, "Assay.collection() should be false with expected: [(null)] and actual: [(undefined)]. Result");
-	  equals( Assay.collection([undefined], ["string"]), false, "Assay.collection() should be false with expected: [(undefined)] and actual: [(String: 'foo')]. Result");
+	  equals( Assay.collection([undefined], ["foo"]), false, "Assay.collection() should be false with expected: [(undefined)] and actual: [(String: 'foo')]. Result");
 	  equals( Assay.collection([/foo/], [9]), false, "Assay.collection() should be false: [(RegExp: /foo/)], [(Number: 9)]. Result");
 	  equals( Assay.collection([new Custom], [new Number]), false, "Assay.collection() should be false: [(Custom: new Custom)], [(Number: new Number)]. Result");
 
@@ -382,21 +382,21 @@
 	  // Test matching member types (but mis-matched values)
 
 	  equals( Assay.collection([10], [1]), true, "Assay.collection() should be true with expected: [(Number: 10)] and actual: [(Number: 1)]. Result");
-	  equals( Assay.collection([""], ["different string"]), true, "Assay.collection() should be true with expected: [(String: '')] and actual: [(String: 'different string')]. Result");
+	  equals( Assay.collection([""], ["bar"]), true, "Assay.collection() should be true with expected: [(String: '')] and actual: [(String: 'bar')]. Result");
 	  equals( Assay.collection([true], [false]), true, "Assay.collection() should be true with expected: [(Boolean: true)] and actual: [(Boolean: false)]. Result");
 	  equals( Assay.collection([false], [true]), true, "Assay.collection() should be true with expected: [(Boolean: false)] and actual: [(Boolean: true)]. Result");
-	  equals( Assay.collection([{test: "string"}], [{test: "different string"}]), true, "Assay.collection() should be true with expected: [(Object: {test: 'foo'})] and actual: [(Object: {test: 'different string'})]. Result");
+	  equals( Assay.collection([{test: "foo"}], [{test: "different string"}]), true, "Assay.collection() should be true with expected: [(Object: {test: 'foo'})] and actual: [(Object: {test: 'different string'})]. Result");
 	  equals( Assay.collection([new Date], [new Date(1970)]), true, "Assay.collection() should be true with expected: [(Date: new Date)] and actual: [(Date: new Date(1970))]. Result");
 	  equals( Assay.collection([new Custom], [new Custom]), true, "Assay.collection() should be true with expected: [(Custom: new Custom)] and actual: [(Custom: new Custom)]. Result");
 
 	  // Test matching member values
 	  equals( Assay.collection([10], [10]), true, "Assay.collection() should be true with expected: [(Number: 10)] and actual: [(Number: 10)]. Result");
-	  equals( Assay.collection(["string"], ["string"]), true, "Assay.collection() should be true with expected: [(String: 'foo')] and actual: [(String: 'foo')]. Result");
+	  equals( Assay.collection(["foo"], ["foo"]), true, "Assay.collection() should be true with expected: [(String: 'foo')] and actual: [(String: 'foo')]. Result");
 	  equals( Assay.collection([true], [true]), true, "Assay.collection() should be true with expected: [(Boolean: true)] and actual: [(Boolean: true)]. Result");
 	  equals( Assay.collection([[]], [[]]), true, "Assay.collection() should be true with expected: [(Array: [])] and actual: [(Array: [])]. Result");
 	  equals( Assay.collection([{}], [{}]), true, "Assay.collection() should be true with expected: [(Object: {})] and actual: [(Object: {})]. Result");
-	  equals( Assay.collection([{test: "string"}], [{test: "string"}]), true, "Assay.collection() should be true with expected: [(Object: {test: 'foo'})] and actual: [(Object: {test: 'foo'})]. Result");
-	  equals( Assay.collection([["nested"]], [["nested"]]), true, "Assay.collection() should be true with expected: [(Array: [[]])] and actual: [(Array: [[]])]. Result");
+	  equals( Assay.collection([{test: "foo"}], [{test: "foo"}]), true, "Assay.collection() should be true with expected: [(Object: {test: 'foo'})] and actual: [(Object: {test: 'foo'})]. Result");
+	  equals( Assay.collection([["foo"]], [["foo"]]), true, "Assay.collection() should be true with expected: [(Array: [[]])] and actual: [(Array: [[]])]. Result");
 	  equals( Assay.collection([function() {}], [function() {}]), true, "Assay.collection() should be true with expected: [(Function: function(){})] and actual: [(Function: function(){})]. Result");
 	  equals( Assay.collection([/foo/], [/foo/]), true, "Assay.collection() should be true with expected: [(RegExp: /foo/)] and actual: [(RegExp: /foo/)]. Result");
 	  equals( Assay.collection([new Date], [new Date]), true, "Assay.collection() should be true with expected: [(Date: new Date)] and actual: [(Date: new Date)]. Result");
@@ -408,16 +408,16 @@
 	  equals( Assay.collection([false], [false]), true, "Assay.collection() should be true with expected: [(Boolean: false)] and actual: [(Boolean: false)]. Result");
 	  equals( Assay.collection([null], [null]), true, "Assay.collection() should be true with expected: [(null)] and actual: [(null)]. Result");
 	  equals( Assay.collection([undefined], [undefined]), true, "Assay.collection() should be true with expected: [(undefined)] and actual: [(undefined)]. Result");
-	  equals( Assay.collection([0,"string", true, [], {}, function() {}, null, undefined, /foo/, new Date], [0,"string", true, [], {}, function() {}, null, undefined, /foo/, new Date]), true, "Assay.collection() should be true with expected: [ MANY TYPES ] and actual: [ MANY TYPES ]. Result");
+	  equals( Assay.collection([0,"foo", true, [], {}, function() {}, null, undefined, /foo/, new Date], [0,"foo", true, [], {}, function() {}, null, undefined, /foo/, new Date]), true, "Assay.collection() should be true with expected: [ MANY TYPES ] and actual: [ MANY TYPES ]. Result");
 
 	  // Nested
 
-	  equals( Assay.collection([[[["test"]]]], [[[["test"]]]]), true, "Assay.collection() should be true with expected: [(Array: [[[['test']]]])] with actual: (Array: [[[['test']]]]). Result");
-	  equals( Assay.collection(["one", ["two", ["three", ["four"]]]], ["one", ["two", ["three", ["four"]]]]), true, "Assay.collection() should be true with expected: [ MANY NESTED [] ] and actual: [ MANY NESTED [] ]. Result");
+	  equals( Assay.collection([[[["foo"]]]], [[[["foo"]]]]), true, "Assay.collection() should be true with expected: [(Array: [[[['foo']]]])] with actual: (Array: [[[['foo']]]]). Result");
+	  equals( Assay.collection(["foo", ["bar", ["baz", ["biz"]]]], ["foo", ["bar", ["baz", ["biz"]]]]), true, "Assay.collection() should be true with expected: [ MANY NESTED [] ] and actual: [ MANY NESTED [] ]. Result");
 
 	});
 
-	test("Assay.collection() method - strict value checking exercises", function () {
+	test("Assay.collection() exercises [strict mode", function () {
 
 	  expect(31)
 
@@ -429,36 +429,36 @@
 
 	  equals( Assay.collection([10], [""], {strictValueChecking:true}), false, "Assay.collection() should be false with expected: [(Number: 10)] and actual: [(String: '')]. Result");
 	  equals( Assay.collection([""], [10], {strictValueChecking:true}), false, "Assay.collection() should be false with expected: [(String: '')] and actual: [(Number: 10)]. Result");
-	  equals( Assay.collection([{test: "one"}], [["test", 1]], {strictValueChecking:true}), false, "Assay.collection() should be false with expected: [(Object: {test: \"one\"})] and actual: [(Object: {test: 1})]. Result");
+	  equals( Assay.collection([{test: "foo"}], [["test", 1]], {strictValueChecking:true}), false, "Assay.collection() should be false with expected: [(Object: {test: 'foo'})] and actual: [(Object: {test: 1})]. Result");
 	  equals( Assay.collection([function() {}], [], {strictValueChecking:true}), false, "Assay.collection() should be false with expected: [(Function: function() {})] and actual: [undefined]. Result");
 	  equals( Assay.collection([null], [undefined], {strictValueChecking:true}), false, "Assay.collection() should be false with expected: [(null)] and actual: [(undefined)]. Result");
-	  equals( Assay.collection([undefined], ["string"], {strictValueChecking:true}), false, "Assay.collection() should be false with expected: [(undefined)] and actual: [(String: 'foo')]. Result");
+	  equals( Assay.collection([undefined], ["foo"], {strictValueChecking:true}), false, "Assay.collection() should be false with expected: [(undefined)] and actual: [(String: 'foo')]. Result");
 	  equals( Assay.collection([/foo/], [9], {strictValueChecking:true}), false, "Assay.collection() should be false: [(RegExp: /foo/)], [(Number: 9)]. Result");
 	  equals( Assay.collection([new Custom], [new Number], {strictValueChecking:true}), false, "Assay.collection() should be false: [(Custom: new Custom)], [(Number: new Number)]. Result");
 
 	  // Test mis-matched member values
 
 	  equals( Assay.collection([10], [1], {strictValueChecking:true}), false, "Assay.collection() should be false with expected: [(Number: 10)] and actual: [(Number: 1)]. Result");
-	  equals( Assay.collection([""], ["different string"], {strictValueChecking:true}), false, "Assay.collection() should be false with expected: [(String: '')] and actual: [(String: 'different string')]. Result");
+	  equals( Assay.collection([""], ["bar"], {strictValueChecking:true}), false, "Assay.collection() should be false with expected: [(String: '')] and actual: [(String: 'different string')]. Result");
 	  equals( Assay.collection([true], [false], {strictValueChecking:true}), false, "Assay.collection() should be false with expected: [(Boolean: true)] and actual: [(Boolean: false)]. Result");
 	  equals( Assay.collection([false], [true], {strictValueChecking:true}), false, "Assay.collection() should be false with expected: [(Boolean: false)] and actual: [(Boolean: true)]. Result");
-	  equals( Assay.collection([{test: "string"}], [{test: "different string"}], {strictValueChecking:true}), false, "Assay.collection() should be false with expected: [(Object: {test: 'foo'})] and actual: [(Object: {test: 'different string'})]. Result");
+	  equals( Assay.collection([{test: "foo"}], [{test: "bar"}], {strictValueChecking:true}), false, "Assay.collection() should be false with expected: [(Object: {test: 'foo'})] and actual: [(Object: {test: 'bar'})]. Result");
+	  equals( Assay.collection([function() {}], [function() {}], {strictValueChecking:true}), false, "Assay.collection() should be false with expected: [(Function: function(){})] and actual: [(Function: function(){})]. Result");
 	  equals( Assay.collection([new Date], [new Date(1970)], {strictValueChecking:true}), false, "Assay.collection() should be false with expected: [(Date: new Date)] and actual: [(Date: new Date(1970))]. Result");
 	  // commented out as revisting equality and identity rules around strict checking
 	  //equals( Assay.collection([new Custom], [new Custom], {strictValueChecking:true}), false, "Assay.collection() should be false with expected: [(Custom: new Custom)] and actual: [(Custom: new Custom)]. Result");
-	  equals( Assay.collection([0,"string", true, [], {}, function() {}, null, undefined, /foo/, new Date], [1,"string", true, [], {}, function() {}, null, undefined, /foo/, new Date], {strictValueChecking:true}), false, "Assay.collection() should be false with expected: [ MANY TYPES ] and actual: [ MANY TYPES ]");
+	  equals( Assay.collection([0,"foo", true, [], {}, function() {}, null, undefined, /foo/, new Date], [1,"string", true, [], {}, function() {}, null, undefined, /foo/, new Date], {strictValueChecking:true}), false, "Assay.collection() should be false with expected: [ MANY TYPES ] and actual: [ MANY TYPES ]");
 
 	  // Expected true evaluations
 
 	  // Test matching member values
 	  equals( Assay.collection([10], [10], {strictValueChecking:true}), true, "Assay.collection() should be true with expected: [(Number: 10)] and actual: [(Number: 10)]. Result");
-	  equals( Assay.collection(["string"], ["string"], {strictValueChecking:true}), true, "Assay.collection() should be true with expected: [(String: 'foo')] and actual: [(String: 'foo')]. Result");
+	  equals( Assay.collection(["foo"], ["foo"], {strictValueChecking:true}), true, "Assay.collection() should be true with expected: [(String: 'foo')] and actual: [(String: 'foo')]. Result");
 	  equals( Assay.collection([true], [true], {strictValueChecking:true}), true, "Assay.collection() should be true with expected: [(Boolean: true)] and actual: [(Boolean: true)]. Result");
 	  equals( Assay.collection([[]], [[]], {strictValueChecking:true}), true, "Assay.collection() should be true with expected: [(Array: [])] and actual: [(Array: [])]. Result");
 	  equals( Assay.collection([{}], [{}], {strictValueChecking:true}), true, "Assay.collection() should be true with expected: [(Object: {})] and actual: [(Object: {})]. Result");
-	  equals( Assay.collection([{test: "string"}], [{test: "string"}], {strictValueChecking:true}), true, "Assay.collection() should be true with expected: [(Object: {test: 'foo'})] and actual: [(Object: {test: 'foo'})]. Result");
-	  equals( Assay.collection([["nested"]], [["nested"]], {strictValueChecking:true}), true, "Assay.collection() should be true with expected: [(Array: [[]])] and actual: [(Array: [[]])]. Result");
-	  equals( Assay.collection([function() {}], [function() {}], {strictValueChecking:true}), true, "Assay.collection() should be true with expected: [(Function: function(){})] and actual: [(Function: function(){})]. Result");
+	  equals( Assay.collection([{test: "foo"}], [{test: "foo"}], {strictValueChecking:true}), true, "Assay.collection() should be true with expected: [(Object: {test: 'foo'})] and actual: [(Object: {test: 'foo'})]. Result");
+	  equals( Assay.collection([["foo"]], [["foo"]], {strictValueChecking:true}), true, "Assay.collection() should be true with expected: [(Array: [[]])] and actual: [(Array: [[]])]. Result");
 	  equals( Assay.collection([/foo/], [/foo/], {strictValueChecking:true}), true, "Assay.collection() should be true with expected: [(RegExp: /foo/)] and actual: [(RegExp: /foo/)]. Result");
 
 	  // Test matching member falsy values
@@ -466,13 +466,13 @@
 	  equals( Assay.collection([0], [0], {strictValueChecking:true}), true, "Assay.collection() should be true with expected: [(Number: 0)] and actual: [(Number: 0)]. Result");
 	  equals( Assay.collection([""], [""], {strictValueChecking:true}), true, "Assay.collection() should be true with expected: [(String: '')] and actual: [(String: '')]. Result");
 	  equals( Assay.collection([false], [false], {strictValueChecking:true}), true, "Assay.collection() should be true with expected: [(Boolean: false)] and actual: [(Boolean: false)]. Result");
-	  equals( Assay.collection([null], [null], {strictValueChecking:true}), true, "Assay.collection() should be true with expected: [(null)] and actual: [(null)]. Result");
+	 debugger; equals( Assay.collection([null], [null], {strictValueChecking:true}), true, "Assay.collection() should be true with expected: [(null)] and actual: [(null)]. Result");
 	  equals( Assay.collection([undefined], [undefined], {strictValueChecking:true}), true, "Assay.collection() should be true with expected: [(undefined)] and actual: [(undefined)]. Result");
 
 	  // Nested
 
-	  equals( Assay.collection([[[["test"]]]], [[[["test"]]]], {strictValueChecking:true}), true, "Assay.collection() should be true with expected: [(Array: [[[['test']]]])] with actual: (Array: [[[['test']]]]). Result");
-	  equals( Assay.collection(["one", ["two", ["three", ["four"]]]], ["one", ["two", ["three", ["four"]]]], {strictValueChecking:true}), true, "Assay.collection() should be true with expected: [ MANY NESTED [] ] and actual: [ MANY NESTED [] ]. Result");
+	  equals( Assay.collection([[[["foo"]]]], [[[["foo"]]]], {strictValueChecking:true}), true, "Assay.collection() should be true with expected: [(Array: [[[['test']]]])] with actual: (Array: [[[['test']]]]). Result");
+	  equals( Assay.collection(["foo", ["bar", ["baz", ["biz"]]]], ["foo", ["bar", ["baz", ["biz"]]]], {strictValueChecking:true}), true, "Assay.collection() should be true with expected: [ MANY NESTED [] ] and actual: [ MANY NESTED [] ]. Result");
 
 	});
 
