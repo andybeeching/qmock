@@ -356,12 +356,10 @@ function initAssay () {
       }*/
 
       function __isCollection ( obj, expectedType ) {
-        return ( expectedType === "function" )
-          ? false
-          : !!( obj.hasOwnProperty && obj.hasOwnProperty('length') );
+        return ( obj.hasOwnProperty && obj.hasOwnProperty('length') );
       }
 
-      function __compare ( expected, actual, expectedType ) {
+      function __compare ( expected, actual, expectedType, opt_typed ) {
 
         // Some defaults
         var ROUTINES = {
@@ -371,7 +369,7 @@ function initAssay () {
               "date": "valueOf",
               "regexp": "toString",
               // We already know the type of the actual is correct - strict matching disable by default for function objects
-              "function": null
+              "function": ( !opt_typed ) ? function ( expected, actual ) { return expected === actual; } : function (){ return true; }
             },
 
             //
@@ -428,9 +426,9 @@ function initAssay () {
         isCollection = __isCollection( expected, expectedType ),
         //isComparison = __isComparison( expectedType ),
         // Set options
-        strict = (opt && opt.strictValueChecking) || false,
-        typed = (opt && opt.typed) || false,
-        exceptionType = (opt && opt.exceptionType) || ( strict === true ? "IncorrectArgumentValueException" : "IncorrectArgumentTypeException"),
+        isStrict = (opt && opt.strictValueChecking) || false,
+        isTyped = (opt && opt.typed) || false,
+        exceptionType = (opt && opt.exceptionType) || ( isStrict === true ? "IncorrectArgumentValueException" : "IncorrectArgumentTypeException"),
         // What happened to isNative fn?!? - see Kangax blog... damn me and my lack of self-documentation sometimes.
         //nativeTypes = [Number, String, Boolean, Date, Function, Object, Array, RegExp, Variable],
         descriptor = ( opt && opt.descriptor ) || "getClass()",
@@ -439,13 +437,13 @@ function initAssay () {
         result = true;
 
       // Top-level type check
-      result = __checkType( expected, actual, expectedType, typed );
+      result = __checkType( expected, actual, expectedType, isTyped );
 
       // If strict then look at comparison
-      if ( result && strict ) {
+      if ( result && isStrict ) {
 
         // Shallow comparison
-        result = __compare( expected, actual, expectedType );
+        result = __compare( expected, actual, expectedType, isTyped );
 
         if ( result === null ) {
 
