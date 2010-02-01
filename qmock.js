@@ -330,7 +330,7 @@ function initAssay () {
       }
 
       function __checkType ( expected, actual, expectedType, opt_typed ) {
-        
+
         // Custom handling for expected "object"s
         // Since everything inherits from Object we have a different check for them
         // On a related note this differs from isHash as nearly all types in JavaScript can act as hash-like objects
@@ -346,7 +346,7 @@ function initAssay () {
         var klass = ( opt_typed && expectedType === "function" )
           ? expected
           : (expected !== null && expected !== undefined) && expected.constructor,
-        
+
         // Grab the type of through function decompilation (we only care about natives for this part, so they should be consistent x-interpreter)
         // This is done so a 'typed' interface doesn't allow functions where the expectation is a constructor (confused.com yet?)
         // Unless of course said type was Function, in which case boundType === "function"
@@ -421,7 +421,7 @@ function initAssay () {
 
             },
 
-            // 
+            //
             fn = CUSTOM_ROUTINES[ expectedType ] || ROUTINES[ expectedType ] || null;
 
         return ( fn )
@@ -460,10 +460,10 @@ function initAssay () {
       if ( result && isStrict ) {
         result = __compare( expected, actual, expectedType, isTyped );
       }
-      
+
       // If object not handled in __compare, or deep: true then perform a deep comparison
       if ( result === null || isDeep ) {
-        
+
         try {
           result = ( ( isCollection )
                         ? assertCollection

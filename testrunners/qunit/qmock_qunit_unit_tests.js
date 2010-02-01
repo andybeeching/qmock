@@ -1829,7 +1829,7 @@
     container[ "QMock" ] = initQMock( __Assay && __Assay.object, { "expose": __Assay && __Assay.exposeObject } );
 
     // Test interface
-    equals( Assay.hash( this.expectedQMockInterface, container[ "QMock" ] ), true, "initQmock() should return a Qmock instance interface registered to the identifier 'QMock' on container" );
+    equals( Assay.hash( this.expectedQMockInterface, container[ "QMock" ], {typed: true} ), true, "initQmock() should return a Qmock instance interface registered to the identifier 'QMock' on container" );
 
     // Test private methods NOT exposed
     ok( Assay.object( undefined, container.QMock[ "_createMockFromJSON" ] ), "initQmock() without optional param should not expose the private method _createMockFromJSON()" );
@@ -1854,7 +1854,7 @@
     container[ "QMock" ] = initQMock( __Assay && __Assay.object, { "isTest": true, "expose": __Assay && __Assay.Utils.expose } );
 
     // Test interface
-    equals( Assay.hash( this.expectedQMockInterface, container[ "QMock" ] ), true, "initQMock() should return a Qmock instance interface registered to the identifier 'Qmock' on container" );
+    equals( Assay.hash( this.expectedQMockInterface, container[ "QMock" ], {typed: true} ), true, "initQMock() should return a Qmock instance interface registered to the identifier 'Qmock' on container" );
 
     // Test private methods exposed
     ok( Assay.hash( {"get": Function, "set": Function, "restore": Function}, container.QMock[ "_createMockFromJSON" ] ), "initQMock( {isTest: true} ) should expose accessors and mutators for the private function _createMockFromJSON() on container.QMock" );
