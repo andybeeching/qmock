@@ -754,7 +754,6 @@
 	  equals( Assay.hash({Array: []}, {Array: []}, true), true, "Assay.hash() should be true with expected: (Object {Array: []}) and actual: (Object {Array: []}). Result");
 	  equals( Assay.hash({Array: ["one"]},{Array: ["one"]}, true), true, "Assay.hash() should be true with expected: (Object {Array: ['one']}) and actual: (Object {Array: ['one']}). Result");
 	  equals( Assay.hash({Object: {}}, {Object: {}}, true), true, "Assay.hash() should be true with expected: (Object {Object: {}}) and actual: (Object {Object: {}}). Result");
-	  // Not sure what to do with this one - it's definitely an edge case... for now maybe just defer to a quick type check (if expectedType === Function?)
 	  equals( Assay.hash({Function: function() {}}, {Function: function() {}}, true), true, "Assay.hash() should be true with expected: (Object {Function: function(){}}) and actual: (Object {Function: function(){}}). Result");
 	  equals( Assay.hash({"null": null},{"null": null}, true), true, "Assay.hash() should be true with expected: (Object {'null': null}) and actual: (Object {'null': null}). Result");
 	  equals( Assay.hash({"undefined": undefined},{"undefined": undefined}, true), true, "Assay.hash() should be true with expected: (Object {'undefined': undefined}) and actual: (Object {'undefined': undefined}). Result");
@@ -810,7 +809,7 @@
 
 	});
 
-	test("Assay.object() exercises - (Number: Constructor) primitive [default type check mode]", function() {
+	test("Assay.object() exercises - (Number: Constructor) [default type check mode]", function() {
 
 	  // FALSE ASSERTIONS
 
@@ -844,7 +843,7 @@
 
 	});
 
-	test("Assay.object() exercises - (Number: Constructor) primitive [strict mode]", function() {
+	test("Assay.object() exercises - (Number: Constructor) [strict mode]", function() {
 
 	  // FALSE ASSERTIONS
 
@@ -880,7 +879,7 @@
 
 	});
 
-	test("Assay.object() exercises - (Number: 1) primitive [default type check mode]", function() {
+	test("Assay.object() exercises - (Number: 1) [default type check mode]", function() {
 
 	  // FALSE ASSERTIONS
 
@@ -922,7 +921,7 @@
 
 	});
 
-	test("Assay.object() exercises - (Number: 1) primitive [strict mode]", function() {
+	test("Assay.object() exercises - (Number: 1) [strict mode]", function() {
 
 	  // FALSE ASSERTIONS
 
@@ -963,7 +962,7 @@
 
 	});
 
-	test("Assay.object() exercises - (String: Constructor) primitive [default type check mode]", function() {
+	test("Assay.object() exercises - (String: Constructor) [default type check mode]", function() {
 
 	  // FALSE ASSERTIONS
 
@@ -999,7 +998,7 @@
 
 	});
 
-	test("Assay.object() exercises - (String: Constructor) primitive [strict mode]", function() {
+	test("Assay.object() exercises - (String: Constructor) [strict mode]", function() {
 
 	  // FALSE ASSERTIONS
 
@@ -1035,7 +1034,7 @@
 
 	});
 
-	test("Assay.object() exercises - (String: 'foo') primitive [default type check mode]", function() {
+	test("Assay.object() exercises - (String: 'foo') [default type check mode]", function() {
 
 	  // FALSE ASSERTIONS
 
@@ -1078,7 +1077,7 @@
 
 	});
 
-	test("Assay.object() exercises - (String: 'foo') primitive [strict mode]", function() {
+	test("Assay.object() exercises - (String: 'foo') [strict mode]", function() {
 
 	  // FALSE ASSERTIONS
 
@@ -1118,7 +1117,7 @@
 
 	});
 
-	test("Assay.object() exercises - (Boolean: Constructor) primitive [default type check mode]", function() {
+	test("Assay.object() exercises - (Boolean: Constructor) [default type check mode]", function() {
 
 	  // FALSE ASSERTIONS
 
@@ -1154,7 +1153,7 @@
 
 	});
 
-	test("Assay.object() exercises - (Boolean: Constructor) primitive [strict mode]", function() {
+	test("Assay.object() exercises - (Boolean: Constructor) [strict mode]", function() {
 
 	  // FALSE ASSERTIONS
 
@@ -1193,7 +1192,7 @@
 
 	});
 
-	test("Assay.object() exercises - (Boolean: true) primitive [default type check mode]", function() {
+	test("Assay.object() exercises - (Boolean: true) [default type check mode]", function() {
 
 	  // FALSE ASSERTIONS
 
@@ -1237,7 +1236,7 @@
 
 	});
 
-	test("Assay.object() exercises - (Boolean: true) primitive [strict mode]", function() {
+	test("Assay.object() exercises - (Boolean: true) [strict mode]", function() {
 
 	  // FALSE ASSERTIONS
 
@@ -1279,7 +1278,7 @@
 
 	});
 
-	test("Assay.object() exercises - (RegExp) composite [default type check mode]", function() {
+	test("Assay.object() exercises - (RegExp: Constructor) [default type check mode]", function() {
 
 	  // FALSE ASSERTIONS
 
@@ -1315,7 +1314,7 @@
 
 	});
 
-	test("Assay.object() exercises - (RegExp) composite [strict mode]", function() {
+	test("Assay.object() exercises - (RegExp: Constructor) [strict mode]", function() {
 
 	  // FALSE ASSERTIONS
 
@@ -1355,7 +1354,7 @@
 	});
 
 
-	test("Assay.object() exercises - (RegExp: /foo/) composite [default type check mode]", function() {
+	test("Assay.object() exercises - (RegExp: /foo/) [default type check mode]", function() {
 
 	  // FALSE ASSERTIONS
 
@@ -1395,7 +1394,7 @@
 
 	});
 
-	test("Assay.object() exercises - (RegExp: /foo/) composite [strict mode]", function() {
+	test("Assay.object() exercises - (RegExp: /foo/) [strict mode]", function() {
 
 	  // FALSE ASSERTIONS
 
@@ -1435,7 +1434,7 @@
 
 	});
 
-	test("Assay.object() exercises - (Object: Constructor) primitive [default type check mode]", function() {
+	test("Assay.object() exercises - (Object: Constructor) [default type check mode]", function() {
 
 	  // FALSE ASSERTIONS
 
@@ -1471,7 +1470,7 @@
 
 	});
 
-	test("Assay.object() exercises - (Object: Constructor) conmposite [strict mode]", function() {
+	test("Assay.object() exercises - (Object: Constructor) [strict mode]", function() {
 
 	  // FALSE ASSERTIONS
 
@@ -1504,6 +1503,87 @@
 
 		// TRUE ASSERTIONS
 		equals( Assay.object(Object, Object, {strictValueChecking: true}), true, "Assay.object() should return true with expected: (Object: Constructor) and actual: (Object: Constructor)" );
+
+	});
+
+	test("Assay.object() exercises - (Object: {}) [default type check mode]", function() {
+
+	  // FALSE ASSERTIONS
+
+	  // Test invalid argument type - Constructors
+		equals( Assay.object({}, String), false, "Assay.object() should return false with expected: (Object: {}) and actual: (String: Constructor)" );
+		equals( Assay.object({}, Number), false, "Assay.object() should return false with expected: (Object: {}) and actual: (Number: Constructor)" );
+		equals( Assay.object({}, Boolean), false, "Assay.object() should return false with expected: (Object: {}) and actual: (Boolean: Constructor)" );
+		equals( Assay.object({}, Array), false, "Assay.object() should return false with expected: (Object: {}) and actual: (Array: Constructor)" );
+		equals( Assay.object({}, Object), false, "Assay.object() should return false with expected: (Object: {}) and actual: (Object: Constructor)" );
+		equals( Assay.object({}, Function), false, "Assay.object() should return false with expected: (Object: {}) and actual: (Function: Constructor)" );
+		equals( Assay.object({}, RegExp), false, "Assay.object() should return false with expected: (Object: {}) and actual: (RegExp: Constructor)" );
+		equals( Assay.object({}, Date), false, "Assay.object() should return false with expected: (Object: {}) and actual: (Date: Constructor)" );
+		equals( Assay.object({}, Custom), false, "Assay.object() should return false with expected: (Object: {}) and actual: (Custom: Constructor)" );
+		equals( Assay.object({}, Error), false, "Assay.object() should return false with expected: (Object: {}) and actual: (Error: Constructor)" );
+
+		// Test invalid argument type - Values (truthy)
+
+		equals( Assay.object({}, 'foo'), false, "Assay.object() should return false with expected: (Object: {}) and actual: (String: 'foo')" );
+		equals( Assay.object({}, 1), false, "Assay.object() should return false with expected: (Object: {}) and actual: (Number: 1)" );
+		equals( Assay.object({}, true), false, "Assay.object() should return false with expected: (Object: {}) and actual: (Boolean: true)" );
+		equals( Assay.object({}, []), false, "Assay.object() should return false with expected: (Object: {}) and actual: (Array: [])" );
+		equals( Assay.object({}, function(){}), false, "Assay.object() should return false with expected: (Object: {}) and actual: (Function: function(){})" );
+		equals( Assay.object({}, /test/), false, "Assay.object() should return false with expected: (Object: {}) and actual: (RegExp: /test/)" );
+		equals( Assay.object({}, new Date), false, "Assay.object() should return false with expected: (Object: {}) and actual: (Date: new instance)" );
+
+	  // Test invalid argument types - false values
+
+		equals( Assay.object({}, null), false, "Assay.object() should return false with expected: (Object: {}) and actual: (null)" );
+		equals( Assay.object({}, undefined), false, "Assay.object() should return false with expected: (Object: {}) and actual: (undefined)" );
+
+		// TRUE ASSERTIONS
+	  equals( Assay.object({}, {}), true, "Assay.object() should return true with expected: (Object: {}) and actual: (Object: {})" );
+		equals( Assay.object({}, {foo: "bar"}), true, "Assay.object() should return true with expected: (Object: {}) and actual: (Object: {foo: 'bar'})" );
+
+    // Constructors who return objects
+    // Although a different type essentially the assertion is measuring the key-value pairs
+    // If it is typed too strongly we lose some of the utility of enumerating over hash-like objects
+		equals( Assay.object({}, new Custom), true, "Assay.object() should return true with expected: (Object: {}) and actual: (Custom: new instance)" );
+
+	});
+
+	test("Assay.object() exercises - (Object: {}) [strict mode]", function() {
+
+	  // FALSE ASSERTIONS
+
+	  // Test invalid argument type - Constructors
+		equals( Assay.object({}, String, {strictValueChecking: true}), false, "Assay.object() should return false with expected: (Object: {}) and actual: (String: Constructor)" );
+		equals( Assay.object({}, Number, {strictValueChecking: true}), false, "Assay.object() should return false with expected: (Object: {}) and actual: (Number: Constructor)" );
+		equals( Assay.object({}, Boolean, {strictValueChecking: true}), false, "Assay.object() should return false with expected: (Object: {}) and actual: (Boolean: Constructor)" );
+		equals( Assay.object({}, Array, {strictValueChecking: true}), false, "Assay.object() should return false with expected: (Object: {}) and actual: (Array: Constructor)" );
+		equals( Assay.object({}, Object, {strictValueChecking: true}), false, "Assay.object() should return false with expected: (Object: {}) and actual: (Object: Constructor)" );
+		equals( Assay.object({}, Function, {strictValueChecking: true}), false, "Assay.object() should return false with expected: (Object: {}) and actual: (Function: Constructor)" );
+		equals( Assay.object({}, RegExp, {strictValueChecking: true}), false, "Assay.object() should return false with expected: (Object: {}) and actual: (RegExp: Constructor)" );
+		equals( Assay.object({}, Date, {strictValueChecking: true}), false, "Assay.object() should return false with expected: (Object: {}) and actual: (Date: Constructor)" );
+		equals( Assay.object({}, Error, {strictValueChecking: true}), false, "Assay.object() should return false with expected: (Object: {}) and actual: (Error: Constructor)" );
+		equals( Assay.object({}, Custom, {strictValueChecking: true}), false, "Assay.object() should return false with expected: (Object: {}) and actual: (Custom: Constructor)" );
+
+		// Test invalid argument type - Values (truthy)
+		equals( Assay.object({}, 'foo', {strictValueChecking: true}), false, "Assay.object() should return false with expected: (Object: {}) and actual: (String: 'foo')" );
+		equals( Assay.object({}, 1, {strictValueChecking: true}), false, "Assay.object() should return false with expected: (Object: {}) and actual: (Number: 1)" );
+		equals( Assay.object({}, true, {strictValueChecking: true}), false, "Assay.object() should return false with expected: (Object: {}) and actual: (Boolean: true)" );
+		equals( Assay.object({}, [], {strictValueChecking: true}), false, "Assay.object() should return false with expected: (Object: {}) and actual: (Array: [])" );
+		equals( Assay.object({foo: "bar"}, {}, {strictValueChecking: true}), false, "Assay.object() should return false with expected: (Object: {}) and actual: (Object: {foo: 'bar'})" );
+		equals( Assay.object({}, function(){}, {strictValueChecking: true}), false, "Assay.object() should return false with expected: (Object: {}) and actual: (Function: function(){})" );
+		equals( Assay.object({}, /test/, {strictValueChecking: true}), false, "Assay.object() should return false with expected: (Object: {}) and actual: (RegExp: /test/)" );
+		equals( Assay.object({}, new Date, {strictValueChecking: true}), false, "Assay.object() should return false with expected: (Object: {}) and actual: (Date: new instance)" );
+		equals( Assay.object({foo: "bar"}, new Custom, {strictValueChecking: true}), false, "Assay.object() should return false with expected: (Object: {foo: 'bar'}) and actual: (Custom: new instance)" );
+
+	  // Test invalid argument types - false values
+
+		equals( Assay.object({}, null, {strictValueChecking: true}), false, "Assay.object() should return false with expected: (Object: {}) and actual: (null)" );
+		equals( Assay.object({}, undefined, {strictValueChecking: true}), false, "Assay.object() should return false with expected: (Object: {}) and actual: (undefined)" );
+
+		// TRUE ASSERTIONS
+		equals( Assay.object({}, {}, {strictValueChecking: true}), true, "Assay.object() should return true with expected: (Object: {}) and actual: (Object: {})" );
+		equals( Assay.object({foo: "bar"}, {foo: "bar"}, {strictValueChecking: true}), true, "Assay.object() should return true with expected: (Object: {foo: 'bar'}) and actual: (Object: {foo: 'bar'})" );
+		equals( Assay.object({}, new Custom, {strictValueChecking: true}), true, "Assay.object() should return true with expected: (Object: {}) and actual: (Custom: new instance)" );
 
 	});
 
@@ -1550,6 +1630,7 @@
 
     // Object
     equals( Assay.object(Object, {}, {typed:true}), true, "Assay.object() in 'typed' mode should return true with expected: (Object: Constructor) and actual: (Object: {})" );
+    equals( Assay.object(Object, new Custom, {typed: true}), true, "Assay.object() in 'typed' mode should return true with expected: (Object: Constructor) and actual: (Custom: new Custom)" );
 		// Ensure no false positives
 		equals( Assay.object(Object, 'foo', {typed: true}), false, "Assay.object() in 'typed' mode should return false with expected: (Object: Constructor) and actual: (String: 'foo')" );
 		equals( Assay.object(Object, 1, {typed: true}), false, "Assay.object() in 'typed' mode should return false with expected: (Object: Constructor) and actual: (Number: 1)" );
@@ -1558,7 +1639,6 @@
 		equals( Assay.object(Object, [], {typed: true}), false, "Assay.object() in 'typed' mode should return false with expected: (Object: Constructor) and actual: (Array: [])" );
 		equals( Assay.object(Object, new Date, {typed: true}), false, "Assay.object() in 'typed' mode should return false with expected: (Object: Constructor) and actual: (Date: new Date)" );
 		equals( Assay.object(Object, function() {}, {typed: true}), false, "Assay.object() in 'typed' mode should return false with expected: (Object: Constructor) and actual: (Function: function(){})" );
-		equals( Assay.object(Object, new Custom, {typed: true}), false, "Assay.object() in 'typed' mode should return false with expected: (Object: Constructor) and actual: (Custom: new Date)" );
 		// Test default mode (type inference) works
     equals( Assay.object({}, {}, {typed:true}), true, "Assay.object() in 'typed' mode should return true with expected: (Object: {}) and actual: (Object: {})" );
     equals( Assay.object({foo: "bar"}, {}, {typed:true}), true, "Assay.object() in 'typed' mode should return true with expected: (Object: {foo:'bar'}) and actual: (Object: {})" );
@@ -1578,7 +1658,7 @@
     equals( Assay.object(Number, 'foo', {typed: true}), false, "Assay.object() in 'typed' mode should return false with expected: (Number: Constructor) and actual: (String: 'foo')" );
 		equals( Assay.object(Number, true, {typed: true}), false, "Assay.object() in 'typed' mode should return false with expected: (Number: Constructor) and actual: (Boolean: true)" );
 		equals( Assay.object(Number, function() {}, {typed: true}), false, "Assay.object() in 'typed' mode should return false with expected: (Number: Constructor) and actual: (Function: function(){})" );
-		
+
     // String
 		equals( Assay.object(String, "foo", {strictValueChecking: true, typed: true}), true, "Assay.object() in 'typed' mode should return true with expected: (String: Constructor) and actual: (String: 'foo')" );
 		equals( Assay.object(String, "", {strictValueChecking: true, typed: true}), true, "Assay.object() in 'typed' mode should return true with expected: (String: Constructor) and actual: (String: '')" );
@@ -1600,18 +1680,35 @@
     // RegExp
     equals( Assay.object(RegExp, /foo/, {strictValueChecking: true, typed:true}), true, "Assay.object() in 'typed' mode should return true with expected: (RegExp: Constructor) and actual: (RegExp: /foo/)" );
 		equals( Assay.object(RegExp, new RegExp(/foo/), {strictValueChecking: true, typed:true}), true, "Assay.object() in 'typed' mode should return true with expected: (RegExp: Constructor) and actual: (RegExp: new RegExp(/foo/))" );
-		equals( Assay.object(/foo/, /bar/, {strictValueChecking: true, typed: true}), false, "Assay.object() in 'typed' mode should return false with expected: (RegExp: /foo/) and actual: (RegExp: /bar/)" );
+	  equals( Assay.object(/foo/, new RegExp(/foo/), {strictValueChecking: true, typed: true}), true, "Assay.object() in 'typed' mode should return true with expected: (RegExp: /foo/) and actual: (RegExp: new RegExp(/foo/))" );
 		equals( Assay.object(/foo/, /foo/, {strictValueChecking: true, typed: true}), true, "Assay.object() in 'typed' mode should return true with expected: (RegExp: /foo/) and actual: (RegExp: /foo/)" );
-		equals( Assay.object(/foo/, new RegExp(/foo/), {strictValueChecking: true, typed: true}), true, "Assay.object() in 'typed' mode should return true with expected: (RegExp: /foo/) and actual: (RegExp: new RegExp(/foo/))" );
+		// Ensure no false positives
+		equals( Assay.object(/foo/, /bar/, {strictValueChecking: true, typed: true}), false, "Assay.object() in 'typed' mode should return false with expected: (RegExp: /foo/) and actual: (RegExp: /bar/)" );
 
     // Object
-    equals( Assay.object(Object, {}, {strictValueChecking: true, typed: true}), true, "Assay.object() in 'typed' mode should return true with expected: (Object: Constructor) and actual: (Number: 1)" );
-		equals( Assay.object(Object, {}, {strictValueChecking: true, typed: true}), true, "Assay.object() in 'typed' mode should return true with expected: (Object: Constructor) and actual: (Number: 0)" );
-		/*equals( Assay.object(1, 0, {strictValueChecking: true, typed:true}), false, "Assay.object() in 'typed' mode  should return false with expected: (Number: 1) and actual: (Number: 0)" );
-		equals( Assay.object(0, 1, {strictValueChecking: true, typed:true}), false, "Assay.object() in 'typed' mode should return false with expected: (Number: 0) and actual: (Number: 1)" );
-		equals( Assay.object(1, 1, {strictValueChecking: true, typed:true}), true, "Assay.object() in 'typed' mode should return true with expected: (Number: 1) and actual: (Number: 1)" );
-		equals( Assay.object(0, 0, {strictValueChecking: true, typed:true}), true, "Assay.object() in 'typed' mode should return true with expected: (Number: 0) and actual: (Number: 0)" );
-    */
+    equals( Assay.object(Object, {}, {strictValueChecking: true, typed: true}), true, "Assay.object() in 'typed' mode should return true with expected: (Object: Constructor) and actual: (Object: {})" );
+		equals( Assay.object(Object, {foo: "bar"}, {strictValueChecking: true, typed: true}), true, "Assay.object() in 'typed' mode should return true with expected: (Object: Constructor) and actual: (Object: {foo: 'bar'})" );
+		equals( Assay.object(Object, new Custom, {strictValueChecking: true, typed: true}), true, "Assay.object() in 'typed' mode should return false with expected: (Object: Constructor) and actual: (Custom: new Custom)" );
+		equals( Assay.object({}, {}, {strictValueChecking: true, typed:true}), true, "Assay.object() in 'typed' mode should return true with expected: (Object: {}) and actual: (Object: {})" );
+    equals( Assay.object({}, new Custom, {strictValueChecking: true, typed: true}), true, "Assay.object() in 'typed' mode should return false with expected: (Object: {}) and actual: (Custom: new Custom)" );
+    equals( Assay.object({foo: "bar"}, {foo: "bar"}, {strictValueChecking: true, typed:true}), true, "Assay.object() in 'typed' mode should return true with expected: (Object: {foo:'bar'}) and actual: (Object: {foo: 'bar'})" );
+
+		// Ensure no false positives
+		equals( Assay.object(Object, 'foo', {strictValueChecking: true, typed: true}), false, "Assay.object() in 'typed' mode should return false with expected: (Object: Constructor) and actual: (String: 'foo')" );
+		equals( Assay.object(Object, 1, {strictValueChecking: true, typed: true}), false, "Assay.object() in 'typed' mode should return false with expected: (Object: Constructor) and actual: (Number: 1)" );
+		equals( Assay.object(Object, true, {strictValueChecking: true, typed: true}), false, "Assay.object() in 'typed' mode should return false with expected: (Object: Constructor) and actual: (Boolean: true)" );
+		equals( Assay.object(Object, /foo/, {strictValueChecking: true, typed: true}), false, "Assay.object() in 'typed' mode should return false with expected: (Object: Constructor) and actual: (RegExp: /re/)" );
+		equals( Assay.object(Object, [], {strictValueChecking: true, typed: true}), false, "Assay.object() in 'typed' mode should return false with expected: (Object: Constructor) and actual: (Array: [])" );
+		equals( Assay.object(Object, new Date, {strictValueChecking: true, typed: true}), false, "Assay.object() in 'typed' mode should return false with expected: (Object: Constructor) and actual: (Date: new Date)" );
+		equals( Assay.object(Object, function() {}, {strictValueChecking: true, typed: true}), false, "Assay.object() in 'typed' mode should return false with expected: (Object: Constructor) and actual: (Function: function(){})" );
+		equals( Assay.object({foo: "bar"}, {}, {strictValueChecking: true, typed:true}), false, "Assay.object() in 'typed' mode should return true with expected: (Object: {foo:'bar'}) and actual: (Object: {})" );
+		equals( Assay.object({}, 'foo', {strictValueChecking: true, typed: true}), false, "Assay.object() in 'typed' mode should return false with expected: (Object: {}) and actual: (String: 'foo')" );
+		equals( Assay.object({}, 1, {strictValueChecking: true, typed: true}), false, "Assay.object() in 'typed' mode should return false with expected: (Object: {}) and actual: (Number: 1)" );
+		equals( Assay.object({}, true, {strictValueChecking: true, typed: true}), false, "Assay.object() in 'typed' mode should return false with expected: (Object: {}) and actual: (Boolean: true)" );
+		equals( Assay.object({}, /foo/, {strictValueChecking: true, typed: true}), false, "Assay.object() in 'typed' mode should return false with expected: (Object: {}) and actual: (RegExp: /re/)" );
+		equals( Assay.object({}, [], {strictValueChecking: true, typed: true}), false, "Assay.object() in 'typed' mode should return false with expected: (Object: {}) and actual: (Array: [])" );
+		equals( Assay.object({}, new Date, {strictValueChecking: true, typed: true}), false, "Assay.object() in 'typed' mode should return false with expected: (Object: {}) and actual: (Date: new Date)" );
+		equals( Assay.object({}, function() {}, {strictValueChecking: true, typed: true}), false, "Assay.object() in 'typed' mode should return false with expected: (Object: {}) and actual: (Function: function(){})" );
 
 	});
 

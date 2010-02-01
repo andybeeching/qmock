@@ -330,21 +330,37 @@ function initAssay () {
       }
 
       function __checkType ( expected, actual, expectedType, opt_typed ) {
+        
+        // Custom handling for expected "object"s
+        // Since everything inherits from Object we have a different check for them
+        // On a related note this differs from isHash as nearly all types in JavaScript can act as hash-like objects
+        // and hence can be enurmerated upon
+        if ( expectedType === "object" || ( opt_typed && expected === Object ) ) {
+          /* stricter variant:
+           * !!(actual && actual.constructor === Object.prototype.constructor);
+           */
+          return _getTypeOf( actual ) === "object";
+        }
 
-        // If function passed for expected use as "class", else use constructor property (if available)
+        // If function passed for expected the use as "class", else use constructor property (if available)
         var klass = ( opt_typed && expectedType === "function" )
           ? expected
-          : (expected !== null && expected !== undefined) && expected.constructor;
+          : (expected !== null && expected !== undefined) && expected.constructor,
+        
+        // Grab the type of through function decompilation (we only care about natives for this part, so they should be consistent x-interpreter)
+        // This is done so a 'typed' interface doesn't allow functions where the expectation is a constructor (confused.com yet?)
+        // Unless of course said type was Function, in which case boundType === "function"
+            boundType = ( opt_typed ) ? _getFunctionName( klass ).toLowerCase() : expectedType;
 
-        // Some comment
-        return ( opt_typed && expected === Object )
-          // Since everything inherits from Object we have a different check for objects
-          ? ( actual && actual.constructor === Object.prototype.constructor )
-          // Else test the instance & catch 'type bound' tests where actual === function object
-          : ( // Sandboxed check
-              Object( actual ) instanceof ( klass || Function )
-              // More robust cross-frame check
-              || _getTypeOf( actual ) === (( opt_typed ) ? _getFunctionName( klass ).toLowerCase() : expectedType ));
+        // Else test the instance against the expected Klass
+        // Try sandboxed check first (on the assumption that custom constructors will only pass this expression)
+        // & catch 'type bound' tests where actual === function object
+        // Function is used a fallback if Klass is not a valid constructor
+        return ( // Sandboxed check
+                Object( actual ) instanceof ( klass || Function )
+                // Cross-frame & 'typed' check
+                || _getTypeOf( actual ) === boundType
+        );
       }
 
       function __setExpectedType ( obj ) {
@@ -385,7 +401,7 @@ function initAssay () {
               "undefined": _identityCheck
             },
 
-            //
+            // Allow collaborator objects to override default comparison operations
             CUSTOM_ROUTINES = {},
 
             //
@@ -405,7 +421,7 @@ function initAssay () {
 
             },
 
-            //
+            // 
             fn = CUSTOM_ROUTINES[ expectedType ] || ROUTINES[ expectedType ] || null;
 
         return ( fn )
@@ -424,70 +440,58 @@ function initAssay () {
 
       var expectedType = _getTypeOf( expected ),
 
-
-      // Test whether expected is a constructor for native object types (aside from null // undefined)
-      //var expectedType = ( expected !== null && expected !== undefined ) ? expected.constructor : expected,
-        /*expectedType = (expected !== null && expected !== undefined)
-          ? ( expected.constructor === Function ) // but also matches function literals :-(
-            ? expected
-            : expected.constructor
-              : expected,*/
-
         // Set flags
 
         isCollection = __isCollection( expected, expectedType ),
-        //isComparison = __isComparison( expectedType ),
+
         // Set options
         isStrict = (opt && opt.strictValueChecking) || false,
         isTyped = (opt && opt.typed) || false,
+        isDeep = ( opt && opt.deep ) || false;
         exceptionType = (opt && opt.exceptionType) || ( isStrict === true ? "IncorrectArgumentValueException" : "IncorrectArgumentTypeException"),
-        // What happened to isNative fn?!? - see Kangax blog... damn me and my lack of self-documentation sometimes.
-        //nativeTypes = [Number, String, Boolean, Date, Function, Object, Array, RegExp, Variable],
         descriptor = ( opt && opt.descriptor ) || "getClass()",
         raiseError = ( opt && opt.exceptionHandler ) || null,
-        deepCheck = ( opt && opt.deepCheck ) || true;
         result = true;
 
       // Top-level type check
       result = __checkType( expected, actual, expectedType, isTyped );
 
-      // If strict then look at comparison
+      // If strict then do shallow comparison
       if ( result && isStrict ) {
-
-        // Shallow comparison
         result = __compare( expected, actual, expectedType, isTyped );
-
-        if ( result === null ) {
-
-          // Deep comparison
-          try {
-            result = ( ( isCollection )
-                          ? assertCollection
-                          : assertHash )
-                            .apply(
-                              null,
-                              [
-                                expected,
-                                actual,
-                                {
-                                  "strictValueChecking": !!deepCheck,
-                                  "exceptionType": exceptionType,
-                                  "exceptionHandler": (isCollection === true) ? null : raiseError,
-                                  "descriptor": descriptor
-                                }
-                              ]
-                            );
+      }
+      
+      // If object not handled in __compare, or deep: true then perform a deep comparison
+      if ( result === null || isDeep ) {
+        
+        try {
+          result = ( ( isCollection )
+                        ? assertCollection
+                        : assertHash )
+                          .apply(
+                            null,
+                            [
+                              expected,
+                              actual,
+                              {
+                                "strictValueChecking": isStrict,
+                                "exceptionType": exceptionType,
+                                "exceptionHandler": (isCollection === true) ? null : raiseError,
+                                "descriptor": descriptor,
+                                "typed": isTyped,
+                              }
+                            ]
+                          );
+        }
+          catch ( exception ) {
+          // If MissingHashKeyException thrown then create custom error listing the missing keys.
+          if ( exception && exception.type && exception.type === "MalformedArgumentsException" ) {
+            raiseError && raiseError( expected, actual, exception.type, descriptor );
+          } else {
+            throw exception;
           }
-            catch ( exception ) {
-            // If MissingHashKeyException thrown then create custom error listing the missing keys.
-            if ( exception && exception.type && exception.type === "MalformedArgumentsException" ) {
-              raiseError && raiseError( expected, actual, exception.type, descriptor );
-            } else {
-              throw exception;
-            }
-            // Ensure normal flow control plays out
-            result = false;
-          }
+          // Ensure normal flow control plays out
+          result = false;
         }
 
       }
