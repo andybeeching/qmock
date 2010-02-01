@@ -331,8 +331,8 @@ function initAssay () {
 
       function __checkType ( expected, actual, expectedType, opt_typed ) {
 
-        // If function passed use as constructor, else lookup constructor (if available)
-        var klass = ( opt_typed && _getTypeOf( expected ) === "function" )
+        // If function passed for expected use as "class", else use constructor property (if available)
+        var klass = ( opt_typed && expectedType === "function" )
           ? expected
           : (expected !== null && expected !== undefined) && expected.constructor;
 
@@ -340,10 +340,11 @@ function initAssay () {
         return ( opt_typed && expected === Object )
           // Since everything inherits from Object we have a different check for objects
           ? ( actual && actual.constructor === Object.prototype.constructor )
+          // Else test the instance & catch 'type bound' tests where actual === function object
           : ( // Sandboxed check
               Object( actual ) instanceof ( klass || Function )
               // More robust cross-frame check
-              || _getTypeOf( actual ) === expectedType );
+              || _getTypeOf( actual ) === (( opt_typed ) ? _getFunctionName( klass ).toLowerCase() : expectedType ));
       }
 
       function __setExpectedType ( obj ) {
