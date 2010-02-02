@@ -56,7 +56,9 @@
 
  */
 
-function initAssay () {
+var initAssay = ( function ( toStr ) {
+
+  return function () {
 
     var undefined;
 
@@ -64,7 +66,7 @@ function initAssay () {
 
     // Allow pass-through argument checking
     // Either reference static member off Mock class (Mock.Variable), or alias - e.g. var Selector = Mock.Variable;
-    function Variable () {};
+    function Variable () {}
 
     // Function to expose private objects on a target object for testing (plus injection of mocks/stubs and reset functionality)
     // Be able to pass object detailing which methods to return (maybe config? {get:true, set:true, reset:true} - default would be false?)
@@ -139,9 +141,8 @@ function initAssay () {
     function _isNativeType ( obj ) {
 
       // Early exclusions
-      if ( obj !== null
-        && obj !== undefined
-        && Object.prototype.toString.call( obj ) !== "[object Function]" ) {
+      if ( obj !== null && obj !== undefined
+        && toStr.call( obj ) !== "[object Function]" ) {
           return false;
         }
 
@@ -202,7 +203,7 @@ function initAssay () {
 
       return ( obj === undefined )
         ? 'undefined'
-        : TYPES[ Object.prototype.toString.call( obj ) ]
+        : TYPES[ toStr.call( obj ) ]
           || ( obj ? 'object' : 'null' );
     }
 
@@ -219,7 +220,7 @@ function initAssay () {
     function _getFunctionName ( fn ) {
 
       // Check if dealing with a function object
-      if ( Object.prototype.toString.call( fn ) !== "[object Function]" ) {
+      if ( toStr.call( fn ) !== "[object Function]" ) {
         return false;
       }
 
@@ -233,7 +234,7 @@ function initAssay () {
         : fn.ID;
 
       // Cache result to avoid future lookups
-      return fn[ "ID" ] = fn.ID || id || "anonymous";
+      return fn.ID = fn.ID || id || "anonymous";
 
     };
 
@@ -501,10 +502,6 @@ function initAssay () {
         raiseError && raiseError( expected, actual, exceptionType, descriptor ); // Need to inject correct className
       }
 
-
-
-
-
       /*assertNativeType:
         for ( var i = 0, len = nativeTypes.length; i < len; i++ ) {
           if ( expected === nativeTypes[i] ) {
@@ -638,10 +635,12 @@ function initAssay () {
       }
     };
 
-}
+  }// end return initAssay
 
+})( Object.prototype.toString ) // Trap toString, hopefully before someone shadows/overwrites it
+debugger;
 // Export Assay initialiser
-(( typeof exports === "undefined" ) ? this : exports )["Assay"] = initAssay;
+( ( typeof exports === "undefined" ) ? this : exports )["Assay"] = initAssay;
 
 // Register Assay Public Interface
 (function bootstrapAssay ( container ) {
