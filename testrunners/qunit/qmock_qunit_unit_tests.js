@@ -816,6 +816,8 @@
 		// Test invalid argument type - Values (truthy)
 		equals( Assay.object(Number, 1), false, "Assay.object() should return false with expected: (Number: Constructor) and actual: (Number: 1)" );
 		equals( Assay.object(Number, 0), false, "Assay.object() should return false with expected: (Number: Constructor) and actual: (Number: 0)" );
+		equals( Assay.object(Number, NaN), false, "Assay.object() should return false with expected: (Number: Constructor) and actual: (Number: NaN)" );
+		equals( Assay.object(Number, Infinity), false, "Assay.object() should return false with expected: (Number: Constructor) and actual: (Number: Infinity)" );
 		equals( Assay.object(Number, "string"), false, "Assay.object() should return false with expected: (Number: Constructor) and actual: (String: string)" );
 		equals( Assay.object(Number, true), false, "Assay.object() should return false with expected: (Number: Constructor) and actual: (Boolean: true)" );
 		equals( Assay.object(Number, []), false, "Assay.object() should return false with expected: (Number: Constructor) and actual: (Array: [])" );
@@ -894,6 +896,8 @@
 		equals( Assay.object(1, Date), false, "Assay.object() should return false with expected: (Number: 1) and actual: (Date: Constructor)" );
 		equals( Assay.object(1, Error), false, "Assay.object() should return false with expected: (Number: 1) and actual: (Error: Constructor)" );
 		equals( Assay.object(1, Custom), false, "Assay.object() should return false with expected: (Number: 1) and actual: (Custom: Constructor)" );
+    // NaN is a type of Number - what should the result be?!
+		//equals( Assay.object(1, NaN), false, "Assay.object() should return true with expected: (Number: 1) and actual: (Number: NaN)" );
 
 		// Test invalid argument type - Values (truthy)
 
@@ -914,10 +918,12 @@
 		// TRUE ASSERTIONS
 		equals( Assay.object(1, 1), true, "Assay.object() should return true with expected: (Number: 1) and actual: (Number: 1)" );
 		equals( Assay.object(1, 0), true, "Assay.object() should return true with expected: (Number: 1) and actual: (Number: 0)" );
+		equals( Assay.object(1, Infinity), true, "Assay.object() should return true with expected: (Number: 1) and actual: (Number: Infinity)" );
 
 		// Expect Falsy Value
-		equals( Assay.object(0, 1 ), true, "Assay.object() should return true with expected: (Number: 0) and actual: (Number: 1)" );
-		equals( Assay.object(0, 0 ), true, "Assay.object() should return true with expected: (Number: 0) and actual: (Number: 0)" );
+		equals( Assay.object(0, 1), true, "Assay.object() should return true with expected: (Number: 0) and actual: (Number: 1)" );
+		equals( Assay.object(0, 0), true, "Assay.object() should return true with expected: (Number: 0) and actual: (Number: 0)" );
+		equals( Assay.object(0, Infinity), true, "Assay.object() should return true with expected: (Number: 0) and actual: (Number: Infinity)" );
 
 	});
 
@@ -955,6 +961,8 @@
 		// Unequal values
 		equals( Assay.object(1, 0, {strictValueChecking: true}), false, "Assay.object() should return false with expected: (Number: 1) and actual: (Number: 0)" );
 		equals( Assay.object(0, 1, {strictValueChecking: true}), false, "Assay.object() should return false with expected: (Number: 0) and actual: (Number: 1)" );
+		equals( Assay.object(1, NaN, {strictValueChecking: true}), false, "Assay.object() should return false with expected: (Number: 1) and actual: (Number: NaN)" );
+		equals( Assay.object(1, Infinity, {strictValueChecking: true}), false, "Assay.object() should return false with expected: (Number: 1) and actual: (Number: Infinity)" );
 
 		// TRUE ASSERTIONS
 		equals( Assay.object(1, 1, {strictValueChecking: true}), true, "Assay.object() should return true with expected: (Number: 1) and actual: (Number: 1)" );
