@@ -56,603 +56,598 @@
 
  */
 
-var initAssay = ( function ( toStr ) {
+function initAssay () {
 
-  return function () {
+  var undefined;
 
-    var undefined;
+  // PRIVATE functions
 
-    // PRIVATE functions
+  // Allow pass-through argument checking
+  // Either reference static member off Mock class (Mock.Variable), or alias - e.g. var Selector = Mock.Variable;
+  function Variable () {}
 
-    // Allow pass-through argument checking
-    // Either reference static member off Mock class (Mock.Variable), or alias - e.g. var Selector = Mock.Variable;
-    function Variable () {}
+  // Function to expose private objects on a target object for testing (plus injection of mocks/stubs and reset functionality)
+  // Be able to pass object detailing which methods to return (maybe config? {get:true, set:true, reset:true} - default would be false?)
+  function _exposeObject ( obj, descriptor, container, opt_filter ) {
 
-    // Function to expose private objects on a target object for testing (plus injection of mocks/stubs and reset functionality)
-    // Be able to pass object detailing which methods to return (maybe config? {get:true, set:true, reset:true} - default would be false?)
-    function _exposeObject ( obj, descriptor, container, opt_filter ) {
-
-      var cachedObj = obj, // can this part be improved by one cache for all or many atomic caches?
-          // defaults
-          container = container || this,
-          map = {
-            get: function () {
-              return obj;
-            },
-            set: function ( newObj ) {
-              obj = newObj || null;
-            },
-            restore: function () {
-              obj = cachedObj;
-            }
-          };
-
-      // parameter checks
-      if ( arguments.length < 3 ) {
-        throw {
-          type: "MissingParametersException",
-          msg: "exposeObject() requires an 'obj', 'descriptor', and 'container' parameter to be passed to method interface"
-        }
-      }
-
-      // Filter map of getters and setters
-      if ( opt_filter !== undefined ) {
-        for ( var key in map ) {
-          if ( ( !opt_filter.hasOwnProperty( key ) || opt_filter[ key ] !== true ) && ( key in map ) ) {
-            delete map[ key ];
+    var cachedObj = obj, // can this part be improved by one cache for all or many atomic caches?
+        // defaults
+        container = container || this,
+        map = {
+          get: function () {
+            return obj;
+          },
+          set: function ( newObj ) {
+            obj = newObj || null;
+          },
+          restore: function () {
+            obj = cachedObj;
           }
-        }
+        };
+
+    // parameter checks
+    if ( arguments.length < 3 ) {
+      throw {
+        type: "MissingParametersException",
+        msg: "exposeObject() requires an 'obj', 'descriptor', and 'container' parameter to be passed to method interface"
       }
-
-      // attach accessors & mutators
-      container[ descriptor ] = map;
-
-      // successful exposé
-      return true;
-
     }
 
-    // Private function to test whether an object can be enumerated
-    function _isHash ( obj ) {
-
-      var result = false,
-          id = Math.random();
-
-      // exclude null/undefined early
-      if ( obj === undefined || obj === null ) {
-        return result;
+    // Filter map of getters and setters
+    if ( opt_filter !== undefined ) {
+      for ( var key in map ) {
+        if ( ( !opt_filter.hasOwnProperty( key ) || opt_filter[ key ] !== true ) && ( key in map ) ) {
+          delete map[ key ];
+        }
       }
+    }
 
-      // If object then should allow mutation
-      obj[ id ] = true;
-      result = !!( obj[ id ] );
+    // attach accessors & mutators
+    container[ descriptor ] = map;
 
-      // cleanup to avoid false positives later on
-      if ( result ) {
-        delete obj[ id ];
-      }
+    // successful exposé
+    return true;
 
+  }
+
+  // Private function to test whether an object can be enumerated
+  function _isHash ( obj ) {
+
+    var result = false,
+        id = Math.random();
+
+    // exclude null/undefined early
+    if ( obj === undefined || obj === null ) {
       return result;
     }
 
-    // Only returns true for Native constructors - not host objects
-    // Native object types have {DontEnum} internal attribute set to true
-    // Note: reference to undefined is from reference trapped in Assay scope (safer)
-    function _isNativeType ( obj ) {
+    // If object then should allow mutation
+    obj[ id ] = true;
+    result = !!( obj[ id ] );
 
-      // Early exclusions
-      if ( obj !== null && obj !== undefined
-        && toStr.call( obj ) !== "[object Function]" ) {
-          return false;
-        }
-
-      // Enumeration test
-      // If Natives have not been modified (either locally or prototypically)
-      // then inner for..in loop never reached.
-      // If augmented in any way then do an identity check against globally available references
-      // Not bullet-proof but *fairly* robust (susceptible to cross-frame pollution)
-      for( var key in ( obj || {} ) ) {
-        // Only iterated once
-        for (
-          var i = 0,
-              NATIVES = [Number, String, Boolean, RegExp, Date, Function, Array, Object, Error],
-              len = NATIVES.length,
-              result = false;
-            i < len;
-            i++ ) {
-          if ( obj === NATIVES[ i ] ) {
-            result = true;
-            break;
-          }
-        }
-
-        // Identity check subject to cross-frame pollution
-        return result;
-
-      }
-
-      // Return Boolean - null and undefined // true
-      return true;
-
+    // cleanup to avoid false positives later on
+    if ( result ) {
+      delete obj[ id ];
     }
 
-    // Utilising the 'Miller Device'
-    // http://www.caplet.com/ (Mark Miller's (of the Google) website)
-    // http://profiles.yahoo.com/blog/GSBHPXZFNRM2QRAP3PXNGFMFVU?eid=fam48bo6nChhLpXTWLYuo2PoctbJjTIo34SjoLBF9VV3glXt.w#comments
-    // http://perfectionkills.com/instanceof-considered-harmful-or-how-to-write-a-robust-isarray/
-    // http://gist.github.com/47997
-    // http://zaa.ch/1q
-    // http://groups.google.com.au/group/comp.lang.javascript/browse_frm/thread/368a55fec19af7b2/efea4aa2d12a3aa4?hl=en&lnk=gst&q=+An+isArray+test+(and+IE+bugs)+#efea4aa2d12a3aa4
-    // Function name can't be can't be typeof or typeOf because Safari barfs on
-    // the reserved word use.  Non-IE browsers report the browser object classes
-    // in the toString e.g. '[object HTMLDivElement]', but IE always returns
-    // '[object Object]' for DOM objects and methods because they are COM objects
-    function _getTypeOf ( obj ) {
+    return result;
+  }
 
-      // Don't add string checks for undefined/null as easy to get false positives with other unknown objects
-      var TYPES = {
-        "[object Number]"   : "number",
-        "[object Boolean]"  : "boolean",
-        "[object String]"   : "string",
-        "[object Function]" : "function",
-        "[object RegExp]"   : "regexp",
-        "[object Array]"    : "array",
-        "[object Date]"     : "date",
-        "[object Error]"    : "error"
-      };
+  // Only returns true for Native constructors - not host objects
+  // Native object types have {DontEnum} internal attribute set to true
+  // Note: reference to undefined is from reference trapped in Assay scope (safer)
+  function _isNativeType ( obj ) {
 
-      return ( obj === undefined )
-        ? 'undefined'
-        : TYPES[ toStr.call( obj ) ]
-          || ( obj ? 'object' : 'null' );
-    }
-
-    // Grab the identifier of a function object
-    // Most useful called on function declarations, or named function expressions (or with displayName)
-    // Otherwise will just return ['anonymous']
-    // Not re-using _getTypeof to reduce dependencies
-    /**
-     *
-  	 * Function that returns a function name by decompilation or the Function.name property.
-  	 *
-  	 */
-
-    function _getFunctionName ( fn ) {
-
-      // Check if dealing with a function object
-      if ( toStr.call( fn ) !== "[object Function]" ) {
+    // Early exclusions
+    if ( obj !== null && obj !== undefined
+      && Object.prototype.toString.call( obj ) !== "[object Function]" ) {
         return false;
       }
 
-      // Firefox supports Function.name, so try that first, else decompile and use RegExp
-      // IE returns null for anonymous functions, so provide fallback array
-      // We don't use displayName as that can be manipulated more easily to mess up the 'Klass' inference.
-      var id = ( !fn.ID )
-        ? ( !fn.name )
-          ? ( fn + "" ).match( /function +([\w$]*) *\(/ )[ 1 ] // decompiles function and grabs identifier if named
-          : fn.name
-        : fn.ID;
+    // Enumeration test
+    // If Natives have not been modified (either locally or prototypically)
+    // then inner for..in loop never reached.
+    // If augmented in any way then do an identity check against globally available references
+    // Not bullet-proof but *fairly* robust (susceptible to cross-frame pollution)
+    for( var key in ( obj || {} ) ) {
+      // Only iterated once
+      for (
+        var i = 0,
+            NATIVES = [Number, String, Boolean, RegExp, Date, Function, Array, Object, Error],
+            len = NATIVES.length,
+            result = false;
+          i < len;
+          i++ ) {
+        if ( obj === NATIVES[ i ] ) {
+          result = true;
+          break;
+        }
+      }
 
-      // Cache result to avoid future lookups
-      return fn.ID = fn.ID || id || "anonymous";
+      // Identity check subject to cross-frame pollution
+      return result;
 
+    }
+
+    // Return Boolean - null and undefined // true
+    return true;
+
+  }
+
+  // Utilising the 'Miller Device'
+  // http://www.caplet.com/ (Mark Miller's (of the Google) website)
+  // http://profiles.yahoo.com/blog/GSBHPXZFNRM2QRAP3PXNGFMFVU?eid=fam48bo6nChhLpXTWLYuo2PoctbJjTIo34SjoLBF9VV3glXt.w#comments
+  // http://perfectionkills.com/instanceof-considered-harmful-or-how-to-write-a-robust-isarray/
+  // http://gist.github.com/47997
+  // http://zaa.ch/1q
+  // http://groups.google.com.au/group/comp.lang.javascript/browse_frm/thread/368a55fec19af7b2/efea4aa2d12a3aa4?hl=en&lnk=gst&q=+An+isArray+test+(and+IE+bugs)+#efea4aa2d12a3aa4
+  // Function name can't be can't be typeof or typeOf because Safari barfs on
+  // the reserved word use.  Non-IE browsers report the browser object classes
+  // in the toString e.g. '[object HTMLDivElement]', but IE always returns
+  // '[object Object]' for DOM objects and methods because they are COM objects
+  function _getTypeOf ( obj ) {
+
+    // Don't add string checks for undefined/null as easy to get false positives with other unknown objects
+    var TYPES = {
+      "[object Number]"   : "number",
+      "[object Boolean]"  : "boolean",
+      "[object String]"   : "string",
+      "[object Function]" : "function",
+      "[object RegExp]"   : "regexp",
+      "[object Array]"    : "array",
+      "[object Date]"     : "date",
+      "[object Error]"    : "error"
     };
 
-    // Priviledged function to compare two hash-like objects
-    function assertHash ( expected, actual, opt ) {
+    return ( obj === undefined )
+      ? 'undefined'
+      : TYPES[ Object.prototype.toString.call( obj ) ]
+        || ( obj ? 'object' : 'null' );
+  }
 
-      var result = true,
-          // defaults
-          raiseError = ( opt && opt.exceptionHandler ) || null,
-          descriptor = ( opt && opt.descriptor ) || 'assertHash()';
+  // Grab the identifier of a function object
+  // Most useful called on function declarations, or named function expressions (or with displayName)
+  // Otherwise will just return ['anonymous']
+  // Not re-using _getTypeof to reduce dependencies
+  /**
+   *
+	 * Function that returns a function name by decompilation or the Function.name property.
+	 *
+	 */
 
-      // asserHash interface checks
-      // Required parameters & characteristics (i.e. is enumerable)
-      if ( arguments.length < 2 ) {
-        throw {
-          type: "MissingParametersException",
-          msg: "assertHash() requires at least an 'expected' and 'actual' parameter to be passed to method interface"
-        }
-      } else if ( ( _isHash( expected ) === false ) || ( _isHash( actual ) === false ) ) {
-        throw {
-          type: "MalformedArgumentsException",
-          msg: "assertHash() requires the 'expected' and 'actual' parameters to be Hashes. Expected was: " + expected + ", actual was: " + actual
-        }
-      } else {
+  function _getFunctionName ( fn ) {
 
-      // TODO: 'DontEnum' checking
+    // Check if dealing with a function object
+    if ( Object.prototype.toString.call( fn ) !== "[object Function]" ) {
+      return false;
+    }
 
-        checkingMembers:
-          for ( var key in expected ) {
-            // expectations don't support prototypical inheritance...
-            if ( expected.hasOwnProperty( key ) ) {
-              // but actual values do (and also shadowed natives, e.g. toString as a key - see {DontEnum} tests)
-              // We 'objectify' the 'actual' object as the in operator throws errors when executed against primitive values (e.g. key in "" --> key in Object("")))
-              // We use the in operator as opposed to a dynamic lookup because in the case of an assigned falsy value to actual[key] the result is false (as opposed to true - the property does exist on the actual object)
-              // in operator performs lookup resolution on [[Prototype]] chain
-              // FF 3.6 won't eumerate function instance prototype property (https://developer.mozilla.org/En/Firefox_3.6_for_developers#JavaScript)
-              if ( key in Object( actual ) ) {
-                result &= assertObject( expected[key], actual[key], opt );
-              } else {
-                raiseError && raiseError( key, "not found on object", "MissingHashKeyException", descriptor )
-                result = false;
-                continue checkingMembers;
-              }
+    // Firefox supports Function.name, so try that first, else decompile and use RegExp
+    // IE returns null for anonymous functions, so provide fallback array
+    // We don't use displayName as that can be manipulated more easily to mess up the 'Klass' inference.
+    var id = ( !fn.ID )
+      ? ( !fn.name )
+        ? ( fn + "" ).match( /function +([\w$]*) *\(/ )[ 1 ] // decompiles function and grabs identifier if named
+        : fn.name
+      : fn.ID;
+
+    // Cache result to avoid future lookups
+    return fn.ID = fn.ID || id || "anonymous";
+
+  };
+
+  // Priviledged function to compare two hash-like objects
+  function assertHash ( expected, actual, opt ) {
+
+    var result = true,
+        // defaults
+        raiseError = ( opt && opt.exceptionHandler ) || null,
+        descriptor = ( opt && opt.descriptor ) || 'assertHash()';
+
+    // asserHash interface checks
+    // Required parameters & characteristics (i.e. is enumerable)
+    if ( arguments.length < 2 ) {
+      throw {
+        type: "MissingParametersException",
+        msg: "assertHash() requires at least an 'expected' and 'actual' parameter to be passed to method interface"
+      }
+    } else if ( ( _isHash( expected ) === false ) || ( _isHash( actual ) === false ) ) {
+      throw {
+        type: "MalformedArgumentsException",
+        msg: "assertHash() requires the 'expected' and 'actual' parameters to be Hashes. Expected was: " + expected + ", actual was: " + actual
+      }
+    } else {
+
+    // TODO: 'DontEnum' checking
+
+      checkingMembers:
+        for ( var key in expected ) {
+          // expectations don't support prototypical inheritance...
+          if ( expected.hasOwnProperty( key ) ) {
+            // but actual values do (and also shadowed natives, e.g. toString as a key - see {DontEnum} tests)
+            // We 'objectify' the 'actual' object as the in operator throws errors when executed against primitive values (e.g. key in "" --> key in Object("")))
+            // We use the in operator as opposed to a dynamic lookup because in the case of an assigned falsy value to actual[key] the result is false (as opposed to true - the property does exist on the actual object)
+            // in operator performs lookup resolution on [[Prototype]] chain
+            // FF 3.6 won't eumerate function instance prototype property (https://developer.mozilla.org/En/Firefox_3.6_for_developers#JavaScript)
+            if ( key in Object( actual ) ) {
+              result &= assertObject( expected[key], actual[key], opt );
+            } else {
+              raiseError && raiseError( key, "not found on object", "MissingHashKeyException", descriptor )
+              result = false;
+              continue checkingMembers;
             }
           }
-      }
-
-      return !!result;
+        }
     }
 
-    // Delegate function that asserts elements of a collection
-    function assertCollection ( expected, actual, opt ) {
+    return !!result;
+  }
 
-      var result = true,
-          raiseError = ( opt && opt.exceptionHandler ) || null,
-          descriptor = ( opt && opt.descriptor ) || 'assertCollection()';
+  // Delegate function that asserts elements of a collection
+  function assertCollection ( expected, actual, opt ) {
 
-      // assertCollection interface checks
-      if ( arguments.length < 2 ) {
-        throw {
-          type: "MissingParametersException",
-          msg: "assertCollection() requires at least an expected and actual parameter to be passed to interface"
-        }
-      } else if ( ( !expected || expected.length === undefined ) || ( !actual || actual.length === undefined ) ) {
-        throw {
-          type: "MalformedArgumentsException",
-          msg: "assertCollection() requires the 'expected' and 'actual' collection parameters to be an Array-like collection"
-        }
+    var result = true,
+        raiseError = ( opt && opt.exceptionHandler ) || null,
+        descriptor = ( opt && opt.descriptor ) || 'assertCollection()';
+
+    // assertCollection interface checks
+    if ( arguments.length < 2 ) {
+      throw {
+        type: "MissingParametersException",
+        msg: "assertCollection() requires at least an expected and actual parameter to be passed to interface"
+      }
+    } else if ( ( !expected || expected.length === undefined ) || ( !actual || actual.length === undefined ) ) {
+      throw {
+        type: "MalformedArgumentsException",
+        msg: "assertCollection() requires the 'expected' and 'actual' collection parameters to be an Array-like collection"
+      }
+    }
+
+    // assertCollection parameter checks
+    if ( expected.length !== actual.length ) {
+      raiseError && raiseError( expected.length, actual.length, "MismatchedNumberOfMembersException", descriptor )
+      result = false;
+    } else {
+      // Only assert on absolute number of params declared in method signature as expectations don't exist for overloaded interfaces
+      for ( var i = 0, len = actual.length; i < len; i++ ) {
+        // 1:1 assertion
+        result &= assertObject ( expected[ i ], actual[ i ], opt );
+      }
+    }
+
+    // Return a Boolean for recursive calls, exceptions handled in opt_exceptionsHandler.
+    return !!result;
+  }
+
+  // Key function to test objects against each other.
+  function assertObject ( expected, actual, opt ) {
+
+    // Delegate straight to assertCollection if a presentation to an interface
+    if ( opt && opt.delegate === true ) {
+      delete opt.delegate;
+      return assertCollection.apply( null, arguments );
+    }
+
+    function __checkType ( expected, actual, expectedType, opt_typed ) {
+
+      if ( expectedType === "null" || expectedType === "undefined" ) {
+        return __identityCheck( expected, actual );
       }
 
-      // assertCollection parameter checks
-      if ( expected.length !== actual.length ) {
-        raiseError && raiseError( expected.length, actual.length, "MismatchedNumberOfMembersException", descriptor )
+      // Custom handling for expected "object"s
+      // Since everything inherits from Object we have a different check for them
+      // On a related note this differs from isHash as nearly all types in JavaScript can act as hash-like objects
+      // and hence can be enurmerated upon
+      if ( expectedType === "object" || ( opt_typed && expected === Object ) ) {
+        /* stricter variant:
+         * !!(actual && actual.constructor === Object.prototype.constructor);
+         */
+        return _getTypeOf( actual ) === "object";
+      }
+
+      // If function passed for expected the use as "class", else use constructor property (if available)
+      var klass = ( opt_typed && expectedType === "function" )
+        ? expected
+        : (expected !== null && expected !== undefined) && expected.constructor,
+
+      // Grab the type of through function decompilation (we only care about natives for this part, so they should be consistent x-interpreter)
+      // This is done so a 'typed' interface doesn't allow functions where the expectation is a constructor (confused.com yet?)
+      // Unless of course said type was Function, in which case boundType === "function"
+          boundType = ( opt_typed ) ? _getFunctionName( klass ).toLowerCase() : expectedType;
+
+      // Else test the instance against the expected Klass
+      // Try sandboxed check first (on the assumption that custom constructors will only pass this expression)
+      // & catch 'type bound' tests where actual === function object
+      // Function is used a fallback if Klass is not a valid constructor
+      return ( // Sandboxed check
+              Object( actual ) instanceof ( klass || Function )
+              // Cross-frame & 'typed' check
+              || _getTypeOf( actual ) === boundType
+      );
+    }
+
+    function __setExpectedType ( obj ) {
+
+      var Klass = _getTypeOf( obj );
+      // some comment
+      return ( Klass !== "function" ) ? Klass : _getFunctionName( obj );
+    }
+
+    function __identityCheck ( expected, actual ) {
+      return expected === actual;
+    }
+
+    /*function __isComparison ( type ) {
+      return /^(?:number|string|boolean|date|regexp)$/.test( type );
+    }*/
+
+    function __isCollection ( obj, expectedType ) {
+      return !!( obj && obj.hasOwnProperty && obj.hasOwnProperty('length') );
+    }
+
+    function __compare ( expected, actual, expectedType, opt_typed ) {
+
+      // pass-thru
+      function pass (){ return true; }
+
+      // Some defaults
+      var ROUTINES = {
+            // We don't use an identity check for primitives, because if created through Object then actually comparing by reference rather than value.
+            // Object('foo') === 'foo' // false
+            // typeof Object('foo') === "object" // true
+            // Object('foo').constructor === String // true (!)
+            "number": "valueOf",
+            "string": "valueOf",
+            "boolean": "valueOf",
+            "date": "valueOf",
+            "regexp": "toString",
+            // We already know the type of the actual is correct - strict matching disable by default for function objects
+            "function": ( !opt_typed ) ? __identityCheck : pass,
+            "null": pass,
+            "undefined": pass
+          },
+
+          // Allow collaborator objects to override default comparison operations
+          CUSTOM_ROUTINES = {},
+
+          //
+          utils = {
+
+            setCompare: function ( obj, callback ) {
+              CUSTOM_ROUTINES[ obj ] = callback;
+            },
+
+            removeCompare: function ( obj ) {
+              delete CUSTOM_ROUTINES[ obj ];
+            },
+
+            restoreCompare: function () {
+              CUSTOM_ROUTINES = {};
+            }
+
+          },
+
+          //
+          fn = CUSTOM_ROUTINES[ expectedType ] || ROUTINES[ expectedType ] || null;
+
+      return ( fn )
+        ? ( fn === pass || _getTypeOf( fn ) === "function" )
+          // if function supplied for object type then invoke
+          ? fn.apply( null, arguments )
+          // else call method on instances
+          : ( expected && expected[ fn ] && expected[ fn ]() ) === ( actual && actual[ fn ] && actual[ fn ]() )
+        // else set flag for deep comparison
+        : fn;
+    }
+
+    var expectedType = _getTypeOf( expected ),
+
+      // Set flags
+
+      isCollection = __isCollection( expected, expectedType ),
+
+      // Set options
+      isStrict = (opt && opt.strictValueChecking) || false,
+      isTyped = (opt && opt.typed) || false,
+      isDeep = ( opt && opt.deep ) || false;
+      exceptionType = (opt && opt.exceptionType) || ( isStrict === true ? "IncorrectArgumentValueException" : "IncorrectArgumentTypeException"),
+      descriptor = ( opt && opt.descriptor ) || "getClass()",
+      raiseError = ( opt && opt.exceptionHandler ) || null,
+      result = true;
+
+    // Top-level type check
+    result = __checkType( expected, actual, expectedType, isTyped );
+
+    // If strict then do shallow comparison
+    if ( result && isStrict ) {
+      result = __compare( expected, actual, expectedType, isTyped );
+    }
+
+    // If object not handled in __compare, or deep: true then perform a deep comparison
+    if ( result === null || isDeep ) {
+
+      try {
+        result = ( ( isCollection )
+                      ? assertCollection
+                      : assertHash )
+                        .apply(
+                          null,
+                          [
+                            expected,
+                            actual,
+                            {
+                              "strictValueChecking": isStrict,
+                              "exceptionType": exceptionType,
+                              "exceptionHandler": (isCollection === true) ? null : raiseError,
+                              "descriptor": descriptor,
+                              "typed": isTyped,
+                            }
+                          ]
+                        );
+      }
+        catch ( exception ) {
+        // If MissingHashKeyException thrown then create custom error listing the missing keys.
+        if ( exception && exception.type && exception.type === "MalformedArgumentsException" ) {
+          raiseError && raiseError( expected, actual, exception.type, descriptor );
+        } else {
+          throw exception;
+        }
+        // Ensure normal flow control plays out
         result = false;
-      } else {
-        // Only assert on absolute number of params declared in method signature as expectations don't exist for overloaded interfaces
-        for ( var i = 0, len = actual.length; i < len; i++ ) {
-          // 1:1 assertion
-          result &= assertObject ( expected[ i ], actual[ i ], opt );
-        }
       }
 
-      // Return a Boolean for recursive calls, exceptions handled in opt_exceptionsHandler.
-      return !!result;
     }
 
-    // Key function to test objects against each other.
-    function assertObject ( expected, actual, opt ) {
+    // Throw error if negative match
+    if ( result === false ) {
+      raiseError && raiseError( expected, actual, exceptionType, descriptor ); // Need to inject correct className
+    }
 
-      // Delegate straight to assertCollection if a presentation to an interface
-      if ( opt && opt.delegate === true ) {
-        delete opt.delegate;
-        return assertCollection.apply( null, arguments );
-      }
-
-      function __checkType ( expected, actual, expectedType, opt_typed ) {
-
-        // Custom handling for expected "object"s
-        // Since everything inherits from Object we have a different check for them
-        // On a related note this differs from isHash as nearly all types in JavaScript can act as hash-like objects
-        // and hence can be enurmerated upon
-        if ( expectedType === "object" || ( opt_typed && expected === Object ) ) {
-          /* stricter variant:
-           * !!(actual && actual.constructor === Object.prototype.constructor);
-           */
-          return _getTypeOf( actual ) === "object";
+    /*assertNativeType:
+      for ( var i = 0, len = nativeTypes.length; i < len; i++ ) {
+        if ( expected === nativeTypes[i] ) {
+          expectedType = expected;
+          break assertNativeType;
         }
-
-        // If function passed for expected the use as "class", else use constructor property (if available)
-        var klass = ( opt_typed && expectedType === "function" )
-          ? expected
-          : (expected !== null && expected !== undefined) && expected.constructor,
-
-        // Grab the type of through function decompilation (we only care about natives for this part, so they should be consistent x-interpreter)
-        // This is done so a 'typed' interface doesn't allow functions where the expectation is a constructor (confused.com yet?)
-        // Unless of course said type was Function, in which case boundType === "function"
-            boundType = ( opt_typed ) ? _getFunctionName( klass ).toLowerCase() : expectedType;
-
-        // Else test the instance against the expected Klass
-        // Try sandboxed check first (on the assumption that custom constructors will only pass this expression)
-        // & catch 'type bound' tests where actual === function object
-        // Function is used a fallback if Klass is not a valid constructor
-        return ( // Sandboxed check
-                Object( actual ) instanceof ( klass || Function )
-                // Cross-frame & 'typed' check
-                || _getTypeOf( actual ) === boundType
-        );
-      }
-
-      function __setExpectedType ( obj ) {
-
-        var Klass = _getTypeOf( obj );
-        // some comment
-        return ( Klass !== "function" ) ? Klass : _getFunctionName( obj );
-      }
-
-      /*function __isComparison ( type ) {
-        return /^(?:number|string|boolean|date|regexp)$/.test( type );
       }*/
 
-      function __isCollection ( obj, expectedType ) {
-        return !!( obj && obj.hasOwnProperty && obj.hasOwnProperty('length') );
-      }
+    // n.b. switch statements check by identity (aka strict === rather than ... ? See Nyman talk)
+    /*setFlags:
+    switch( expectedType ) {
 
-      function __compare ( expected, actual, expectedType, opt_typed ) {
+      // Pass-through
+      //case "Variable":
+        //break;
 
-        function _identityCheck ( expected, actual ) {
-          return expected === actual;
+      // False (however unlikely) - compare by type
+      case "null":
+      case "undefined":
+        if ( expected !== actual ) {
+          raiseError && raiseError( expected, actual, exceptionType, descriptor );
+          result = false;
+        }
+        break;
+
+      // Primitives (plus Date) - compare by prototype or value (where strictValue === true)
+      case "Date":
+      case "Number":
+      case "String":
+      case "Boolean":
+        // set Primitive flag
+        isValue = true;
+        break;
+
+      default:
+
+        // set RegExp flag
+        if ( expectedType === RegExp ) {
+          isRegExp = true;
         }
 
-        // Some defaults
-        var ROUTINES = {
-              // We don't use an identity check for primitives, because if created through Object then actually comparing by reference rather than value.
-              // Object('foo') === 'foo' // false
-              // typeof Object('foo') === "object" // true
-              // Object('foo').constructor === String // true (!)
-              "number": "valueOf",
-              "string": "valueOf",
-              "boolean": "valueOf",
-              "date": "valueOf",
-              "regexp": "toString",
-              // We already know the type of the actual is correct - strict matching disable by default for function objects
-              "function": ( !opt_typed ) ? _identityCheck : function (){ return true; },
-              "null": _identityCheck,
-              "undefined": _identityCheck
-            },
+        // set collection flag via duck-typing test
+        // We use hasOwnProperty() because a force to Boolean lookup generates false positives (e.g. 0), and the 'in' operator crawls the prototype chain
+        if ( expected.hasOwnProperty && expected.hasOwnProperty('length') ) {
+          isCollection = true;
+        }
 
-            // Allow collaborator objects to override default comparison operations
-            CUSTOM_ROUTINES = {},
+        // Let's make sure the types match first of all...
+        // If not strict then check if a instance of expectation - acts on CURRENT prototype object - DOUBLE CHECK this - surely traverses [[Prototype]] chain to check all sub/superclasses and root node(s)?
+        // May need refactoring to use getPrototypeOf() for more robust solution
+        // Or check received value is not simply a constructor itself.
+        // Alternative code for 1st expression (which uses Object())
+        //} else if  {
+        /*} else if ( ( (actual !== null && actual !== undefined) ? actual.constructor : actual ) === expectedType ) {
+          return true;
+        } else {
+          // Otherwise throw exception
+          throwException(exceptionType, name, "getClass() - Number/String/Boolean/Array/Object", actual); // Need to inject correct className
+        }
+        // Use of Object() converts primitve literal values into objects which plays nice with the instanceof operator (n.b. [[Prototype]] *is* setup, e.g. "".constuctor (which lives on __proto__, the prototype of the constructor function, exists)).
+        // I'd love to know why! instanceof crawls [[Prototype]]
 
-            //
-            utils = {
+        // Type Test
+        if ( __checkType( expectedType, actual ) === true ) {
 
-              setCompare: function ( obj, callback ) {
-                CUSTOM_ROUTINES[ obj ] = callback;
-              },
+          // If strict then 'deep' assertion
+          if ( strictValueChecking === true ) {
 
-              removeCompare: function ( obj ) {
-                delete CUSTOM_ROUTINES[ obj ];
-              },
+            // Catch errors thrown by collaborator object interface (e.g. assertHash())
+            try {
 
-              restoreCompare: function () {
-                CUSTOM_ROUTINES = {};
+              // Handle primtive values - if correct types then identity check
+              // Using Object.prototype.valueOf() allows us to compare Dates along with the normal primitve values w/o custom handling (e.g. UTC conversion)
+              if ( ( isValue === true && !_compare(expected, actual, "valueOf") )
+
+              // Handle regular expression objects. Note: NOT testing implementation, just the string representation of the object
+              || ( isRegExp === true && !_compare(expected, actual, "toString") )
+
+              // Handle composite values & custom Data Types - first check for match on constructor, then match on collection, e.g. members (strict checking)
+              || ( (isValue === false) && ( actual !== expectedType ) && ( ( (isCollection === true) ? assertCollection : assertHash)(expected, actual, {"strictValueChecking": true, "exceptionType": exceptionType, "exceptionHandler": (isCollection === true) ? null : raiseError, "descriptor": descriptor} ) === false ) ) ) {
+
+                // FAIL.
+                result = false;
+
               }
 
-            },
+            } catch (error) {
 
-            //
-            fn = CUSTOM_ROUTINES[ expectedType ] || ROUTINES[ expectedType ] || null;
+              // If MissingHashKeyException thrown then create custom error listing the missing keys.
+              if ( error && error.type && error.type === "MalformedArgumentsException" ) {
+                raiseError && raiseError( expected, actual, error.type, descriptor );
+              } else {
+                throw error;
+              }
+              // Ensure normal flow control plays out
+              result = false;
+            }
 
-        return ( fn )
-
-          ? _getTypeOf( fn ) === "function"
-
-            // if function supplied for object type then invoke
-            ? fn.apply( null, arguments )
-
-            // else call method on instances
-            : ( expected && expected[ fn ] && expected[ fn ]() ) === ( actual && actual[ fn ] && actual[ fn ]() )
-
-          // else set flag for deep comparison
-          : fn;
-      }
-
-      var expectedType = _getTypeOf( expected ),
-
-        // Set flags
-
-        isCollection = __isCollection( expected, expectedType ),
-
-        // Set options
-        isStrict = (opt && opt.strictValueChecking) || false,
-        isTyped = (opt && opt.typed) || false,
-        isDeep = ( opt && opt.deep ) || false;
-        exceptionType = (opt && opt.exceptionType) || ( isStrict === true ? "IncorrectArgumentValueException" : "IncorrectArgumentTypeException"),
-        descriptor = ( opt && opt.descriptor ) || "getClass()",
-        raiseError = ( opt && opt.exceptionHandler ) || null,
-        result = true;
-
-      // Top-level type check
-      result = __checkType( expected, actual, expectedType, isTyped );
-
-      // If strict then do shallow comparison
-      if ( result && isStrict ) {
-        result = __compare( expected, actual, expectedType, isTyped );
-      }
-
-      // If object not handled in __compare, or deep: true then perform a deep comparison
-      if ( result === null || isDeep ) {
-
-        try {
-          result = ( ( isCollection )
-                        ? assertCollection
-                        : assertHash )
-                          .apply(
-                            null,
-                            [
-                              expected,
-                              actual,
-                              {
-                                "strictValueChecking": isStrict,
-                                "exceptionType": exceptionType,
-                                "exceptionHandler": (isCollection === true) ? null : raiseError,
-                                "descriptor": descriptor,
-                                "typed": isTyped,
-                              }
-                            ]
-                          );
-        }
-          catch ( exception ) {
-          // If MissingHashKeyException thrown then create custom error listing the missing keys.
-          if ( exception && exception.type && exception.type === "MalformedArgumentsException" ) {
-            raiseError && raiseError( expected, actual, exception.type, descriptor );
-          } else {
-            throw exception;
-          }
-          // Ensure normal flow control plays out
+        }*/
+        // Handle expected object literals whose Type match all types (aside from falsy types)
+        // aka check Object actually is an Object instance
+        /*else if ( ( expectedType === Object ) && ( actual && actual.constructor !== Object.prototype.constructor ) ) {
           result = false;
         }
 
+      // If not strict check actual isn't a constructor in own right
+      } else if ( actual !== expectedType ) {
+        result = false;
       }
-
       // Throw error if negative match
       if ( result === false ) {
         raiseError && raiseError( expected, actual, exceptionType, descriptor ); // Need to inject correct className
       }
+    } // end switch*/
+     return result;
+  }
 
-      /*assertNativeType:
-        for ( var i = 0, len = nativeTypes.length; i < len; i++ ) {
-          if ( expected === nativeTypes[i] ) {
-            expectedType = expected;
-            break assertNativeType;
-          }
-        }*/
-
-      // n.b. switch statements check by identity (aka strict === rather than ... ? See Nyman talk)
-      /*setFlags:
-      switch( expectedType ) {
-
-        // Pass-through
-        //case "Variable":
-          //break;
-
-        // False (however unlikely) - compare by type
-        case "null":
-        case "undefined":
-          if ( expected !== actual ) {
-            raiseError && raiseError( expected, actual, exceptionType, descriptor );
-            result = false;
-          }
-          break;
-
-        // Primitives (plus Date) - compare by prototype or value (where strictValue === true)
-        case "Date":
-        case "Number":
-        case "String":
-        case "Boolean":
-          // set Primitive flag
-          isValue = true;
-          break;
-
-        default:
-
-          // set RegExp flag
-          if ( expectedType === RegExp ) {
-            isRegExp = true;
-          }
-
-          // set collection flag via duck-typing test
-          // We use hasOwnProperty() because a force to Boolean lookup generates false positives (e.g. 0), and the 'in' operator crawls the prototype chain
-          if ( expected.hasOwnProperty && expected.hasOwnProperty('length') ) {
-            isCollection = true;
-          }
-
-          // Let's make sure the types match first of all...
-          // If not strict then check if a instance of expectation - acts on CURRENT prototype object - DOUBLE CHECK this - surely traverses [[Prototype]] chain to check all sub/superclasses and root node(s)?
-          // May need refactoring to use getPrototypeOf() for more robust solution
-          // Or check received value is not simply a constructor itself.
-          // Alternative code for 1st expression (which uses Object())
-          //} else if  {
-          /*} else if ( ( (actual !== null && actual !== undefined) ? actual.constructor : actual ) === expectedType ) {
-            return true;
-          } else {
-            // Otherwise throw exception
-            throwException(exceptionType, name, "getClass() - Number/String/Boolean/Array/Object", actual); // Need to inject correct className
-          }
-          // Use of Object() converts primitve literal values into objects which plays nice with the instanceof operator (n.b. [[Prototype]] *is* setup, e.g. "".constuctor (which lives on __proto__, the prototype of the constructor function, exists)).
-          // I'd love to know why! instanceof crawls [[Prototype]]
-
-          // Type Test
-          if ( __checkType( expectedType, actual ) === true ) {
-
-            // If strict then 'deep' assertion
-            if ( strictValueChecking === true ) {
-
-              // Catch errors thrown by collaborator object interface (e.g. assertHash())
-              try {
-
-                // Handle primtive values - if correct types then identity check
-                // Using Object.prototype.valueOf() allows us to compare Dates along with the normal primitve values w/o custom handling (e.g. UTC conversion)
-                if ( ( isValue === true && !_compare(expected, actual, "valueOf") )
-
-                // Handle regular expression objects. Note: NOT testing implementation, just the string representation of the object
-                || ( isRegExp === true && !_compare(expected, actual, "toString") )
-
-                // Handle composite values & custom Data Types - first check for match on constructor, then match on collection, e.g. members (strict checking)
-                || ( (isValue === false) && ( actual !== expectedType ) && ( ( (isCollection === true) ? assertCollection : assertHash)(expected, actual, {"strictValueChecking": true, "exceptionType": exceptionType, "exceptionHandler": (isCollection === true) ? null : raiseError, "descriptor": descriptor} ) === false ) ) ) {
-
-                  // FAIL.
-                  result = false;
-
-                }
-
-              } catch (error) {
-
-                // If MissingHashKeyException thrown then create custom error listing the missing keys.
-                if ( error && error.type && error.type === "MalformedArgumentsException" ) {
-                  raiseError && raiseError( expected, actual, error.type, descriptor );
-                } else {
-                  throw error;
-                }
-                // Ensure normal flow control plays out
-                result = false;
-              }
-
-          }*/
-          // Handle expected object literals whose Type match all types (aside from falsy types)
-          // aka check Object actually is an Object instance
-          /*else if ( ( expectedType === Object ) && ( actual && actual.constructor !== Object.prototype.constructor ) ) {
-            result = false;
-          }
-
-        // If not strict check actual isn't a constructor in own right
-        } else if ( actual !== expectedType ) {
-          result = false;
-        }
-        // Throw error if negative match
-        if ( result === false ) {
-          raiseError && raiseError( expected, actual, exceptionType, descriptor ); // Need to inject correct className
-        }
-      } // end switch*/
-       return result;
+  // PUBLIC API on Assay namespace
+  return {
+    "version": "0.2",
+    "object": assertObject,
+    "hash": assertHash,
+    "collection": assertCollection,
+    "type": _getTypeOf,
+    "Variable": Variable,
+    "Utils": {
+      "expose": _exposeObject,
+      "getFunctionName": _getFunctionName,
+      "isHash": _isHash,
+      "isNativeType": _isNativeType
     }
+  };
 
-    // PUBLIC API on Assay namespace
-    return {
-      "version": "0.2",
-      "object": assertObject,
-      "hash": assertHash,
-      "collection": assertCollection,
-      "type": _getTypeOf,
-      "Variable": Variable,
-      "Utils": {
-        "expose": _exposeObject,
-        "getFunctionName": _getFunctionName,
-        "isHash": _isHash,
-        "isNativeType": _isNativeType
-      }
-    };
+}// end return initAssay
 
-  }// end return initAssay
-
-})( Object.prototype.toString ) // Trap toString, hopefully before someone shadows/overwrites it
-debugger;
-// Export Assay initialiser
-( ( typeof exports === "undefined" ) ? this : exports )["Assay"] = initAssay;
+// Export Assay initialiser - CommonJS compliance
+( ( typeof exports === "undefined" ) ? this : exports )["initAssay"] = initAssay;
 
 // Register Assay Public Interface
-(function bootstrapAssay ( container ) {
-
-  container.Assay = initAssay();
-
-})( ( typeof exports === "undefined" ) ? this : exports );
+( ( typeof exports === "undefined" ) ? this : exports )["Assay"] = initAssay();
 
 function initQMock ( assert, opt ) {
 
   // initialisation requirement checks
-  if ( !assert || assert.constructor !== Function ) {
+  if ( !assert || Object.prototype.toString.call( assert )!== "[object Function]" ) {
     throw {
       type: "DependencyUnavailableException",
       message: "qMock requires the 'assert' parameter be a function (with the signature: {(Variable: expected), (Variable: actual), [(Hash: opt)]})"
@@ -762,7 +757,7 @@ function initQMock ( assert, opt ) {
         },
         methods = [], // List of MockedMember method instances declared on mock
         exceptions = [], // List of exceptions thrown by verify/verifyMethod functions,
-        identifier = ( assert( String, arguments && arguments[0] ) ) ? arguments[0] : "'Constructor' (#protip - you can pass in a (String) when instantiating a new Mock, which helps inform constructor-level error messages)";
+        identifier = ( assert( String, arguments && arguments[0], {typed: true} ) ) ? arguments[0] : "'Constructor' (#protip - you can pass in a (String) when instantiating a new Mock, which helps inform constructor-level error messages)";
 
     // Function to push arguments into Mock exceptions list
     function throwMockException () {
@@ -838,7 +833,10 @@ function initQMock ( assert, opt ) {
                     if ( assert(
                           method.expectedArgs[i]["accepts"], // 'expected' inputs
                           presentation, // 'actual' inputs
-                          {strictValueChecking: true} // Must be strict 1:1 match to return a certain value
+                          {
+                            strictValueChecking: true,
+                            typed: true
+                          } // Must be strict 1:1 match to return a certain value
                         )
                     ) {
                       // If match found against presentation return bound object (or self if chained)
@@ -1054,7 +1052,8 @@ function initQMock ( assert, opt ) {
                                 "exceptionType": (strictValueChecking) ? "IncorrectArgumentValueException" : "IncorrectArgumentTypeException",
                                 "exceptionHandler": throwMockException,
                                 "descriptor": name,
-                                "delegate": true
+                                "delegate": true,
+                                "typed": true
                               }
                             )
                           ) {
@@ -1123,7 +1122,8 @@ function initQMock ( assert, opt ) {
               "strictValueChecking": mock.strictValueChecking,
               "exceptionHandler": throwMockException,
               "delegate": true,
-              "descriptor": "Mock Constructor"
+              "descriptor": "Mock Constructor",
+              "typed": true
             }
           );
         }
@@ -1156,7 +1156,7 @@ function initQMock ( assert, opt ) {
     mock.expectsArguments = mock.accepts;
 
     // If params passed to Mock constructor auto-magikally create mocked interface from JSON tree.
-    if ( assert( Object, arguments && arguments[ 0 ] ) ) {
+    if ( assert( Object, arguments && arguments[ 0 ], {typed: true} ) ) {
       createMockFromJSON.call( mock, arguments[ 0 ] );
     }
 
