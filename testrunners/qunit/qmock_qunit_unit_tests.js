@@ -5435,7 +5435,6 @@
 		  $.verify();
 		  ok(false, "verify() should throw exception when passed NO parameters. expected: (String: Constructor), Actual: (N/A)");
 		} catch (e) {
-		  console.log(e)
 		  equals(e.length, 1, "verify() should return an array of 1 exception: IncorrectNumberOfArgumentsException");
 		  equals(e[0].type, "IncorrectNumberOfArgumentsException", "verify() exception type should be IncorrectNumberOfArgumentsException");
 		}
@@ -5499,7 +5498,7 @@
 	    .accepts(".ninjas")
 	      .expects(2)
 	        .method('each')
-	        .accepts(function() {})
+	        .accepts(Function)
 	        .andChain()
 	      .andExpects(3)
 	        .method('wrap')
@@ -5526,7 +5525,6 @@
 	  });
 
 	  // Verify
-
 	  ok(jQuery.verify(), "verify() should be true: jQuery is mocked with chaining");
 
 	});

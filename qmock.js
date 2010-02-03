@@ -324,8 +324,13 @@ function initAssay () {
 
   // Key function to test objects against each other.
   function assertObject ( expected, actual, opt ) {
+    
+    // Early exclusion for pass-through objects
+    if ( expected === Variable ) {
+      return true;
+    }
 
-    // Delegate straight to assertCollection if a presentation to an interface
+    // Delegate assertion to appropriate method if flagged.
     if ( opt && opt.delegate === true ) {
       delete opt.delegate;
       return assertCollection.apply( null, arguments );
