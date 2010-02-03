@@ -2098,16 +2098,16 @@
     container[ "QMock" ] = initQMock( __Assay && __Assay.object, { "expose": __Assay && __Assay.exposeObject } );
 
     // Test interface
-    equals( Assay.hash( this.expectedQMockInterface, container[ "QMock" ], {typed: true} ), true, "initQmock() should return a Qmock instance interface registered to the identifier 'QMock' on container" );
+    equals( __Assay.hash( this.expectedQMockInterface, container[ "QMock" ], {typed: true} ), true, "initQmock() should return a Qmock instance interface registered to the identifier 'QMock' on container" );
 
     // Test private methods NOT exposed
-    ok( Assay.object( undefined, container.QMock[ "_createMockFromJSON" ] ), "initQmock() without optional param should not expose the private method _createMockFromJSON()" );
+    ok( ( typeof container.QMock[ "_createMockFromJSON" ] === "undefined" ), "initQmock() without optional param should not expose the private method _createMockFromJSON()" );
 
     // Unload Assay from container
     delete container[ "QMock" ];
 
     // Test successful removal
-    ok( Assay.object( undefined, container.QMock ), "QMock should be unloaded, and the associated identifier 'Qmock' should not exist on container" );
+    ok( ( typeof container.QMock === "undefined" ), "QMock should be unloaded, and the associated identifier 'Qmock' should not exist on container" );
 
 	});
 
@@ -2123,16 +2123,16 @@
     container[ "QMock" ] = initQMock( __Assay && __Assay.object, { "isTest": true, "expose": __Assay && __Assay.Utils.expose } );
 
     // Test interface
-    equals( Assay.hash( this.expectedQMockInterface, container[ "QMock" ], {typed: true} ), true, "initQMock() should return a Qmock instance interface registered to the identifier 'Qmock' on container" );
+    equals( __Assay.hash( this.expectedQMockInterface, container[ "QMock" ], {typed: true} ), true, "initQMock() should return a Qmock instance interface registered to the identifier 'Qmock' on container" );
 
     // Test private methods exposed
-    ok( Assay.hash( {"get": Function, "set": Function, "restore": Function}, container.QMock[ "_createMockFromJSON" ] ), "initQMock( {isTest: true} ) should expose accessors and mutators for the private function _createMockFromJSON() on container.QMock" );
+    ok( __Assay.hash( {"get": Function, "set": Function, "restore": Function}, container.QMock[ "_createMockFromJSON" ] ), "initQMock( {isTest: true} ) should expose accessors and mutators for the private function _createMockFromJSON() on container.QMock" );
 
     // Unload Assay from container
     delete container[ "QMock" ];
 
     // Test successful removal
-    ok( Assay.object( undefined, container.QMock ), "QMock should be unloaded, and the associated identifier 'Qmock' should not exist on container" );
+    ok( ( typeof container.QMock === "undefined" ), "QMock should be unloaded, and the associated identifier 'Qmock' should not exist on container" );
 
 	});
 
@@ -2742,15 +2742,15 @@
 	      .withValue(new Custom);
 
 	  // No need to exercise - all stubs
-	  ok( Assay.object( wizard["number"], 1, true ), "wizard mock object should have a stubbed property of 'number' with a value of (Number: 1)");
-	  ok( Assay.object( wizard["boolean"], true, true ), "wizard mock object should have a stubbed property of 'number' with a value of (Boolean: true)");
-	  ok( Assay.object( wizard["null"], null, true ), "wizard mock object should have a stubbed property of 'null' with a value of (null)");
-	  ok( Assay.object( wizard["function"], function() {}, true ), "wizard mock object should have a stubbed property of 'function' with a value of (Function: function stubbedFunction () {})");
-	  ok( Assay.object( wizard["object"], {}, true ), "wizard mock object should have a stubbed property of 'object' with a value of (Object: {})");
-	  ok( Assay.object( wizard["array"], [], true ), "wizard mock object should have a stubbed property of 'array' with a value of (Array: [])");
-	  ok( Assay.object( wizard["regExp"], /RegExp/, true ), "wizard mock object should have a stubbed property of 'regExp' with a value of (RegExp: /RegExp/)");
-	  ok( Assay.object( wizard["date"], new Date(1970), true ), "wizard mock object should have a stubbed property of 'date' with a value of (Date: new Date)");
-	  ok( Assay.object( wizard["custom object"], new Custom, true ), "wizard mock object should have a stubbed property of 'custom object' with a value of (Custom: new Custom)");
+	  equals( wizard["number"], 1, "wizard mock object should have a stubbed property of 'number' with a value of (Number: 1)");
+	  equals( wizard["boolean"], true, "wizard mock object should have a stubbed property of 'number' with a value of (Boolean: true)");
+	  equals( wizard["null"], null, "wizard mock object should have a stubbed property of 'null' with a value of (null)");
+	  equals( typeof wizard["function"], "function", "wizard mock object should have a stubbed property of 'function' with a value of (Function: function stubbedFunction () {})");
+	  equals( typeof wizard["object"], "object", "wizard mock object should have a stubbed property of 'object' with a value of (Object: {})");
+	  equals( wizard["array"].constructor, Array, "wizard mock object should have a stubbed property of 'array' with a value of (Array: [])");
+	  equals( wizard["regExp"].constructor, RegExp, "wizard mock object should have a stubbed property of 'regExp' with a value of (RegExp: /RegExp/)");
+	  equals( wizard["date"].constructor, Date, "wizard mock object should have a stubbed property of 'date' with a value of (Date: new Date)");
+	  equals( wizard["custom object"].constructor, Custom, "wizard mock object should have a stubbed property of 'custom object' with a value of (Custom: new Custom)");
 
 	});
 
@@ -2833,15 +2833,15 @@
     });
 
 	  // No need to exercise - all stubs
-	  ok( Assay.object( wizard["number"], 1, true ), "wizard mock object should have a stubbed property of 'number' with a value of (Number: 1)");
-	  ok( Assay.object( wizard["boolean"], true, true ), "wizard mock object should have a stubbed property of 'number' with a value of (Boolean: true)");
-	  ok( Assay.object( wizard["null"], null, true ), "wizard mock object should have a stubbed property of 'null' with a value of (null)");
-	  ok( Assay.object( wizard["function"], function() {}, true ), "wizard mock object should have a stubbed property of 'function' with a value of (Function: function stubbedFunction () {})");
-	  ok( Assay.object( wizard["object"], {}, true ), "wizard mock object should have a stubbed property of 'object' with a value of (Object: {})");
-	  ok( Assay.object( wizard["array"], [], true ), "wizard mock object should have a stubbed property of 'array' with a value of (Array: [])");
-	  ok( Assay.object( wizard["regExp"], /RegExp/, true ), "wizard mock object should have a stubbed property of 'regExp' with a value of (RegExp: /RegExp/)");
-	  ok( Assay.object( wizard["date"], new Date(1970), true ), "wizard mock object should have a stubbed property of 'date' with a value of (Date: new Date)");
-	  ok( Assay.object( wizard["custom object"], new Custom, true ), "wizard mock object should have a stubbed property of 'custom object' with a value of (Custom: new Custom)");
+	  equals( wizard["number"], 1, "wizard mock object should have a stubbed property of 'number' with a value of (Number: 1)");
+	  equals( wizard["boolean"], true, "wizard mock object should have a stubbed property of 'number' with a value of (Boolean: true)");
+	  equals( wizard["null"], null, "wizard mock object should have a stubbed property of 'null' with a value of (null)");
+	  equals( typeof wizard["function"], "function", "wizard mock object should have a stubbed property of 'function' with a value of (Function: function stubbedFunction () {})");
+	  equals( typeof wizard["object"], "object", "wizard mock object should have a stubbed property of 'object' with a value of (Object: {})");
+	  equals( wizard["array"].constructor, Array, "wizard mock object should have a stubbed property of 'array' with a value of (Array: [])");
+	  equals( wizard["regExp"].constructor, RegExp, "wizard mock object should have a stubbed property of 'regExp' with a value of (RegExp: /RegExp/)");
+	  equals( wizard["date"].constructor, Date, "wizard mock object should have a stubbed property of 'date' with a value of (Date: new Date)");
+	  equals( wizard["custom object"].constructor, Custom, "wizard mock object should have a stubbed property of 'custom object' with a value of (Custom: new Custom)");
 
 	});
 

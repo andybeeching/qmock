@@ -335,9 +335,9 @@ function initAssay () {
       delete opt.delegate;
       return assertCollection.apply( null, arguments );
     }
-
+    
     function __checkType ( expected, actual, expectedType, opt_typed ) {
-
+      
       if ( expectedType === "null" || expectedType === "undefined" ) {
         return __identityCheck( expected, actual );
       }
@@ -356,12 +356,7 @@ function initAssay () {
       // If function passed for expected the use as "class", else use constructor property (if available)
       var klass = ( opt_typed && expectedType === "function" )
         ? expected
-        : (expected !== null && expected !== undefined) && expected.constructor,
-
-      // Grab the type of through function decompilation (we only care about natives for this part, so they should be consistent x-interpreter)
-      // This is done so a 'typed' interface doesn't allow functions where the expectation is a constructor (confused.com yet?)
-      // Unless of course said type was Function, in which case boundType === "function"
-          boundType = ( opt_typed ) ? _getFunctionName( klass ).toLowerCase() : expectedType;
+        : (expected !== null && expected !== undefined) && expected.constructor;
 
       // Else test the instance against the expected Klass
       // Try sandboxed check first (on the assumption that custom constructors will only pass this expression)
@@ -370,7 +365,10 @@ function initAssay () {
       return ( // Sandboxed check
               Object( actual ) instanceof ( klass || Function )
               // Cross-frame & 'typed' check
-              || _getTypeOf( actual ) === boundType
+              // Grab the type of through function decompilation (we only care about natives for this part, so they should be consistent x-interpreter)
+              // This is done so a 'typed' interface doesn't allow functions where the expectation is a constructor (confused.com yet?)
+              // Unless of course said type was Function, in which case boundType === "function"
+              || _getTypeOf( actual ) === ( ( opt_typed ) ? _getFunctionName( klass ).toLowerCase() : expectedType )
       );
     }
 
@@ -649,8 +647,8 @@ function initAssay () {
 // Export Assay initialiser - CommonJS compliance
 ( ( typeof exports === "undefined" ) ? this : exports )["initAssay"] = initAssay;
 
-// Register Assay Public Interface
-( ( typeof exports === "undefined" ) ? this : exports )["Assay"] = initAssay();
+// Register Assay Public Interface - this bit doesn't affect QMock in the slightest!
+//( ( typeof exports === "undefined" ) ? this : exports )["Assay"] = initAssay();
 
 function initQMock ( assert, opt ) {
 
@@ -1200,16 +1198,16 @@ function initQMock ( assert, opt ) {
 (function bootstrapQMock ( container ) {
 
   // Private Assay Interface
-  var Assay = initAssay();
+  var _Assay = initAssay();
 
   // Initialise QMock
   container.Mock = initQMock(
     // assert (Function)
-    (Assay && Assay.object),
+    (_Assay && _Assay.object),
     // opt (Hash)
     {
       "isTest": true,
-      "expose": (Assay && Assay.Utils.expose)
+      "expose": ( _Assay && _Assay.Utils.expose)
     }
   );
 
