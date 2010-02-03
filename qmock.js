@@ -244,7 +244,6 @@ function initAssay () {
         raiseError = ( opt && opt.exceptionHandler ) || null,
         descriptor = ( opt && opt.descriptor ) || 'assertHash()';
 
-    // asserHash interface checks
     // Required parameters & characteristics (i.e. is enumerable)
     if ( arguments.length < 2 ) {
       throw {
@@ -258,7 +257,7 @@ function initAssay () {
       }
     } else {
 
-    // TODO: 'DontEnum' checking
+    // TODO: {DontEnum} shim
 
       checkingMembers:
         for ( var key in expected ) {
@@ -270,6 +269,10 @@ function initAssay () {
             // in operator performs lookup resolution on [[Prototype]] chain
             // FF 3.6 won't eumerate function instance prototype property (https://developer.mozilla.org/En/Firefox_3.6_for_developers#JavaScript)
             if ( key in Object( actual ) ) {
+              // Attempt to provide more useful error message
+              if ( opt ) {
+                opt.descriptor = descriptor + ' > ' + key;
+              }
               result &= assertObject( expected[key], actual[key], opt );
             } else {
               raiseError && raiseError( key, "not found on object", "MissingHashKeyException", descriptor )
@@ -478,7 +481,7 @@ function initAssay () {
                             {
                               "strictValueChecking": isStrict,
                               "exceptionType": exceptionType,
-                              "exceptionHandler": (isCollection === true) ? null : raiseError,
+                              "exceptionHandler": raiseError,
                               "descriptor": descriptor,
                               "typed": isTyped,
                             }
@@ -723,7 +726,8 @@ function initQMock ( assert, opt ) {
   }
 
   // Function to build pretty exception objects - TBR function signature
-  //function createException ( exceptionType, objName, expected, actual ) {
+  // Can be improved by using Assay.type for expected and actual
+  // function createException ( exceptionType, objName, expected, actual ) {
   function createException ( expected, actual, exceptionType, descriptor ) {
 
     var e = {
@@ -1051,7 +1055,7 @@ function initQMock ( assert, opt ) {
                                 "strictValueChecking": strictValueChecking,
                                 "exceptionType": (strictValueChecking) ? "IncorrectArgumentValueException" : "IncorrectArgumentTypeException",
                                 "exceptionHandler": throwMockException,
-                                "descriptor": name,
+                                "descriptor": name + '()',
                                 "delegate": true,
                                 "typed": true
                               }

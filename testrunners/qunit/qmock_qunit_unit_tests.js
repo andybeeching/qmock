@@ -362,7 +362,7 @@
 
 	  expect(33);
 
-	  var mock = new Mock();
+	  var mock = new Mock;
 
 	  // Expected false evaluations
 
@@ -2151,7 +2151,7 @@
 	test("w/ API: mock with single parameterless method (explicit execution call total, no return value)", function () {
 
 	  expect(16);
-	  var ninja = new Mock();
+	  var ninja = new Mock;
 
 	  // Test invalid method naming - protect API if using mocked member interface to set methods and properties
 	  try {
@@ -2162,7 +2162,7 @@
 	    equals(e[0].type, "InvalidMethodNameException", "exception type should be InvalidMethodNameException");
 	  }
 
-	  var ninja = new Mock();  // Can't call reset as mock is broken, must re-instantiate mock instance.
+	  var ninja = new Mock;  // Can't call reset as mock is broken, must re-instantiate mock instance.
 
 	  try {
 	    ninja.expects(1).method('andExpects');
@@ -2172,7 +2172,7 @@
 	    equals(e[0].type, "InvalidMethodNameException", "exception type should be InvalidMethodNameException");
 	  }
 
-	  ninja = new Mock(); // Can't call reset as mock is broken, must re-instantiate mock instance.
+	  ninja = new Mock; // Can't call reset as mock is broken, must re-instantiate mock instance.
 
 	  try {
 	    ninja.expects(1).method('expectsArguments');
@@ -2182,7 +2182,7 @@
 	    equals(e[0].type, "InvalidMethodNameException", "exception type should be InvalidMethodNameException");
 	  }
 
-	  ninja = new Mock(); // Can't call reset as mock is broken, must re-instantiate mock instance.
+	  ninja = new Mock; // Can't call reset as mock is broken, must re-instantiate mock instance.
 
 	  try {
 	    ninja.expects(1).method('reset');
@@ -2192,7 +2192,7 @@
 	    equals(e[0].type, "InvalidMethodNameException", "exception type should be InvalidMethodNameException");
 	  }
 
-	  ninja = new Mock(); // Can't call reset as mock is broken, must re-instantiate mock instance.
+	  ninja = new Mock; // Can't call reset as mock is broken, must re-instantiate mock instance.
 
 	  ninja
 	    .expects(1)
@@ -2229,7 +2229,7 @@
 	  ok(ninja.verify(), "verify() should pass after swing called");
 
 	  // False Positive, expect ZERO calls
-	  var samurai = new Mock();
+	  var samurai = new Mock;
 
 	  samurai
 	    .expects(0)
@@ -2239,7 +2239,7 @@
 
 	  // Lots of calls
 
-	  var wizard = new Mock();
+	  var wizard = new Mock;
 
 	  wizard
 	    .expects(2000)
@@ -2388,7 +2388,7 @@
 
 	  expect(13);
 
-	  var ninja = new Mock();
+	  var ninja = new Mock;
 
 	  ninja
 	    .expects(1, 3)
@@ -2435,7 +2435,7 @@
 
 	  // At LEAST one swing...
 
-	  var samurai = new Mock();
+	  var samurai = new Mock;
 	  samurai
 	    .expects(1, Infinity)// Can use any string, inifinity symbol used here.
 	      .method('swing');
@@ -2450,7 +2450,7 @@
 
 	  // Range of calls
 
-	  var wizard = new Mock();
+	  var wizard = new Mock;
 
 	  wizard
 	    .expects()
@@ -2649,7 +2649,7 @@
 
 	  expect(15);
 
-	  var ninja = new Mock();
+	  var ninja = new Mock;
 
 	  // Test invalid property naming
 	  try {
@@ -2660,7 +2660,7 @@
 	    equals(e[0].type, "InvalidPropertyNameException", "exception type should be InvalidPropertyNameException");
 	  }
 
-	  var ninja = new Mock();
+	  var ninja = new Mock;
 
 	  ninja
 	    .expects()
@@ -2669,7 +2669,7 @@
 
 	  ok( (ninja.rank === "apprentice") , "ninja mock object should have a property with an identifier 'rank' that has a value of 'apprentice'" );
 
-	  ninja = new Mock();
+	  ninja = new Mock;
 
 	  ninja
 	    .expects()
@@ -2682,7 +2682,7 @@
 	  ok( ( (ninja.rank === "apprentice") && (ninja.master === "The Chrome") ) , "ninja mock object should have two properties with the identifiers 'rank' & 'master', and values of 'apprentice' and 'The Chrome' respectively")
 
 	  // Composite
-	  var samurai = new Mock();
+	  var samurai = new Mock;
 
 	  samurai
 	    .expects()
@@ -2702,7 +2702,7 @@
 
 	  // Test all object types can be stored on property
 
-	  var wizard = new Mock();
+	  var wizard = new Mock;
 
 	  function Custom () {};
 
@@ -2783,7 +2783,7 @@
 
 	  ok( (ninja.rank === "apprentice") , "ninja mock object should have a property called 'rank' with correct value" );
 
-	  ninja = new Mock();
+	  ninja = new Mock;
 
 	  ninja = new Mock({
 	    "rank"  : {
@@ -2849,7 +2849,7 @@
 
 	  expect(14);
 
-	    var mock = new Mock();
+	    var mock = new Mock;
 
 	    mock
 	    .expects(1)
@@ -2978,7 +2978,7 @@
 	  * Re-run tests with mocked method interface declared with a Constructor and with typed parameter assertion.
 	  *
 	  **/
-	  var ninja = new Mock();
+	  var ninja = new Mock;
 	  ninja
 	    .expects(1)
 	      .method("swing")
@@ -3186,7 +3186,7 @@
 	  *
 	  **/
 
-		var ninja = new Mock();
+		var ninja = new Mock;
 	  ninja
 	    .expects(1)
 	      .method('swing')
@@ -3395,7 +3395,7 @@
 	  **/
 
 	  // Test single parameter value expectations, no return value
-	  var ninja = new Mock();
+	  var ninja = new Mock;
 	  ninja
 	    .expects(1)
 	    .method('swing')
@@ -3605,7 +3605,7 @@
 	  **/
 
 	  // Test single parameter value expectations, no return value
-	  var ninja = new Mock();
+	  var ninja = new Mock;
 	  ninja
 	    .expects(1)
 	    .method('swing')
@@ -3816,7 +3816,7 @@
 
 	  // Test String primitive
 
-	  var samurai = new Mock();
+	  var samurai = new Mock;
 
 	  samurai
 	    .expects(1)
@@ -3863,7 +3863,7 @@
 
 	  // Test Boolean primitive
 
-	  var wizard = new Mock();
+	  var wizard = new Mock;
 
 	  wizard
 	    .expects(1)
@@ -3909,7 +3909,7 @@
 
 	  // Test string primitive
 
-	  var ninja = new Mock();
+	  var ninja = new Mock;
 	  ninja
 	    .expects(1)
 	      .method('swing')
@@ -3951,7 +3951,7 @@
 
 	  // Test number primitive
 
-	  var samurai = new Mock();
+	  var samurai = new Mock;
 
 	  samurai
 	    .expects(1)
@@ -3997,7 +3997,7 @@
 
 	  // Test Boolean primitives
 
-	  var wizard = new Mock();
+	  var wizard = new Mock;
 
 	  wizard
 	    .expects(1)
@@ -4107,7 +4107,7 @@
 
 	  expect( 25 );
 
-	    var ninja = new Mock();
+	    var ninja = new Mock;
 
 	  ninja
 	    .expects( 1 )
@@ -4187,7 +4187,7 @@
 
 	  ok( ninja.verify(), "verify() should pass after 'giveUp' was called once with null type" );
 
-	  var samurai = new Mock();
+	  var samurai = new Mock;
 
 	  samurai
 	    .expects(1)
@@ -4244,7 +4244,7 @@
 
 	  ok( samurai.verify(), "verify() should pass after 'fear' was called once with falsey type" );
 
-	  var wizard = new Mock();
+	  var wizard = new Mock;
 
 	  wizard
 	    .expects(1)
@@ -4307,7 +4307,7 @@
 
 	  expect(10);
 
-	    var ninja = new Mock();
+	    var ninja = new Mock;
 
 	    ninja.expects(1)
 	    .method('describe')
@@ -4368,7 +4368,7 @@
 
 	  // Nested Composites - setup
 
-	  var samurai = new Mock();
+	  var samurai = new Mock;
 
 	  samurai
 	    .expects(1)
@@ -4431,9 +4431,9 @@
 
 	test("mock with composite argument types: object (literal) [enum] - strict type checking members", function () {
 
-	  expect(21);
+	  expect(19);
 
-	    var ninja = new Mock();
+	    var ninja = new Mock;
 
 	    ninja.expects(1)
 	    .method('describe')
@@ -4450,7 +4450,7 @@
 
     try {
       ninja.verify();
-      ok(false, "verify() should throw exception");
+      ok(false, "verify() should throw exception when ninja.describe() not invoked");
     } catch (e) {
       equals(e.length, 1, "verify() should return an array of 1 exception");
       equals(e[0].type, "IncorrectNumberOfMethodCallsException", "verify() exception type should be IncorrectNumberOfMethodCallsException");
@@ -4464,11 +4464,10 @@
 
     try {
       ninja.verify();
-      ok(false, "verify() should throw exception");
+      ok(false, "verify() should throw exception when ninja.describe() passed invalid parameter type. Expected: (Object), Actual: (String: 'Jet Li')");
     } catch (e) {
-      equals(e.length, 2 , "verify() should return an array of 2 exception");
-      equals(e[0].type, "MalformedArgumentsException", "verify()[0] exception type should be MalformedArgumentsException");
-      equals(e[1].type, "IncorrectArgumentValueException", "verify()[3] exception type should be IncorrectArgumentValueException");
+      equals(e.length, 1 , "verify() should return an array of 1 exception");
+      equals(e[0].type, "IncorrectArgumentValueException", "verify()[3] exception type should be IncorrectArgumentValueException");
     }
 
     ninja.reset()
@@ -4477,7 +4476,7 @@
 
     try {
       ninja.verify();
-      ok(false, "verify() should throw exception");
+      ok(false, "verify() should throw exception when ninja.describe() is passed incomplete parameter value. Expected: (Object w/ keys), Actual: (Object: {})");
     } catch (e) {
       equals(e.length, 4 , "verify() should return an array of 4 exception");
       equals(e[0].type, "MissingHashKeyException", "verify()[0] exception type should be MissingHashKeyException");
@@ -4498,7 +4497,7 @@
 
 	  try {
       ninja.verify();
-      ok(false, "verify() should throw exception");
+      ok(false, "verify() should throw exception when ninja.describe() is passed parameter with incorrect values");
     } catch (e) {
       equals(e.length, 4 , "verify() should return an array of 4 exceptions");
       equals(e[0].type, "IncorrectArgumentValueException", "verify()[0] exception type should be IncorrectArgumentValueException");
@@ -4519,11 +4518,11 @@
      age: 46
     });
 
-	  ok(ninja.verify(), "verify() should be true");
+	  ok(ninja.verify(), "verify() should be true when ninja.describe() passed matching expected and actual parameters");
 
 	  // Nested Composites - setup
 
-	  var samurai = new Mock();
+	  var samurai = new Mock;
 
 	  samurai
 	    .expects(1)
@@ -4547,7 +4546,7 @@
 
 	  // Bad Exercise
 
-	  // Test correct argument types - wrong values - assertion recurse through whole object tree
+	  // Test correct argument types - wrong values - assertion recurses through whole object tree
 
 	  samurai.describe({
 	    name: "Jet Li",
@@ -4563,31 +4562,11 @@
 
 	  try {
       samurai.verify();
-      ok(false, "verify() should throw exception");
+      ok(false, "verify() should throw exception when ninja.describe() passed a param with an incorrect nested array literal");
     } catch (e) {
-      equals(e.length, 2 , "verify() should return an array of 1 exceptions");
+      equals(e.length, 4 , "verify() should return an array of 4 exceptions");
       equals(e[0].type, "IncorrectArgumentValueException", "verify() exception type should be IncorrectArgumentValueException");
-      equals(e[1].type, "IncorrectArgumentValueException", "verify() exception type should be IncorrectArgumentValueException");
     }
-
-	  samurai.reset();
-
-	  // Test correct argument types - pass-thru values
-
-	  /*samurai.describe({
-	    name: "Jet Li",
-	    age: Number,
-	    'marshal arts': Array,
-	    weapon: {
-	      damage: String,
-	      type: 'sword'
-	    }
-	  });
-
-	  samurai.getDamage();
-
-    samurai.verify();
-	  ok(samurai.verify(), "verify() should be true with constructors as expected");*/
 
 	  samurai.reset();
 
@@ -4666,9 +4645,9 @@
 	  // No arg
     try {
       ninja.verify();
-      ok(false, "verify() should throw exception");
+      ok(false, "verify() should throw exception when ninja.setSkills() passed no parameters. Expected: (Array: ['swordplay', 'kung-fu', 'stealth'])");
     } catch (e) {
-      equals(e.length, 1, "verify() should return an array of 2 exception");
+      equals(e.length, 1, "verify() should return an array with 1 exception");
       equals(e[0].type, "IncorrectNumberOfMethodCallsException", "verify() exception type should be IncorrectNumberOfMethodCallsException");
     }
 
@@ -4678,9 +4657,9 @@
 	  ninja.setSkills(['swordplay', 1, true]);
     try {
       ninja.verify();
-      ok(false, "verify() should throw exception");
+      ok(false, "verify() should throw exceptions when ninja.setSkills() passed invalid paramater. Expected: (Array: ['swordplay', 'kung-fu', 'stealth'], Actual: (Array: ['swordplay', 1, true]))");
     } catch (e) {
-      equals(e.length, 1 , "verify() should return an array of 1 exceptions");
+      equals(e.length, 3 , "verify() should return an array of 1 exceptions");
       equals(e[0].type, "IncorrectArgumentValueException", "verify()[0] exception type should be IncorrectArgumentValueException");
     }
 
@@ -4697,7 +4676,7 @@
 
 	  expect(4)
 
-	  var ninja = new Mock();
+	  var ninja = new Mock;
 
 	  ninja
 	    .expects(1)
@@ -4708,7 +4687,7 @@
 
 	  ok(ninja.verify(), "verify() should be true");
 
-	  var samurai = new Mock();
+	  var samurai = new Mock;
 
 	  var date = new Date;
 
@@ -4738,8 +4717,9 @@
 
 	test("mock with custom object argument types", function () {
 
-	  var Sword = function Sword() {},
-	    Shield = function Shield() {},
+	  var Sword = function Sword () {},
+	    Shield = function Shield () {},
+	    // instances
 	    katana = new Sword,
 	    wooden = new Shield;
 
@@ -4747,17 +4727,17 @@
 
 	  // Use to check strict argument checking
 
-	  var ninja = new Mock();
+	  var ninja = new Mock;
 
 	  ninja
 	    .expects(1)
 	      .method("setSword")
-	      .accepts(katana);
+	      .accepts(Sword);
 
 	  ninja.setSword(wooden);
 	  try {
 	        ninja.verify();
-	        ok(false, "verify() should throw exception");
+	        ok(false, "verify() should throw exception when ninja.setSword() passed incorrect instance type. Expected: (Sword: obj), actual: (Shield: obj)");
 	    } catch (e) {
 	        equals(e.length, 1, "verify() should return an array of 1 exception");
 	        equals(e[0].type, "IncorrectArgumentTypeException", "verify() exception type should be IncorrectArgumentTypeException");
@@ -4800,11 +4780,11 @@
 
 	  expect(15);
 
-	  var ninja = new Mock();
+	  var ninja = new Mock;
 
 	  // Allow pass-through argument types (and implicitly values)
 
-	  var ninja = new Mock();
+	  var ninja = new Mock;
 
 	  ninja
 	    .expects(1)
@@ -4859,7 +4839,7 @@
 
 	  ninja.reset();
 
-	  ninja.hitOpponents(new Custom ());
+	  ninja.hitOpponents(new Custom);
 
 	  ok(ninja.verify(), "verify() should be true with composite argument type: new Custom ()");
 
@@ -4901,7 +4881,7 @@
 
 	  ok(ninja.verify(), "verify() should be true with pass-through object: Variable");
 
-	  var samurai = new Mock();
+	  var samurai = new Mock;
 
 	  samurai
 	    .expects(1)
@@ -4918,7 +4898,7 @@
 
 	  expect(7);
 
-	  var ninja = new Mock();
+	  var ninja = new Mock;
 
 	  ninja
 	    .expects(1)
@@ -4991,7 +4971,7 @@
 
 	  expect(7);
 
-	  var ninja = new Mock();
+	  var ninja = new Mock;
 
 	  var ninja = new Mock({
 	    "testMultipleParameters": {
@@ -5066,7 +5046,7 @@
 
 	  expect(15);
 
-    var samurai = new Mock();
+    var samurai = new Mock;
 
 	  samurai
 	    .expects(1)
@@ -5256,7 +5236,7 @@
 
 	  expect(9);
 
-	  var ninja = new Mock();
+	  var ninja = new Mock;
 	  ninja
 	    .expects(1)
 	      .method("swing")
@@ -5383,7 +5363,7 @@
 
 	  // Mock the query of the J
 
-	  var jQuery = new Mock();
+	  var jQuery = new Mock;
 
 	  jQuery
 	    .accepts(".ninjas")
@@ -5416,12 +5396,13 @@
 	  // Verify
 
 	  ok(jQuery.verify(), "verify() should be true: jQuery is mocked :-)");
+
 	});
 
 	test("chaining", function () {
 
 	  expect(14);
-	    var $ = new Mock();
+	    var $ = new Mock;
 	    $.accepts(".ninja")
 	        .expects(2)
 	      .method('run')
@@ -5454,6 +5435,7 @@
 		  $.verify();
 		  ok(false, "verify() should throw exception when passed NO parameters. expected: (String: Constructor), Actual: (N/A)");
 		} catch (e) {
+		  console.log(e)
 		  equals(e.length, 1, "verify() should return an array of 1 exception: IncorrectNumberOfArgumentsException");
 		  equals(e[0].type, "IncorrectNumberOfArgumentsException", "verify() exception type should be IncorrectNumberOfArgumentsException");
 		}
@@ -5511,7 +5493,7 @@
 
 	  // Mock jQuery with chaining
 
-	  var jQuery = new Mock();
+	  var jQuery = new Mock;
 
 	  jQuery
 	    .accepts(".ninjas")
@@ -5553,7 +5535,7 @@
 
 	  expect(3);
 
-	  var $ = new Mock();
+	  var $ = new Mock;
 
 		// Invalid callback
 
