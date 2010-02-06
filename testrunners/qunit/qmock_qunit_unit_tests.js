@@ -6,12 +6,6 @@
 	// Stub to test support for user-defined objects
 	function Custom () {};
 
-	function Named () {}
-
-
-	// Stub for CSS selector parameter expectation (e.g. mock jQuery)
-	var Selector = Mock.Variable;
-
 	/**
 	 *
 	 * Assay Unit tests
@@ -2766,7 +2760,7 @@
 	  try {
 	    ninja = new Mock({
 	      "expects": {
-	        value: Mock.Variable
+	        value: true
 	      }
 	    });
 	    ok(false, "mock should detect bad property name 'expects'");
@@ -4784,8 +4778,8 @@
 	  ninja
 	    .expects(1)
 	      .method("testMultipleParameters")
-	      .accepts(1, "string", true, null, undefined, {}, [], new Date, /RegExp/, Selector, new Custom )
-	      .required(11)
+	      .accepts(1, "string", true, null, undefined, {}, [], new Date, /RegExp/, new Custom )
+	      .required(10)
 	      .overload(false);
 	       // Could use same logic for RANGES on call method?
 
@@ -4795,11 +4789,11 @@
 
 	  ninja.testMultipleParameters();
 	  try {
-	        ninja.verify();
-	        ok(false, "verify() should throw exception");
-	    } catch (e) {
-	        equals(e[0].type, "IncorrectNumberOfArgumentsException", "verify() exception type should be IncorrectNumberOfArgumentsException");
-	    }
+      ninja.verify();
+      ok(false, "verify() should throw exception");
+    } catch (e) {
+      equals(e[0].type, "IncorrectNumberOfArgumentsException", "verify() exception type should be IncorrectNumberOfArgumentsException");
+    }
 
 	  ninja.reset();
 
@@ -4817,7 +4811,7 @@
 
 	  // Test too many arguments - method overloading
 
-	  ninja.testMultipleParameters("string", 1, true, null, undefined, {}, [], new Date, /RegExp/, Selector, new Custom, "string" );
+	  ninja.testMultipleParameters("string", 1, true, null, undefined, {}, [], new Date, /RegExp/, new Custom, "string" );
 	  try {
 	    ninja.verify();
 	    ok(false, "verify() should throw exception");
@@ -4829,7 +4823,7 @@
 
 	  // Test incorrect arguments - first two switched
 
-	  ninja.testMultipleParameters("string", 1, true, null, undefined, {}, [], new Date, /RegExp/, Selector, new Custom );
+	  ninja.testMultipleParameters("string", 1, true, null, undefined, {}, [], new Date, /RegExp/, new Custom );
 	  try {
 	    ninja.verify();
 	    ok(false, "verify() should throw exception an array of 2 exceptions");
@@ -4843,7 +4837,7 @@
 
 	  // Good Exercise
 
-	  ninja.testMultipleParameters(1, "string", true, null, undefined, {}, [], new Date, /RegExp/, Selector, new Custom );
+	  ninja.testMultipleParameters(1, "string", true, null, undefined, {}, [], new Date, /RegExp/, new Custom );
 	  ok(ninja.verify(), "verify() should be true");
 
 	});
@@ -4852,13 +4846,11 @@
 
 	  expect(7);
 
-	  var ninja = new Mock;
-
 	  var ninja = new Mock({
 	    "testMultipleParameters": {
-	      accepts: [1, "string", true, null, undefined, {}, [], new Date, /RegExp/, Selector, new Custom],
+	      accepts: [1, "string", true, null, undefined, {}, [], new Date, /RegExp/, new Custom],
 	      calls: 1,
-	      required: 11,
+	      required: 10,
 	      overload: false
 	    }
 	  });
@@ -4891,7 +4883,7 @@
 
 	  // Test too many arguments - method overloading
 
-	  ninja.testMultipleParameters("string", 1, true, null, undefined, {}, [], new Date, /RegExp/, Selector, new Custom, "string" );
+	  ninja.testMultipleParameters("string", 1, true, null, undefined, {}, [], new Date, /RegExp/, new Custom, "string" );
 	  try {
 	        ninja.verify();
 	        ok(false, "verify() should throw exception");
@@ -4903,7 +4895,7 @@
 
 	  // Test incorrect arguments - first two switched
 
-	  ninja.testMultipleParameters("string", 1, true, null, undefined, {}, [], new Date, /RegExp/, Selector, new Custom );
+	  ninja.testMultipleParameters("string", 1, true, null, undefined, {}, [], new Date, /RegExp/, new Custom );
 	  try {
 	        ninja.verify();
 	        ok(false, "verify() should throw exception");
@@ -4917,7 +4909,7 @@
 
 	  // Good Exercise
 
-	  ninja.testMultipleParameters(1, "string", true, null, undefined, {}, [], new Date, /RegExp/, Selector, new Custom );
+	  ninja.testMultipleParameters(1, "string", true, null, undefined, {}, [], new Date, /RegExp/, new Custom );
 	  ok(ninja.verify(), "verify() should be true");
 
 	});
@@ -4932,7 +4924,7 @@
 	  samurai
 	    .expects(1)
 	      .method("testMultipleParameters")
-	      .accepts(1, "string", true, null, undefined, {}, [], new Date, /RegExp/, Selector, new Custom )
+	      .accepts(1, "string", true, null, undefined, {}, [], new Date, /RegExp/, new Custom )
 	      .required(0); // Overwrite implict required of 11 (fn.length).
 
 	  // Bad Exercises
@@ -4964,7 +4956,7 @@
 
 	  // All arguments - last two switched around to be incorrect
 
-	  samurai.testMultipleParameters("string", 1, true, null, undefined, {}, [], new Date, /RegExp/, Selector, new Custom )
+	  samurai.testMultipleParameters("string", 1, true, null, undefined, {}, [], new Date, /RegExp/, new Custom )
 		try {
 		  samurai.verify();
 		  ok(false, "verify() should throw exception");
@@ -4978,7 +4970,7 @@
 
 	  // Too many arguments - method overloading - first two switched to be incorrect - overloaded arguments should be ignored
 
-	  samurai.testMultipleParameters("string", 1, true, null, undefined, {}, [], new Date, /RegExp/, Selector, new Custom, null );
+	  samurai.testMultipleParameters("string", 1, true, null, undefined, {}, [], new Date, /RegExp/, new Custom, null );
 		try {
 		  samurai.verify();
 		  ok(false, "verify() should throw exception");
@@ -5006,13 +4998,13 @@
 
 	  // All Arguments - test false positive
 
-	  samurai.testMultipleParameters(1, "string", true, null, undefined, {}, [], new Date, /RegExp/, Selector, new Custom );
+	  samurai.testMultipleParameters(1, "string", true, null, undefined, {}, [], new Date, /RegExp/, new Custom );
 	  ok(samurai.verify(), "verify() should be true");
 
 	  samurai.reset();
 
 	  // Overloaded method call
-	  samurai.testMultipleParameters(1, "string", true, null, undefined, {}, [], new Date, /RegExp/, Selector, new Custom, null );
+	  samurai.testMultipleParameters(1, "string", true, null, undefined, {}, [], new Date, /RegExp/, new Custom, null );
 	  ok(samurai.verify(), "verify() should be true");
 
 	});
@@ -5023,7 +5015,7 @@
 
 	  var samurai = new Mock({
 	    "testMultipleParameters": {
-	      accepts: [1, "string", true, null, undefined, {}, [], new Date, /RegExp/, Selector, new Custom],
+	      accepts: [1, "string", true, null, undefined, {}, [], new Date, /RegExp/, new Custom],
 	      calls: 1,
 	      required: 0
 	    }
@@ -5060,7 +5052,7 @@
 
 	  // All arguments - last two switched around to be incorrect
 
-	  samurai.testMultipleParameters("string", 1, true, null, undefined, {}, [], new Date, /RegExp/, Selector, new Custom )
+	  samurai.testMultipleParameters("string", 1, true, null, undefined, {}, [], new Date, /RegExp/, new Custom )
 	  try {
 	        samurai.verify();
 	        ok(false, "verify() should throw exception");
@@ -5074,7 +5066,7 @@
 
 	  // Too many arguments - method overloading - first two switched to be incorrect - overloaded arguments should be ignored
 
-	  samurai.testMultipleParameters("string", 1, true, null, undefined, {}, [], new Date, /RegExp/, Selector, new Custom, null );
+	  samurai.testMultipleParameters("string", 1, true, null, undefined, {}, [], new Date, /RegExp/, new Custom, null );
 	  try {
 	        samurai.verify();
 	        ok(false, "verify() should throw exception");
@@ -5102,13 +5094,13 @@
 
 	  // All Arguments - test false positive
 
-	  samurai.testMultipleParameters(1, "string", true, null, undefined, {}, [], new Date, /RegExp/, Selector, new Custom );
+	  samurai.testMultipleParameters(1, "string", true, null, undefined, {}, [], new Date, /RegExp/, new Custom );
 	  ok(samurai.verify(), "verify() should be true");
 
 	  samurai.reset();
 
 	  // Overloaded method call
-	  samurai.testMultipleParameters(1, "string", true, null, undefined, {}, [], new Date, /RegExp/, Selector, new Custom, null );
+	  samurai.testMultipleParameters(1, "string", true, null, undefined, {}, [], new Date, /RegExp/, new Custom, null );
 	  ok(samurai.verify(), "verify() should be true");
 
 	});
@@ -5287,11 +5279,11 @@
 	    $.accepts(".ninja")
 	        .expects(2)
 	      .method('run')
-	            .accepts(Mock.Variable)
+	            .accepts(String)
 	            .andChain()
 	        .expects(1)
 	      .method('fight')
-	            .accepts('hard')
+	            .accepts(String)
 	            .andChain();
 
 		// Invalid constructor param

@@ -63,7 +63,7 @@ function initAssay () {
   // PRIVATE functions
 
   // Allow pass-through argument checking
-  // Either reference static member off Mock class (Mock.Variable), or alias - e.g. var Selector = Mock.Variable;
+  // Exposed on Assay API
   function Variable () {}
 
   // Function to expose private objects on a target object for testing (plus injection of mocks/stubs and reset functionality)
@@ -1178,7 +1178,7 @@ function initQMock ( assert, opt ) {
   MockConstructor["version"] = "0.2";
 
   // Expose internal methods for unit tests
-  if ( opt && opt.isTest && assert(Function, opt.expose) ) {
+  if ( opt && opt.isTest && assert( Function, opt.expose ) ) {
     // mock generator
     ;;;; opt.expose( createMockFromJSON, "_createMockFromJSON", MockConstructor );
   }
@@ -1203,16 +1203,12 @@ function initQMock ( assert, opt ) {
   // Initialise QMock
   container.Mock = initQMock(
     // assert (Function)
-    (_Assay && _Assay.object),
+    ( _Assay && _Assay.object ),
     // opt (Hash)
     {
       "isTest": true,
       "expose": ( _Assay && _Assay.Utils.expose)
     }
   );
-
-  // Add reference to Variable for backward compatibility for Juice (TBR)
-  // Needs to be refactored to a custom matcher IMO, so can set from qmock and it will perform a lookup for a deserializer fn in a cache witin Assay.
-  container.Mock.Variable = Assay.Variable;
 
 })( ( typeof exports === "undefined" ) ? this : exports );
