@@ -128,7 +128,7 @@
 	  equals( isHash( 0 ), false, "isHash() should be false with 'obj' parameter: (Number: 0). Result");
 	  equals( isHash( 1 ), false, "isHash() should be false with 'obj' parameter: (Number: 1). Result");
 	  equals( isHash( "" ), false, "isHash() should be false with 'obj' parameter: (String: ''). Result");
-	  equals( isHash( "string primitive type" ), false, "isHash() should be false with 'obj' parameter: (String: 'string primitive type'). Result");
+	  equals( isHash( "foo" ), false, "isHash() should be false with 'obj' parameter: (String: 'foo'). Result");
 	  equals( isHash( false ), false, "isHash() should be false with 'obj' parameter: (Boolean: false). Result");
 	  equals( isHash( true ), false, "isHash() should be false with 'obj' parameter: (Boolean: true). Result");
 
@@ -153,11 +153,12 @@
 	  equals( isHash( Object(0) ), true, "isHash() should be true with 'obj' parameter: (Number: Object(0)). Result");
 	  equals( isHash( Object(1) ), true, "isHash() should be true with 'obj' parameter: (Number: Object(1)). Result");
 	  equals( isHash( Object("") ), true, "isHash() should be true with 'obj' parameter: (String: Object('')). Result");
-	  equals( isHash( Object('string composite type') ), true, "isHash() should be true with 'obj' parameter: (String: Object('string compositive type')). Result");
+	  equals( isHash( Object('foo') ), true, "isHash() should be true with 'obj' parameter: (String: Object('foo')). Result");
 	  equals( isHash( Object(false) ), true, "isHash() should be true with 'obj' parameter: (Boolean: false). Result");
 	  equals( isHash( Object(true) ), true, "isHash() should be true with 'obj' parameter: (Boolean: true). Result");
 	  equals( isHash( /foo/ ), true, "isHash() should be true with 'obj' parameter: (RegExp: /foo/). Result");
 	  equals( isHash( function() {} ), true, "isHash() should be true with 'obj' parameter: (Function: function(){}). Result");
+	  equals( isHash( (function() {}).prototype ), true, "isHash() should be true with 'obj' parameter: (Object: prototype). Result");
 	  equals( isHash( {} ), true, "isHash() should be true with 'obj' parameter: (Object: {}). Result");
 	  equals( isHash( [] ), true, "isHash() should be true with 'obj' parameter: (Array: []). Result");
 	  equals( isHash( new Date ), true, "isHash() should be true with 'obj' parameter: (Date: new Date). Result");
@@ -293,6 +294,7 @@
 	  equals( getFunctionName( functionDeclaration ), "functionDeclaration", "getFunctionName() should be true with 'obj' parameter: (Function: functionDeclaration). Result");
 	  equals( getFunctionName( function functionExpression () {} ), "functionExpression", "getFunctionName() should be true with 'obj' parameter: (Function: functionExpression). Result");
 	  equals( getFunctionName( function () {} ), "anonymous", "getFunctionName() should be true with 'obj' parameter: (Function: anonymous). Result");
+
     // Test for event callback functions - varies across browsers whether this is named or not (e.g. FF/Y, CH/N)
 	  /*if ( focus ) {
 	    equals( getFunctionName( focus ), "focus", "getFunctionName() should be true with 'obj' parameter: (focus). Result");
