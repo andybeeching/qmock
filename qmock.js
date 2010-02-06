@@ -324,7 +324,7 @@ function initAssay () {
 
   // Key function to test objects against each other.
   function assertObject ( expected, actual, opt ) {
-    
+
     // Early exclusion for pass-through objects
     if ( expected === Variable ) {
       return true;
@@ -335,9 +335,9 @@ function initAssay () {
       delete opt.delegate;
       return assertCollection.apply( null, arguments );
     }
-    
+
     function __checkType ( expected, actual, expectedType, opt_typed ) {
-      
+
       if ( expectedType === "null" || expectedType === "undefined" ) {
         return __identityCheck( expected, actual );
       }

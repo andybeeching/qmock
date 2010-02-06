@@ -2879,19 +2879,19 @@
 	    .andExpects(1)
 	      .method('getEmptyObjectValue').returns({ });
 
-  	ok( Assay.object( mock.getNumericValue(), 10, true ), "getNumericValue() on mock should return (Number: 10)");
-    ok( Assay.object( mock.getStringValue(), 'data', true ), "getStringValue() on mock should return (String: data)");
-    ok( Assay.object( mock.getArrayValue(), [ 1, 2, 3 ], true ), "getArrayValue() on mock should return (Array: [ 1, 2, 3 ])");
-    ok( Assay.object( mock.getFunctionValue()(), 'function', true ), "getFunctionValue() on mock, when invoked, should return (String: 'function')");
-    ok( Assay.object( mock.getObjectValue(), { id: 5, value: 'value' }, true ), "getObjectValue() on mock should return (Object: {id: 5, value: 'value'})");
-    ok( Assay.object( mock.getNullValue(), null, true ), "getNullValue() on mock should return (null)");
-    ok( Assay.object( mock.getUndefinedValue(), undefined, true ), "getUndefinedValue() on mock should return (undefined)");
-    ok( Assay.object( mock.getEmptyStringValue(), "", true ), "getEmptyStringValue() on mock should return (String '')");
-    ok( Assay.object( mock.getZeroValue(), 0, true ), "getZeroValue() on mock should return (Number: 0)");
-    ok( Assay.object( mock.getTrueValue(), true, true ), "getTrueValue() on mock should return (Boolean: true)");
-    ok( Assay.object( mock.getFalseValue(), false, true ), "getFalseValue() on mock should return (Boolean: false)");
-    ok( Assay.object( mock.getEmptyArrayValue(), [], true ), "getEmptyArrayValue() on mock should return (Array: [])");
-    ok( Assay.object( mock.getEmptyObjectValue(), {}, true ), "getEmptyObjectValue() on mock should return (Object: {})");
+  	equals( mock.getNumericValue(), 10, "getNumericValue() on mock should return (Number: 10)");
+    equals( mock.getStringValue(), 'data', "getStringValue() on mock should return (String: data)");
+    equals( mock.getArrayValue().constructor, Array, "getArrayValue() on mock should return (Array: [ 1, 2, 3 ])");
+    equals( mock.getFunctionValue()(), 'function', "getFunctionValue() on mock, when invoked, should return (String: 'function')");
+    equals( mock.getObjectValue().constructor, Object.prototype.constructor, "getObjectValue() on mock should return (Object: {id: 5, value: 'value'})");
+    equals( mock.getNullValue(), null, "getNullValue() on mock should return (null)");
+    equals( mock.getUndefinedValue(), undefined, "getUndefinedValue() on mock should return (undefined)");
+    equals( mock.getEmptyStringValue(), "", "getEmptyStringValue() on mock should return (String: '')");
+    equals( mock.getZeroValue(), 0, "getZeroValue() on mock should return (Number: 0)");
+    equals( mock.getTrueValue(), true, "getTrueValue() on mock should return (Boolean: true)");
+    equals( mock.getFalseValue(), false, "getFalseValue() on mock should return (Boolean: false)");
+    equals( mock.getEmptyArrayValue().constructor, Array, "getEmptyArrayValue() on mock should return (Array: [])");
+    equals( mock.getEmptyObjectValue().constructor, Object.prototype.constructor, "getEmptyObjectValue() on mock should return (Object: {})");
     ok(mock.verify(), "verify() should be true");
 
 	});
@@ -2942,19 +2942,19 @@
 	    }
 	  });
 
-  	ok( Assay.object( mock.getNumericValue(), 10, true ), "getNumericValue() on mock should return (Number: 10)");
-    ok( Assay.object( mock.getStringValue(), 'data', true ), "getStringValue() on mock should return (String: data)");
-    ok( Assay.object( mock.getArrayValue(), [ 1, 2, 3 ], true ), "getArrayValue() on mock should return (Array: [ 1, 2, 3 ])");
-    ok( Assay.object( mock.getFunctionValue()(), 'function', true ), "getFunctionValue() on mock, when invoked, should return (String: 'function')");
-    ok( Assay.object( mock.getObjectValue(), { id: 5, value: 'value' }, true ), "getObjectValue() on mock should return (Object: {id: 5, value: 'value'})");
-    ok( Assay.object( mock.getNullValue(), null, true ), "getNullValue() on mock should return (null)");
-    ok( Assay.object( mock.getUndefinedValue(), undefined, true ), "getUndefinedValue() on mock should return (undefined)");
-    ok( Assay.object( mock.getEmptyStringValue(), "", true ), "getEmptyStringValue() on mock should return (String '')");
-    ok( Assay.object( mock.getZeroValue(), 0, true ), "getZeroValue() on mock should return (Number: 0)");
-    ok( Assay.object( mock.getTrueValue(), true, true ), "getTrueValue() on mock should return (Boolean: true)");
-    ok( Assay.object( mock.getFalseValue(), false, true ), "getFalseValue() on mock should return (Boolean: false)");
-    ok( Assay.object( mock.getEmptyArrayValue(), [], true ), "getEmptyArrayValue() on mock should return (Array: [])");
-    ok( Assay.object( mock.getEmptyObjectValue(), {}, true ), "getEmptyObjectValue() on mock should return (Object: {})");
+  	equals( mock.getNumericValue(), 10, "getNumericValue() on mock should return (Number: 10)");
+    equals( mock.getStringValue(), 'data', "getStringValue() on mock should return (String: data)");
+    equals( mock.getArrayValue().constructor, Array, "getArrayValue() on mock should return (Array: [ 1, 2, 3 ])");
+    equals( mock.getFunctionValue()(), 'function', "getFunctionValue() on mock, when invoked, should return (String: 'function')");
+    equals( mock.getObjectValue().constructor, Object.prototype.constructor, "getObjectValue() on mock should return (Object: {id: 5, value: 'value'})");
+    equals( mock.getNullValue(), null, "getNullValue() on mock should return (null)");
+    equals( mock.getUndefinedValue(), undefined, "getUndefinedValue() on mock should return (undefined)");
+    equals( mock.getEmptyStringValue(), "", "getEmptyStringValue() on mock should return (String: '')");
+    equals( mock.getZeroValue(), 0, "getZeroValue() on mock should return (Number: 0)");
+    equals( mock.getTrueValue(), true, "getTrueValue() on mock should return (Boolean: true)");
+    equals( mock.getFalseValue(), false, "getFalseValue() on mock should return (Boolean: false)");
+    equals( mock.getEmptyArrayValue().constructor, Array, "getEmptyArrayValue() on mock should return (Array: [])");
+    equals( mock.getEmptyObjectValue().constructor, Object.prototype.constructor, "getEmptyObjectValue() on mock should return (Object: {})");
     ok(mock.verify(), "verify() should be true");
 
 	});
@@ -4772,125 +4772,6 @@
 	  ninja.setSword(katana);
 
 	  ok(ninja.verify(), "verify() should be true");
-
-	});
-
-
-	test("mock with pass-through argument types: Selector & Variable", function () {
-
-	  expect(15);
-
-	  var ninja = new Mock;
-
-	  // Allow pass-through argument types (and implicitly values)
-
-	  var ninja = new Mock;
-
-	  ninja
-	    .expects(1)
-	      .method("hitOpponents")
-	      .accepts(Mock.Variable);
-
-	  // Good Exercise
-
-	  // Test primitives
-
-	  ninja.hitOpponents(1);
-
-	  ok(ninja.verify(), "verify() should be true with primitive argument type: 1");
-
-	  ninja.reset();
-
-	  ninja.hitOpponents("hard");
-
-	  ok(ninja.verify(), "verify() should be true with primitive argument type: \"hard\"");
-
-	  ninja.reset();
-
-	  ninja.hitOpponents(true);
-
-	  ok(ninja.verify(), "verify() should be true with primitive argument type: true");
-
-	  ninja.reset();
-
-	  // Test Composites
-
-	  ninja.hitOpponents(function() {});
-
-	  ok(ninja.verify(), "verify() should be true with composite argument type: Function () {}");
-
-	  ninja.reset();
-
-	  ninja.hitOpponents({});
-
-	  ok(ninja.verify(), "verify() should be true with composite argument type: {}");
-
-	  ninja.reset();
-
-	  ninja.hitOpponents([]);
-
-	  ok(ninja.verify(), "verify() should be true with composite argument type: []");
-
-	  ninja.reset();
-
-	  ninja.hitOpponents(new Date);
-
-	  ok(ninja.verify(), "verify() should be true with composite argument type: new Date ()");
-
-	  ninja.reset();
-
-	  ninja.hitOpponents(new Custom);
-
-	  ok(ninja.verify(), "verify() should be true with composite argument type: new Custom ()");
-
-	  ninja.reset();
-
-	  // Test falsy values
-
-	  ninja.hitOpponents(null);
-
-	  ok(ninja.verify(), "verify() should be true with falsy argument type: null");
-
-	  ninja.reset();
-
-	  ninja.hitOpponents(undefined);
-
-	  ok(ninja.verify(), "verify() should be true with falsy argument type: undefined");
-
-	  ninja.reset();
-
-	  ninja.hitOpponents(false);
-
-	  ok(ninja.verify(), "verify() should be true with falsy argument type: false");
-
-	  ninja.reset();
-
-	  ninja.hitOpponents("");
-
-	  ok(ninja.verify(), "verify() should be true with falsy argument type: \"\"");
-
-	  ninja.reset();
-
-	  ninja.hitOpponents(0);
-
-	  ok(ninja.verify(), "verify() should be true with falsy argument type: 0");
-
-	  ninja.reset();
-
-	  ninja.hitOpponents(Mock.Variable);
-
-	  ok(ninja.verify(), "verify() should be true with pass-through object: Variable");
-
-	  var samurai = new Mock;
-
-	  samurai
-	    .expects(1)
-	      .method("findArmour")
-	      .accepts(Selector);
-
-	  samurai.findArmour(Selector);
-
-	  ok(samurai.verify(), "verify() should be true with pass-through object: Selector");
 
 	});
 
