@@ -61,229 +61,10 @@ var initAssay = ( function ( _toString, _hasOwnProperty ) {
 
   // PROTECTED Functions & Variables
   // Shared between Assay Instances
-  var undefined;
-
-  // Allow pass-through argument checking
-  // Exposed on Assay API
-  function Variable () {}
-
-  // Function to expose private objects on a target object for testing (plus injection of mocks/stubs and reset functionality)
-  // Be able to pass object detailing which methods to return (maybe config? {get:true, set:true, reset:true} - default would be false?)
-  function _exposeObject ( obj, descriptor, container, opt_filter ) {
-
-    var cachedObj = obj, // can this part be improved by one cache for all or many atomic caches?
-        // defaults
-        container = container || this,
-        _map = {
-          get: function () {
-            return obj;
-          },
-          set: function ( newObj ) {
-            obj = newObj || null;
-          },
-          restore: function () {
-            obj = cachedObj;
-          }
-        };
-
-    // parameter checks
-    if ( arguments.length < 3 ) {
-      throw {
-        type: "MissingParametersException",
-        msg: "exposeObject() requires an 'obj', 'descriptor', and 'container' parameter to be passed to method interface"
-      }
-    }
-
-    // Filter map of getters and setters
-    if ( opt_filter !== undefined ) {
-      for ( var key in _map ) {
-        if ( ( !_hasOwnProperty.call( opt_filter, key ) || opt_filter[ key ] !== true ) && ( key in _map ) ) {
-          delete _map[ key ];
-        }
-      }
-    }
-
-    // attach accessors & mutators
-    container[ descriptor ] = _map;
-
-    // successful exposé
-    return true;
-
-  }
-
-  // Private function to test whether an object can be enumerated
-  function _isHash ( obj ) {
-
-    var result = false,
-        id = Math.random();
-
-    // exclude null/undefined early
-    if ( obj === undefined || obj === null ) {
-      return result;
-    }
-
-    // If object then should allow mutation
-    obj[ id ] = true;
-    result = !!( obj[ id ] );
-
-    // cleanup to avoid false positives later on
-    if ( result ) {
-      delete obj[ id ];
-    }
-
-    return result;
-  }
-
-  // Utilising the 'Miller Device'
-  // http://www.caplet.com/ (Mark Miller's (of the Google) website)
-  // http://profiles.yahoo.com/blog/GSBHPXZFNRM2QRAP3PXNGFMFVU?eid=fam48bo6nChhLpXTWLYuo2PoctbJjTIo34SjoLBF9VV3glXt.w#comments
-  // http://perfectionkills.com/instanceof-considered-harmful-or-how-to-write-a-robust-isarray/
-  // http://gist.github.com/47997
-  // http://zaa.ch/1q
-  // http://groups.google.com.au/group/comp.lang.javascript/browse_frm/thread/368a55fec19af7b2/efea4aa2d12a3aa4?hl=en&lnk=gst&q=+An+isArray+test+(and+IE+bugs)+#efea4aa2d12a3aa4
-  // Function name can't be can't be typeof or typeOf because Safari barfs on
-  // the reserved word use.  Non-IE browsers report the browser object classes
-  // in the toString e.g. '[object HTMLDivElement]', but IE always returns
-  // '[object Object]' for DOM objects and methods because they are COM objects
-  function _getTypeOf ( obj ) {
-
-    // Don't add string checks for undefined/null as easy to get false positives with other unknown objects
-    var TYPES = {
-      "[object Number]"   : "number",
-      "[object Boolean]"  : "boolean",
-      "[object String]"   : "string",
-      "[object Function]" : "function",
-      "[object RegExp]"   : "regexp",
-      "[object Array]"    : "array",
-      "[object Date]"     : "date",
-      "[object Error]"    : "error"
-    };
-
-    return ( obj === undefined )
-      ? 'undefined'
-      : TYPES[ _toString.call( obj ) ]
-        || ( obj ? 'object' : 'null' );
-  }
-
-  // Grab the identifier of a function object
-  // Most useful called on function declarations, or named function expressions (or with displayName)
-  // Otherwise will just return ['anonymous']
-  // Not re-using _getTypeof to reduce dependencies
-  /**
-   *
-	 * Function that returns a function name by decompilation or the Function.name property.
-	 *
-	 */
-
-  function _getFunctionName ( fn ) {
-
-    // Check if dealing with a function object
-    if ( _toString.call( fn ) !== "[object Function]" ) {
-      return false;
-    }
-
-    // Firefox supports Function.name, so try that first, else decompile and use RegExp
-    // IE returns null for anonymous functions, so provide fallback array
-    // We don't use displayName as that can be manipulated more easily to mess up the 'Klass' inference.
-    var id = ( !fn.ID )
-      ? ( !fn.name )
-        ? ( fn + "" ).match( /function +([\w$]*) *\(/ )[ 1 ] // decompiles function and grabs identifier if named
-        : fn.name
-      : fn.ID;
-
-    // Cache result to avoid future lookups
-    return fn.ID = fn.ID || id || "anonymous";
-
-  };
-
-  // Priviledged function to compare two hash-like objects
-  function assertHash ( expected, actual, opt ) {
-
-    var result = true,
-        // defaults
-        raiseError = ( opt && opt.exceptionHandler ) || null,
-        descriptor = ( opt && opt.descriptor ) || 'assertHash()';
-
-    // Required parameters & characteristics (i.e. is enumerable)
-    if ( arguments.length < 2 ) {
-      throw {
-        type: "MissingParametersException",
-        msg: "assertHash() requires at least an 'expected' and 'actual' parameter to be passed to method interface"
-      }
-    } else if ( ( _isHash( expected ) === false ) || ( _isHash( actual ) === false ) ) {
-      throw {
-        type: "MalformedArgumentsException",
-        msg: "assertHash() requires the 'expected' and 'actual' parameters to allow enumeration (be hash-like). Expected was: " + expected + ", actual was: " + actual
-      }
-    } else {
-
-    // TODO: {DontEnum} shim
-
-      checkingMembers:
-        for ( var key in expected ) {
-          // expectations don't support prototypical inheritance...
-          if ( _hasOwnProperty.call( expected, key ) ) {
-            // but actual values do (and also shadowed natives, e.g. toString as a key - see {DontEnum} tests)
-            // We 'objectify' the 'actual' object as the in operator throws errors when executed against primitive values (e.g. key in "" --> key in Object("")))
-            // We use the in operator as opposed to a dynamic lookup because in the case of an assigned falsy value to actual[key] the result is false (as opposed to true - the property does exist on the actual object)
-            // in operator performs lookup resolution on [[Prototype]] chain
-            // FF 3.6 won't eumerate function instance prototype property (https://developer.mozilla.org/En/Firefox_3.6_for_developers#JavaScript)
-            if ( key in Object( actual ) ) {
-              // Attempt to provide more useful error message
-              if ( opt ) {
-                opt.descriptor = descriptor + ' > ' + key;
-              }
-              result &= assertObject( expected[key], actual[key], opt );
-            } else {
-              raiseError && raiseError( key, "not found on object", "MissingHashKeyException", descriptor )
-              result = false;
-              continue checkingMembers;
-            }
-          }
-        }
-    }
-
-    return !!result;
-  }
-
-  // Delegate function that asserts elements of a collection
-  function assertCollection ( expected, actual, opt ) {
-
-    var result = true,
-        raiseError = ( opt && opt.exceptionHandler ) || null,
-        descriptor = ( opt && opt.descriptor ) || 'assertCollection()';
-
-    // assertCollection interface checks
-    if ( arguments.length < 2 ) {
-      throw {
-        type: "MissingParametersException",
-        msg: "assertCollection() requires at least an expected and actual parameter to be passed to interface"
-      }
-    } else if ( ( !expected || expected.length === undefined ) || ( !actual || actual.length === undefined ) ) {
-      throw {
-        type: "MalformedArgumentsException",
-        msg: "assertCollection() requires the 'expected' and 'actual' collection parameters to be an Array-like collection"
-      }
-    }
-
-    // assertCollection parameter checks
-    if ( expected.length !== actual.length ) {
-      raiseError && raiseError( expected.length, actual.length, "MismatchedNumberOfMembersException", descriptor )
-      result = false;
-    } else {
-      // Only assert on absolute number of params declared in method signature as expectations don't exist for overloaded interfaces
-      for ( var i = 0, len = actual.length; i < len; i++ ) {
-        // 1:1 assertion
-        result &= assertObject ( expected[ i ], actual[ i ], opt );
-      }
-    }
-
-    // Return a Boolean for recursive calls, exceptions handled in opt_exceptionsHandler.
-    return !!result;
-  }
+  var undefined,
 
   // Key function to test objects against each other.
-  var assertObject = ( function ( ) {
+  assertObject = ( function ( ) {
 
     // Private Functions
     function __checkType ( expected, actual, expectedType, opt_typed ) {
@@ -323,7 +104,6 @@ var initAssay = ( function ( _toString, _hasOwnProperty ) {
     }
 
     function __setExpectedType ( obj ) {
-
       var Klass = _getTypeOf( obj );
       // some comment
       return ( Klass !== "function" ) ? Klass : _getFunctionName( obj );
@@ -332,10 +112,6 @@ var initAssay = ( function ( _toString, _hasOwnProperty ) {
     function __identityCheck ( expected, actual ) {
       return expected === actual;
     }
-
-    /*function __isComparison ( type ) {
-      return /^(?:number|string|boolean|date|regexp)$/.test( type );
-    }*/
 
     function __isCollection ( obj ) {
       return !!( _hasOwnProperty.call( obj, 'length' ) );
@@ -363,7 +139,7 @@ var initAssay = ( function ( _toString, _hasOwnProperty ) {
             "undefined": pass
           };
 
-      return function compare_ ( expected, actual, expectedType, opt_typed ) {
+      return function ( expected, actual, expectedType, opt_typed ) {
 
         // update ROUTINES
         ROUTINES[ "function" ] = ( !opt_typed ) ? __identityCheck : pass;
@@ -380,9 +156,9 @@ var initAssay = ( function ( _toString, _hasOwnProperty ) {
           // else set flag for deep comparison
           : fn;
       };
-    })()
+    })();
 
-    return function assertObject_ ( expected, actual, opt ) {
+    return function ( expected, actual, opt ) {
 
       // Early exclusion for pass-through objects
       if ( expected === Variable ) {
@@ -417,6 +193,11 @@ var initAssay = ( function ( _toString, _hasOwnProperty ) {
       // If strict then do shallow comparison
       if ( result && isStrict ) {
         result = __compare( expected, actual, expectedType, isTyped );
+      }
+
+      // Handle functions for strict and typed to match instances
+      if ( !result && ( expectedType === "function" ) ) {
+        result = __identityCheck( expected, actual );
       }
 
       // If object not handled in __compare, or deep: true then perform a deep comparison
@@ -577,6 +358,227 @@ var initAssay = ( function ( _toString, _hasOwnProperty ) {
     };
 
   })();
+
+  // Allow pass-through argument checking
+  // Exposed on Assay API
+  function Variable () {}
+
+  // Function to expose private objects on a target object for testing (plus injection of mocks/stubs and reset functionality)
+  // Be able to pass object detailing which methods to return (maybe config? {get:true, set:true, reset:true} - default would be false?)
+  function _exposeObject ( obj, descriptor, container, opt_filter ) {
+
+    var cachedObj = obj, // can this part be improved by one cache for all or many atomic caches?
+        // defaults
+        container = container || this,
+        _map = {
+          get: function () {
+            return obj;
+          },
+          set: function ( newObj ) {
+            obj = newObj || null;
+          },
+          restore: function () {
+            obj = cachedObj;
+          }
+        };
+
+    // parameter checks
+    if ( arguments.length < 3 ) {
+      throw {
+        type: "MissingParametersException",
+        msg: "exposeObject() requires an 'obj', 'descriptor', and 'container' parameter to be passed to method interface"
+      }
+    }
+
+    // Filter map of getters and setters
+    if ( opt_filter !== undefined ) {
+      for ( var key in _map ) {
+        if ( ( !_hasOwnProperty.call( opt_filter, key ) || opt_filter[ key ] !== true ) && ( key in _map ) ) {
+          delete _map[ key ];
+        }
+      }
+    }
+
+    // attach accessors & mutators
+    container[ descriptor ] = _map;
+
+    // successful exposé
+    return true;
+
+  }
+
+  // Private function to test whether an object can be enumerated
+  function _isHash ( obj ) {
+
+    var result = false,
+        id = Math.random();
+
+    // exclude null/undefined early
+    if ( obj === undefined || obj === null ) {
+      return result;
+    }
+
+    // If object then should allow mutation
+    obj[ id ] = true;
+    result = !!( obj[ id ] );
+
+    // cleanup to avoid false positives later on
+    if ( result ) {
+      delete obj[ id ];
+    }
+
+    return result;
+  }
+
+  // Utilising the 'Miller Device'
+  // http://www.caplet.com/ (Mark Miller's (of the Google) website)
+  // http://profiles.yahoo.com/blog/GSBHPXZFNRM2QRAP3PXNGFMFVU?eid=fam48bo6nChhLpXTWLYuo2PoctbJjTIo34SjoLBF9VV3glXt.w#comments
+  // http://perfectionkills.com/instanceof-considered-harmful-or-how-to-write-a-robust-isarray/
+  // http://gist.github.com/47997
+  // http://zaa.ch/1q
+  // http://groups.google.com.au/group/comp.lang.javascript/browse_frm/thread/368a55fec19af7b2/efea4aa2d12a3aa4?hl=en&lnk=gst&q=+An+isArray+test+(and+IE+bugs)+#efea4aa2d12a3aa4
+  // Function name can't be can't be typeof or typeOf because Safari barfs on
+  // the reserved word use.  Non-IE browsers report the browser object classes
+  // in the toString e.g. '[object HTMLDivElement]', but IE always returns
+  // '[object Object]' for DOM objects and methods because they are COM objects
+  function _getTypeOf ( obj ) {
+
+    // Don't add string checks for undefined/null as easy to get false positives with other unknown objects
+    var TYPES = {
+      "[object Number]"   : "number",
+      "[object Boolean]"  : "boolean",
+      "[object String]"   : "string",
+      "[object Function]" : "function",
+      "[object RegExp]"   : "regexp",
+      "[object Array]"    : "array",
+      "[object Date]"     : "date",
+      "[object Error]"    : "error"
+    };
+
+    return ( obj === undefined )
+      ? 'undefined'
+      : TYPES[ _toString.call( obj ) ]
+        || ( obj ? 'object' : 'null' );
+  }
+
+  // Grab the identifier of a function object
+  // Most useful called on function declarations, or named function expressions (or with displayName)
+  // Otherwise will just return ['anonymous']
+  // Not re-using _getTypeof to reduce dependencies
+  /**
+   *
+	 * Function that returns a function name by decompilation or the Function.name property.
+	 *
+	 */
+
+  function _getFunctionName ( fn ) {
+
+    var ANON_ID = "anonymous";
+
+    // Check if dealing with a function object
+    if ( _toString.call( fn ) !== "[object Function]" ) {
+      return false;
+    }
+
+    // Firefox supports Function.name, so try that first, else decompile and use RegExp
+    // IE returns null for anonymous functions, so provide fallback array
+    // We don't use displayName as that can be manipulated more easily to mess up the 'Klass' inference.
+    var id = ( !fn.ID )
+      ? ( !fn.name )
+        ? ( fn + "" ).match( /function +([\w$]*) *\(/ )[ 1 ] // decompiles function and grabs identifier if available
+        : fn.name
+      : fn.ID;
+
+    // Cache result to avoid future lookups
+    return fn.ID = fn.ID || id || ANON_ID;
+
+  };
+
+  // Priviledged function to compare two hash-like objects
+  function assertHash ( expected, actual, opt ) {
+
+    var result = true,
+        // defaults
+        raiseError = ( opt && opt.exceptionHandler ) || null,
+        descriptor = ( opt && opt.descriptor ) || 'assertHash()';
+
+    // Required parameters & characteristics (i.e. is enumerable)
+    if ( arguments.length < 2 ) {
+      throw {
+        type: "MissingParametersException",
+        msg: "assertHash() requires at least an 'expected' and 'actual' parameter to be passed to method interface"
+      }
+    } else if ( ( _isHash( expected ) === false ) || ( _isHash( actual ) === false ) ) {
+      throw {
+        type: "MalformedArgumentsException",
+        msg: "assertHash() requires the 'expected' and 'actual' parameters to allow enumeration (be hash-like). Expected was: " + expected + ", actual was: " + actual
+      }
+    } else {
+
+    // TODO: {DontEnum} shim
+
+      checkingMembers:
+        for ( var key in expected ) {
+          // expectations don't support prototypical inheritance...
+          if ( _hasOwnProperty.call( expected, key ) ) {
+            // but actual values do (and also shadowed natives, e.g. toString as a key - see {DontEnum} tests)
+            // We 'objectify' the 'actual' object as the in operator throws errors when executed against primitive values (e.g. key in "" --> key in Object("")))
+            // We use the in operator as opposed to a dynamic lookup because in the case of an assigned falsy value to actual[key] the result is false (as opposed to true - the property does exist on the actual object)
+            // in operator performs lookup resolution on [[Prototype]] chain
+            // FF 3.6 won't eumerate function instance prototype property (https://developer.mozilla.org/En/Firefox_3.6_for_developers#JavaScript)
+            if ( key in Object( actual ) ) {
+              // Attempt to provide more useful error message
+              if ( opt ) {
+                opt.descriptor = descriptor + ' > ' + key;
+              }
+              result &= assertObject( expected[key], actual[key], opt );
+            } else {
+              raiseError && raiseError( key, "not found on object", "MissingHashKeyException", descriptor )
+              result = false;
+              continue checkingMembers;
+            }
+          }
+        }
+    }
+
+    return !!result;
+  }
+
+  // Delegate function that asserts elements of a collection
+  function assertCollection ( expected, actual, opt ) {
+
+    var result = true,
+        raiseError = ( opt && opt.exceptionHandler ) || null,
+        descriptor = ( opt && opt.descriptor ) || 'assertCollection()';
+
+    // assertCollection interface checks
+    if ( arguments.length < 2 ) {
+      throw {
+        type: "MissingParametersException",
+        msg: "assertCollection() requires at least an expected and actual parameter to be passed to interface"
+      }
+    } else if ( ( !expected || expected.length === undefined ) || ( !actual || actual.length === undefined ) ) {
+      throw {
+        type: "MalformedArgumentsException",
+        msg: "assertCollection() requires the 'expected' and 'actual' collection parameters to be an Array-like collection"
+      }
+    }
+
+    // assertCollection parameter checks
+    if ( expected.length !== actual.length ) {
+      raiseError && raiseError( expected.length, actual.length, "MismatchedNumberOfMembersException", descriptor )
+      result = false;
+    } else {
+      // Only assert on absolute number of params declared in method signature as expectations don't exist for overloaded interfaces
+      for ( var i = 0, len = actual.length; i < len; i++ ) {
+        // 1:1 assertion
+        result &= assertObject ( expected[ i ], actual[ i ], opt );
+      }
+    }
+
+    // Return a Boolean for recursive calls, exceptions handled in opt_exceptionsHandler.
+    return !!result;
+  }
 
   // Assay bootstrapper
   return function () {

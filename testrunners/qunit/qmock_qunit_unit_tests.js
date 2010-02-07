@@ -166,99 +166,6 @@
 
 	});
 
-	/*test("Assay.Utils.isNativeType() - exercises", function () {
-
-	  var isNativeType = Assay.Utils.isNativeType;
-
-    function augmentNative ( obj ) {
-      obj.prototype[ "foo" ] = "bar";
-      return obj;
-    }
-
-    function cleanNatives () {
-      for (
-        var i = 0,
-            types = [Number, String, Boolean, RegExp, Date, Function, Array, Object, Error],
-            len = types.length;
-          i < len;
-          i++ ) {
-        delete types[ i ][ "prototype" ][ "foo" ];
-      }
-    }
-
-    expect( 44 );
-
-	  // Expected False Evaluations
-
-	  // Test falsy types and primitive data types
-
-	  equals( isNativeType( NaN ), false, "isNativeType() should be false with 'obj' parameter: (NaN). Result");
-	  equals( isNativeType( Infinity ), false, "isNativeType() should be false with 'obj' parameter: (NaN). Result");
-	  equals( isNativeType( 0 ), false, "isNativeType() should be false with 'obj' parameter: (Number: 0). Result");
-	  equals( isNativeType( 1 ), false, "isNativeType() should be false with 'obj' parameter: (Number: 1). Result");
-	  equals( isNativeType( "" ), false, "isNativeType() should be false with 'obj' parameter: (String: ''). Result");
-	  equals( isNativeType( "string primitive type" ), false, "isNativeType() should be false with 'obj' parameter: (String: 'string primitive type'). Result");
-	  equals( isNativeType( false ), false, "isNativeType() should be false with 'obj' parameter: (Boolean: false). Result");
-	  equals( isNativeType( true ), false, "isNativeType() should be false with 'obj' parameter: (Boolean: true). Result");
-
-	  // Test composite data types
-	  equals( isNativeType( Object(0) ), false, "isNativeType() should be false with 'obj' parameter: (Number: Object(0)). Result");
-	  equals( isNativeType( Object(1) ), false, "isNativeType() should be false with 'obj' parameter: (Number: Object(1)). Result");
-	  equals( isNativeType( Object("") ), false, "isNativeType() should be false with 'obj' parameter: (String: Object('')). Result");
-	  equals( isNativeType( Object('string composite type') ), false, "isNativeType() should be false with 'obj' parameter: (String: Object('string compositive type')). Result");
-	  equals( isNativeType( Object(false) ), false, "isNativeType() should be false with 'obj' parameter: (Boolean: false). Result");
-	  equals( isNativeType( Object(true) ), false, "isNativeType() should be false with 'obj' parameter: (Boolean: true). Result");
-	  equals( isNativeType( /foo/ ), false, "isNativeType() should be false with 'obj' parameter: (RegExp: /foo/). Result");
-	  // debugger;
-	  equals( isNativeType( Named), false, "isNativeType() should be false with 'obj' parameter: (Function: function(){}). Result");
-	  equals( isNativeType( {} ), false, "isNativeType() should be false with 'obj' parameter: (Object: {}). Result");
-	  equals( isNativeType( [] ), false, "isNativeType() should be false with 'obj' parameter: (Array: []). Result");
-	  equals( isNativeType( new Date ), false, "isNativeType() should be false with 'obj' parameter: (Date: new Date). Result");
-	  equals( isNativeType( new Custom ), false, "isNativeType() should be false with 'obj' parameter: (Custom: new Custom). Result");
-
-	  // Native / Host Objects
-	  // Math is not a Type but a native object
-	  equals( isNativeType( Math ), false, "isNativeType() should be false with 'obj' parameter: (Math). Result");
-	  // need check for DOM / BOM before executing these (mainly for ssjs)
-	  equals( isNativeType( document ), false, "isNativeType() should be false with 'obj' parameter: (HostObject: document). Result");
-
-	  // Custom Objects
-	  // debugger;
-	  equals( isNativeType( Custom ), false, "isNativeType() should be false with 'obj' parameter: (Custom). Result");
-	  equals( isNativeType( focus ), false, "isNativeType() should be false with 'obj' parameter: (Event: focus). Result");
-
-	  // Expected True Evalutions
-
-	  // Test native objects
-    equals( isNativeType( null ), true, "isNativeType() should be true with 'obj' parameter: (null). Result");
-	  equals( isNativeType( undefined ), true, "isNativeType() should be true with 'obj' parameter: (undefined). Result");
-	  equals( isNativeType( Number ), true, "isNativeType() should be true with 'obj' parameter: (Number). Result");
-	  equals( isNativeType( String ), true, "isNativeType() should be true with 'obj' parameter: (String). Result");
-	  equals( isNativeType( Boolean ), true, "isNativeType() should be true with 'obj' parameter: (Boolean). Result");
-	  equals( isNativeType( RegExp ), true, "isNativeType() should be true with 'obj' parameter: (RegExp). Result");
-	  equals( isNativeType( Date ), true, "isNativeType() should be true with 'obj' parameter: (Date). Result");
-	  equals( isNativeType( Function ), true, "isNativeType() should be true with 'obj' parameter: (Function). Result");
-	  equals( isNativeType( Array ), true, "isNativeType() should be true with 'obj' parameter: (Array). Result");
-	  equals( isNativeType( Object ), true, "isNativeType() should be true with 'obj' parameter: (Object). Result");
-	  equals( isNativeType( Error ), true, "isNativeType() should be true with 'obj' parameter: (Object). Result");
-
-	  // Test native objects - augmented
-
-	  equals( isNativeType( augmentNative( Number ) ), true, "isNativeType() should be true with 'obj' parameter: (Number [augmented]). Result");
-	  equals( isNativeType( augmentNative( String ) ), true, "isNativeType() should be true with 'obj' parameter: (String [augmented]). Result");
-	  equals( isNativeType( augmentNative( Boolean ) ), true, "isNativeType() should be true with 'obj' parameter: (Boolean [augmented]). Result");
-	  equals( isNativeType( augmentNative( RegExp ) ), true, "isNativeType() should be true with 'obj' parameter: (RegExp [augmented]). Result");
-	  equals( isNativeType( augmentNative( Date ) ), true, "isNativeType() should be true with 'obj' parameter: (Date [augmented]). Result");
-	  equals( isNativeType( augmentNative( Function ) ), true, "isNativeType() should be true with 'obj' parameter: (Function [augmented]). Result");
-	  equals( isNativeType( augmentNative( Array ) ), true, "isNativeType() should be true with 'obj' parameter: (Array [augmented]). Result");
-	  equals( isNativeType( augmentNative( Object ) ), true, "isNativeType() should be true with 'obj' parameter: (Object [augmented]). Result");
-	  equals( isNativeType( augmentNative( Error ) ), true, "isNativeType() should be true with 'obj' parameter: (Error [augmented]). Result");
-
-    // Clean-up so as not to mitigate false positive/negatives in other tests
-    cleanNatives();
-
-	});*/
-
 	test("Assay.Utils.getFunctionName() - exercises", function () {
 
 	  var getFunctionName = Assay.Utils.getFunctionName;
@@ -1438,6 +1345,155 @@
 
 	});
 
+	test("Assay.object() exercises - (Function: Constructor) [default type check mode]", function() {
+
+	  // FALSE ASSERTIONS
+
+		// Test invalid argument type - Values (truthy)
+		equals( Assay.object(Function, "foo"), false, "Assay.object() should return false with expected: (Array: Constructor) and actual: (String: 'foo')" );
+		equals( Assay.object(Function, ""), false, "Assay.object() should return true with expected: (Array: Constructor) and actual: (String: '')" );
+		equals( Assay.object(Function, 1), false, "Assay.object() should return false with expected: (Array: Constructor) and actual: (Number: 1)" );
+		equals( Assay.object(Function, true), false, "Assay.object() should return false with expected: (Array: Constructor) and actual: (Boolean: true)" );
+		equals( Assay.object(Function, []), false, "Assay.object() should return false with expected: (Array: Constructor) and actual: (Array: [])" );
+		equals( Assay.object(Function, {}), false, "Assay.object() should return false with expected: (Array: Constructor) and actual: (Object: {})" );
+		equals( Assay.object(Function, /test/), false, "Assay.object() should return false with expected: (Array: Constructor) and actual: (RegExp: /test/)" );
+		equals( Assay.object(Function, new Date), false, "Assay.object() should return false with expected: (Array: Constructor) and actual: (Date: new instance)" );
+		equals( Assay.object(Function, new Custom), false, "Assay.object() should return false with expected: (Array: Constructor) and actual: (Custom: new instance)" );
+
+	  // Test invalid argument types - false values
+		equals( Assay.object(Function, null), false, "Assay.object() should return false with expected: (Array: Constructor) and actual: (null)" );
+		equals( Assay.object(Function, undefined), false, "Assay.object() should return false with expected: (Array: Constructor) and actual: (undefined)" );
+
+		// TRUE ASSERTIONS
+
+		// Test Constructors
+		equals( Assay.object(Function, function(){}), true, "Assay.object() should return true with expected: (Array: Constructor) and actual: (Function: function(){})" );
+		equals( Assay.object(Function, String), true, "Assay.object() should return true with expected: (Array: Constructor) and actual: (String: Constructor)" );
+		equals( Assay.object(Function, Number), true, "Assay.object() should return true with expected: (Array: Constructor) and actual: (Number: Constructor)" );
+		equals( Assay.object(Function, Boolean), true, "Assay.object() should return true with expected: (Array: Constructor) and actual: (Boolean: Constructor)" );
+		equals( Assay.object(Function, Array), true, "Assay.object() should return true with expected: (Array: Constructor) and actual: (Array: Constructor)" );
+		equals( Assay.object(Function, Object), true, "Assay.object() should return true with expected: (Array: Constructor) and actual: (Object: Constructor)" );
+		equals( Assay.object(Function, Function), true, "Assay.object() should return true with expected: (Array: Constructor) and actual: (Function: Constructor)" );
+		equals( Assay.object(Function, RegExp), true, "Assay.object() should return true with expected: (Array: Constructor) and actual: (RegExp: Constructor)" );
+		equals( Assay.object(Function, Date), true, "Assay.object() should return true with expected: (Array: Constructor) and actual: (Date: Constructor)" );
+		equals( Assay.object(Function, Error), true, "Assay.object() should return true with expected: (Array: Constructor) and actual: (Error: Constructor)" );
+		equals( Assay.object(Function, Custom), true, "Assay.object() should return true with expected: (Array: Constructor) and actual: (Custom: Constructor)" );
+
+	});
+
+	test("Assay.object() exercises - (Function: Constructor) [strict mode]", function() {
+
+	  // FALSE ASSERTIONS
+
+	  // Test invalid argument type - Constructors
+		equals( Assay.object(Function, Number, {strictValueChecking: true}), false, "Assay.object() should return false with expected: (Array: Constructor) and actual: (Number: Constructor)" );
+		equals( Assay.object(Function, String, {strictValueChecking: true}), false, "Assay.object() should return true with expected: (Array: Constructor) and actual: (String: Constructor)" );
+		equals( Assay.object(Function, Boolean, {strictValueChecking: true}), false, "Assay.object() should return false with expected: (Array: Constructor) and actual: (Boolean: Constructor)" );
+		equals( Assay.object(Function, Object, {strictValueChecking: true}), false, "Assay.object() should return false with expected: (Array: Constructor) and actual: (Object: Constructor)" );
+		equals( Assay.object(Function, Array, {strictValueChecking: true}), false, "Assay.object() should return false with expected: (Array: Constructor) and actual: (Array: Constructor)" );
+		equals( Assay.object(Function, RegExp, {strictValueChecking: true}), false, "Assay.object() should return false with expected: (Array: Constructor) and actual: (RegExp: Constructor)" );
+		equals( Assay.object(Function, Date, {strictValueChecking: true}), false, "Assay.object() should return false with expected: (Array: Constructor) and actual: (Date: Constructor)" );
+		equals( Assay.object(Function, Error, {strictValueChecking: true}), false, "Assay.object() should return false with expected: (Array: Constructor) and actual: (Error: Constructor)" );
+		equals( Assay.object(Function, Custom, {strictValueChecking: true}), false, "Assay.object() should return false with expected: (Array: Constructor) and actual: (Custom: Constructor)" );
+
+		// Test invalid argument type - Values (truthy)
+		equals( Assay.object(Function, "foo", {strictValueChecking: true}), false, "Assay.object() should return true with expected: (Array: Constructor) and actual: (String: 'foo')" );
+		equals( Assay.object(Function, "", {strictValueChecking: true}), false, "Assay.object() should return true with expected: (Array: Constructor) and actual: (String: '')" );
+		equals( Assay.object(Function, 1, {strictValueChecking: true}), false, "Assay.object() should return false with expected: (Array: Constructor) and actual: (Number: 1)" );
+		equals( Assay.object(Function, true, {strictValueChecking: true}), false, "Assay.object() should return false with expected: (Array: Constructor) and actual: (Boolean: true)" );
+		equals( Assay.object(Function, [], {strictValueChecking: true}), false, "Assay.object() should return false with expected: (Array: Constructor) and actual: (Array: [])" );
+		equals( Assay.object(Function, {}, {strictValueChecking: true}), false, "Assay.object() should return false with expected: (Array: Constructor) and actual: (Object: {})" );
+		equals( Assay.object(Function, function(){}, {strictValueChecking: true}), false, "Assay.object() should return false with expected: (Array: Constructor) and actual: (Function: function(){})" );
+		equals( Assay.object(Function, /test/, {strictValueChecking: true}), false, "Assay.object() should return false with expected: (Array: Constructor) and actual: (RegExp: /test/)" );
+		equals( Assay.object(Function, new Date, {strictValueChecking: true}), false, "Assay.object() should return false with expected: (Array: Constructor) and actual: (Date: new instance)" );
+		equals( Assay.object(Function, new Custom, {strictValueChecking: true}), false, "Assay.object() should return false with expected: (Array: Constructor) and actual: (Custom: new instance)" );
+
+	  // Test invalid argument types - false values
+		equals( Assay.object(Function, null, {strictValueChecking: true}), false, "Assay.object() should return false with expected: (Array: Constructor) and actual: (null)" );
+		equals( Assay.object(Function, undefined, {strictValueChecking: true}), false, "Assay.object() should return false with expected: (Array: Constructor) and actual: (undefined)" );
+
+		// TRUE ASSERTIONS
+		equals( Assay.object(Function, Function, {strictValueChecking: true}), true, "Assay.object() should return true with expected: (Array: Constructor) and actual: (Array: Constructor)" );
+
+	});
+
+	test("Assay.object() exercises - (Function: functionDeclaration) [default type check mode]", function() {
+
+	  // FALSE ASSERTIONS
+
+	  function functionDeclaration () {}
+
+		// Test invalid argument type - Values (truthy)
+
+		equals( Assay.object(functionDeclaration, 'foo'), false, "Assay.object() should return false with expected: (Function: functionDeclaration) and actual: (String: 'foo')" );
+		equals( Assay.object(functionDeclaration, 1), false, "Assay.object() should return false with expected: (Function: functionDeclaration) and actual: (Number: 1)" );
+		equals( Assay.object(functionDeclaration, true), false, "Assay.object() should return false with expected: (Function: functionDeclaration) and actual: (Boolean: true)" );
+		equals( Assay.object(functionDeclaration, {}), false, "Assay.object() should return false with expected: (Function: functionDeclaration) and actual: (Object: {})" );
+		equals( Assay.object(functionDeclaration, /test/), false, "Assay.object() should return false with expected: (Function: functionDeclaration) and actual: (RegExp: /test/)" );
+		equals( Assay.object(functionDeclaration, new Date), false, "Assay.object() should return false with expected: (Function: functionDeclaration) and actual: (Date: new instance)" );
+		equals( Assay.object(functionDeclaration, new Custom), false, "Assay.object() should return false with expected: (Function: functionDeclaration) and actual: (Custom: new instance)" );
+
+	  // Test invalid argument types - false values
+
+		equals( Assay.object(functionDeclaration, null), false, "Assay.object() should return false with expected: (Function: functionDeclaration) and actual: (null)" );
+		equals( Assay.object(functionDeclaration, undefined), false, "Assay.object() should return false with expected: (Function: functionDeclaration) and actual: (undefined)" );
+
+		// TRUE ASSERTIONS
+
+		// Test invalid argument type - Constructors
+		equals( Assay.object(functionDeclaration, String), true, "Assay.object() should return true with expected: (Function: functionDeclaration) and actual: (String: Constructor)" );
+		equals( Assay.object(functionDeclaration, Number), true, "Assay.object() should return true with expected: (Function: functionDeclaration) and actual: (Number: Constructor)" );
+		equals( Assay.object(functionDeclaration, Boolean), true, "Assay.object() should return true with expected: (Function: functionDeclaration) and actual: (Boolean: Constructor)" );
+		equals( Assay.object(functionDeclaration, Array), true, "Assay.object() should return true with expected: (Function: functionDeclaration) and actual: (Array: Constructor)" );
+		equals( Assay.object(functionDeclaration, Object), true, "Assay.object() should return true with expected: (Function: functionDeclaration) and actual: (Object: Constructor)" );
+		equals( Assay.object(functionDeclaration, Function), true, "Assay.object() should return true with expected: (Function: functionDeclaration) and actual: (Function: Constructor)" );
+		equals( Assay.object(functionDeclaration, RegExp), true, "Assay.object() should return true with expected: (Function: functionDeclaration) and actual: (RegExp: Constructor)" );
+		equals( Assay.object(functionDeclaration, Date), true, "Assay.object() should return true with expected: (Function: functionDeclaration) and actual: (Date: Constructor)" );
+		equals( Assay.object(functionDeclaration, Custom), true, "Assay.object() should return true with expected: (Function: functionDeclaration) and actual: (Custom: Constructor)" );
+		equals( Assay.object(functionDeclaration, Error), true, "Assay.object() should return true with expected: (Function: functionDeclaration) and actual: (Error: Constructor)" );
+	  equals( Assay.object(functionDeclaration, functionDeclaration), true, "Assay.object() should return true with expected: (Function: functionDeclaration) and actual: (Array: [])" );
+
+	});
+
+	test("Assay.object() exercises - (Function: functionDeclaration) [strict mode]", function() {
+
+	  // FALSE ASSERTIONS
+
+	  function functionDeclaration () {}
+
+	  // Test invalid argument type - Constructors
+		equals( Assay.object(functionDeclaration, String, {strictValueChecking: true}), false, "Assay.object() should return false with expected: (Function: functionDeclaration) and actual: (String: Constructor)" );
+		equals( Assay.object(functionDeclaration, Number, {strictValueChecking: true}), false, "Assay.object() should return false with expected: (Function: functionDeclaration) and actual: (Number: Constructor)" );
+		equals( Assay.object(functionDeclaration, Boolean, {strictValueChecking: true}), false, "Assay.object() should return false with expected: (Function: functionDeclaration) and actual: (Boolean: Constructor)" );
+		equals( Assay.object(functionDeclaration, Array, {strictValueChecking: true}), false, "Assay.object() should return false with expected: (Function: functionDeclaration) and actual: (Array: Constructor)" );
+		equals( Assay.object(functionDeclaration, Object, {strictValueChecking: true}), false, "Assay.object() should return false with expected: (Function: functionDeclaration) and actual: (Object: Constructor)" );
+		equals( Assay.object(functionDeclaration, Function, {strictValueChecking: true}), false, "Assay.object() should return false with expected: (Function: functionDeclaration) and actual: (Function: Constructor)" );
+		equals( Assay.object(functionDeclaration, RegExp, {strictValueChecking: true}), false, "Assay.object() should return false with expected: (Function: functionDeclaration) and actual: (RegExp: Constructor)" );
+		equals( Assay.object(functionDeclaration, Date, {strictValueChecking: true}), false, "Assay.object() should return false with expected: (Function: functionDeclaration) and actual: (Date: Constructor)" );
+		equals( Assay.object(functionDeclaration, Error, {strictValueChecking: true}), false, "Assay.object() should return false with expected: (Function: functionDeclaration) and actual: (Error: Constructor)" );
+		equals( Assay.object(functionDeclaration, Custom, {strictValueChecking: true}), false, "Assay.object() should return false with expected: (Function: functionDeclaration) and actual: (Custom: Constructor)" );
+
+		// Test invalid argument type - Values (truthy)
+		equals( Assay.object(functionDeclaration, 'foo', {strictValueChecking: true}), false, "Assay.object() should return false with expected: (Function: functionDeclaration) and actual: (String: 'foo')" );
+		equals( Assay.object(functionDeclaration, 1, {strictValueChecking: true}), false, "Assay.object() should return false with expected: (Function: functionDeclaration) and actual: (Number: 1)" );
+		equals( Assay.object(functionDeclaration, true, {strictValueChecking: true}), false, "Assay.object() should return false with expected: (Function: functionDeclaration) and actual: (Boolean: true)" );
+		equals( Assay.object(functionDeclaration, {}, {strictValueChecking: true}), false, "Assay.object() should return false with expected: (Function: functionDeclaration) and actual: (Object: {})" );
+		equals( Assay.object(functionDeclaration, ['bar'], {strictValueChecking: true}), false, "Assay.object() should return false with expected: (Function: functionDeclaration) and actual: (Array: ['bar'])" );
+		equals( Assay.object(functionDeclaration, function(){}, {strictValueChecking: true}), false, "Assay.object() should return false with expected: (Function: functionDeclaration) and actual: (Function: function(){})" );
+		equals( Assay.object(functionDeclaration, /test/, {strictValueChecking: true}), false, "Assay.object() should return false with expected: (Function: functionDeclaration) and actual: (RegExp: /test/)" );
+		equals( Assay.object(functionDeclaration, new Date, {strictValueChecking: true}), false, "Assay.object() should return false with expected: (Function: functionDeclaration) and actual: (Date: new instance)" );
+		equals( Assay.object(functionDeclaration, new Custom, {strictValueChecking: true}), false, "Assay.object() should return false with expected: (Function: functionDeclaration) and actual: (Custom: new instance)" );
+
+	  // Test invalid argument types - false values
+
+		equals( Assay.object(functionDeclaration, null, {strictValueChecking: true}), false, "Assay.object() should return false with expected: (Function: functionDeclaration) and actual: (null)" );
+		equals( Assay.object(functionDeclaration, undefined, {strictValueChecking: true}), false, "Assay.object() should return false with expected: (Function: functionDeclaration) and actual: (undefined)" );
+
+		// TRUE ASSERTIONS
+		equals( Assay.object(functionDeclaration, functionDeclaration, {strictValueChecking: true}), true, "Assay.object() should return true with expected: (Function: functionDeclaration) and actual: (Function: functionDeclaration)" );
+
+	});
+
 	test("Assay.object() exercises - (Array: Constructor) [default type check mode]", function() {
 
 	  // FALSE ASSERTIONS
@@ -1739,6 +1795,158 @@
 
 	});
 
+	test("Assay.object() exercises - (Custom: Constructor) [default type check mode]", function() {
+
+	  // FALSE ASSERTIONS
+
+		// Test invalid argument type - Values (truthy)
+		equals( Assay.object(Custom, "foo"), false, "Assay.object() should return false with expected: (String: Constructor) and actual: (String: 'foo')" );
+		equals( Assay.object(Custom, ""), false, "Assay.object() should return true with expected: (String: Constructor) and actual: (String: '')" );
+		equals( Assay.object(Custom, 1), false, "Assay.object() should return false with expected: (String: Constructor) and actual: (Number: 1)" );
+		equals( Assay.object(Custom, true), false, "Assay.object() should return false with expected: (String: Constructor) and actual: (Boolean: true)" );
+		equals( Assay.object(Custom, []), false, "Assay.object() should return false with expected: (String: Constructor) and actual: (Array: [])" );
+		equals( Assay.object(Custom, {}), false, "Assay.object() should return false with expected: (String: Constructor) and actual: (Object: {})" );
+		equals( Assay.object(Custom, /test/), false, "Assay.object() should return false with expected: (String: Constructor) and actual: (RegExp: /test/)" );
+		equals( Assay.object(Custom, new Date), false, "Assay.object() should return false with expected: (String: Constructor) and actual: (Date: new instance)" );
+		equals( Assay.object(Custom, new Custom), false, "Assay.object() should return false with expected: (String: Constructor) and actual: (Custom: new instance)" );
+
+	  // Test invalid argument types - false values
+		equals( Assay.object(Custom, null), false, "Assay.object() should return false with expected: (String: Constructor) and actual: (null)" );
+		equals( Assay.object(Custom, undefined), false, "Assay.object() should return false with expected: (String: Constructor) and actual: (undefined)" );
+
+		// TRUE ASSERTIONS
+
+		// Test Constructors
+		equals( Assay.object(Custom, function(){}), true, "Assay.object() should return true with expected: (String: Constructor) and actual: (Function: function(){})" );
+		equals( Assay.object(Custom, String), true, "Assay.object() should return true with expected: (String: Constructor) and actual: (String: Constructor)" );
+		equals( Assay.object(Custom, Number), true, "Assay.object() should return true with expected: (String: Constructor) and actual: (Number: Constructor)" );
+		equals( Assay.object(Custom, Boolean), true, "Assay.object() should return true with expected: (String: Constructor) and actual: (Boolean: Constructor)" );
+		equals( Assay.object(Custom, Array), true, "Assay.object() should return true with expected: (String: Constructor) and actual: (Array: Constructor)" );
+		equals( Assay.object(Custom, Object), true, "Assay.object() should return true with expected: (String: Constructor) and actual: (Object: Constructor)" );
+		equals( Assay.object(Custom, Function), true, "Assay.object() should return true with expected: (String: Constructor) and actual: (Function: Constructor)" );
+		equals( Assay.object(Custom, RegExp), true, "Assay.object() should return true with expected: (String: Constructor) and actual: (RegExp: Constructor)" );
+		equals( Assay.object(Custom, Date), true, "Assay.object() should return true with expected: (String: Constructor) and actual: (Date: Constructor)" );
+		equals( Assay.object(Custom, Error), true, "Assay.object() should return true with expected: (String: Constructor) and actual: (Error: Constructor)" );
+		equals( Assay.object(Custom, Custom), true, "Assay.object() should return true with expected: (String: Constructor) and actual: (Custom: Constructor)" );
+
+	});
+
+	test("Assay.object() exercises - (Custom: Constructor) [strict mode]", function() {
+
+	  // FALSE ASSERTIONS
+
+	  // Test invalid argument type - Constructors
+		equals( Assay.object(Custom, Number, {strictValueChecking: true}), false, "Assay.object() should return false with expected: (Custom: Constructor) and actual: (Number: Constructor)" );
+		equals( Assay.object(Custom, String, {strictValueChecking: true}), false, "Assay.object() should return true with expected: (Custom: Constructor) and actual: (String: Constructor)" );
+		equals( Assay.object(Custom, Boolean, {strictValueChecking: true}), false, "Assay.object() should return false with expected: (Custom: Constructor) and actual: (Boolean: Constructor)" );
+		equals( Assay.object(Custom, Array, {strictValueChecking: true}), false, "Assay.object() should return false with expected: (Custom: Constructor) and actual: (Array: Constructor)" );
+		equals( Assay.object(Custom, Function, {strictValueChecking: true}), false, "Assay.object() should return false with expected: (Custom: Constructor) and actual: (Function: Constructor)" );
+		equals( Assay.object(Custom, RegExp, {strictValueChecking: true}), false, "Assay.object() should return false with expected: (Custom: Constructor) and actual: (RegExp: Constructor)" );
+		equals( Assay.object(Custom, Date, {strictValueChecking: true}), false, "Assay.object() should return false with expected: (Custom: Constructor) and actual: (Date: Constructor)" );
+		equals( Assay.object(Custom, Object, {strictValueChecking: true}), false, "Assay.object() should return false with expected: (Custom: Constructor) and actual: (Object: Constructor)" );
+		equals( Assay.object(Custom, Error, {strictValueChecking: true}), false, "Assay.object() should return false with expected: (Custom: Constructor) and actual: (Error: Constructor)" );
+
+		// Test invalid argument type - Values (truthy)
+		equals( Assay.object(Custom, "foo", {strictValueChecking: true}), false, "Assay.object() should return true with expected: (Custom: Constructor) and actual: (String: 'foo')" );
+		equals( Assay.object(Custom, "", {strictValueChecking: true}), false, "Assay.object() should return true with expected: (Custom: Constructor) and actual: (String: '')" );
+		equals( Assay.object(Custom, 1, {strictValueChecking: true}), false, "Assay.object() should return false with expected: (Custom: Constructor) and actual: (Number: 1)" );
+		equals( Assay.object(Custom, true, {strictValueChecking: true}), false, "Assay.object() should return false with expected: (Custom: Constructor) and actual: (Boolean: true)" );
+		equals( Assay.object(Custom, [], {strictValueChecking: true}), false, "Assay.object() should return false with expected: (Custom: Constructor) and actual: (Array: [])" );
+		equals( Assay.object(Custom, {}, {strictValueChecking: true}), false, "Assay.object() should return false with expected: (Custom: Constructor) and actual: (Object: {})" );
+		equals( Assay.object(Custom, function(){}, {strictValueChecking: true}), false, "Assay.object() should return false with expected: (Custom: Constructor) and actual: (Function: function(){})" );
+		equals( Assay.object(Custom, /test/, {strictValueChecking: true}), false, "Assay.object() should return false with expected: (Custom: Constructor) and actual: (RegExp: /test/)" );
+		equals( Assay.object(Custom, new Date, {strictValueChecking: true}), false, "Assay.object() should return false with expected: (Custom: Constructor) and actual: (Date: new instance)" );
+		equals( Assay.object(Custom, new Custom, {strictValueChecking: true}), false, "Assay.object() should return false with expected: (Custom: Constructor) and actual: (Custom: new instance)" );
+
+	  // Test invalid argument types - false values
+		equals( Assay.object(Custom, null, {strictValueChecking: true}), false, "Assay.object() should return false with expected: (Custom: Constructor) and actual: (null)" );
+		equals( Assay.object(Custom, undefined, {strictValueChecking: true}), false, "Assay.object() should return false with expected: (Custom: Constructor) and actual: (undefined)" );
+
+		// TRUE ASSERTIONS
+		equals( Assay.object(Custom, Custom, {strictValueChecking: true}), true, "Assay.object() should return true with expected: (Custom: Constructor) and actual: (Custom: Constructor)" );
+
+	});
+
+	test("Assay.object() exercises - (Custom: instance) [default type check mode]", function() {
+
+	  var instance = new Custom;
+
+	  // FALSE ASSERTIONS
+
+	  // Test invalid argument type - Constructors
+		equals( Assay.object(instance, String), false, "Assay.object() should return false with expected: (Custom: instance) and actual: (String: Constructor)" );
+		equals( Assay.object(instance, Number), false, "Assay.object() should return false with expected: (Custom: instance) and actual: (Number: Constructor)" );
+		equals( Assay.object(instance, Boolean), false, "Assay.object() should return false with expected: (Custom: instance) and actual: (Boolean: Constructor)" );
+		equals( Assay.object(instance, Array), false, "Assay.object() should return false with expected: (Custom: instance) and actual: (Array: Constructor)" );
+		equals( Assay.object(instance, Object), false, "Assay.object() should return false with expected: (Custom: instance) and actual: (Object: Constructor)" );
+		equals( Assay.object(instance, Function), false, "Assay.object() should return false with expected: (Custom: instance) and actual: (Function: Constructor)" );
+		equals( Assay.object(instance, RegExp), false, "Assay.object() should return false with expected: (Custom: instance) and actual: (RegExp: Constructor)" );
+		equals( Assay.object(instance, Date), false, "Assay.object() should return false with expected: (Custom: instance) and actual: (Date: Constructor)" );
+		equals( Assay.object(instance, Custom), false, "Assay.object() should return false with expected: (Custom: instance) and actual: (Custom: Constructor)" );
+		equals( Assay.object(instance, Error), false, "Assay.object() should return false with expected: (Custom: instance) and actual: (Error: Constructor)" );
+
+		// Test invalid argument type - Values (truthy)
+
+		equals( Assay.object(instance, 'foo'), false, "Assay.object() should return false with expected: (Custom: instance) and actual: (String: 'foo')" );
+		equals( Assay.object(instance, 1), false, "Assay.object() should return false with expected: (Custom: instance) and actual: (Number: 1)" );
+		equals( Assay.object(instance, true), false, "Assay.object() should return false with expected: (Custom: instance) and actual: (Boolean: true)" );
+		equals( Assay.object(instance, []), false, "Assay.object() should return false with expected: (Custom: instance) and actual: (Array: [])" );
+		equals( Assay.object(instance, function(){}), false, "Assay.object() should return false with expected: (Custom: instance) and actual: (Function: function(){})" );
+		equals( Assay.object(instance, /test/), false, "Assay.object() should return false with expected: (Custom: instance) and actual: (RegExp: /test/)" );
+		equals( Assay.object(instance, new Date), false, "Assay.object() should return false with expected: (Custom: instance) and actual: (Date: new instance)" );
+
+	  // Test invalid argument types - false values
+
+		equals( Assay.object(instance, null), false, "Assay.object() should return false with expected: (Custom: instance) and actual: (null)" );
+		equals( Assay.object(instance, undefined), false, "Assay.object() should return false with expected: (Custom: instance) and actual: (undefined)" );
+
+		// TRUE ASSERTIONS
+	  equals( Assay.object(instance, instance), true, "Assay.object() should return true with expected: (Custom: instance) and actual: (Custom: instance)" );
+		equals( Assay.object(instance, new Custom), true, "Assay.object() should return true with expected: (Custom: instance) and actual: (Custom: instance2)" );
+	});
+
+	test("Assay.object() exercises - (Custom: instance) [strict mode]", function() {
+
+    var instance = new Custom;
+
+	  // FALSE ASSERTIONS
+
+	  // Test invalid argument type - Constructors
+		equals( Assay.object(instance, String, {strictValueChecking: true}), false, "Assay.object() should return false with expected: (Custom: instance) and actual: (String: Constructor)" );
+		equals( Assay.object(instance, Number, {strictValueChecking: true}), false, "Assay.object() should return false with expected: (Custom: instance) and actual: (Number: Constructor)" );
+		equals( Assay.object(instance, Boolean, {strictValueChecking: true}), false, "Assay.object() should return false with expected: (Custom: instance) and actual: (Boolean: Constructor)" );
+		equals( Assay.object(instance, Array, {strictValueChecking: true}), false, "Assay.object() should return false with expected: (Custom: instance) and actual: (Array: Constructor)" );
+		equals( Assay.object(instance, Object, {strictValueChecking: true}), false, "Assay.object() should return false with expected: (Custom: instance) and actual: (Object: Constructor)" );
+		equals( Assay.object(instance, Function, {strictValueChecking: true}), false, "Assay.object() should return false with expected: (Custom: instance) and actual: (Function: Constructor)" );
+		equals( Assay.object(instance, RegExp, {strictValueChecking: true}), false, "Assay.object() should return false with expected: (Custom: instance) and actual: (RegExp: Constructor)" );
+		equals( Assay.object(instance, Date, {strictValueChecking: true}), false, "Assay.object() should return false with expected: (Custom: instance) and actual: (Date: Constructor)" );
+		equals( Assay.object(instance, Error, {strictValueChecking: true}), false, "Assay.object() should return false with expected: (Custom: instance) and actual: (Error: Constructor)" );
+		equals( Assay.object(instance, Custom, {strictValueChecking: true}), false, "Assay.object() should return false with expected: (Custom: instance) and actual: (Custom: Constructor)" );
+
+		// Test invalid argument type - Values (truthy)
+		equals( Assay.object(instance, 'foo', {strictValueChecking: true}), false, "Assay.object() should return false with expected: (Custom: instance) and actual: (String: 'foo')" );
+		equals( Assay.object(instance, 1, {strictValueChecking: true}), false, "Assay.object() should return false with expected: (Custom: instance) and actual: (Number: 1)" );
+		equals( Assay.object(instance, true, {strictValueChecking: true}), false, "Assay.object() should return false with expected: (Custom: instance) and actual: (Boolean: true)" );
+		equals( Assay.object(instance, [], {strictValueChecking: true}), false, "Assay.object() should return false with expected: (Custom: instance) and actual: (Array: [])" );
+		equals( Assay.object(instance, function(){}, {strictValueChecking: true}), false, "Assay.object() should return false with expected: (Custom: instance) and actual: (Function: function(){})" );
+		equals( Assay.object(instance, /test/, {strictValueChecking: true}), false, "Assay.object() should return false with expected: (Custom: instance) and actual: (RegExp: /test/)" );
+		equals( Assay.object(instance, new Date, {strictValueChecking: true}), false, "Assay.object() should return false with expected: (Custom: instance) and actual: (Date: new instance)" );
+
+	  // Test invalid argument types - false values
+
+		equals( Assay.object(instance, null, {strictValueChecking: true}), false, "Assay.object() should return false with expected: (Custom: instance) and actual: (null)" );
+		equals( Assay.object(instance, undefined, {strictValueChecking: true}), false, "Assay.object() should return false with expected: (Custom: instance) and actual: (undefined)" );
+
+		// TRUE ASSERTIONS
+		equals( Assay.object(instance, instance, {strictValueChecking: true}), true, "Assay.object() should return true with expected: (Custom: instance) and actual: (Custom: instance)" );
+		// These will match even in strict mode as their (local) interface is the same
+    // A use case needs to be presented that requires identity checking of instances of custom objects / constructors before it will be added to Assay
+		equals( Assay.object(instance, new Custom, {strictValueChecking: true}), true, "Assay.object() should return false with expected: (Custom: instance) and actual: (Custom: instance2)" );
+		equals( Assay.object(instance, {}, {strictValueChecking: true}), true, "Assay.object() should return false with expected: (Custom: instance) and actual: (Object: {foo: 'bar'})" );
+		equals( Assay.object(instance, {foo: 'bar'}, {strictValueChecking: true}), true, "Assay.object() should return false with expected: (Custom: instance) and actual: (Object: {foo: 'bar'})" );
+
+	});
+
 	test("Assay.object() exercises - (null) & (undefined) [default type check mode]", function() {
 
 	  // FALSE ASSERTIONS
@@ -1821,6 +2029,14 @@
 		equals( Assay.object(/foo/, /foo/, {typed: true}), true, "Assay.object() in 'typed' mode should return true with expected: (RegExp: /foo/) and actual: (RegExp: /foo/)" );
 		equals( Assay.object(/foo/, new RegExp(/foo/), {typed: true}), true, "Assay.object() in 'typed' mode should return true with expected: (RegExp: /foo/) and actual: (RegExp: new RegExp(/foo/))" );
 		equals( Assay.object(/foo/, /bar/, {typed: true}), true, "Assay.object() in 'typed' mode should return true with expected: (RegExp: /foo/) and actual: (RegExp: /bar/)" );
+
+    // Function
+    function functionDeclaration () {};
+    equals( Assay.object(Function, functionDeclaration, {typed:true}), true, "Assay.object() in 'typed' mode should return true with expected: (Function: Constructor) and actual: (Function: functionDeclaration)" );
+		// Test default mode (type inference) works
+		equals( Assay.object(functionDeclaration, functionDeclaration, {typed: true}), true, "Assay.object() in 'typed' mode should return true with expected: (Function: functionDeclaration) and actual: (Function: functionDeclaration)" );
+    // This is the one instance we can't handle... need to use Function as expected
+		// equals( Assay.object(functionDeclaration, function functionExpression () {}, {typed: true}), true, "Assay.object() in 'typed' mode should return true with expected: (Function: functionDeclaration) and actual: (Function: functionExpression)" );
 
     // Array
     equals( Assay.object(Array, [], {typed:true}), true, "Assay.object() in 'typed' mode should return true with expected: (Array: Constructor) and actual: (Array: [])" );
@@ -1914,6 +2130,13 @@
 		equals( Assay.object(/foo/, /foo/, {strictValueChecking: true, typed: true}), true, "Assay.object() in 'typed' mode should return true with expected: (RegExp: /foo/) and actual: (RegExp: /foo/)" );
 		// Ensure no false positives
 		equals( Assay.object(/foo/, /bar/, {strictValueChecking: true, typed: true}), false, "Assay.object() in 'typed' mode should return false with expected: (RegExp: /foo/) and actual: (RegExp: /bar/)" );
+
+    // Function
+    function functionDeclaration () {};
+    equals( Assay.object(Function, functionDeclaration, {strictValueChecking: true, typed:true}), true, "Assay.object() in 'typed' mode should return true with expected: (Function: Constructor) and actual: (Function: functionDeclaration)" );
+		// Test default mode (type inference) works
+		equals( Assay.object(functionDeclaration, functionDeclaration, {strictValueChecking: true, typed: true}), true, "Assay.object() in 'typed' mode should return true with expected: (Function: functionDeclaration) and actual: (Function: functionDeclaration" );
+		equals( Assay.object(functionDeclaration, function functionExpression () {}, {strictValueChecking: true, typed: true}), false, "Assay.object() in 'typed' mode should return true with expected: (Function: functionDeclaration) and actual: (Function: functionExpression)" );
 
     // Array
     equals( Assay.object(Array, [], {strictValueChecking: true, typed:true}), true, "Assay.object() in 'typed' mode should return true with expected: (Array: Constructor) and actual: (Array: [])" );
