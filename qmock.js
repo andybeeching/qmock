@@ -61,24 +61,43 @@ var initAssay = ( function ( _toString, _hasOwnProperty ) {
 
   // PROTECTED Functions & Variables
   // Shared between Assay Instances
-  var undefined,
+
+  // Trap undefined since used for comparison, prevent over-writing.
+  var undefined;
 
   // Key function to test objects against each other.
-  assertObject = ( function ( ) {
+  _assertObject = ( function () {
 
     // Private Functions
+    // Checks that expected and actual are of the same type
+    // Also handles 'typed' signatures to allow for value variance or a
+    // kind of design-by-contract facility.
+    // Function notes:
+    // 1. Expected type of 'object' is handled differently as root Constructor,
+    //    We only check the data type, rather than the constructor
+    //    (since *nearly* all objects in JS are hash-like)
+    // 2. Expected type of "function" also handle differently as anticipated that
+    //    this acts as a parameter type, not value/reference, and hence used as constructor
+    // 3. Type check performed in two parts:
+    //    a) Sandboxed instanceof check against 'Klass'. It is assumed that custom types
+    //       will be handled in this part.
+    //       May need refactoring to use getPrototypeOf() for more robust solution
+    //       Use of Object() converts primitve literal values into objects which plays
+    //       nice with the instanceof operator
+    //       (n.b. [[Prototype]] *is* setup, e.g. "".constuctor (which lives on __proto__, the prototype of the constructor function, exists)).
+    //    b) Cross-frame check via Miller Device. If typed parameter then compare name of constructor
+    //       Against type of actual (only works for natives).
+    //
     function __checkType ( expected, actual, expectedType, opt_typed ) {
 
+      // Handle null / undefined types
       if ( expectedType === "null" || expectedType === "undefined" ) {
         return __identityCheck( expected, actual );
       }
 
       // Custom handling for expected "object"s
-      // Since everything inherits from Object we have a different check for them
-      // On a related note this differs from isHash as nearly all types in JavaScript can act as hash-like objects
-      // and hence can be enurmerated upon
       if ( expectedType === "object" || ( opt_typed && expected === Object ) ) {
-        /* stricter variant:
+        /* stricter variant if don't want any hash-like object (e.g. window):
          * !!(actual && actual.constructor === Object.prototype.constructor);
          */
         return _getTypeOf( actual ) === "object";
@@ -87,56 +106,42 @@ var initAssay = ( function ( _toString, _hasOwnProperty ) {
       // If function passed for expected the use as "class", else use constructor property (if available)
       var klass = ( opt_typed && expectedType === "function" )
         ? expected
-        : (expected !== null && expected !== undefined) && expected.constructor;
+        : expected.constructor;
 
-      // Else test the instance against the expected Klass
-      // Try sandboxed check first (on the assumption that custom constructors will only pass this expression)
-      // & catch 'type bound' tests where actual === function object
-      // Function is used a fallback if Klass is not a valid constructor
-      return ( // Sandboxed check
-              Object( actual ) instanceof ( klass || Function )
-              // Cross-frame & 'typed' check
-              // Grab the type of through function decompilation (we only care about natives for this part, so they should be consistent x-interpreter)
-              // This is done so a 'typed' interface doesn't allow functions where the expectation is a constructor (confused.com yet?)
-              // Unless of course said type was Function, in which case boundType === "function"
+      // a) Sandboxed check
+      // b) Miller Check
+      return ( Object( actual ) instanceof klass
+              // Reset expectedType value depending on whether typed parameter and compare with actual object type
+              // e.g. (Number /* from another sandbox */, 1) // ==> true
               || _getTypeOf( actual ) === ( ( opt_typed ) ? _getFunctionName( klass ).toLowerCase() : expectedType )
       );
     }
 
-    function __setExpectedType ( obj ) {
-      var Klass = _getTypeOf( obj );
-      // some comment
-      return ( Klass !== "function" ) ? Klass : _getFunctionName( obj );
-    }
-
+    // Simple utility function to perform identityChecks
     function __identityCheck ( expected, actual ) {
       return expected === actual;
     }
 
-    function __isCollection ( obj ) {
-      return !!( _hasOwnProperty.call( obj, 'length' ) );
-    }
-
+    // Checks that expected and actual are of the same value,
+    // Or that they require a deep assertion
+    // Don't use an identity check for primitives, because if created via Object()
+    // then actually comparing by reference rather than value.
+    // e.g.
+    // --> Object('foo') === 'foo' // false
+    // --> typeof Object('foo') === "object" // true
+    // --> Object('foo').constructor === String // true (!)
     var __compare = ( function () {
 
        // pass-thru
       function pass () { return true; }
 
-      // Some defaults
+      // Map of serialize methods
       var ROUTINES = {
-            // We don't use an identity check for primitives, because if created through Object then actually comparing by reference rather than value.
-            // Object('foo') === 'foo' // false
-            // typeof Object('foo') === "object" // true
-            // Object('foo').constructor === String // true (!)
-            "number": "valueOf",
-            "string": "valueOf",
-            "boolean": "valueOf",
-            "date": "valueOf",
-            "regexp": "toString",
-            // We already know the type of the actual is correct - strict matching disabled by default for function objects
-            "function": pass,
-            "null": pass,
-            "undefined": pass
+            "number"    : "valueOf",
+            "string"    : "valueOf",
+            "boolean"   : "valueOf",
+            "date"      : "valueOf",
+            "regexp"    : "toString"
           };
 
       return function ( expected, actual, expectedType, opt_typed ) {
@@ -156,6 +161,7 @@ var initAssay = ( function ( _toString, _hasOwnProperty ) {
           // else set flag for deep comparison
           : fn;
       };
+
     })();
 
     return function ( expected, actual, opt ) {
@@ -165,196 +171,59 @@ var initAssay = ( function ( _toString, _hasOwnProperty ) {
         return true;
       }
 
-       // Delegate assertion to appropriate method if flagged.
+      // Delegate assertion to appropriate method if flagged.
       // TBR out
       if ( opt && opt.delegate === true ) {
         delete opt.delegate;
-        return assertCollection.apply( null, arguments );
+        return _assertCollection.apply( null, arguments );
       }
 
-      var expectedType = _getTypeOf( expected ),
+      // Set assertion config
+      var expectedType  = _getTypeOf( expected ),
+          // flags
+          isTyped       = (opt && opt.typed) || false,
+          isStrict      = (opt && opt.strict) || (opt && opt.strictValueChecking) || false, // backwards compat
+          isDeep        = (opt && opt.deep) || false,
+          // Key concern
+          result = true;
 
-        // Set flags
-
-        isCollection = __isCollection( expected, expectedType ),
-
-        // Set options
-        isStrict = (opt && opt.strictValueChecking) || false,
-        isTyped = (opt && opt.typed) || false,
-        isDeep = ( opt && opt.deep ) || false;
-        exceptionType = (opt && opt.exceptionType) || ( isStrict === true ? "IncorrectArgumentValueException" : "IncorrectArgumentTypeException"),
-        descriptor = ( opt && opt.descriptor ) || "getClass()",
-        raiseError = ( opt && opt.exceptionHandler ) || null,
-        result = true;
-
-      // Top-level type check
+      // Type check
       result = __checkType( expected, actual, expectedType, isTyped );
 
-      // If strict then do shallow comparison
-      if ( result && isStrict ) {
-        result = __compare( expected, actual, expectedType, isTyped );
-      }
+      // Filter for null || undefined
+      if ( expectedType !== "null" && expectedType !== "undefined" ) {
 
-      // Handle functions for strict and typed to match instances
-      if ( !result && ( expectedType === "function" ) ) {
-        result = __identityCheck( expected, actual );
-      }
-
-      // If object not handled in __compare, or deep: true then perform a deep comparison
-      if ( result === null || isDeep ) {
-
-        try {
-          result = ( ( isCollection )
-                        ? assertCollection
-                        : assertHash )
-                          .apply(
-                            null,
-                            [
-                              expected,
-                              actual,
-                              {
-                                "strictValueChecking": isStrict,
-                                "exceptionType": exceptionType,
-                                "exceptionHandler": raiseError,
-                                "descriptor": descriptor,
-                                "typed": isTyped,
-                              }
-                            ]
-                          );
+        // Identity Check
+        if ( result && isStrict ) {
+          result = __compare( expected, actual, expectedType, isTyped );
         }
-          catch ( exception ) {
-          // If MissingHashKeyException thrown then create custom error listing the missing keys.
-          if ( exception && exception.type && exception.type === "MalformedArgumentsException" ) {
-            raiseError && raiseError( expected, actual, exception.type, descriptor );
-          } else {
-            throw exception;
-          }
-          // Ensure normal flow control plays out
-          result = false;
+
+        // Handle functions for strict and typed to match instances
+        if ( !result && ( expectedType === "function" ) ) {
+          result = __identityCheck( expected, actual );
+        }
+
+        // Deep Check, performed if object not handled in __compare(), or isDeep === true
+        if ( result === null || isDeep ) {
+          result = ( ( _hasOwnProperty.call( expected, 'length' ) )
+              ? _assertCollection
+              : _assertHash )
+            .apply(null, arguments);
         }
 
       }
 
-      // Throw error if negative match
-      if ( result === false ) {
-        raiseError && raiseError( expected, actual, exceptionType, descriptor ); // Need to inject correct className
+      // Raise error if result is negative, allow for fast-fail
+      if ( result === false && ( opt && opt.exceptionHandler ) ) {
+        // Determine optional descriptors
+        var exceptionType = ( isStrict ) ? "IncorrectArgumentValueException" : "IncorrectArgumentTypeException",
+            descriptor    = opt.descriptor || "Function Signature";
+        // Push error for fail-fast option
+        opt.exceptionHandler( expected, actual, exceptionType, descriptor );
       }
 
-      /*assertNativeType:
-        for ( var i = 0, len = nativeTypes.length; i < len; i++ ) {
-          if ( expected === nativeTypes[i] ) {
-            expectedType = expected;
-            break assertNativeType;
-          }
-        }*/
-
-      // n.b. switch statements check by identity (aka strict === rather than ... ? See Nyman talk)
-      /*setFlags:
-      switch( expectedType ) {
-
-        // Pass-through
-        //case "Variable":
-          //break;
-
-        // False (however unlikely) - compare by type
-        case "null":
-        case "undefined":
-          if ( expected !== actual ) {
-            raiseError && raiseError( expected, actual, exceptionType, descriptor );
-            result = false;
-          }
-          break;
-
-        // Primitives (plus Date) - compare by prototype or value (where strictValue === true)
-        case "Date":
-        case "Number":
-        case "String":
-        case "Boolean":
-          // set Primitive flag
-          isValue = true;
-          break;
-
-        default:
-
-          // set RegExp flag
-          if ( expectedType === RegExp ) {
-            isRegExp = true;
-          }
-
-          // set collection flag via duck-typing test
-          // We use hasOwnProperty() because a force to Boolean lookup generates false positives (e.g. 0), and the 'in' operator crawls the prototype chain
-          if ( expected.hasOwnProperty && expected.hasOwnProperty('length') ) {
-            isCollection = true;
-          }
-
-          // Let's make sure the types match first of all...
-          // If not strict then check if a instance of expectation - acts on CURRENT prototype object - DOUBLE CHECK this - surely traverses [[Prototype]] chain to check all sub/superclasses and root node(s)?
-          // May need refactoring to use getPrototypeOf() for more robust solution
-          // Or check received value is not simply a constructor itself.
-          // Alternative code for 1st expression (which uses Object())
-          //} else if  {
-          /*} else if ( ( (actual !== null && actual !== undefined) ? actual.constructor : actual ) === expectedType ) {
-            return true;
-          } else {
-            // Otherwise throw exception
-            throwException(exceptionType, name, "getClass() - Number/String/Boolean/Array/Object", actual); // Need to inject correct className
-          }
-          // Use of Object() converts primitve literal values into objects which plays nice with the instanceof operator (n.b. [[Prototype]] *is* setup, e.g. "".constuctor (which lives on __proto__, the prototype of the constructor function, exists)).
-          // I'd love to know why! instanceof crawls [[Prototype]]
-
-          // Type Test
-          if ( __checkType( expectedType, actual ) === true ) {
-
-            // If strict then 'deep' assertion
-            if ( strictValueChecking === true ) {
-
-              // Catch errors thrown by collaborator object interface (e.g. assertHash())
-              try {
-
-                // Handle primtive values - if correct types then identity check
-                // Using Object.prototype.valueOf() allows us to compare Dates along with the normal primitve values w/o custom handling (e.g. UTC conversion)
-                if ( ( isValue === true && !_compare(expected, actual, "valueOf") )
-
-                // Handle regular expression objects. Note: NOT testing implementation, just the string representation of the object
-                || ( isRegExp === true && !_compare(expected, actual, "toString") )
-
-                // Handle composite values & custom Data Types - first check for match on constructor, then match on collection, e.g. members (strict checking)
-                || ( (isValue === false) && ( actual !== expectedType ) && ( ( (isCollection === true) ? assertCollection : assertHash)(expected, actual, {"strictValueChecking": true, "exceptionType": exceptionType, "exceptionHandler": (isCollection === true) ? null : raiseError, "descriptor": descriptor} ) === false ) ) ) {
-
-                  // FAIL.
-                  result = false;
-
-                }
-
-              } catch (error) {
-
-                // If MissingHashKeyException thrown then create custom error listing the missing keys.
-                if ( error && error.type && error.type === "MalformedArgumentsException" ) {
-                  raiseError && raiseError( expected, actual, error.type, descriptor );
-                } else {
-                  throw error;
-                }
-                // Ensure normal flow control plays out
-                result = false;
-              }
-
-          }*/
-          // Handle expected object literals whose Type match all types (aside from falsy types)
-          // aka check Object actually is an Object instance
-          /*else if ( ( expectedType === Object ) && ( actual && actual.constructor !== Object.prototype.constructor ) ) {
-            result = false;
-          }
-
-        // If not strict check actual isn't a constructor in own right
-        } else if ( actual !== expectedType ) {
-          result = false;
-        }
-        // Throw error if negative match
-        if ( result === false ) {
-          raiseError && raiseError( expected, actual, exceptionType, descriptor ); // Need to inject correct className
-        }
-      } // end switch*/
-       return result;
+      // Punch it chewie!
+      return result;
     };
 
   })();
@@ -363,8 +232,8 @@ var initAssay = ( function ( _toString, _hasOwnProperty ) {
   // Exposed on Assay API
   function Variable () {}
 
-  // Function to expose private objects on a target object for testing (plus injection of mocks/stubs and reset functionality)
-  // Be able to pass object detailing which methods to return (maybe config? {get:true, set:true, reset:true} - default would be false?)
+  // Function to expose private objects on a target object for testing
+  // Useful for injection of mocks/stubs and reset functionality
   function _exposeObject ( obj, descriptor, container, opt_filter ) {
 
     var cachedObj = obj, // can this part be improved by one cache for all or many atomic caches?
@@ -406,6 +275,9 @@ var initAssay = ( function ( _toString, _hasOwnProperty ) {
     return true;
 
   }
+
+  // set collection flag via duck-typing test
+  // We use hasOwnProperty() because a force to Boolean lookup generates false positives (e.g. 0), and the 'in' operator crawls the prototype chain
 
   // Private function to test whether an object can be enumerated
   function _isHash ( obj ) {
@@ -473,21 +345,21 @@ var initAssay = ( function ( _toString, _hasOwnProperty ) {
 
   function _getFunctionName ( fn ) {
 
-    var ANON_ID = "anonymous";
-
     // Check if dealing with a function object
     if ( _toString.call( fn ) !== "[object Function]" ) {
       return false;
     }
 
+    var ANON_ID = "anonymous",
+
     // Firefox supports Function.name, so try that first, else decompile and use RegExp
     // IE returns null for anonymous functions, so provide fallback array
     // We don't use displayName as that can be manipulated more easily to mess up the 'Klass' inference.
-    var id = ( !fn.ID )
-      ? ( !fn.name )
-        ? ( fn + "" ).match( /function +([\w$]*) *\(/ )[ 1 ] // decompiles function and grabs identifier if available
-        : fn.name
-      : fn.ID;
+        id = ( !fn.ID )
+          ? ( !fn.name )
+            ? ( fn + "" ).match( /function +([\w$]*) *\(/ )[ 1 ] // decompiles function and grabs identifier if available
+            : fn.name
+          : fn.ID;
 
     // Cache result to avoid future lookups
     return fn.ID = fn.ID || id || ANON_ID;
@@ -495,7 +367,7 @@ var initAssay = ( function ( _toString, _hasOwnProperty ) {
   };
 
   // Priviledged function to compare two hash-like objects
-  function assertHash ( expected, actual, opt ) {
+  function _assertHash ( expected, actual, opt ) {
 
     var result = true,
         // defaults
@@ -531,7 +403,7 @@ var initAssay = ( function ( _toString, _hasOwnProperty ) {
               if ( opt ) {
                 opt.descriptor = descriptor + ' > ' + key;
               }
-              result &= assertObject( expected[key], actual[key], opt );
+              result &= _assertObject( expected[key], actual[key], opt );
             } else {
               raiseError && raiseError( key, "not found on object", "MissingHashKeyException", descriptor )
               result = false;
@@ -545,7 +417,7 @@ var initAssay = ( function ( _toString, _hasOwnProperty ) {
   }
 
   // Delegate function that asserts elements of a collection
-  function assertCollection ( expected, actual, opt ) {
+  function _assertCollection ( expected, actual, opt ) {
 
     var result = true,
         raiseError = ( opt && opt.exceptionHandler ) || null,
@@ -572,7 +444,7 @@ var initAssay = ( function ( _toString, _hasOwnProperty ) {
       // Only assert on absolute number of params declared in method signature as expectations don't exist for overloaded interfaces
       for ( var i = 0, len = actual.length; i < len; i++ ) {
         // 1:1 assertion
-        result &= assertObject ( expected[ i ], actual[ i ], opt );
+        result &= _assertObject( expected[ i ], actual[ i ], opt );
       }
     }
 
@@ -586,9 +458,9 @@ var initAssay = ( function ( _toString, _hasOwnProperty ) {
     // PUBLIC API on Assay namespace
     return {
       "version": "0.2",
-      "object": assertObject,
-      "hash": assertHash,
-      "collection": assertCollection,
+      "object": _assertObject,
+      "hash": _assertHash,
+      "collection": _assertCollection,
       "type": _getTypeOf,
       "Variable": Variable,
       "Utils": {

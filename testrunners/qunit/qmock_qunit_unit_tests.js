@@ -4337,10 +4337,11 @@
 
 	  // Test invalid argument type
 
-	  ninja.giveUp( "ok" );
+	  ninja.giveUp( "foo" );
     try {
+      debugger;
       ninja.verify();
-      ok(false, "verify() should throw exception when ninja.giveUp() passed actual parameter (String: 'ok')" );
+      ok(false, "verify() should throw exception when ninja.giveUp() passed actual parameter (String: 'foo')" );
     } catch ( e ) {
       equals( e.length, 1, "verify() should return an array of 1 exceptions" );
       equals( e[0].type, "IncorrectArgumentTypeException", "verify() exception type should be IncorrectArgumentTypeException" );
