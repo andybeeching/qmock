@@ -61,9 +61,9 @@
 
 // START of QMOCK
 
-/* Requirements
- * CommonJS methods of equiv to assert on collections
- * QMock works best with Assay
+/*
+ * QMock requires a comparison routine for all object types (e.g. QUnit.equiv, assert.deepEquals, or Assay.compare)
+ * CommonJS assert interface offers a quasi-standard to adhere to for both test runners and matchers
  *
 */
 
@@ -71,7 +71,7 @@
 
 // Implied Global
 var Mock = Mock || (function ( compare ) {
-  
+
   /**
   * Helpers - Protected
   */
@@ -113,7 +113,7 @@ var Mock = Mock || (function ( compare ) {
               || ( obj ? "object" : "null" );
         }
       };
-      
+
   // Check for required interface
   if ( !compare || _Utils.type( compare ) !== "function" ) {
     return false;
@@ -178,7 +178,7 @@ var Mock = Mock || (function ( compare ) {
     }
     return undefined;
   }
-  
+
   // Function to build pretty exception objects - TBR function signature
   // Can be improved by using Assay.type for expected and actual
   // function createException ( exceptionType, objName, expected, actual ) {
@@ -204,13 +204,13 @@ var Mock = Mock || (function ( compare ) {
     }
     return e;
   }
-  
+
   // PUBLIC MOCK OBJECT CONSTRUCTOR
   function MockConstructor () {
 
     var mock = function MockObject () {
           // Can't use MockObject fn name, dies in IE <<< Changed to be ES5 compatible - test in IE!!
-          MockObject.actualArguments = arguments;
+          MockObject.actualArguments = slice.call(arguments); // Need to be normalised to same object type (since arguments don't share prototype with Arrays, thus would fail CommonJS deepEquals assertion)
           return MockObject;
         },
         methods = [], // List of MockedMember method instances declared on mock
@@ -238,9 +238,9 @@ var Mock = Mock || (function ( compare ) {
       // Store reference to method in method list for reset functionality <str>and potential strict execution order tracking<str>.
       methods.push(this);
     };
-    
+
     MockedMember.prototype = {
-      
+
       "method": function ( name ) {
 
         // Throw error if collision with mockMember API
@@ -262,7 +262,7 @@ var Mock = Mock || (function ( compare ) {
           function updateMethodState () {
 
             // Normalise Arguments
-            var parameters = slice.call( arguments, 0 );
+            var parameters = slice.call( arguments );
 
             // Track method invocations
             method.actualCalls++;
@@ -290,11 +290,7 @@ var Mock = Mock || (function ( compare ) {
                   try {
                     if ( compare(
                           method.expectedArgs[i]["accepts"], // 'expected' inputs
-                          presentation, // 'actual' inputs
-                          {
-                            strictValueChecking: true,
-                            typed: true
-                          } // Must be strict 1:1 match to return a certain value
+                          presentation // 'actual' inputs
                         )
                     ) {
                       // If match found against presentation return bound object (or self if chained)
@@ -422,7 +418,7 @@ var Mock = Mock || (function ( compare ) {
         return this;
       },
 
-      "andChain": function () {
+      "chain": function () {
         return this.returnValue = mock;
       },
 
@@ -457,7 +453,6 @@ var Mock = Mock || (function ( compare ) {
 
           // Evaluate method interface expectations against actual
           assertInterface: switch ( true ) {
-
             // Strict Arg length checking - no overload
             case ( allowOverload === false) && ( requiredNumberofArguments !== false ) && ( requiredNumberofArguments !== actualArgs[0].length ):
             // At least n Arg length checking - overloading allowed - Global check
@@ -490,7 +485,7 @@ var Mock = Mock || (function ( compare ) {
                           throwMockException( actualArgs.length, expectedArgs.length, "IncorrectNumberOfArgumentsException", name );
                           continue assertPresentations;
                         }
-                        
+
                         var actual = ( allowOverload === false && requiredNumberofArguments !== false )
                                    ? actualArgs[ i ]
                                    // Else assume default mode of overloading and type checking against method interface
@@ -516,7 +511,7 @@ var Mock = Mock || (function ( compare ) {
                               exceptions = exceptions.splice(0, cachedExceptionTotal);
                               continue assertPresentations;
                             } else {
-                              throwMockException( actual, expected, (strictValueChecking) ? "IncorrectArgumentValueException" : "IncorrectArgumentTypeException", name + '()' )
+                              throwMockException( actual, expected, (strictValueChecking) ? "IncorrectParameterException" : "IncorrectParameterException", name + '()' )
                             }
 
                       } // end assertExpectations loop
@@ -543,6 +538,7 @@ var Mock = Mock || (function ( compare ) {
     // Backward compatibility for QMock v0.1 API
     MockedMember.prototype["withArguments"] = MockedMember.prototype.accepts;
     MockedMember.prototype["andReturns"] = MockedMember.prototype.returns;
+    MockedMember.prototype["andChain"] = MockedMember.prototype.chain;
 
     // PUBLIC METHODS on mock
     // Creates new MockedMember instance on Mock Object and sets-up initial method expectation
@@ -571,8 +567,8 @@ var Mock = Mock || (function ( compare ) {
         if ( mock.expectsArguments.length !== mock.actualArguments.length ) {
           // Thrown in to satisfy tests (for consistency's sake) - NEEDS TO BE REFACTORED OUT!
           throwMockException( mock.actualArguments.length, mock.expectsArguments.length, "IncorrectNumberOfArgumentsException", "Constructor function" );
-        } else {
-          compare( mock.actualArguments, mock.expectsArguments );
+        } else if ( !compare( mock.actualArguments, mock.expectsArguments ) ) {
+          throwMockException( mock.actualArguments, mock.expectsArguments, "IncorrectParameterException", "Constructor function" );
             /*{
               "strictValueChecking": mock.strictValueChecking,
               "exceptionHandler": throwMockException,
@@ -588,11 +584,11 @@ var Mock = Mock || (function ( compare ) {
         methods[ i ].verifyMethod();
       }
 
-      // Did it go bad?
+      // Moment of truth...
       if (exceptions.length !== 0) {
-        throw exceptions;
+        throw exceptions; // D'OH! :(
       } else {
-        return true;
+        return true; // WIN! \o/
       }
     };
 
@@ -629,7 +625,7 @@ var Mock = Mock || (function ( compare ) {
     // mock generator
     ;;;; assert.expose( createMockFromJSON, "_createMockFromJSON", MockConstructor );
   }*/
-  
+
   // QMock was successfully initialised!
   return MockConstructor;
 
