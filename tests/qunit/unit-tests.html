@@ -2,21 +2,19 @@
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en" dir="ltr" id="html">
     <head>
     	<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    	<title>QMock Unit Tests (using Assay.compare)</title>
+    	<title>QMock Unit Tests (using Qunit.equiv)</title>
     	<link rel="stylesheet" href="../../vendor/qunit/qunit/qunit.css" />
     	<!-- Test Runner -->
         <script type="text/javascript" src="../../vendor/qunit/qunit/qunit.js"></script>
-		<!-- Assay (http://www.github.com/andybeeching/assay) -->
-		<script type="text/javascript" src="../../vendor/assay/src/assay.js"></script>
     	<!-- QMock -->
         <script type="text/javascript" src="../../src/qmock.js"></script>
 		<!-- configure QMock -->
         <script type="text/javascript">
 			
-			// Set Assay.compare as comparison routine
+			// Set QUnit.equiv as comparison routine
 			// You would normally do this inside of the tests.js file
 			// But in this instance it is shared so as to test compatibility with many testrunners
-			QMock.compare = Assay.compare;
+			QMock.compare = QUnit.equiv;
 			
 		</script>
     	<!-- qMock Unit Tests -->
@@ -24,7 +22,7 @@
     </head>
 
 	<body id="body">
-		<h1 id="qunit-header">QMock Unit Tests (using Assay.compare)</h1>
+		<h1 id="qunit-header">QMock Unit Tests (using Qunit.equiv)</h1>
 		<h2 id="qunit-banner"></h2>
 		<div id="qunit-testrunner-toolbar"></div>
 		<h2 id="qunit-userAgent"></h2>

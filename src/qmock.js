@@ -69,8 +69,8 @@
 
 //////////////////////////////////
 
-// Implied Global
-var Mock = Mock || (function () {
+/* Implied 'Global' */
+var QMock = QMock || (function () {
 
   /**
   * Helpers - Protected
@@ -79,46 +79,12 @@ var Mock = Mock || (function () {
   // Really this is ultra defensive but since undefined is used in parameter verification code let's be sure it actually is typeof "undefined".
   var undefined,
       slice = Array.prototype.slice,
-      toString = Object.prototype.toString,
-      // ....
-      _Utils = {
-        // Utilising the 'Miller Device'
-        // http://www.caplet.com/ (Mark Miller's (of the Google) website)
-        // http://profiles.yahoo.com/blog/GSBHPXZFNRM2QRAP3PXNGFMFVU?eid=fam48bo6nChhLpXTWLYuo2PoctbJjTIo34SjoLBF9VV3glXt.w#comments
-        // http://perfectionkills.com/instanceof-considered-harmful-or-how-to-write-a-robust-isarray/
-        // http://gist.github.com/47997
-        // http://zaa.ch/1q
-        // http://groups.google.com.au/group/comp.lang.javascript/browse_frm/thread/368a55fec19af7b2/efea4aa2d12a3aa4?hl=en&lnk=gst&q=+An+isArray+test+(and+IE+bugs)+#efea4aa2d12a3aa4
-        // Similar to QUnit.is()
-        // Function name can't be can't be typeof or typeOf because Safari barfs on
-        // the reserved word use.  Non-IE browsers report the browser object classes
-        // in the toString e.g. '[object HTMLDivElement]', but IE always returns
-        // '[object Object]' for DOM objects and methods because they are COM objects
-        type: function ( obj ) {
-          // Don't add string checks for undefined/null as easy to get false positives with other unknown objects
-          var TYPES = {
-            "[object Number]"   : "number",
-            "[object Boolean]"  : "boolean",
-            "[object String]"   : "string",
-            "[object Function]" : "function",
-            "[object RegExp]"   : "regexp",
-            "[object Array]"    : "array",
-            "[object Date]"     : "date",
-            "[object Error]"    : "error"
-          };
-
-          return ( obj === undefined )
-            ? "undefined"
-            : TYPES[ toString.call( obj ) ]
-              || ( obj ? "object" : "null" );
-        }
-      };
-
-  // Check for required interface
-  /*if ( !compare || _Utils.type( compare ) !== "function" ) {
-    return false;
-  }*/
-
+      toString = Object.prototype.toString;
+      
+  // Utility Functions, borrowed from jQuery but credit to Mark Miller.
+  function isNot ( nativeType, obj ) {
+    return !( toString.call( obj ) === "[object " + nativeType + "]" );
+  }
 
   // PRIVATE static methods
 
@@ -207,14 +173,20 @@ var Mock = Mock || (function () {
 
   // PUBLIC MOCK OBJECT CONSTRUCTOR
   function MockConstructor () {
-
+    
+    // Check compare and alias
+    if ( !!!compare || isNot( "Function", QMock.compare ) ) {
+      new Error("QMock requires a legitimate comparison function to be set (Qmock.compare)'");
+    }
+    
     var mock = function MockObject () {
           // Can't use MockObject fn name, dies in IE <<< Changed to be ES5 compatible - test in IE!!
           MockObject.actualArguments = slice.call(arguments); // Need to be normalised to same object type (since arguments don't share prototype with Arrays, thus would fail CommonJS deepEquals assertion)
           return MockObject;
         },
         methods = [], // List of MockedMember method instances declared on mock
-        exceptions = []; // List of exceptions thrown by verify/verifyMethod functions,
+        exceptions = [], // List of exceptions thrown by verify/verifyMethod functions,
+        compare = QMock.compare; // Alias for readability and speed
         //"'Constructor' (#protip - you can pass in a (String) when instantiating a new Mock, which helps inform constructor-level error messages)";
 
     // Function to push arguments into Mock exceptions list
@@ -332,10 +304,10 @@ var Mock = Mock || (function () {
               type: "MissingAcceptsPropertyException",
               msg: "Qmock expects arguments to setInterfaceExpectations() to contain an accepts property"
             }
-          } else if ( _Utils.type( acceptsProperty ) !== "array" ) {
+          } else if ( isNot( "Array", acceptsProperty ) ) {
             throw {
               type: "InvalidAcceptsValueException",
-              msg: "Qmock expects value of 'accepts' in arguments to be an Array"
+              msg: "Qmock expects value of 'accepts' in arguments to be an Array (note true array, not array-like)"
             }
           }
         }
@@ -627,9 +599,15 @@ var Mock = Mock || (function () {
   }*/
 
   // QMock was successfully initialised!
-  return MockConstructor;
+  return {
+    Mock: MockConstructor,
+    compare: null
+  };
 
-})( QUnit.equiv );
+})();
+
+// Implied global - pretty Mock instantiation
+var Mock = QMock.Mock;
 
 // CommonJS export
 if ( typeof exports !== "undefined" ) {
