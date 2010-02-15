@@ -2,18 +2,53 @@
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en" dir="ltr" id="html">
     <head>
     	<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    	<title>QMock Tests</title>
+    	<title>Extended QMock Unit Tests (using Assay.compare)</title>
     	<link rel="stylesheet" href="../../vendor/qunit/qunit/qunit.css" />
     	<!-- Test Runner -->
         <script type="text/javascript" src="../../vendor/qunit/qunit/qunit.js"></script>
-    	<!-- qMock -->
+		<!-- Assay (http://www.github.com/andybeeching/assay) -->
+		<script type="text/javascript" src="../../vendor/assay/src/assay.js"></script>
+    	<!-- QMock -->
         <script type="text/javascript" src="../../src/qmock.js"></script>
+		<!-- configure QMock -->
+        <script type="text/javascript">
+			
+			// Set Assay.compare as comparison routine
+			// You would normally do this inside of the tests.js file
+			// But in this instance it is shared so as to test compatibility with many testrunners
+			QMock.compare = Assay.compare;
+			
+		</script>
     	<!-- qMock Unit Tests -->
         <script type="text/javascript" src="../unit-tests.js"></script>
     </head>
 
 	<body id="body">
-		<h1 id="qunit-header">QUnit Test Suite</h1>
+		<h1 id="qunit-header">Extended QMock Unit Tests (using Assay.compare)</h1>
+		<!-- 
+		
+			This file contains extra QMock tests which are supported by various methods on the Assay interface
+			There is no reason why one cannot use Assay entirely, or mix and match Assay with any testrunner's
+			native built-in comparison method (e.g. QUnit.equiv)
+			
+			It is suggested that the setting of QMock.compare be done in the setup callback for each module
+
+			e.g. Note: This example is based of QUnit, other testrunners may differ in how they implement the setup & teardown phases
+				
+				module('Module 1', {
+					setup: function () {
+						QMock.compare = Assay.compare;
+					},
+					teardown: function () {
+						QMock.compare = QUnit.equiv;
+					}
+				});
+				
+				test ('boostrap app', function() {
+					// Do $(tuff)...
+				});
+				
+		-->
 		<h2 id="qunit-banner"></h2>
 		<div id="qunit-testrunner-toolbar"></div>
 		<h2 id="qunit-userAgent"></h2>

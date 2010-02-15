@@ -69,24 +69,27 @@
 
 //////////////////////////////////
 
-/* Implied 'Global' */
-var QMock = QMock || (function () {
+(function ( container ) {
 
-  /**
-  * Helpers - Protected
-  */
-
-  // Really this is ultra defensive but since undefined is used in parameter verification code let's be sure it actually is typeof "undefined".
+  // Try to ensure following are originals / built-in objects as can be shadowed / overwritten
   var undefined,
       slice = Array.prototype.slice,
-      toString = Object.prototype.toString;
+      toString = Object.prototype.toString,
       
-  // Utility Functions, borrowed from jQuery but credit to Mark Miller.
+      // default configuration options
+      config = {
+        failFast: true,
+        compare: false
+      };
+      
+  // UTILITY Functions
+  
+  // Following inspired by jQuery but most credit to Mark Miller for 'Miller Device'
   function isNot ( nativeType, obj ) {
     return !( toString.call( obj ) === "[object " + nativeType + "]" );
   }
 
-  // PRIVATE static methods
+  // PRIVATE Functions
 
   // Function to handle JSON based mock creation
   function createMockFromJSON ( mockedMembers ) {
@@ -124,7 +127,7 @@ var QMock = QMock || (function () {
             // Disco.
             member[ expectation ][
               ( (expectation === "interface" || expectation === "accepts")
-              && memberConfig[ expectation ].constructor === Array)
+              && !isNot( "Array", memberConfig[ expectation ] ))
                 ? "apply"
                 : "call"
             ](member, memberConfig[ expectation ]);
@@ -147,7 +150,6 @@ var QMock = QMock || (function () {
 
   // Function to build pretty exception objects - TBR function signature
   // Can be improved by using Assay.type for expected and actual
-  // function createException ( exceptionType, objName, expected, actual ) {
   function createException ( actual, expected, exceptionType, descriptor ) {
 
     var e = {
@@ -172,10 +174,10 @@ var QMock = QMock || (function () {
   }
 
   // PUBLIC MOCK OBJECT CONSTRUCTOR
-  function MockConstructor () {
+  function Mock () {
     
     // Check compare and alias
-    if ( !!!compare || isNot( "Function", QMock.compare ) ) {
+    if ( !!!QMock.config.compare || isNot( "Function", QMock.config.compare ) ) {
       new Error("QMock requires a legitimate comparison function to be set (Qmock.compare)'");
     }
     
@@ -587,29 +589,23 @@ var QMock = QMock || (function () {
 
   }
 
-  // PUBLIC static members on Mock class
-
-  // Version number
-  MockConstructor["version"] = "0.3";
-
   // Expose internal methods for unit tests
   /*if ( undefined !== expose ) {
     // mock generator
     ;;;; assert.expose( createMockFromJSON, "_createMockFromJSON", MockConstructor );
   }*/
-
-  // QMock was successfully initialised!
-  return {
-    Mock: MockConstructor,
-    compare: null
+  
+  // Expose QMock API
+  container.QMock = {
+    Mock: Mock,
+    config: config,
+    version: "0.3" // follow ???? for versioning
   };
-
-})();
-
-// Implied global - pretty Mock instantiation
-var Mock = QMock.Mock;
-
-// CommonJS export
-if ( typeof exports !== "undefined" ) {
-  exports.Mock = Mock;
-}
+  
+  // Alias QMock.Mock for pretty Mock initialisation (i.e. new Mock)
+  container.Mock = Mock;
+  
+  // QMock was successfully initialised!
+  return true;
+  
+})( (typeof exports !== "undefined") ? exports : this ); // if exports available assume CommonJS
