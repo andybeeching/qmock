@@ -70,7 +70,7 @@
 //////////////////////////////////
 
 // Implied Global
-var Mock = Mock || (function ( compare ) {
+var Mock = Mock || (function () {
 
   /**
   * Helpers - Protected
@@ -115,9 +115,9 @@ var Mock = Mock || (function ( compare ) {
       };
 
   // Check for required interface
-  if ( !compare || _Utils.type( compare ) !== "function" ) {
+  /*if ( !compare || _Utils.type( compare ) !== "function" ) {
     return false;
-  }
+  }*/
 
 
   // PRIVATE static methods

@@ -1,3 +1,9 @@
 [submodule "vendor/qunit"]
 	path = vendor/qunit
 	url = http://github.com/jquery/qunit.git
+[submodule "vendor/evidence"]
+	path = vendor/evidence
+	url = git://github.com/tobie/Evidence.git
+[submodule "vendor/riotjs"]
+	path = vendor/riotjs
+	url = git://github.com/alexyoung/riotjs.git

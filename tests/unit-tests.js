@@ -31,7 +31,7 @@
 	 *  4. Reset: [Optional] Call reset method on the mock to return it's internal state to the end of the setup phase. Sometimes located in the 'teardown' phase of the testrunner after each test phase.
 	 *
 	 */
-
+  debugger;
 	module( "QMock: Stubbed properties & methods" );
 
  	test("mock with multiple stubbed properties", function () {

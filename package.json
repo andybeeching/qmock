@@ -1,0 +1,21 @@
+{
+	"name": "qmock",
+	"author": {
+		"name": "Mark Meyer",
+		"email": "markdotmeyer@gmail.com",
+		"url": "http://empire42.com/"
+	},
+	"maintainer": {
+		"name": "Andy Beeching",
+		"email": "andybeeching@gmail.com",
+		"url": "http://twitter.com/andybeeching/"
+	},
+	"url": "http://github.com/andybeeching/qmock/",
+	"license": {
+		"name": "MIT",
+		"url": "http://www.opensource.org/licenses/mit-license.php"
+	},
+	"description": "A versatile 'expect-run-verify' JavaScript Mocking framework.",
+	"keywords": [ "testing", "unit", "stub", "mocking", "CommonJS" ],
+	"lib": "qmock"
+}
