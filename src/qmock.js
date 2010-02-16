@@ -183,8 +183,9 @@
 
     var mock = function MockObject () {
           // Can't use MockObject fn name, dies in IE <<< Changed to be ES5 compatible - test in IE!!
-          MockObject.actualArguments = slice.call(arguments); // Need to be normalised to same object type (since arguments don't share prototype with Arrays, thus would fail CommonJS deepEquals assertion)
-          return MockObject;
+          // Should be able to use alias though? Held in closure..
+          mock.actualArguments = slice.call(arguments); // Need to be normalised to same object type (since arguments don't share prototype with Arrays, thus would fail CommonJS deepEquals assertion)
+          return mock;
         },
         methods = [], // List of MockedMember method instances declared on mock
         exceptions = [], // List of exceptions thrown by verify/verifyMethod functions,
@@ -196,23 +197,24 @@
       exceptions.push( createException.apply( null, arguments ) );
     }
 
-    // CONSTRUCTOR for mocked methods
-    function MockedMember ( min, max ) {
-      this.name = "";
-      this.expectedCalls = ( min !== undefined ) ? min : false;
-      this.maxCalls = max || false;
-      this.actualCalls = 0;
+    // prototype for mocked method
+    function __Mock ( min, max ) {
+      this.identifier = null;
       this.expectedArgs = [{"accepts": [undefined]}];
       this.actualArgs = [];
       this.callbackArgs = [];
+      this.returnValue = undefined;
+      this.expectedCalls = ( min !== undefined ) ? min : false;
+      this.maxCalls = max || false;
+      this.actualCalls = 0;
+      this.callbackArgs = [];
       this.requiredNumberofArguments = false;
       this.allowOverload = true;
-      this.returnValue = undefined;
       // Store reference to method in method list for reset functionality <str>and potential strict execution order tracking<str>.
       methods.push(this);
     };
 
-    MockedMember.prototype = {
+    __Mock.prototype = {
 
       "method": function ( name ) {
 
@@ -505,14 +507,14 @@
     }; // End MockedMember.prototype declaration
 
     // Backward compatibility for QMock v0.1 API
-    MockedMember.prototype["withArguments"] = MockedMember.prototype.accepts;
-    MockedMember.prototype["andReturns"] = MockedMember.prototype.returns;
-    MockedMember.prototype["andChain"] = MockedMember.prototype.chain;
+    __Mock.prototype["withArguments"] = __Mock.prototype.accepts;
+    __Mock.prototype["andReturns"] = __Mock.prototype.returns;
+    __Mock.prototype["andChain"] = __Mock.prototype.chain;
 
     // PUBLIC METHODS on mock
     // Creates new MockedMember instance on Mock Object and sets-up initial method expectation
-    mock.expects = mock.andExpects = function mockExpectsNewMethod (min, max) {
-      return new MockedMember(min, max);
+    mock.expects = mock.andExpects = function mockExpectsNewMethod ( min, max ) {
+      return new __Mock( min, max );
     };
 
     mock.accepts = function mockExpectsArguments () {
