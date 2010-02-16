@@ -75,15 +75,15 @@
   var undefined,
       slice = Array.prototype.slice,
       toString = Object.prototype.toString,
-      
+
       // default configuration options
       config = {
         failFast: true,
         compare: false
       };
-      
+
   // UTILITY Functions
-  
+
   // Following inspired by jQuery but most credit to Mark Miller for 'Miller Device'
   function isNot ( nativeType, obj ) {
     return !( toString.call( obj ) === "[object " + nativeType + "]" );
@@ -175,12 +175,12 @@
 
   // PUBLIC MOCK OBJECT CONSTRUCTOR
   function Mock () {
-    
+
     // Check compare and alias
     if ( !!!QMock.config.compare || isNot( "Function", QMock.config.compare ) ) {
       new Error("QMock requires a legitimate comparison function to be set (Qmock.compare)'");
     }
-    
+
     var mock = function MockObject () {
           // Can't use MockObject fn name, dies in IE <<< Changed to be ES5 compatible - test in IE!!
           MockObject.actualArguments = slice.call(arguments); // Need to be normalised to same object type (since arguments don't share prototype with Arrays, thus would fail CommonJS deepEquals assertion)
@@ -362,7 +362,7 @@
       },
 
       "property": function ( name ) {
-        if ( mock[ name ] !== undefined ) {
+        if ( mock.hasOwnProperty( name ) ) {
           throwMockException( "should be unique (was " + name + ")", "undefined property name", "InvalidPropertyNameException", "Constructor function" );
           throw exceptions;
         }
@@ -583,18 +583,18 @@
     // mock generator
     ;;;; assert.expose( createMockFromJSON, "_createMockFromJSON", MockConstructor );
   }*/
-  
+
   // Expose QMock API
   container.QMock = {
     Mock: Mock,
     config: config,
     version: "0.3" // follow semantic versioning conventions (http://semver.org/)
   };
-  
+
   // Alias QMock.Mock for pretty Mock initialisation (i.e. new Mock)
   container.Mock = Mock;
-  
+
   // QMock was successfully initialised!
   return true;
-  
+
 })( (typeof exports !== "undefined") ? exports : this ); // if exports available assume CommonJS
