@@ -218,7 +218,8 @@
       "method": function ( name ) {
 
         // Throw error if collision with mockMember API
-        if (mock[ name ] !== undefined) {
+        // Change to hasOwnProperty Check
+        if (mock.hasOwnProperty( name )) {
           throwMockException("was reserved method name '" + name + "'", "a unique method name", "InvalidMethodNameException", "Constructor function");
           throw exceptions;
         }
@@ -599,7 +600,7 @@
   container.QMock = {
     Mock: Mock,
     config: config,
-    version: "0.3" // follow ???? for versioning
+    version: "0.3" // follow semantic versioning conventions (http://semver.org/)
   };
   
   // Alias QMock.Mock for pretty Mock initialisation (i.e. new Mock)
