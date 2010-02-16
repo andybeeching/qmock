@@ -208,7 +208,6 @@
       this.requiredNumberofArguments = false;
       this.allowOverload = true;
       this.returnValue = undefined;
-      this.strictValueChecking = false;
       // Store reference to method in method list for reset functionality <str>and potential strict execution order tracking<str>.
       methods.push(this);
     };
@@ -362,11 +361,6 @@
         return this;
       },
 
-      "strict": function () {
-        this.strictValueChecking = true;
-        return this;
-      },
-
       "property": function ( name ) {
         if ( mock[ name ] !== undefined ) {
           throwMockException( "should be unique (was " + name + ")", "undefined property name", "InvalidPropertyNameException", "Constructor function" );
@@ -486,7 +480,7 @@
                               exceptions = exceptions.splice(0, cachedExceptionTotal);
                               continue assertPresentations;
                             } else {
-                              throwMockException( actual, expected, (strictValueChecking) ? "IncorrectParameterException" : "IncorrectParameterException", name + '()' )
+                              throwMockException( actual, expected, "IncorrectParameterException", name + '()' )
                             }
 
                       } // end assertExpectations loop
@@ -527,12 +521,6 @@
     };
 
     mock.actualArguments = []; // Stub, used for symbol binding
-    mock.strictValueChecking = false; // Default is type checking
-
-    mock.strict = function mockExpectsStrictParameterValues () {
-      mock.strictValueChecking = true;
-      return mock;
-    };
 
     // Verify method, tests both constructor and declared method's respective states.
     mock.verify = function verifyMock () {
