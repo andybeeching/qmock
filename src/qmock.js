@@ -85,8 +85,12 @@
   // UTILITY Functions
 
   // Following inspired by jQuery but most credit to Mark Miller for 'Miller Device'
-  function isNot ( nativeType, obj ) {
-    return !( toString.call( obj ) === "[object " + nativeType + "]" );
+  function is ( nativeType, obj ) {
+    return toString.call( obj ) === "[object " + nativeType + "]";
+  }
+
+  function isNot () {
+    return !is.apply( null, arguments );
   }
 
   // PRIVATE Functions
@@ -197,106 +201,111 @@
       exceptions.push( createException.apply( null, arguments ) );
     }
 
-    // prototype for mocked method
+    // Prototype for mocked method/property
+    // Can I strip out 'un-required' properties - save initialisation...
     function __Mock ( min, max ) {
-      this.identifier = null;
-      this.expectedArgs = [{"accepts": [undefined]}];
-      this.actualArgs = [];
-      this.callbackArgs = [];
-      this.returnValue = undefined;
-      this.expectedCalls = ( min !== undefined ) ? min : false;
-      this.maxCalls = max || false;
-      this.actualCalls = 0;
-      this.callbackArgs = [];
-      this.requiredNumberofArguments = false;
-      this.allowOverload = true;
+      // Stub Behaviour
+      this._expected = [{"accepts": [undefined]}];
+      this._received = [];
+      this._data = []; // TBR
+      this._return = undefined;
+      // Expectations
+      this._min = ( min !== undefined ) ? min : false;
+      this._max = max || false;
+      this._calls = 0;
+      this._requires = false;
+      this._overload = true;
       // Store reference to method in method list for reset functionality <str>and potential strict execution order tracking<str>.
       methods.push(this);
     };
 
     __Mock.prototype = {
 
-      "method": function ( name ) {
+      "method": function ( key ) {
 
         // Throw error if collision with mockMember API
         // Change to hasOwnProperty Check
-        if (mock.hasOwnProperty( name )) {
-          throwMockException("was reserved method name '" + name + "'", "a unique method name", "InvalidMethodNameException", "Constructor function");
+        if ( mock.hasOwnProperty( key ) ) {
+          throwMockException("was reserved method name '" + key + "'", "a unique method name", "InvalidMethodNameException", "Constructor function");
           throw exceptions;
         }
 
-          // Register public interface to mocked method instance on mock klass, bind to curried function
-          mock[ name ] = (function ( method, name ) {
+        function matchReturn ( method, presentation ) {
+          var i = 0,
+              len = method._expected.length,
+              // Default return is either  (undefined || Object || self (mock - chained)
+              obj = method._return;
 
-          method[ "name" ] = name;
-
-          function getState () {
-            return method;
+          for (; i < len; i++ ) {
+            // Compare presentations with expectations and match to return value if specified
+            if ( compare( method._expected[ i ][ "accepts" ], presentation ) ) {
+              // If match found against presentation return bound object (or self if chained)
+              obj = ( method._return && method._return === mock )
+                ? mock
+                : ( "returns" in method._expected[ i ] )
+                  ? method._expected[ i ][ "returns" ]
+                  : method._return;
+              }
           }
+          return obj;
+        }
+
+        // Register public interface to mocked method instance on mock klass, bind to curried function
+        mock[ key ] = (function ( method, name ) {
+
+          method._id = name;
 
           // Invoked when mock is called within SUT object.
-          function updateMethodState () {
+          function stub () {
 
             // Normalise Arguments
-            var parameters = slice.call( arguments );
+            var args = slice.call( arguments );
 
             // Track method invocations
-            method.actualCalls++;
+            method._calls++;
 
-            // Store method call params for verification
-            method.actualArgs.push( parameters );
-
+            // Store presentation to method for verify phase
+            method._received.push( args );
             // Execute any callback functions specified with associated args.
-            for (var i = 0, len = parameters.length; i < len; i++) {
-              if (parameters[i] && parameters[i].constructor === Function) {
-                  parameters[i].apply( null, method.callbackArgs );
+            for ( var param = 0, len = args.length; param < len; param++) {
+              // Check if potential callback passed
+              if ( args[ param ] && is( "Function", args[ param ] ) ) {
+                // See if multiple expectatations
+                if( method._expected.length > 1 ) {
+                  // Compare presentation with expectations and match to data value if specified
+                  for (var presentation = 0, expectations = method._expected.length; presentation < expectations; presentation++ ) {
+                    if ( compare( method._expected[ presentation ][ "accepts" ], args ) ) {
+                      // If match found against presentation return bound object (or self if chained)
+                      var data = method._expected[ presentation ].data;
+                      break;
+                    }
+                  }
+                }
+                // Use data associated with presentation, or default to 'global' data if available
+                data = ( data != null ) ? data : method._data;
+                if ( data ) {
+                  args[ param ].apply( null, [ data ] );
+                }
+                // reset data to undefined for next pass
+                data = null;
               }
             }
 
-            // Assert arguments against expected presentations and return appropriate object
-            return ( function getReturnValue ( presentation ) {
+            return matchReturn( method, args );
+          } // end stub
 
-              // Make default return value the default method value (undefined || Object || self (mock - chained))
-              var obj = method.returnValue;
+          // Accessor for debugging internal state of mock
+          stub._getState = function () {
+            return method;
+          };
 
-              // Compare actual with expected arguments and if true return correct object
-              assertingPresentations:
-                for ( var i = 0, len = method.expectedArgs.length; i < len; i++ ) {
+          return stub;
 
-                  try {
-                    if ( compare(
-                          method.expectedArgs[i]["accepts"], // 'expected' inputs
-                          presentation // 'actual' inputs
-                        )
-                    ) {
-                      // If match found against presentation return bound object (or self if chained)
-                      obj = (method.returnValue && method.returnValue === mock)
-                        ? mock
-                        : ( "returns" in method.expectedArgs[i] )
-                          ? method.expectedArgs[i]["returns"]
-                          : method.returnValue;
-                    }
-                  } catch (e) {
-                    if ( e[0] && e[0].type === "MissingHashKeyException" ) {
-                      continue assertingPresentations;
-                    }
-                  }
-
-              }
-
-              return obj;
-
-           })( parameters )}
-
-           updateMethodState._getState = getState;
-
-           return updateMethodState;
-
-          })( this, name );
+        // pass in scope
+        })( this, key );
 
         // chain
         return this;
-
       },
 
       "interface": function setInterfaceExpectations () {
@@ -316,7 +325,7 @@
           }
         }
 
-        // Expected format of arguments - {accepts: [], returns: value}
+        // Expected format of arguments - {accepts: [ values ] [, returns: value] [, response: [ values ]] }
 
         // Where arguments can equal either any type, or overloadable pairings.
         // e.g. "string" or {params: foo, returns: bar}. Note array literals must be nested ({params: ["string", [1,2,3]], returns: "meh"})
@@ -326,10 +335,10 @@
         // If required number of arguments not already set, then implicitly set it to length of param array (so let ppl customise it)
         // Add in per presentation strict argument length unless already set either globally or locally (recommendation to keep it consistent locally - don't let mocks change behaviour in test group too much)
         // This should probably be part of the refactor... feels messy!
-        if ( this.requiredNumberofArguments === false ) {
+        if ( this._requires === false ) {
 
           // Set minimum expectations
-          this.requiredNumberofArguments = arguments[ 0 ][ "accepts" ].length;
+          this._requires = arguments[ 0 ][ "accepts" ].length;
 
           // Assign explicit expectation if exist
           for ( var i = 0, len = arguments.length; i < len; i++ ) {
@@ -338,37 +347,42 @@
             }
           }
         }
-        this.expectedArgs = arguments;
+        this._expected = arguments;
         return this;
       },
 
       "accepts": function setSingleInterfaceExpectation () {
-        this.requiredNumberofArguments = arguments.length;
-        this.expectedArgs = [ { "accepts" : slice.call( arguments, 0 ) } ];
+        this._requires = arguments.length;
+        this._expected = [ { "accepts" : slice.call( arguments, 0 ) } ];
         return this;
       },
 
       "returns": function ( stub ) {
-        this.returnValue = stub; // default is undefined
+        this._return = stub; // default is undefined
         return this;
       },
 
-      "required": function ( requiredArgs ) {
-        this.requiredNumberofArguments = requiredArgs;
+      "required": function ( total ) {
+        this._requires = total;
         return this;
       },
 
-      "overload": function ( isOverload ) {
-        this.allowOverload = isOverload;
+      "overload": function ( bool ) {
+        this._overload = bool;
         return this;
       },
 
-      "property": function ( name ) {
-        if ( mock.hasOwnProperty( name ) ) {
-          throwMockException( "should be unique (was " + name + ")", "undefined property name", "InvalidPropertyNameException", "Constructor function" );
+      "data": function ( data ) {
+        this._data = data;
+        return this;
+      },
+
+      "property": function ( key ) {
+        if ( mock.hasOwnProperty( key ) ) {
+          throwMockException( "should be unique (was " + key + ")", "undefined property name", "InvalidPropertyNameException", "Constructor function" );
           throw exceptions;
         }
-        mock[ name ] = "stub";
+        mock[ key ] = "stub";
         return this;
       },
 
@@ -383,14 +397,8 @@
         return this;
       },
 
-      "callFunctionWith": function () {
-        // Callback function arguments - useful for async requests
-        this.callbackArgs = arguments;
-        return this;
-      },
-
       "chain": function () {
-        return this.returnValue = mock;
+        return this._return = mock;
       },
 
       "andExpects": function ( calls ) {
@@ -402,21 +410,21 @@
           with (this) {
            // Evaluate expected method invocations against actual
            assertMethodCalls:
-             switch ( expectedCalls !== false ) {
+             switch ( _min !== false ) {
                // max is infinite
-               case (maxCalls === Infinity) && (actualCalls > expectedCalls):
+               case (_max === Infinity) && (_calls > _min):
                // arbitrary range defined
-               case (maxCalls > 0) && (actualCalls >= expectedCalls) && (actualCalls <= maxCalls):
+               case (_max > 0) && (_calls >= _min) && (_calls <= _max):
                // explicit call number defined
-               case (expectedCalls === actualCalls):
+               case (_min === _calls):
                  // Return verifyMethod early if no args to assert.
-                 if (actualCalls === 0) {
+                 if (_calls === 0) {
                    return;
                  } else {
                    break assertMethodCalls;
                  }
                default:
-                 throwMockException( actualCalls, expectedCalls, "IncorrectNumberOfMethodCallsException", name);
+                 throwMockException( _calls, _min, "IncorrectNumberOfMethodCallsException", _id);
                  break assertMethod;
              }
 
@@ -425,10 +433,10 @@
           // Evaluate method interface expectations against actual
           assertInterface: switch ( true ) {
             // Strict Arg length checking - no overload
-            case ( allowOverload === false) && ( requiredNumberofArguments !== false ) && ( requiredNumberofArguments !== actualArgs[0].length ):
+            case ( _overload === false) && ( _requires !== false ) && ( _requires !== _received[0].length ):
             // At least n Arg length checking - overloading allowed - Global check
-            case ( allowOverload === true) && ( requiredNumberofArguments !== false ) && ( requiredNumberofArguments > actualArgs[0].length )  :
-              throwMockException( actualArgs.length, expectedArgs.length, "IncorrectNumberOfArgumentsException", name );
+            case ( _overload === true) && ( _requires !== false ) && ( _requires > _received[0].length )  :
+              throwMockException( _received.length, _expected.length, "IncorrectNumberOfArgumentsException", _id );
               break assertMethod;
 
             default:
@@ -437,34 +445,34 @@
               // Only check arguments if some available or explicitly required
               // By default functions returned 'undefined'
               // This feels hacky also... refactor out if possible!
-              if ( requiredNumberofArguments !== false || ( actualCalls > 0 && actualArgs[0].length > 0 ) ) {
+              if ( _requires !== false || ( _calls > 0 && _received[0].length > 0 ) ) {
 
                 assertPresentations: // For each presentation to the interface...
 
-                  for (var i = 0, len = actualArgs.length; i < len; i++) {
+                  for (var i = 0, len = _received.length; i < len; i++) {
 
                     // Use to restore exceptions object to pre-presentation assertion state in case of match
                     var cachedExceptionTotal = exceptions.length;
 
                     assertExpectations: // ...Check if a matching expectation
 
-                      for (var j = 0, _len = expectedArgs.length; j < _len; j++) {
+                      for (var j = 0, _len = _expected.length; j < _len; j++) {
 
                         // Assert Number of Arguments if expectation explicitly set...
                         // At least n Arg length checking - overloading allowed - Global check
-                        if ( expectedArgs[ j ][ "required" ] > actualArgs[ i ].length )  {
-                          throwMockException( actualArgs.length, expectedArgs.length, "IncorrectNumberOfArgumentsException", name );
+                        if ( _expected[ j ][ "required" ] > _received[ i ].length )  {
+                          throwMockException( _received.length, _expected.length, "IncorrectNumberOfArgumentsException", _id );
                           continue assertPresentations;
                         }
 
-                        var actual = ( allowOverload === false && requiredNumberofArguments !== false )
-                                   ? actualArgs[ i ]
+                        var actual = ( _overload === false && _requires !== false )
+                                   ? _received[ i ]
                                    // Else assume default mode of overloading and type checking against method interface
-                                   : slice.call(actualArgs[ i ], 0, expectedArgs[ j ][ "accepts" ].length),
-                            expected = ( allowOverload === false && requiredNumberofArguments !== false )
-                                     ? expectedArgs[ j ][ "accepts" ]
+                                   : slice.call(_received[ i ], 0, _expected[ j ][ "accepts" ].length),
+                            expected = ( _overload === false && _requires !== false )
+                                     ? _expected[ j ][ "accepts" ]
                                      // Else assume default mode of overloading and type checking against method interface
-                                     : slice.call(expectedArgs[ j ][ "accepts" ], 0, actualArgs[ i ].length);
+                                     : slice.call(_expected[ j ][ "accepts" ], 0, _received[ i ].length);
 
                         // If a match (strict value checking) between a presentation and expectation restore exceptions object and assert next interface presentation.
                         // If strict argument total checking is on just pass through expected and actual
@@ -482,7 +490,7 @@
                               exceptions = exceptions.splice(0, cachedExceptionTotal);
                               continue assertPresentations;
                             } else {
-                              throwMockException( actual, expected, "IncorrectParameterException", name + '()' )
+                              throwMockException( actual, expected, "IncorrectParameterException", _id + '()' )
                             }
 
                       } // end assertExpectations loop
@@ -494,13 +502,13 @@
       },
 
       atLeast: function (n) {
-        this.expectedCalls = n;
-        this.maxCalls = Infinity;
+        this._min = n;
+        this._max = Infinity;
         return this;
       },
 
       noMoreThan: function (n) {
-        this.maxCalls = n;
+        this._max = n;
         return this;
       }
 
@@ -510,6 +518,7 @@
     __Mock.prototype["withArguments"] = __Mock.prototype.accepts;
     __Mock.prototype["andReturns"] = __Mock.prototype.returns;
     __Mock.prototype["andChain"] = __Mock.prototype.chain;
+    __Mock.prototype["callFunctionWith"] = __Mock.prototype.data;
 
     // PUBLIC METHODS on mock
     // Creates new MockedMember instance on Mock Object and sets-up initial method expectation
@@ -562,8 +571,8 @@
       exceptions = [];
       this.actualArguments = [];
       for (var i = 0, len = methods.length; i < len; i++) {
-        methods[ i ].actualCalls = 0;
-        methods[ i ].actualArgs = [];
+        methods[ i ]._calls = 0;
+        methods[ i ]._received = [];
       }
     };
 
@@ -592,6 +601,8 @@
     config: config,
     version: "0.3" // follow semantic versioning conventions (http://semver.org/)
   };
+
+  // Do I need a setup function a la $.ajax?
 
   // Alias QMock.Mock for pretty Mock initialisation (i.e. new Mock)
   container.Mock = Mock;

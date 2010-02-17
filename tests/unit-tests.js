@@ -313,7 +313,7 @@
 
 	  // Test _getState for mockedMembers.
 	  var state = ninja.swing._getState();
-	  equals(state.actualCalls, 0, "verify() should be true. Result");
+	  equals(state._calls, 0, "verify() should be true. Result");
 
 	  // Bad Exercise - no swings
     try {
@@ -2101,7 +2101,6 @@
 	  expect(6);
 
 	  var ninja = new Mock;
-
 	  ninja
 	    .expects(1)
 	      .method("testMultipleParameters")
@@ -2539,22 +2538,35 @@
 
 	test("mocked method with callback arguments", function () {
 
-	  expect(3);
+	  expect(5);
 
 	  var $ = new Mock;
 
 		// Invalid callback
 
-		$.expects(1).method('get')
-      .accepts('path/to/resource', Function)
-      .callFunctionWith({foo: 'bar'});
+		$.expects(1)
+		  .method('get')
+        .accepts('path/to/resource', function onSuccess() {})
+        .data({foo: 'bar'});
 
-/*
-    // Suggested syntax for 'cleaner' callbacks
-		$.expects(1).method('get')
-      .accepts('path/to/resource')
-      .callback(Function, {foo: 'bar'})
-*/
+    /* JSON equivalent
+    new Mock({
+      "get": {
+        accepts: ['path/to/resource', callback]
+        response: {foo: 'bar'}
+      }
+    });
+
+    new Mock({
+      "get": {
+        interface: [
+          {accepts: ['path/to/resource', callback], response: {foo: 'bar'}}
+          {accepts: ['path/to/resource', callback2], response: {far: 'baz'}}
+        ]
+      }
+    });
+
+    */
 
 		$.get('path/to/resource');
 
@@ -2574,7 +2586,42 @@
 
 		$.get('path/to/resource', function (data) { called = data.foo });
 
-	  equals(called, 'bar', "called should be set to true");
+	  equals(called, 'bar', "var called should be set to true when $.get() passed (String: url, Function: callback)");
+
+	  // Test multiple callbacks
+
+	  var $ = new Mock;
+
+    var success = false;
+
+    function onSuccess ( data ) {
+      success = data.foo;
+    }
+
+    var fail = false;
+
+    function onFail ( data ) {
+      fail = data.baz;
+    }
+
+    // Suggested syntax for 'cleaner' callbacks
+		$.expects(1)
+		  .method('get')
+		    .interface(
+		      {accepts: ['path/to/resource', onSuccess], data: {foo: true}},
+		      {accepts: ['path/to/resource', onFail], data: {baz: true}}
+		    );
+
+		// Exercise
+		// Correct Usage
+
+		var called = false;
+
+		$.get('path/to/resource', onSuccess);
+		equals(success, true, "var success should be set to true when $.get() passed (String: url, Function: onSuccess)");
+
+		$.get('path/to/resource', onFail);
+    equals(fail, true, "var fail should be set to true when $.get() passed (String: url, Function: onFail)");
 
 	});
 
@@ -2624,7 +2671,7 @@
 
 	test("[0.2] Constructor and mockedMember object API backward compatibility", function () {
 
-	  expect(1);
+	  expect(2);
 
 	  // Setup - Test support for andChain method on mocked methods
 
@@ -2636,6 +2683,23 @@
 
 	  // Good exercise & verify
 	  ok("swing" in (mock.swing()), "mock.swing() should return the mock itself (API v 0.2)");
+
+	  // Setup - Test support for callFunctionWith method on mocked methods
+
+	  var mock = new Mock;
+		mock
+		  .expects(1).method('get')
+        .accepts('path/to/resource', Function)
+        .callFunctionWith({foo: 'bar'});
+
+    // Correct Usage
+
+    var called = false;
+
+    mock.get('path/to/resource', function (data) { called = data.foo });
+
+	  // Good exercise & verify
+	  equals(called, 'bar', "var called should be set to true when mock.get() passed (String: url, Function: callback)");
 
 	});
 
