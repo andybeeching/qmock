@@ -16,7 +16,7 @@
 			// Set Assay.compare as comparison routine
 			// You would normally do this inside of the tests.js file
 			// But in this instance it is shared so as to test compatibility with many testrunners
-			QMock.compare = Assay.compare;
+			QMock.config.compare = Assay.compare;
 			
 		</script>
     	<!-- qMock Unit Tests -->

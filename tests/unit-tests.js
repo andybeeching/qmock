@@ -83,7 +83,6 @@
  	      .withValue("The Chrome");
 
  	  samurai.swing();
-
  	  // Good Exercise
  	  ok( samurai.verify(), "verify() should pass after swing was called once" );
  	  ok( ( (samurai.rank === "apprentice") && (samurai.master === "The Chrome") ) , "ninja mock object should have a two properties set correctly")
@@ -177,20 +176,20 @@
  	    .andExpects(1)
  	      .method('getEmptyObjectValue').returns({ });
 
-   	equals( mock.getNumericValue(), 10, "getNumericValue() on mock should return (Number: 10)");
-     equals( mock.getStringValue(), 'data', "getStringValue() on mock should return (String: data)");
-     equals( mock.getArrayValue().constructor, Array, "getArrayValue() on mock should return (Array: [ 1, 2, 3 ])");
-     equals( mock.getFunctionValue()(), 'function', "getFunctionValue() on mock, when invoked, should return (String: 'function')");
-     equals( mock.getObjectValue().constructor, Object.prototype.constructor, "getObjectValue() on mock should return (Object: {id: 5, value: 'value'})");
-     equals( mock.getNullValue(), null, "getNullValue() on mock should return (null)");
-     equals( mock.getUndefinedValue(), undefined, "getUndefinedValue() on mock should return (undefined)");
-     equals( mock.getEmptyStringValue(), "", "getEmptyStringValue() on mock should return (String: '')");
-     equals( mock.getZeroValue(), 0, "getZeroValue() on mock should return (Number: 0)");
-     equals( mock.getTrueValue(), true, "getTrueValue() on mock should return (Boolean: true)");
-     equals( mock.getFalseValue(), false, "getFalseValue() on mock should return (Boolean: false)");
-     equals( mock.getEmptyArrayValue().constructor, Array, "getEmptyArrayValue() on mock should return (Array: [])");
-     equals( mock.getEmptyObjectValue().constructor, Object.prototype.constructor, "getEmptyObjectValue() on mock should return (Object: {})");
-     ok(mock.verify(), "verify() should be true");
+      equals( mock.getNumericValue(), 10, "getNumericValue() on mock should return (Number: 10)");
+      equals( mock.getStringValue(), 'data', "getStringValue() on mock should return (String: data)");
+      equals( mock.getArrayValue().constructor, Array, "getArrayValue() on mock should return (Array: [ 1, 2, 3 ])");
+      equals( mock.getFunctionValue()(), 'function', "getFunctionValue() on mock, when invoked, should return (String: 'function')");
+      equals( mock.getObjectValue().constructor, Object.prototype.constructor, "getObjectValue() on mock should return (Object: {id: 5, value: 'value'})");
+      equals( mock.getNullValue(), null, "getNullValue() on mock should return (null)");
+      equals( mock.getUndefinedValue(), undefined, "getUndefinedValue() on mock should return (undefined)");
+      equals( mock.getEmptyStringValue(), "", "getEmptyStringValue() on mock should return (String: '')");
+      equals( mock.getZeroValue(), 0, "getZeroValue() on mock should return (Number: 0)");
+      equals( mock.getTrueValue(), true, "getTrueValue() on mock should return (Boolean: true)");
+      equals( mock.getFalseValue(), false, "getFalseValue() on mock should return (Boolean: false)");
+      equals( mock.getEmptyArrayValue().constructor, Array, "getEmptyArrayValue() on mock should return (Array: [])");
+      equals( mock.getEmptyObjectValue().constructor, Object.prototype.constructor, "getEmptyObjectValue() on mock should return (Object: {})");
+      ok(mock.verify(), "verify() should be true");
 
  	});
 
@@ -2663,7 +2662,6 @@
 	    .expects(1)
 	      .method("swing")
 	      .andReturns(true);
-
 	  // Good exercise & verify
 	  equals(mock.swing(), true, "mock.swing() should return true when setting up return value with 'andReturns' (API v 0.1)");
 

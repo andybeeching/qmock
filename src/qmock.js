@@ -54,6 +54,7 @@
  * Refactor hasOWnProperty into method()
  * TODO: Allow deep option for recursing through trees - typed or stric (or even varied?)
  * TODO: Publish CommonJS compliant API for ASSAY
+ * TODO: Add setter method for config options to decouple from QMock idebtifier (see comparePresentations)
 
  */
 
@@ -91,6 +92,20 @@
 
   function isNot () {
     return !is.apply( null, arguments );
+  }
+
+  // ( String: presentation, Collection: expectations[, String: opt_prop )
+  function comparePresentation ( presentation, expectations, opt_prop ) {
+    for ( var result = false, i = 0, len = expectations.length; i < len; i++ ) {
+      // If match found against presentation return bound object (or self if chained)
+      if ( config.compare( presentation, expectations[ i ][ "accepts" ] ) ) {
+        result = ( opt_prop )
+          ? expectations[ i ][ opt_prop ]
+          : true
+        break;
+      }
+    }
+    return result;
   }
 
   // PRIVATE Functions
@@ -193,7 +208,7 @@
         },
         methods = [], // List of MockedMember method instances declared on mock
         exceptions = [], // List of exceptions thrown by verify/verifyMethod functions,
-        compare = QMock.compare; // Alias for readability and speed
+        compare = QMock.config.compare; // Alias for readability and speed
         //"'Constructor' (#protip - you can pass in a (String) when instantiating a new Mock, which helps inform constructor-level error messages)";
 
     // Function to push arguments into Mock exceptions list
@@ -208,13 +223,14 @@
       this._expected = [{"accepts": [undefined]}];
       this._received = [];
       this._data = []; // TBR
-      this._return = undefined;
+      this._returns = undefined;
       // Expectations
       this._min = ( min !== undefined ) ? min : false;
       this._max = max || false;
       this._calls = 0;
       this._requires = false;
       this._overload = true;
+      this._chained = false;
       // Store reference to method in method list for reset functionality <str>and potential strict execution order tracking<str>.
       methods.push(this);
     };
@@ -222,7 +238,6 @@
     __Mock.prototype = {
 
       "method": function ( key ) {
-
         // Throw error if collision with mockMember API
         // Change to hasOwnProperty Check
         if ( mock.hasOwnProperty( key ) ) {
@@ -230,81 +245,69 @@
           throw exceptions;
         }
 
-        function matchReturn ( method, presentation ) {
-          var i = 0,
-              len = method._expected.length,
-              // Default return is either  (undefined || Object || self (mock - chained)
-              obj = method._return;
-
-          for (; i < len; i++ ) {
-            // Compare presentations with expectations and match to return value if specified
-            if ( compare( method._expected[ i ][ "accepts" ], presentation ) ) {
-              // If match found against presentation return bound object (or self if chained)
-              obj = ( method._return && method._return === mock )
-                ? mock
-                : ( "returns" in method._expected[ i ] )
-                  ? method._expected[ i ][ "returns" ]
-                  : method._return;
-              }
+        function matchReturn ( presentation, expectations, method ) {
+          // Early return if chained
+          if ( method._chained ) {
+            return mock;
           }
-          return obj;
+          // Compare presentations with expectations and match to return value if specified
+          // Else use global, which is 'undefined' by default
+          return comparePresentation( presentation, expectations, "returns" ) || method._returns;
         }
 
-        // Register public interface to mocked method instance on mock klass, bind to curried function
-        mock[ key ] = (function ( method, name ) {
-
-          method._id = name;
-
-          // Invoked when mock is called within SUT object.
-          function stub () {
-
-            // Normalise Arguments
-            var args = slice.call( arguments );
-
-            // Track method invocations
-            method._calls++;
-
-            // Store presentation to method for verify phase
-            method._received.push( args );
-            // Execute any callback functions specified with associated args.
-            for ( var param = 0, len = args.length; param < len; param++) {
-              // Check if potential callback passed
-              if ( args[ param ] && is( "Function", args[ param ] ) ) {
-                // See if multiple expectatations
-                if( method._expected.length > 1 ) {
-                  // Compare presentation with expectations and match to data value if specified
-                  for (var presentation = 0, expectations = method._expected.length; presentation < expectations; presentation++ ) {
-                    if ( compare( method._expected[ presentation ][ "accepts" ], args ) ) {
-                      // If match found against presentation return bound object (or self if chained)
-                      var data = method._expected[ presentation ].data;
-                      break;
-                    }
-                  }
-                }
-                // Use data associated with presentation, or default to 'global' data if available
-                data = ( data != null ) ? data : method._data;
-                if ( data ) {
-                  args[ param ].apply( null, [ data ] );
-                }
-                // reset data to undefined for next pass
-                data = null;
+        function fireCallback ( presentation, expectations, method ) {
+          // Execute any callback functions specified with associated args
+          for (var i = 0, len = presentation.length, data; i < len; i++) {
+            // Check if potential callback passed
+            if ( presentation[ i ] && is( "Function", presentation[ i ] ) ) {
+              // Test for presentation match to expectations, and assign callback data if declared
+              // Use data associated with presentation, or default to 'global' data if available
+              data = comparePresentation( presentation, expectations, "data" ) || method._data || null;
+              //
+              if ( data != null ) {
+                presentation[ i ].apply( null, [ data ] );
               }
+              // reset data to undefined for next pass (multiple callbacks)
+              data = null;
             }
+          }
+        }
 
-            return matchReturn( method, args );
-          } // end stub
+        function updateMethodState ( method, presentation ) {
+          // Track method invocations
+          method._calls++;
+          // Store presentation to method for verify phase
+          method._received.push( presentation );
+          // Stub callback responses
+          fireCallback( presentation, method._expected, method );
+          // Canned return value
+          return matchReturn( presentation, method._expected, method  );
+        }
 
+        function createStub ( obj ) {
+          // bind to curried function
+          var stub = (function ( fn ) {
+            return function () {
+              return updateMethodState( obj, slice.call(arguments) );
+            }
+          })( obj );
           // Accessor for debugging internal state of mock
           stub._getState = function () {
-            return method;
+            return obj;
           };
-
+          // Stub is invoked when mocked method is called within the SUT.
           return stub;
+        }
 
-        // pass in scope
+        // Register public interface to mocked method instance on mock klass
+        mock[ key ] = (function ( method, name ) {
+          // Useful for error messages / debugging
+          method._id = name;
+          // assign stub to identifier
+          return createStub( method );
         })( this, key );
 
-        // chain
+        // chain for pretty declaration
         return this;
       },
 
@@ -358,7 +361,7 @@
       },
 
       "returns": function ( stub ) {
-        this._return = stub; // default is undefined
+        this._returns = stub; // default is undefined
         return this;
       },
 
@@ -398,7 +401,8 @@
       },
 
       "chain": function () {
-        return this._return = mock;
+        this._chained = true;
+        return this;
       },
 
       "andExpects": function ( calls ) {
