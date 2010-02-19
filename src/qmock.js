@@ -93,7 +93,7 @@
   function isNot () {
     return !is.apply( null, arguments );
   }
-
+  
   // ( String: presentation, Collection: expectations[, String: opt_prop )
   function comparePresentation ( presentation, expectations, opt_prop ) {
     for ( var result = false, i = 0, len = expectations.length; i < len; i++ ) {
@@ -107,6 +107,8 @@
     }
     return result;
   }
+  
+  // FUNCTIONS FOR EXERCISING
   
   function fireCallback ( presentation, expectations, method ) {
     // Execute any callback functions specified with associated args
@@ -152,15 +154,25 @@
     // Stub is invoked when mocked method is called within the SUT.
     return stub;
   }
-  
+
+  // Compare presentations with expectations and match to return value if specified
+  // Else use global, which is 'undefined' by default
   function matchReturn ( presentation, expectations, method ) {
-    // Early return if chained
-    /*if ( method._chained ) {
-      return mock;
-    }*/
-    // Compare presentations with expectations and match to return value if specified
-    // Else use global, which is 'undefined' by default
     return comparePresentation( presentation, expectations, "returns" ) || method._returns;
+  }
+  
+  // FUNCTIONS FOR VERIFYING
+  
+  // Evaluate expected method invocations against actual
+  function testInvocations ( method ) {
+    return (
+      // explicit call number defined
+      method._minCalls === method._calls ||
+      // arbitrary range defined
+      ( method._minCalls <= method._calls ) && ( method._maxCalls >= method._calls ) ||
+      // at least n calls
+      ( method._minCalls < method._calls ) && ( method._maxCalls === Infinity ) 
+    );
   }
 
   // PRIVATE Functions
@@ -285,8 +297,8 @@
       // Default stub state
       this._expected = [];
       this._received = [];
-      this._min = ( min !== undefined ) ? min : false;
-      this._max = max || false;
+      this._minCalls = min || 0;
+      this._maxCalls = max;
       this._calls = 0;
       // Store reference to method in method list for reset functionality <str>and potential strict execution order tracking<str>.
       methods.push(this);
@@ -411,32 +423,31 @@
       },
 
       "verifyMethod": function () {
+        
+        //function test
+        
+        
+        var result = ( testInvocations( this ) );
+
+        // Early exclusions for no argument assertion
+        if ( this._calls === 0 && result ) {
+          return result;
+        } else if ( !result ) {
+          throwMockException( this._calls, this._minCalls, "IncorrectNumberOfMethodCallsException", this._id);
+          return result;
+        }
+        
+        // Since Invocations passed and result === true at this point, test presentations to method interface
+        
         assertMethod:
+          
           with (this) {
-           // Evaluate expected method invocations against actual
-           assertMethodCalls:
-             switch ( _min !== false ) {
-               // max is infinite
-               case (_max === Infinity) && (_calls > _min):
-               // arbitrary range defined
-               case (_max > 0) && (_calls >= _min) && (_calls <= _max):
-               // explicit call number defined
-               case (_min === _calls):
-                 // Return verifyMethod early if no args to assert.
-                 if (_calls === 0) {
-                   return;
-                 } else {
-                   break assertMethodCalls;
-                 }
-               default:
-                 throwMockException( _calls, _min, "IncorrectNumberOfMethodCallsException", _id);
-                 break assertMethod;
-             }
 
           // assert presentations.... LET's DO THAT AFTERWARDS...IN fact more like a loop around the old atomic presentation checking mechanism...
 
           // Evaluate method interface expectations against actual
-          assertInterface: switch ( true ) {
+          assertInterface: 
+          switch ( true ) {
             // Strict Arg length checking - no overload
             case ( _overload === false) && ( _requires !== false ) && ( _requires !== _received[0].length ):
             // At least n Arg length checking - overloading allowed - Global check
@@ -506,14 +517,14 @@
           } // end assertMethod
       },
 
-      atLeast: function (n) {
-        this._min = n;
-        this._max = Infinity;
+      atLeast: function ( num ) {
+        this._minCalls = num;
+        this._maxCalls = Infinity;
         return this;
       },
 
-      noMoreThan: function (n) {
-        this._max = n;
+      noMoreThan: function ( num ) {
+        this._maxCalls = num;
         return this;
       }
 
