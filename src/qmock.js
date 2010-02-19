@@ -107,6 +107,61 @@
     }
     return result;
   }
+  
+  function fireCallback ( presentation, expectations, method ) {
+    // Execute any callback functions specified with associated args
+    for (var i = 0, len = presentation.length, data; i < len; i++) {
+      // Check if potential callback passed
+      if ( presentation[ i ] && is( "Function", presentation[ i ] ) ) {
+        // Test for presentation match to expectations, and assign callback data if declared
+        // Use data associated with presentation, or default to 'global' data if available
+        data = comparePresentation( presentation, expectations, "data" ) || method._data || null;
+        //
+        if ( data != null ) {
+          presentation[ i ].apply( null, [ data ] );
+        }
+        // reset data to undefined for next pass (multiple callbacks)
+        data = null;
+      }
+    }
+  }
+  
+  function createStub ( key, method, container ) {
+
+    function stub () {
+      // Normalise actual parameters
+      var presentation = slice.call( arguments );
+      // Track method invocations
+      method._calls++;
+      // Store presentation to method for verify phase
+      method._received.push( presentation );
+      // Trigger callbacks with stubbed responses
+      fireCallback( presentation, method._expected, method );
+      // Return stubbed fn value
+      return matchReturn( presentation, method._expected, method, container );
+    }
+    
+    // Useful for error messages / debugging
+    method._id = key;
+    
+    // Accessor for debugging internal state of mock
+    stub._getState = function () {
+      return method;
+    };
+    
+    // Stub is invoked when mocked method is called within the SUT.
+    return stub;
+  }
+  
+  function matchReturn ( presentation, expectations, method ) {
+    // Early return if chained
+    /*if ( method._chained ) {
+      return mock;
+    }*/
+    // Compare presentations with expectations and match to return value if specified
+    // Else use global, which is 'undefined' by default
+    return comparePresentation( presentation, expectations, "returns" ) || method._returns;
+  }
 
   // PRIVATE Functions
 
@@ -208,7 +263,7 @@
         },
         methods = [], // List of MockedMember method instances declared on mock
         exceptions = [], // List of exceptions thrown by verify/verifyMethod functions,
-        compare = QMock.config.compare; // Alias for readability and speed
+        compare = config.compare; // Alias for readability
         //"'Constructor' (#protip - you can pass in a (String) when instantiating a new Mock, which helps inform constructor-level error messages)";
 
     // Function to push arguments into Mock exceptions list
@@ -219,93 +274,38 @@
     // Prototype for mocked method/property
     // Can I strip out 'un-required' properties - save initialisation...
     function __Mock ( min, max ) {
-      // Stub Behaviour
-      this._expected = [{"accepts": [undefined]}];
-      this._received = [];
-      this._data = []; // TBR
+      // Reference to container
+      this._mock = mock;
+      // Default stub behaviours
       this._returns = undefined;
-      // Expectations
-      this._min = ( min !== undefined ) ? min : false;
-      this._max = max || false;
-      this._calls = 0;
       this._requires = false;
       this._overload = true;
       this._chained = false;
+      this._data = null;
+      // Default stub state
+      this._expected = [];
+      this._received = [];
+      this._min = ( min !== undefined ) ? min : false;
+      this._max = max || false;
+      this._calls = 0;
       // Store reference to method in method list for reset functionality <str>and potential strict execution order tracking<str>.
       methods.push(this);
     };
 
     __Mock.prototype = {
-
+      
       "method": function ( key ) {
         // Throw error if collision with mockMember API
-        // Change to hasOwnProperty Check
-        if ( mock.hasOwnProperty( key ) ) {
+        if ( this._mock.hasOwnProperty( key ) ) {
           throwMockException("was reserved method name '" + key + "'", "a unique method name", "InvalidMethodNameException", "Constructor function");
           throw exceptions;
         }
 
-        function matchReturn ( presentation, expectations, method ) {
-          // Early return if chained
-          if ( method._chained ) {
-            return mock;
-          }
-          // Compare presentations with expectations and match to return value if specified
-          // Else use global, which is 'undefined' by default
-          return comparePresentation( presentation, expectations, "returns" ) || method._returns;
-        }
-
-        function fireCallback ( presentation, expectations, method ) {
-          // Execute any callback functions specified with associated args
-          for (var i = 0, len = presentation.length, data; i < len; i++) {
-            // Check if potential callback passed
-            if ( presentation[ i ] && is( "Function", presentation[ i ] ) ) {
-              // Test for presentation match to expectations, and assign callback data if declared
-              // Use data associated with presentation, or default to 'global' data if available
-              data = comparePresentation( presentation, expectations, "data" ) || method._data || null;
-              //
-              if ( data != null ) {
-                presentation[ i ].apply( null, [ data ] );
-              }
-              // reset data to undefined for next pass (multiple callbacks)
-              data = null;
-            }
-          }
-        }
-
-        function updateMethodState ( method, presentation ) {
-          // Track method invocations
-          method._calls++;
-          // Store presentation to method for verify phase
-          method._received.push( presentation );
-          // Stub callback responses
-          fireCallback( presentation, method._expected, method );
-          // Canned return value
-          return matchReturn( presentation, method._expected, method  );
-        }
-
-        function createStub ( obj ) {
-          // bind to curried function
-          var stub = (function ( fn ) {
-            return function () {
-              return updateMethodState( obj, slice.call(arguments) );
-            }
-          })( obj );
-          // Accessor for debugging internal state of mock
-          stub._getState = function () {
-            return obj;
-          };
-          // Stub is invoked when mocked method is called within the SUT.
-          return stub;
-        }
-
         // Register public interface to mocked method instance on mock klass
-        mock[ key ] = (function ( method, name ) {
-          // Useful for error messages / debugging
-          method._id = name;
+        this._mock[ key ] = (function () {
           // assign stub to identifier
-          return createStub( method );
-        })( this, key );
+          return createStub( key, this );
+        }).call( this );
 
         // chain for pretty declaration
         return this;
@@ -343,12 +343,13 @@
           // Set minimum expectations
           this._requires = arguments[ 0 ][ "accepts" ].length;
 
-          // Assign explicit expectation if exist
-          for ( var i = 0, len = arguments.length; i < len; i++ ) {
+         // TBD: Support for different requires per expected presentation
+         // Assign explicit expectation if exist
+         /* for ( var i = 0, len = arguments.length; i < len; i++ ) {
             if ( !arguments[ i ][ "required" ] ) {
               arguments[ i ][ "required" ] = arguments[ i ][ "accepts" ].length;
             }
-          }
+          }*/
         }
         this._expected = arguments;
         return this;
@@ -356,7 +357,7 @@
 
       "accepts": function setSingleInterfaceExpectation () {
         this._requires = arguments.length;
-        this._expected = [ { "accepts" : slice.call( arguments, 0 ) } ];
+        this._expected.push( { "accepts" : slice.call( arguments ) } );
         return this;
       },
 
@@ -381,19 +382,19 @@
       },
 
       "property": function ( key ) {
-        if ( mock.hasOwnProperty( key ) ) {
+        if ( this._mock.hasOwnProperty( key ) ) {
           throwMockException( "should be unique (was " + key + ")", "undefined property name", "InvalidPropertyNameException", "Constructor function" );
           throw exceptions;
         }
-        mock[ key ] = "stub";
+        this._mock[ key ] = "stub";
         return this;
       },
 
       "withValue": function ( value ) {
-        for ( property in mock ) {
-          if ( mock.hasOwnProperty( property ) ) {
-            if ( mock[ property ] === "stub" ) {
-              mock[ property ] = value;
+        for ( property in this._mock ) {
+          if ( this._mock.hasOwnProperty( property ) ) {
+            if ( this._mock[ property ] === "stub" ) {
+              this._mock[ property ] = value;
             }
           }
         }
@@ -401,12 +402,12 @@
       },
 
       "chain": function () {
-        this._chained = true;
+        this._returns = this._mock;
         return this;
       },
 
       "andExpects": function ( calls ) {
-        return mock.expects( calls );
+        return this._mock.expects( calls );
       },
 
       "verifyMethod": function () {
@@ -547,13 +548,6 @@
           throwMockException( mock.actualArguments.length, mock.expectsArguments.length, "IncorrectNumberOfArgumentsException", "Constructor function" );
         } else if ( !compare( mock.actualArguments, mock.expectsArguments ) ) {
           throwMockException( mock.actualArguments, mock.expectsArguments, "IncorrectParameterException", "Constructor function" );
-            /*{
-              "strictValueChecking": mock.strictValueChecking,
-              "exceptionHandler": throwMockException,
-              "delegate": true,
-              "descriptor": "Mock Constructor",
-              "typed": true
-            }*/
         }
       }
 

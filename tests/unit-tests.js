@@ -2419,6 +2419,7 @@
 	      .expects(1)
 	        .method('each')
 	        .accepts(wrap)
+	        .data(this)
 	        .chain()
 	      .andExpects(3)
 	        .method('wrap')
@@ -2435,9 +2436,7 @@
 	        });
 
 	  // Exercise
-
 	  jQuery(".ninjas").each(wrap);
-
 	  // Verify
 	  ok(jQuery.verify(), "verify() should be true: jQuery is mocked with chaining");
 
@@ -2510,6 +2509,7 @@
 	      .expects(1)
 	        .method('each')
 	        .accepts(hide)
+	        .data({})
 	      .andExpects(3)
 	        .method('wrap')
 	        .accepts('<div />')
