@@ -93,7 +93,7 @@
   function isNot () {
     return !is.apply( null, arguments );
   }
-  
+
   // ( String: presentation, Collection: expectations[, String: opt_prop )
   function comparePresentation ( presentation, expectations, opt_prop ) {
     for ( var result = false, i = 0, len = expectations.length; i < len; i++ ) {
@@ -107,9 +107,9 @@
     }
     return result;
   }
-  
+
   // FUNCTIONS FOR EXERCISING
-  
+
   function fireCallback ( presentation, expectations, method ) {
     // Execute any callback functions specified with associated args
     for (var i = 0, len = presentation.length, data; i < len; i++) {
@@ -127,8 +127,8 @@
       }
     }
   }
-  
-  function createStub ( key, method, container ) {
+
+  function createStub ( method ) {
 
     function stub () {
       // Normalise actual parameters
@@ -140,17 +140,14 @@
       // Trigger callbacks with stubbed responses
       fireCallback( presentation, method._expected, method );
       // Return stubbed fn value
-      return matchReturn( presentation, method._expected, method, container );
+      return matchReturn( presentation, method._expected, method );
     }
-    
-    // Useful for error messages / debugging
-    method._id = key;
-    
+
     // Accessor for debugging internal state of mock
     stub._getState = function () {
       return method;
     };
-    
+
     // Stub is invoked when mocked method is called within the SUT.
     return stub;
   }
@@ -160,9 +157,9 @@
   function matchReturn ( presentation, expectations, method ) {
     return comparePresentation( presentation, expectations, "returns" ) || method._returns;
   }
-  
+
   // FUNCTIONS FOR VERIFYING
-  
+
   // Evaluate expected method invocations against actual
   function testInvocations ( method ) {
     return (
@@ -171,7 +168,16 @@
       // arbitrary range defined
       ( method._minCalls <= method._calls ) && ( method._maxCalls >= method._calls ) ||
       // at least n calls
-      ( method._minCalls < method._calls ) && ( method._maxCalls === Infinity ) 
+      ( method._minCalls < method._calls ) && ( method._maxCalls === Infinity )
+    );
+  }
+
+  function testOverloading ( method ) {
+    return ( ( method._overload )
+      // At least n Arg length checking - overloading allowed
+      ? ( method._requires > method._received[0].length )
+      // Strict Arg length checking - no overload
+      : ( method._requires !== method._received[0].length )
     );
   }
 
@@ -290,7 +296,7 @@
       this._mock = mock;
       // Default stub behaviours
       this._returns = undefined;
-      this._requires = false;
+      this._requires = 0;
       this._overload = true;
       this._chained = false;
       this._data = null;
@@ -305,7 +311,7 @@
     };
 
     __Mock.prototype = {
-      
+
       "method": function ( key ) {
         // Throw error if collision with mockMember API
         if ( this._mock.hasOwnProperty( key ) ) {
@@ -313,11 +319,11 @@
           throw exceptions;
         }
 
+        // Useful for error messages / debugging
+        this._id = key;
+
         // Register public interface to mocked method instance on mock klass
-        this._mock[ key ] = (function () {
-          // assign stub to identifier
-          return createStub( key, this );
-        }).call( this );
+        this._mock[ key ] = createStub( this );
 
         // chain for pretty declaration
         return this;
@@ -350,19 +356,16 @@
         // If required number of arguments not already set, then implicitly set it to length of param array (so let ppl customise it)
         // Add in per presentation strict argument length unless already set either globally or locally (recommendation to keep it consistent locally - don't let mocks change behaviour in test group too much)
         // This should probably be part of the refactor... feels messy!
-        if ( this._requires === false ) {
+        // Set minimum expectations
+        this._requires = arguments[ 0 ][ "accepts" ].length;
 
-          // Set minimum expectations
-          this._requires = arguments[ 0 ][ "accepts" ].length;
-
-         // TBD: Support for different requires per expected presentation
-         // Assign explicit expectation if exist
-         /* for ( var i = 0, len = arguments.length; i < len; i++ ) {
-            if ( !arguments[ i ][ "required" ] ) {
-              arguments[ i ][ "required" ] = arguments[ i ][ "accepts" ].length;
-            }
-          }*/
-        }
+       // TBD: Support for different requires per expected presentation
+       // Assign explicit expectation if exist
+       /* for ( var i = 0, len = arguments.length; i < len; i++ ) {
+          if ( !arguments[ i ][ "required" ] ) {
+            arguments[ i ][ "required" ] = arguments[ i ][ "accepts" ].length;
+          }
+        }*/
         this._expected = arguments;
         return this;
       },
@@ -423,45 +426,39 @@
       },
 
       "verifyMethod": function () {
-        
-        //function test
-        
-        
-        var result = ( testInvocations( this ) );
 
         // Early exclusions for no argument assertion
-        if ( this._calls === 0 && result ) {
-          return result;
-        } else if ( !result ) {
+        if ( testInvocations( this ) ) {
+          // If true and no calls then exclude from further tests
+          if ( this._calls === 0 ) {
+            return true;
+          }
+        } else {
           throwMockException( this._calls, this._minCalls, "IncorrectNumberOfMethodCallsException", this._id);
-          return result;
+          return false;
         }
-        
+
         // Since Invocations passed and result === true at this point, test presentations to method interface
-        
+        if ( this._requires && testOverloading ( this ) ) {
+          throwMockException( this._received.length, this._expected.length, "IncorrectNumberOfArgumentsException", this._id );
+          return false;
+        }
+
+        // Size of parameter collection is acceptable, time to assert them
+
         assertMethod:
-          
+
           with (this) {
 
           // assert presentations.... LET's DO THAT AFTERWARDS...IN fact more like a loop around the old atomic presentation checking mechanism...
 
           // Evaluate method interface expectations against actual
-          assertInterface: 
+          assertInterface:
           switch ( true ) {
-            // Strict Arg length checking - no overload
-            case ( _overload === false) && ( _requires !== false ) && ( _requires !== _received[0].length ):
-            // At least n Arg length checking - overloading allowed - Global check
-            case ( _overload === true) && ( _requires !== false ) && ( _requires > _received[0].length )  :
-              throwMockException( _received.length, _expected.length, "IncorrectNumberOfArgumentsException", _id );
-              break assertMethod;
+
 
             default:
               (function () {
-
-              // Only check arguments if some available or explicitly required
-              // By default functions returned 'undefined'
-              // This feels hacky also... refactor out if possible!
-              if ( _requires !== false || ( _calls > 0 && _received[0].length > 0 ) ) {
 
                 assertPresentations: // For each presentation to the interface...
 
@@ -511,7 +508,6 @@
 
                       } // end assertExpectations loop
                   } // end assertPresentations loop
-                }
               }).call(this);
             } // end assertInterface
           } // end assertMethod
