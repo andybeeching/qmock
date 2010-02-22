@@ -94,6 +94,10 @@
     return !is.apply( null, arguments );
   }
 
+  function trimCollection ( a, b ) {
+    return slice.call( a, 0, b.length );
+  }
+
   // ( String: presentation, Collection: expectations[, String: opt_prop )
   function comparePresentation ( presentation, expectations, opt_prop ) {
     for ( var result = false, i = 0, len = expectations.length; i < len; i++ ) {
@@ -426,10 +430,10 @@
       },
 
       "verifyMethod": function () {
-        
+
         // Early exclusions for no argument assertion
         if ( testInvocations( this ) ) {
-          // If true and no calls then exclude from further tests
+          // If true and no calls then exclude from further interrogation
           if ( this._calls === 0 ) {
             return true;
           }
@@ -441,7 +445,7 @@
         // TBD: This doesn't seem to support multiple presentations to an interface? Checks 'global' _received
         // Since Invocations passed and result === true at this point, test presentations to method interface
         // See if any paramters actually required, if so, verify against overloading behaviour
-        if ( this._requires && testOverloading ( this ) ) {
+        if ( this._requires && testOverloading( this ) ) {
           throwMockException( this._received[0].length, this._expected.length, "IncorrectNumberOfArgumentsException", this._id );
           return false;
           // Bail if no parameter OR parameter expectations
@@ -449,14 +453,9 @@
           return true;
         }
 
-        function trimCollection ( a, b ) {
-          return slice.call( a, 0, b.length );
-        }
-        
         function testPresentation ( presentation, expectations, opt_overload ) {
           for (var i = 0, len = expectations.length, expected; i < len; i++) {
-            
-            // alias for readability and speed      
+            // alias for readability and speed
             expected = expectations[ i ].accepts;
 
             // If overloading allowed only want to check parameters passed-in (otherwise will fail)
@@ -465,36 +464,31 @@
               presentation = trimCollection( presentation, expected );
               expected  = trimCollection( expected, presentation );
             }
-            
+
             // If a match (strict value checking) between a presentation and expectation restore exceptions object and assert next interface presentation.
             // If strict argument total checking is on just pass through expected and actual
-            //result2 |= compare( presentation, expectation );
             // If true then
             if ( compare( presentation, expected ) ) {
               return true;
-            } else {
-              throwMockException( presentation, expected, "IncorrectParameterException", /*method._id*/ + '()' );
             }
           }
           return false;
         }
-        
+
         /* Will only return true if ALL presentations to interface match an expectation */
         function verifyParameters ( method ) {
           // For each presentation to the interface...
           for (var params = 0, total = method._received.length, result = true; params < total; params++) {
-            
             // ...Check if a matching expectation
             result &= testPresentation( method._received[ params ], method._expected, method._overload );
-            
-            // Bail if we get a match
-              // Record which presentations fail
-              //throwMockException( presentation, expectation, "IncorrectParameterException", /*method._id*/ + '()' );
+            // Record which presentations fail
+            if ( !!!result ) {
+              throwMockException( method._received[ params ], method._expected, "IncorrectParameterException", method._id + '()' );
+            }
           }
-          
           return result;
         }
-        
+
         // Size of parameter collection is acceptable, time to assert them
         return verifyParameters( this );
       },
@@ -533,7 +527,7 @@
 
     // Verify method, tests both constructor and declared method's respective states.
     mock.verify = function verifyMock () {
-      
+
       result = true;
 
       // Check Constructor Arguments

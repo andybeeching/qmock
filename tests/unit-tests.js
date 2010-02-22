@@ -1550,7 +1550,7 @@
 
   test("mocked method with single strict parameter - multiple (String: 'foo' | 'bar') expected presentations", function () {
 
-	  expect(25);
+	  expect(18);
 
 	  var ninja = new Mock;
 	  ninja
@@ -1585,9 +1585,8 @@
       ninja.verify();
       ok(false, "verify() should throw exception when ninja.swing() passed incorrect parameter type (String: Constructor)");
     } catch (exception) {
-      equals(exception.length, 2, "verify() should return 1 exception when swing() passed incorrect parameter (String: Constructor)");
+      equals(exception.length, 1, "verify() should return 1 exception when swing() passed incorrect parameter (String: Constructor)");
       equals(exception[0].type, "IncorrectParameterException", "verify() exception type should be IncorrectParameterException for (String: Constructor)");
-      equals(exception[1].type, "IncorrectParameterException", "verify() exception type should be IncorrectParameterException for (String: Constructor)");
     }
 
     ninja.reset();
@@ -1598,9 +1597,8 @@
       ninja.verify();
       ok(false, "verify() should throw exception when ninja.swing() passed incorrect parameter type (Object: Constructor)");
     } catch (exception) {
-      equals(exception.length, 2, "verify() should return 1 exception when swing() passed incorrect parameter (Object: Constructor)");
+      equals(exception.length, 1, "verify() should return 1 exception when swing() passed incorrect parameter (Object: Constructor)");
       equals(exception[0].type, "IncorrectParameterException", "verify() exception type should be IncorrectParameterException for (Object: Constructor)");
-      equals(exception[1].type, "IncorrectParameterException", "verify() exception type should be IncorrectParameterException for (Object: Constructor)");
     }
 
     ninja.reset();
@@ -1613,8 +1611,7 @@
       ninja.verify();
       ok(false, "verify() should throw exception when ninja.swing() passed incorrect parameter type (Number: 1)");
     } catch (exception) {
-      equals(exception.length, 2, "verify() should return 1 exception when swing() passed incorrect parameter type (Number: 1)");
-      equals(exception[0].type, "IncorrectParameterException", "verify() exception type should be IncorrectParameterException for (Number: 1)");
+      equals(exception.length, 1, "verify() should return 1 exception when swing() passed incorrect parameter type (Number: 1)");
       equals(exception[0].type, "IncorrectParameterException", "verify() exception type should be IncorrectParameterException for (Number: 1)");
     }
 
@@ -1626,8 +1623,7 @@
       ninja.verify();
       ok(false, "verify() should throw exception when ninja.swing() passed incorrect parameter type (Boolean: true)");
     } catch (exception) {
-      equals(exception.length, 2, "verify() should return 1 exception when swing() passed incorrect parameter type (Boolean: true)");
-      equals(exception[0].type, "IncorrectParameterException", "verify() exception type should be IncorrectParameterException for (Boolean: true)");
+      equals(exception.length, 1, "verify() should return 1 exception when swing() passed incorrect parameter type (Boolean: true)");
       equals(exception[0].type, "IncorrectParameterException", "verify() exception type should be IncorrectParameterException for (Boolean: true)");
     }
 
@@ -1639,8 +1635,7 @@
       ninja.verify();
       ok(false, "verify() should throw exception when ninja.swing() passed incorrect parameter type (Object: {})");
     } catch (exception) {
-      equals(exception.length, 2, "verify() should return 1 exception when swing() passed incorrect parameter type (Object: {})");
-      equals(exception[0].type, "IncorrectParameterException", "verify() exception type should be IncorrectParameterException for (Object: {})");
+      equals(exception.length, 1, "verify() should return 1 exception when swing() passed incorrect parameter type (Object: {})");
       equals(exception[0].type, "IncorrectParameterException", "verify() exception type should be IncorrectParameterException for (Object: {})");
     }
 
@@ -1654,8 +1649,7 @@
       ninja.verify();
       ok(false, "verify() should throw exception when ninja.swing() passed incorrect parameter value (String: 'bar')");
     } catch (exception) {
-      equals(exception.length, 2, "verify() should return 1 exception when swing() passed incorrect parameter value (String: 'bar')");
-      equals(exception[0].type, "IncorrectParameterException", "verify() exception type should be IncorrectParameterException for (String: 'bar')");
+      equals(exception.length, 1, "verify() should return 1 exception when swing() passed incorrect parameter value (String: 'bar')");
       equals(exception[0].type, "IncorrectParameterException", "verify() exception type should be IncorrectParameterException for (String: 'bar')");
     }
 
@@ -1667,8 +1661,7 @@
       ninja.verify();
       ok(false, "verify() should throw exception when ninja.swing() passed incorrect parameter value (String: '')");
     } catch (exception) {
-      equals(exception.length, 2, "verify() should return 1 exception when swing() passed incorrect parameter value (String: '')");
-      equals(exception[0].type, "IncorrectParameterException", "verify() exception type should be IncorrectParameterException for (String: '')");
+      equals(exception.length, 1, "verify() should return 1 exception when swing() passed incorrect parameter value (String: '')");
       equals(exception[0].type, "IncorrectParameterException", "verify() exception type should be IncorrectParameterException for (String: '')");
     }
 
@@ -1692,7 +1685,7 @@
 
   test("mocked method with single strict parameter - multiple (Number: 3 | 9) expected presentations", function () {
 
-	  expect(31);
+	  expect(22);
 
 	  var ninja = new Mock;
 	  ninja
@@ -1727,9 +1720,8 @@
       ninja.verify();
       ok(false, "verify() should throw exception when ninja.swing() passed incorrect parameter type (Number: Constructor)");
     } catch (exception) {
-      equals(exception.length, 2, "verify() should return 1 exception when swing() passed incorrect parameter (Number: Constructor)");
+      equals(exception.length, 1, "verify() should return 1 exception when swing() passed incorrect parameter (Number: Constructor)");
       equals(exception[0].type, "IncorrectParameterException", "verify() exception type should be IncorrectParameterException for (Number: Constructor)");
-      equals(exception[1].type, "IncorrectParameterException", "verify() exception type should be IncorrectParameterException for (Number: Constructor)");
     }
 
     ninja.reset();
@@ -1740,8 +1732,7 @@
       ninja.verify();
       ok(false, "verify() should throw exception when ninja.swing() passed incorrect parameter type (Object: Constructor)");
     } catch (exception) {
-      equals(exception.length, 2, "verify() should return 1 exception when swing() passed incorrect parameter (Object: Constructor)");
-      equals(exception[0].type, "IncorrectParameterException", "verify() exception type should be IncorrectParameterException for (Object: Constructor)");
+      equals(exception.length, 1, "verify() should return 1 exception when swing() passed incorrect parameter (Object: Constructor)");
       equals(exception[0].type, "IncorrectParameterException", "verify() exception type should be IncorrectParameterException for (Object: Constructor)");
     }
 
@@ -1755,8 +1746,7 @@
       ninja.verify();
       ok(false, "verify() should throw exception when ninja.swing() passed incorrect parameter type (String: 'foo')");
     } catch (exception) {
-      equals(exception.length, 2, "verify() should return 1 exception when swing() passed incorrect parameter type (String: 'foo')");
-      equals(exception[0].type, "IncorrectParameterException", "verify() exception type should be IncorrectParameterException for (String: 'foo')");
+      equals(exception.length, 1, "verify() should return 1 exception when swing() passed incorrect parameter type (String: 'foo')");
       equals(exception[0].type, "IncorrectParameterException", "verify() exception type should be IncorrectParameterException for (String: 'foo')");
     }
 
@@ -1768,8 +1758,7 @@
       ninja.verify();
       ok(false, "verify() should throw exception when ninja.swing() passed incorrect parameter type (Boolean: true)");
     } catch (exception) {
-      equals(exception.length, 2, "verify() should return 1 exception when swing() passed incorrect parameter type (Boolean: true)");
-      equals(exception[0].type, "IncorrectParameterException", "verify() exception type should be IncorrectParameterException for (Boolean: true)");
+      equals(exception.length, 1, "verify() should return 1 exception when swing() passed incorrect parameter type (Boolean: true)");
       equals(exception[0].type, "IncorrectParameterException", "verify() exception type should be IncorrectParameterException for (Boolean: true)");
     }
 
@@ -1781,8 +1770,7 @@
       ninja.verify();
       ok(false, "verify() should throw exception when ninja.swing() passed incorrect parameter type (Object: {})");
     } catch (exception) {
-      equals(exception.length, 2, "verify() should return 1 exception when swing() passed incorrect parameter type (Object: {})");
-      equals(exception[0].type, "IncorrectParameterException", "verify() exception type should be IncorrectParameterException for (Object: {})");
+      equals(exception.length, 1, "verify() should return 1 exception when swing() passed incorrect parameter type (Object: {})");
       equals(exception[0].type, "IncorrectParameterException", "verify() exception type should be IncorrectParameterException for (Object: {})");
     }
 
@@ -1796,8 +1784,7 @@
       ninja.verify();
       ok(false, "verify() should throw exception when ninja.swing() passed incorrect parameter value (Number: 0)");
     } catch (exception) {
-      equals(exception.length, 2, "verify() should return 1 exception when swing() passed incorrect parameter value (Number: 0)");
-      equals(exception[0].type, "IncorrectParameterException", "verify() exception type should be IncorrectParameterException for (Number: 0)");
+      equals(exception.length, 1, "verify() should return 1 exception when swing() passed incorrect parameter value (Number: 0)");
       equals(exception[0].type, "IncorrectParameterException", "verify() exception type should be IncorrectParameterException for (Number: 0)");
     }
 
@@ -1809,8 +1796,7 @@
       ninja.verify();
       ok(false, "verify() should throw exception when ninja.swing() passed incorrect parameter value (Number: 2)");
     } catch (exception) {
-      equals(exception.length, 2, "verify() should return 1 exception when swing() passed incorrect parameter value (Number: 2)");
-      equals(exception[0].type, "IncorrectParameterException", "verify() exception type should be IncorrectParameterException for (Number: 2)");
+      equals(exception.length, 1, "verify() should return 1 exception when swing() passed incorrect parameter value (Number: 2)");
       equals(exception[0].type, "IncorrectParameterException", "verify() exception type should be IncorrectParameterException for (Number: 2)");
     }
 
@@ -1822,8 +1808,7 @@
       ninja.verify();
       ok(false, "verify() should throw exception when ninja.swing() passed incorrect parameter value (Number: NaN)");
     } catch (exception) {
-      equals(exception.length, 2, "verify() should return 1 exception when swing() passed incorrect parameter value (Number: NaN)");
-      equals(exception[0].type, "IncorrectParameterException", "verify() exception type should be IncorrectParameterException for (Number: NaN)");
+      equals(exception.length, 1, "verify() should return 1 exception when swing() passed incorrect parameter value (Number: NaN)");
       equals(exception[0].type, "IncorrectParameterException", "verify() exception type should be IncorrectParameterException for (Number: NaN)");
     }
 
@@ -1836,8 +1821,7 @@
       ninja.verify();
       ok(false, "verify() should throw exception when ninja.swing() passed incorrect parameter value (Number: Infinity)");
     } catch (exception) {
-      equals(exception.length, 2, "verify() should return 1 exception when swing() passed incorrect parameter value (Number: Infinity)");
-      equals(exception[0].type, "IncorrectParameterException", "verify() exception type should be IncorrectParameterException for (Number: Infinity)");
+      equals(exception.length, 1, "verify() should return 1 exception when swing() passed incorrect parameter value (Number: Infinity)");
       equals(exception[0].type, "IncorrectParameterException", "verify() exception type should be IncorrectParameterException for (Number: Infinity)");
     }
 
@@ -1863,9 +1847,9 @@
 
     // Note, if you want a typed parameter then use an assertion library (like Assay),
     // that allows for such a declaration
-    // aka, it's not advised to list all the possible (acceptable) values!
+    // aka, it's not advised to list all the possible (acceptable) values like true || false || etc...
 
-	  expect(19);
+	  expect(14);
 
 	  var ninja = new Mock;
 	  ninja
@@ -1900,9 +1884,8 @@
       ninja.verify();
       ok(false, "verify() should throw exception when ninja.swing() passed incorrect parameter (Boolean: Constructor)");
     } catch (exception) {
-      equals(exception.length, 2, "verify() should return 1 exception when swing() passed incorrect parameter (Boolean: Constructor)");
+      equals(exception.length, 1, "verify() should return 1 exception when swing() passed incorrect parameter (Boolean: Constructor)");
       equals(exception[0].type, "IncorrectParameterException", "verify() exception type should be IncorrectParameterException for (Boolean: Constructor)");
-      equals(exception[1].type, "IncorrectParameterException", "verify() exception type should be IncorrectParameterException for (Boolean: Constructor)");
     }
 
     ninja.reset();
@@ -1913,8 +1896,7 @@
       ninja.verify();
       ok(false, "verify() should throw exception when ninja.swing() passed incorrect parameter (Object: Constructor)");
     } catch (exception) {
-      equals(exception.length, 2, "verify() should return 1 exception when swing() passed incorrect parameter (Object: Constructor)");
-      equals(exception[0].type, "IncorrectParameterException", "verify() exception type should be IncorrectParameterException for (Object: Constructor)");
+      equals(exception.length, 1, "verify() should return 1 exception when swing() passed incorrect parameter (Object: Constructor)");
       equals(exception[0].type, "IncorrectParameterException", "verify() exception type should be IncorrectParameterException for (Object: Constructor)");
     }
 
@@ -1928,8 +1910,7 @@
       ninja.verify();
       ok(false, "verify() should throw exception when ninja.swing() passed incorrect parameter (String: 'foo')");
     } catch (exception) {
-      equals(exception.length, 2, "verify() should return 1 exception when swing() passed incorrect parameter type (String: 'foo')");
-      equals(exception[0].type, "IncorrectParameterException", "verify() exception type should be IncorrectParameterException for (String: 'foo')");
+      equals(exception.length, 1, "verify() should return 1 exception when swing() passed incorrect parameter type (String: 'foo')");
       equals(exception[0].type, "IncorrectParameterException", "verify() exception type should be IncorrectParameterException for (String: 'foo')");
     }
 
@@ -1941,8 +1922,7 @@
       ninja.verify();
       ok(false, "verify() should throw exception when ninja.swing() passed incorrect parameter (Number: 1)");
     } catch (exception) {
-      equals(exception.length, 2, "verify() should return 1 exception when swing() passed incorrect parameter type (Number: 1)");
-      equals(exception[0].type, "IncorrectParameterException", "verify() exception type should be IncorrectParameterException for (Number: 1)");
+      equals(exception.length, 1, "verify() should return 1 exception when swing() passed incorrect parameter type (Number: 1)");
       equals(exception[0].type, "IncorrectParameterException", "verify() exception type should be IncorrectParameterException for (Number: 1)");
     }
 
@@ -1954,8 +1934,7 @@
       ninja.verify();
       ok(false, "verify() should throw exception when ninja.swing() passed incorrect parameter (Object: {})");
     } catch (exception) {
-      equals(exception.length, 2, "verify() should return 1 exception when swing() passed incorrect parameter type (Object: {})");
-      equals(exception[0].type, "IncorrectParameterException", "verify() exception type should be IncorrectParameterException for (Object: {})");
+      equals(exception.length, 1, "verify() should return 1 exception when swing() passed incorrect parameter type (Object: {})");
       equals(exception[0].type, "IncorrectParameterException", "verify() exception type should be IncorrectParameterException for (Object: {})");
     }
 
@@ -2025,7 +2004,7 @@
       ninja.verify();
       ok(false, "verify() should throw exception when ninja.swing() passed incorrect parameter (String: 'bar')");
     } catch (exception) {
-      equals(exception.length, 9, "verify() should return 1 exception when swing() passed incorrect parameter (String: 'bar')");
+      equals(exception.length, 1, "verify() should return 1 exception when swing() passed incorrect parameter (String: 'bar')");
     }
 
     ninja.reset();
@@ -2324,7 +2303,7 @@
 		  ninja.verify();
 		  ok(false, "verify() should throw exception when passed parameter (String: 'baz')");
 		} catch (e) {
-		  equals(e.length, 2, "verify() should return an array of 1 exceptions with Parameter (String: 'baz')");
+		  equals(e.length, 1, "verify() should return an array of 1 exceptions with Parameter (String: 'baz')");
 		  equals(e[0].type, "IncorrectParameterException", "verify() exception type should be IncorrectParameterException");
 		}
 
