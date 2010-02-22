@@ -308,6 +308,185 @@
     }
     return e;
   }
+  
+  // Prototype for mocked method/property
+  // Can I strip out 'un-required' properties - save initialisation...
+  function __Mock ( min, max ) {
+    // Default stub behaviours
+    this._returns = undefined;
+    this._requires = 0;
+    this._overload = true;
+    this._chained = false;
+    this._data = null;
+    // Default stub state
+    this._expected = [];
+    this._received = [];
+    this._minCalls = min || 0;
+    this._maxCalls = max;
+    this._calls = 0;
+  };
+
+  __Mock.prototype = {
+
+    "method": function ( key ) {
+      // Throw error if collision with mockMember API
+      if ( this._mock.hasOwnProperty( key ) ) {
+        throw {
+          type: "InvalidMethodNameException",
+          msg: "Qmock expects a unique identifier for each mocked method"
+        };
+      }
+
+      // Useful for error messages / debugging
+      this._id = key;
+
+      // Register public interface to mocked method instance on mock klass
+      this._mock[ key ] = createStub( this );
+
+      // chain for pretty declaration
+      return this;
+    },
+
+    "interface": function setInterfaceExpectations () {
+      // Check for valid input to interface
+      for (var i = 0, len = arguments.length; i < len; i++) {
+        var acceptsProperty = arguments[ i ][ "accepts" ] || false; // attach hasOwnProperty check.
+        if ( acceptsProperty === false ) {
+          throw {
+            type: "MissingAcceptsPropertyException",
+            msg: "Qmock expects arguments to setInterfaceExpectations() to contain an accepts property"
+          }
+        } else if ( isNot( "Array", acceptsProperty ) ) {
+          throw {
+            type: "InvalidAcceptsValueException",
+            msg: "Qmock expects value of 'accepts' in arguments to be an Array (note true array, not array-like)"
+          }
+        }
+      }
+
+      // Expected format of arguments - {accepts: [ values ] [, returns: value] [, response: [ values ]] }
+
+      // Where arguments can equal either any type, or overloadable pairings.
+      // e.g. "string" or {params: foo, returns: bar}. Note array literals must be nested ({params: ["string", [1,2,3]], returns: "meh"})
+      // Normalize input to accepts into key/value expectation pairings
+
+      // THIS NEEDS A DEBATE - DEFAULT IS FOR IMPLICT STRICT NUMBER OF, & VALUE OF, ARG CHECKING FOR 'PRESENTATIONS'.
+      // If required number of arguments not already set, then implicitly set it to length of param array (so let ppl customise it)
+      // Add in per presentation strict argument length unless already set either globally or locally (recommendation to keep it consistent locally - don't let mocks change behaviour in test group too much)
+      // This should probably be part of the refactor... feels messy!
+      // Set minimum expectations
+      this._requires = arguments[ 0 ][ "accepts" ].length;
+
+     // TBD: Support for different requires per expected presentation
+     // Assign explicit expectation if exist
+     /* for ( var i = 0, len = arguments.length; i < len; i++ ) {
+        if ( !arguments[ i ][ "required" ] ) {
+          arguments[ i ][ "required" ] = arguments[ i ][ "accepts" ].length;
+        }
+      }*/
+      this._expected = arguments;
+      return this;
+    },
+
+    "accepts": function setSingleInterfaceExpectation () {
+      this._requires = arguments.length;
+      this._expected.push( { "accepts" : slice.call( arguments ) } );
+      return this;
+    },
+
+    "returns": function ( stub ) {
+      this._returns = stub; // default is undefined
+      return this;
+    },
+
+    "required": function ( num ) {
+      this._requires = num;
+      return this;
+    },
+
+    "overload": function ( bool ) {
+      this._overload = bool;
+      return this;
+    },
+
+    "data": function ( data ) {
+      this._data = data;
+      return this;
+    },
+
+    "property": function ( key ) {
+      if ( this._mock.hasOwnProperty( key ) ) {
+        throw {
+          type: "InvalidPropertyNameException",
+          msg: "Qmock expects a unique key for each stubbed property"
+        };
+      }
+      this._mock[ key ] = "stub";
+      return this;
+    },
+
+    "withValue": function ( value ) {
+      for ( property in this._mock ) {
+        if ( this._mock.hasOwnProperty( property ) ) {
+          if ( this._mock[ property ] === "stub" ) {
+            this._mock[ property ] = value;
+          }
+        }
+      }
+      return this;
+    },
+
+    "chain": function () {
+      this._returns = this._mock;
+      return this;
+    },
+
+    "andExpects": function ( calls ) {
+      return this._mock.expects( calls );
+    },
+
+    "verifyMethod": function ( opt_raise ) {
+      // 1. Check number of method invocations
+      if ( testInvocations( this ) ) {
+        // If true and no calls then exclude from further interrogation
+        if ( this._calls === 0 ) {
+          return true;
+        }
+      } else {
+        opt_raise && opt_raise( this._calls, this._minCalls, "IncorrectNumberOfMethodCallsException", this._id );
+        return false;
+      }
+
+      // 2. Check number of parameters received
+      // TBD: This doesn't seem to support multiple presentations to an interface? Checks 'global' _received
+      // See if any paramters actually required, if so, verify against overloading behaviour
+      if ( this._requires && testOverloading( this ) ) {
+        opt_raise && opt_raise( this._received[0].length, this._expected.length, "IncorrectNumberOfArgumentsException", this._id );
+        return false;
+      }
+
+      // 3. Assert all presentations to interface
+      return testInterface( this, opt_raise );
+    },
+
+    atLeast: function ( num ) {
+      this._minCalls = num;
+      this._maxCalls = Infinity;
+      return this;
+    },
+
+    noMoreThan: function ( num ) {
+      this._maxCalls = num;
+      return this;
+    }
+
+  }; // End MockedMember.prototype declaration
+
+  // Backward compatibility for QMock v0.1 API
+  __Mock.prototype["withArguments"] = __Mock.prototype.accepts;
+  __Mock.prototype["andReturns"] = __Mock.prototype.returns;
+  __Mock.prototype["andChain"] = __Mock.prototype.chain;
+  __Mock.prototype["callFunctionWith"] = __Mock.prototype.data;
 
   // PUBLIC MOCK OBJECT CONSTRUCTOR
   function Mock () {
@@ -333,189 +512,17 @@
       exceptions.push( createException.apply( null, arguments ) );
     }
 
-    // Prototype for mocked method/property
-    // Can I strip out 'un-required' properties - save initialisation...
-    function __Mock ( min, max ) {
-      // Reference to container
-      this._mock = mock;
-      // Default stub behaviours
-      this._returns = undefined;
-      this._requires = 0;
-      this._overload = true;
-      this._chained = false;
-      this._data = null;
-      // Default stub state
-      this._expected = [];
-      this._received = [];
-      this._minCalls = min || 0;
-      this._maxCalls = max;
-      this._calls = 0;
-      // Store reference to method in method list for reset functionality <str>and potential strict execution order tracking<str>.
-      methods.push(this);
-    };
-
-    __Mock.prototype = {
-
-      "method": function ( key ) {
-        // Throw error if collision with mockMember API
-        if ( this._mock.hasOwnProperty( key ) ) {
-          throwMockException("was reserved method name '" + key + "'", "a unique method name", "InvalidMethodNameException", "Constructor function");
-          throw exceptions;
-        }
-
-        // Useful for error messages / debugging
-        this._id = key;
-
-        // Register public interface to mocked method instance on mock klass
-        this._mock[ key ] = createStub( this );
-
-        // chain for pretty declaration
-        return this;
-      },
-
-      "interface": function setInterfaceExpectations () {
-        // Check for valid input to interface
-        for (var i = 0, len = arguments.length; i < len; i++) {
-          var acceptsProperty = arguments[ i ][ "accepts" ] || false; // attach hasOwnProperty check.
-          if ( acceptsProperty === false ) {
-            throw {
-              type: "MissingAcceptsPropertyException",
-              msg: "Qmock expects arguments to setInterfaceExpectations() to contain an accepts property"
-            }
-          } else if ( isNot( "Array", acceptsProperty ) ) {
-            throw {
-              type: "InvalidAcceptsValueException",
-              msg: "Qmock expects value of 'accepts' in arguments to be an Array (note true array, not array-like)"
-            }
-          }
-        }
-
-        // Expected format of arguments - {accepts: [ values ] [, returns: value] [, response: [ values ]] }
-
-        // Where arguments can equal either any type, or overloadable pairings.
-        // e.g. "string" or {params: foo, returns: bar}. Note array literals must be nested ({params: ["string", [1,2,3]], returns: "meh"})
-        // Normalize input to accepts into key/value expectation pairings
-
-        // THIS NEEDS A DEBATE - DEFAULT IS FOR IMPLICT STRICT NUMBER OF, & VALUE OF, ARG CHECKING FOR 'PRESENTATIONS'.
-        // If required number of arguments not already set, then implicitly set it to length of param array (so let ppl customise it)
-        // Add in per presentation strict argument length unless already set either globally or locally (recommendation to keep it consistent locally - don't let mocks change behaviour in test group too much)
-        // This should probably be part of the refactor... feels messy!
-        // Set minimum expectations
-        this._requires = arguments[ 0 ][ "accepts" ].length;
-
-       // TBD: Support for different requires per expected presentation
-       // Assign explicit expectation if exist
-       /* for ( var i = 0, len = arguments.length; i < len; i++ ) {
-          if ( !arguments[ i ][ "required" ] ) {
-            arguments[ i ][ "required" ] = arguments[ i ][ "accepts" ].length;
-          }
-        }*/
-        this._expected = arguments;
-        return this;
-      },
-
-      "accepts": function setSingleInterfaceExpectation () {
-        this._requires = arguments.length;
-        this._expected.push( { "accepts" : slice.call( arguments ) } );
-        return this;
-      },
-
-      "returns": function ( stub ) {
-        this._returns = stub; // default is undefined
-        return this;
-      },
-
-      "required": function ( num ) {
-        this._requires = num;
-        return this;
-      },
-
-      "overload": function ( bool ) {
-        this._overload = bool;
-        return this;
-      },
-
-      "data": function ( data ) {
-        this._data = data;
-        return this;
-      },
-
-      "property": function ( key ) {
-        if ( this._mock.hasOwnProperty( key ) ) {
-          throwMockException( "should be unique (was " + key + ")", "undefined property name", "InvalidPropertyNameException", "Constructor function" );
-          throw exceptions;
-        }
-        this._mock[ key ] = "stub";
-        return this;
-      },
-
-      "withValue": function ( value ) {
-        for ( property in this._mock ) {
-          if ( this._mock.hasOwnProperty( property ) ) {
-            if ( this._mock[ property ] === "stub" ) {
-              this._mock[ property ] = value;
-            }
-          }
-        }
-        return this;
-      },
-
-      "chain": function () {
-        this._returns = this._mock;
-        return this;
-      },
-
-      "andExpects": function ( calls ) {
-        return this._mock.expects( calls );
-      },
-
-      "verifyMethod": function () {
-        // 1. Check number of method invocations
-        if ( testInvocations( this ) ) {
-          // If true and no calls then exclude from further interrogation
-          if ( this._calls === 0 ) {
-            return true;
-          }
-        } else {
-          throwMockException( this._calls, this._minCalls, "IncorrectNumberOfMethodCallsException", this._id );
-          return false;
-        }
-
-        // 2. Check number of parameters received
-        // TBD: This doesn't seem to support multiple presentations to an interface? Checks 'global' _received
-        // See if any paramters actually required, if so, verify against overloading behaviour
-        if ( this._requires && testOverloading( this ) ) {
-          throwMockException( this._received[0].length, this._expected.length, "IncorrectNumberOfArgumentsException", this._id );
-          return false;
-        }
-
-        // 3. Assert all presentations to interface
-        return testInterface( this, throwMockException );
-      },
-
-      atLeast: function ( num ) {
-        this._minCalls = num;
-        this._maxCalls = Infinity;
-        return this;
-      },
-
-      noMoreThan: function ( num ) {
-        this._maxCalls = num;
-        return this;
-      }
-
-    }; // End MockedMember.prototype declaration
-
-    // Backward compatibility for QMock v0.1 API
-    __Mock.prototype["withArguments"] = __Mock.prototype.accepts;
-    __Mock.prototype["andReturns"] = __Mock.prototype.returns;
-    __Mock.prototype["andChain"] = __Mock.prototype.chain;
-    __Mock.prototype["callFunctionWith"] = __Mock.prototype.data;
-
     // PUBLIC METHODS on mock
     // Creates new MockedMember instance on Mock Object and sets-up initial method expectation
     mock.expects = mock.andExpects = function mockExpectsNewMethod ( min, max ) {
-      return new __Mock( min, max );
+      // Create a new member
+      var member = new __Mock( min, max );
+      // Store reference to namespace on each member instance
+      member._mock = mock;
+      // Store reference to method in method list for reset functionality 
+      // <str>and potential strict execution order tracking<str>.
+      methods.push( member );
+      return member;
     };
 
     mock.accepts = function mockExpectsArguments () {
@@ -528,7 +535,7 @@
     // Verify method, tests both constructor and declared method's respective states.
     mock.verify = function verifyMock () {
 
-      result = true;
+      var result = true;
 
       // Check Constructor Arguments
       if ( mock.expectsArguments.push ) {
@@ -544,14 +551,14 @@
 
       // Verify Mocked Methods
       for (var i = 0, len = methods.length; i < len; i++) {
-        result &= methods[ i ].verifyMethod();
+        result &= methods[ i ].verifyMethod( throwMockException );
       }
 
       // Moment of truth...
       if ( !result ) {
         throw exceptions; // D'OH! :(
       } else {
-        return true; // WIN! \o/
+        return !!result; // WIN! \o/
       }
     };
 

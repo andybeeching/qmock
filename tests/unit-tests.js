@@ -35,7 +35,7 @@
 
  	test("mock with multiple stubbed properties", function () {
 
- 	  expect(15);
+ 	  expect(14);
 
  	  var ninja = new Mock;
 
@@ -44,8 +44,7 @@
  	    ninja.expects(1).property('expects');
  	    ok(false, "mock should throw 'InvalidPropertyNameException' when trying to set a bad property name of 'expects'");
  	  } catch (e) {
- 	    equals(e.length, 1, "array of 1 exception should be thrown");
- 	    equals(e[0].type, "InvalidPropertyNameException", "exception type should be InvalidPropertyNameException");
+ 	    equals(e.type, "InvalidPropertyNameException", "exception type should be InvalidPropertyNameException");
  	  }
 
  	  var ninja = new Mock;
@@ -197,7 +196,7 @@
 
 	test("mocked method with explicit invocation call expectation", function () {
 
-	  expect(16);
+	  expect(12);
 	  var ninja = new Mock;
 
 	  // Test invalid method naming - protect API if using mocked member interface to set methods and properties
@@ -205,8 +204,7 @@
 	    ninja.expects(1).method('expects');
 	    ok(false, "mock should detect bad method name 'expects'");
 	  } catch (e) {
-	    equals(e.length, 1, "array of 1 exception should be thrown when bad method name 'expects' is used. Actual was");
-	    equals(e[0].type, "InvalidMethodNameException", "exception type should be InvalidMethodNameException");
+	    equals(e.type, "InvalidMethodNameException", "exception type should be InvalidMethodNameException");
 	  }
 
 	  var ninja = new Mock;  // Can't call reset as mock is broken, must re-instantiate mock instance.
@@ -215,8 +213,7 @@
 	    ninja.expects(1).method('andExpects');
 	    ok(false, "mock should detect bad method name 'andExpects'");
 	  } catch (e) {
-	    equals(e.length, 1, "array of 1 exception should be thrown");
-	    equals(e[0].type, "InvalidMethodNameException", "exception type should be InvalidMethodNameException");
+	    equals(e.type, "InvalidMethodNameException", "exception type should be InvalidMethodNameException");
 	  }
 
 	  ninja = new Mock; // Can't call reset as mock is broken, must re-instantiate mock instance.
@@ -225,8 +222,7 @@
 	    ninja.expects(1).method('expectsArguments');
 	    ok(false, "mock should detect bad method name 'expectsArguments'");
 	  } catch (e) {
-	    equals(e.length, 1, "array of 1 exception should be thrown");
-	    equals(e[0].type, "InvalidMethodNameException", "exception type should be InvalidMethodNameException");
+	    equals(e.type, "InvalidMethodNameException", "exception type should be InvalidMethodNameException");
 	  }
 
 	  ninja = new Mock; // Can't call reset as mock is broken, must re-instantiate mock instance.
@@ -235,8 +231,7 @@
 	    ninja.expects(1).method('reset');
 	    ok(false, "mock should detect bad method name 'reset'");
 	  } catch (e) {
-	    equals(e.length, 1, "array of 1 exception should be thrown");
-	    equals(e[0].type, "InvalidMethodNameException", "exception type should be InvalidMethodNameException");
+	    equals(e.type, "InvalidMethodNameException", "exception type should be InvalidMethodNameException");
 	  }
 
 	  ninja = new Mock; // Can't call reset as mock is broken, must re-instantiate mock instance.
