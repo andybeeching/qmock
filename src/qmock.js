@@ -489,7 +489,7 @@
   __Mock.prototype["callFunctionWith"] = __Mock.prototype.data;
 
   // PUBLIC MOCK OBJECT CONSTRUCTOR
-  function Mock () {
+  function Mock ( definition ) {
 
     // Check compare and alias
     if ( !!!QMock.config.compare || isNot( "Function", QMock.config.compare ) ) {
@@ -576,7 +576,7 @@
     mock.expectsArguments = mock.accepts;
 
     // If params passed to Mock constructor auto-magikally create mocked interface from JSON tree.
-    if ( typeof arguments[ 0 ] === "object" ) {
+    if ( is( "Object", definition ) ) {
       createMockFromJSON.call( mock, arguments[ 0 ] );
     }
 
