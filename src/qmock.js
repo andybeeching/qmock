@@ -55,7 +55,7 @@
  * TODO: Allow deep option for recursing through trees - typed or stric (or even varied?)
  * TODO: Publish CommonJS compliant API for ASSAY
  * TODO: Add setter method for config options to decouple from QMock idebtifier (see comparePresentations)
-
+ * TODO: Change how property / withValue work for better (and faster) declaration of stubbed properties
  */
 
 ///////////////////////////////////
@@ -381,8 +381,8 @@
         return this;
       },
 
-      "required": function ( total ) {
-        this._requires = total;
+      "required": function ( num ) {
+        this._requires = num;
         return this;
       },
 
