@@ -176,6 +176,7 @@
     );
   }
 
+  // Evaluate number of parameters received during invocations
   function testOverloading ( method ) {
     return ( ( method._overload )
       // At least n Arg length checking - overloading allowed
@@ -183,6 +184,45 @@
       // Strict Arg length checking - no overload
       : ( method._requires !== method._received[0].length )
     );
+  }
+  
+  // Evaluate single presentation against method expectations if match ANY will return true
+  function testPresentation ( presentation, expectations, opt_overload ) {
+    for (var i = 0, len = expectations.length, expected, result = true; i < len; i++) {
+      // reset so that empty presentation and empty expectation return true
+      result = false;
+      // expectation to compare
+      expected = expectations[ i ].accepts;
+      // If overloading allowed only want to check parameters passed-in (otherwise will fail)
+      // Must also trim off overloaded args as no expectations for them.
+      if ( !!opt_overload ) {
+        presentation = trimCollection( presentation, expected );
+        expected  = trimCollection( expected, presentation );
+      }
+      // If strict argument total checking is on just pass through expected and actual
+      result |= config.compare( presentation, expected );
+      
+      // If true then exit early
+      if ( !!result ) {
+        return true;
+      }
+    }
+    return !!result;
+  }
+  
+  // Evaluate ALL parameters against expectations, only return true if
+  // all match an expectation
+  function testInterface ( method, opt_raise ) {
+    // For each presentation to the interface...
+    for (var params = 0, total = method._received.length, result = true; params < total; params++) {
+      // ...Check if a matching expectation
+      result &= testPresentation( method._received[ params ], method._expected, method._overload );
+      // Record which presentations fail
+      if ( !!!result && opt_raise ) {
+        opt_raise( method._received[ params ], method._expected, "IncorrectParameterException", method._id + '()' );
+      }
+    }
+    return result;
   }
 
   // PRIVATE Functions
@@ -430,8 +470,7 @@
       },
 
       "verifyMethod": function () {
-
-        // Early exclusions for no argument assertion
+        // 1. Check number of method invocations
         if ( testInvocations( this ) ) {
           // If true and no calls then exclude from further interrogation
           if ( this._calls === 0 ) {
@@ -442,55 +481,16 @@
           return false;
         }
 
+        // 2. Check number of parameters received
         // TBD: This doesn't seem to support multiple presentations to an interface? Checks 'global' _received
-        // Since Invocations passed and result === true at this point, test presentations to method interface
         // See if any paramters actually required, if so, verify against overloading behaviour
         if ( this._requires && testOverloading( this ) ) {
           throwMockException( this._received[0].length, this._expected.length, "IncorrectNumberOfArgumentsException", this._id );
           return false;
-          // Bail if no parameter OR parameter expectations
-        } else if ( this._expected.length === 0 ) {
-          return true;
         }
 
-        function testPresentation ( presentation, expectations, opt_overload ) {
-          for (var i = 0, len = expectations.length, expected; i < len; i++) {
-            // alias for readability and speed
-            expected = expectations[ i ].accepts;
-
-            // If overloading allowed only want to check parameters passed-in (otherwise will fail)
-            // Must also trim off overloaded args as no expectations for them.
-            if ( !!opt_overload ) {
-              presentation = trimCollection( presentation, expected );
-              expected  = trimCollection( expected, presentation );
-            }
-
-            // If a match (strict value checking) between a presentation and expectation restore exceptions object and assert next interface presentation.
-            // If strict argument total checking is on just pass through expected and actual
-            // If true then
-            if ( compare( presentation, expected ) ) {
-              return true;
-            }
-          }
-          return false;
-        }
-
-        /* Will only return true if ALL presentations to interface match an expectation */
-        function verifyParameters ( method ) {
-          // For each presentation to the interface...
-          for (var params = 0, total = method._received.length, result = true; params < total; params++) {
-            // ...Check if a matching expectation
-            result &= testPresentation( method._received[ params ], method._expected, method._overload );
-            // Record which presentations fail
-            if ( !!!result ) {
-              throwMockException( method._received[ params ], method._expected, "IncorrectParameterException", method._id + '()' );
-            }
-          }
-          return result;
-        }
-
-        // Size of parameter collection is acceptable, time to assert them
-        return verifyParameters( this );
+        // 3. Assert all presentations to interface
+        return testInterface( this, throwMockException );
       },
 
       atLeast: function ( num ) {
