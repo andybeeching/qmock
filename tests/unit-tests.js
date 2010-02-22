@@ -359,11 +359,11 @@
 	  samurai.swing();
 	  ok(samurai.verify(), "verify() should pass after swing was called once");
 
-	  for(var i = 0; i < 4999; i++) {
+	  for(var i = 0; i < 50; i++) {
 	    samurai.swing();
 	  }
 
-	  ok(samurai.verify(), "verify() should pass after swing was called 5000 times");
+	  ok(samurai.verify(), "verify() should pass after swing was called 50 times");
 
 	  // Range of calls
 
@@ -1600,7 +1600,7 @@
     } catch (exception) {
       equals(exception.length, 2, "verify() should return 1 exception when swing() passed incorrect parameter (Object: Constructor)");
       equals(exception[0].type, "IncorrectParameterException", "verify() exception type should be IncorrectParameterException for (Object: Constructor)");
-      equals(exception[0].type, "IncorrectParameterException", "verify() exception type should be IncorrectParameterException for (Object: Constructor)");
+      equals(exception[1].type, "IncorrectParameterException", "verify() exception type should be IncorrectParameterException for (Object: Constructor)");
     }
 
     ninja.reset();
@@ -2322,7 +2322,7 @@
 	  ninja.swing("baz");
 	  try {
 		  ninja.verify();
-		  ok(false, "verify() should throw exception wehn passed parameter (String: 'baz')");
+		  ok(false, "verify() should throw exception when passed parameter (String: 'baz')");
 		} catch (e) {
 		  equals(e.length, 2, "verify() should return an array of 1 exceptions with Parameter (String: 'baz')");
 		  equals(e[0].type, "IncorrectParameterException", "verify() exception type should be IncorrectParameterException");
@@ -2330,13 +2330,12 @@
 
 	  ninja.reset();
 
-	  // Argument of right type and matching value
+	  // Argument of right type and matching value [1]
 	  equals( ninja.swing("foo") , "bar", "ninja.swing() should return (String: 'bar') when passed parameter (String: 'foo')");
 	  ok(ninja.verify(), "verify() should be true");
 
 	  ninja.reset();
-
-	  // Argument of right type and matching value
+	  // Argument of right type and matching value [2]
 	  equals( ninja.swing("far") , "baz", "ninja.swing() should return (String: 'baz') when passed parameter (String: 'far')");
 	  ok(ninja.verify(), "verify() should be true");
 
@@ -2372,7 +2371,7 @@
     $().run('foo').run('foo');
 		try {
 		  $.verify();
-		  ok(false, "verify() should throw exception when $ passed NO parameters");
+		  ok(false, "verify() should throw IncorrectNumberOfArgumentsException when $ passed NO parameters");
 		} catch (e) {
 		  equals(e.length, 1, "verify() should return an array of 1 exception: IncorrectNumberOfArgumentsException");
 		  equals(e[0].type, "IncorrectNumberOfArgumentsException", "verify() exception type should be IncorrectNumberOfArgumentsException");

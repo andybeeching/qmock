@@ -426,7 +426,7 @@
       },
 
       "verifyMethod": function () {
-
+        
         // Early exclusions for no argument assertion
         if ( testInvocations( this ) ) {
           // If true and no calls then exclude from further tests
@@ -434,83 +434,69 @@
             return true;
           }
         } else {
-          throwMockException( this._calls, this._minCalls, "IncorrectNumberOfMethodCallsException", this._id);
+          throwMockException( this._calls, this._minCalls, "IncorrectNumberOfMethodCallsException", this._id );
           return false;
         }
 
+        // TBD: This doesn't seem to support multiple presentations to an interface? Checks 'global' _received
         // Since Invocations passed and result === true at this point, test presentations to method interface
+        // See if any paramters actually required, if so, verify against overloading behaviour
         if ( this._requires && testOverloading ( this ) ) {
-          throwMockException( this._received.length, this._expected.length, "IncorrectNumberOfArgumentsException", this._id );
+          throwMockException( this._received[0].length, this._expected.length, "IncorrectNumberOfArgumentsException", this._id );
           return false;
+          // Bail if no parameter OR parameter expectations
+        } else if ( this._expected.length === 0 ) {
+          return true;
         }
 
+        function trimCollection ( a, b ) {
+          return slice.call( a, 0, b.length );
+        }
+        
+        function testPresentation ( presentation, expectations, opt_overload ) {
+          for (var i = 0, len = expectations.length, expected; i < len; i++) {
+            
+            // alias for readability and speed      
+            expected = expectations[ i ].accepts;
+
+            // If overloading allowed only want to check parameters passed-in (otherwise will fail)
+            // Must also trim off overloaded args as no expectations for them.
+            if ( !!opt_overload ) {
+              presentation = trimCollection( presentation, expected );
+              expected  = trimCollection( expected, presentation );
+            }
+            
+            // If a match (strict value checking) between a presentation and expectation restore exceptions object and assert next interface presentation.
+            // If strict argument total checking is on just pass through expected and actual
+            //result2 |= compare( presentation, expectation );
+            // If true then
+            if ( compare( presentation, expected ) ) {
+              return true;
+            } else {
+              throwMockException( presentation, expected, "IncorrectParameterException", /*method._id*/ + '()' );
+            }
+          }
+          return false;
+        }
+        
+        /* Will only return true if ALL presentations to interface match an expectation */
+        function verifyParameters ( method ) {
+          // For each presentation to the interface...
+          for (var params = 0, total = method._received.length, result = true; params < total; params++) {
+            
+            // ...Check if a matching expectation
+            result &= testPresentation( method._received[ params ], method._expected, method._overload );
+            
+            // Bail if we get a match
+              // Record which presentations fail
+              //throwMockException( presentation, expectation, "IncorrectParameterException", /*method._id*/ + '()' );
+          }
+          
+          return result;
+        }
+        
         // Size of parameter collection is acceptable, time to assert them
-
-        assertMethod:
-
-          with (this) {
-
-          // assert presentations.... LET's DO THAT AFTERWARDS...IN fact more like a loop around the old atomic presentation checking mechanism...
-
-          // Evaluate method interface expectations against actual
-          assertInterface:
-          switch ( true ) {
-
-
-            default:
-              (function () {
-
-                assertPresentations: // For each presentation to the interface...
-
-                  for (var i = 0, len = _received.length; i < len; i++) {
-
-                    // Use to restore exceptions object to pre-presentation assertion state in case of match
-                    var cachedExceptionTotal = exceptions.length;
-
-                    assertExpectations: // ...Check if a matching expectation
-
-                      for (var j = 0, _len = _expected.length; j < _len; j++) {
-
-                        // Assert Number of Arguments if expectation explicitly set...
-                        // At least n Arg length checking - overloading allowed - Global check
-                        if ( _expected[ j ][ "required" ] > _received[ i ].length )  {
-                          throwMockException( _received.length, _expected.length, "IncorrectNumberOfArgumentsException", _id );
-                          continue assertPresentations;
-                        }
-
-                        var actual = ( _overload === false && _requires !== false )
-                                   ? _received[ i ]
-                                   // Else assume default mode of overloading and type checking against method interface
-                                   : slice.call(_received[ i ], 0, _expected[ j ][ "accepts" ].length),
-                            expected = ( _overload === false && _requires !== false )
-                                     ? _expected[ j ][ "accepts" ]
-                                     // Else assume default mode of overloading and type checking against method interface
-                                     : slice.call(_expected[ j ][ "accepts" ], 0, _received[ i ].length);
-
-                        // If a match (strict value checking) between a presentation and expectation restore exceptions object and assert next interface presentation.
-                        // If strict argument total checking is on just pass through expected and actual
-                        if ( compare( actual, expected ) ) {
-                              /*,
-                              {
-                                "strictValueChecking": strictValueChecking, // done automatically for 'values', follow CommonJS assertion logic for non-primitves / date objects
-                                "exceptionType": (strictValueChecking) ? "IncorrectArgumentValueException" : "IncorrectArgumentTypeException", // Mmm, yes and no
-                                "exceptionHandler": throwMockException, // This seems like a flawed concept?
-                                "descriptor": name + '()', // We have this information to build up part of a meaningful error msg
-                                "delegate": true, // this can be part of curried fn
-                                "typed": true // this can be part of curried fn
-                              }*/
-                              // If match remove exceptions raised during checks and move on to next presentation.
-                              exceptions = exceptions.splice(0, cachedExceptionTotal);
-                              continue assertPresentations;
-                            } else {
-                              throwMockException( actual, expected, "IncorrectParameterException", _id + '()' )
-                            }
-
-                      } // end assertExpectations loop
-                  } // end assertPresentations loop
-              }).call(this);
-            } // end assertInterface
-          } // end assertMethod
+        return verifyParameters( this );
       },
 
       atLeast: function ( num ) {
@@ -547,24 +533,28 @@
 
     // Verify method, tests both constructor and declared method's respective states.
     mock.verify = function verifyMock () {
+      
+      result = true;
 
       // Check Constructor Arguments
       if ( mock.expectsArguments.push ) {
         if ( mock.expectsArguments.length !== mock.actualArguments.length ) {
           // Thrown in to satisfy tests (for consistency's sake) - NEEDS TO BE REFACTORED OUT!
           throwMockException( mock.actualArguments.length, mock.expectsArguments.length, "IncorrectNumberOfArgumentsException", "Constructor function" );
+          result = false;
         } else if ( !compare( mock.actualArguments, mock.expectsArguments ) ) {
           throwMockException( mock.actualArguments, mock.expectsArguments, "IncorrectParameterException", "Constructor function" );
+          result = false;
         }
       }
 
       // Verify Mocked Methods
       for (var i = 0, len = methods.length; i < len; i++) {
-        methods[ i ].verifyMethod();
+        result &= methods[ i ].verifyMethod();
       }
 
       // Moment of truth...
-      if (exceptions.length !== 0) {
+      if ( !result ) {
         throw exceptions; // D'OH! :(
       } else {
         return true; // WIN! \o/
