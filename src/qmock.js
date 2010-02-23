@@ -97,8 +97,7 @@
   function trimCollection ( a, b ) {
     return slice.call( a, 0, b.length );
   }
-
-  // ( String: presentation, Collection: expectations[, String: opt_prop )
+  
   function comparePresentation ( presentation, expectations, opt_prop ) {
     for ( var result = false, i = 0, len = expectations.length; i < len; i++ ) {
       // If match found against presentation return bound object (or self if chained)
@@ -114,7 +113,9 @@
 
   // FUNCTIONS FOR EXERCISING
 
-  function fireCallback ( presentation, expectations, method ) {
+  // ( String: presentation, Collection: expectations[, String: opt_prop )
+
+  function exerciseCallback ( presentation, expectations, method ) {
     // Execute any callback functions specified with associated args
     for (var i = 0, len = presentation.length, data; i < len; i++) {
       // Check if potential callback passed
@@ -132,6 +133,7 @@
     }
   }
 
+  // Essentially a factory
   function createStub ( method ) {
 
     function stub () {
@@ -142,12 +144,13 @@
       // Store presentation to method for verify phase
       method._received.push( presentation );
       // Trigger callbacks with stubbed responses
-      fireCallback( presentation, method._expected, method );
+      exerciseCallback( presentation, method._expected, method );
       // Return stubbed fn value
       return matchReturn( presentation, method._expected, method );
     }
 
-    // Accessor for debugging internal state of mock
+    // Accessor to internal state of mock
+    // Useful for debugging and watch()
     stub._getState = function () {
       return method;
     };
@@ -503,11 +506,10 @@
           return mock;
         },
         methods = [], // List of MockedMember method instances declared on mock
-        exceptions = [], // List of exceptions thrown by verify/verifyMethod functions,
-        compare = config.compare; // Alias for readability
+        exceptions = []; // List of exceptions thrown by verify/verifyMethod functions,
         //"'Constructor' (#protip - you can pass in a (String) when instantiating a new Mock, which helps inform constructor-level error messages)";
-
-    // Function to push arguments into Mock exceptions list
+        
+      // Function to push arguments into Mock exceptions list
     function throwMockException () {
       exceptions.push( createException.apply( null, arguments ) );
     }
@@ -543,7 +545,7 @@
           // Thrown in to satisfy tests (for consistency's sake) - NEEDS TO BE REFACTORED OUT!
           throwMockException( mock.actualArguments.length, mock.expectsArguments.length, "IncorrectNumberOfArgumentsException", "Constructor function" );
           result = false;
-        } else if ( !compare( mock.actualArguments, mock.expectsArguments ) ) {
+        } else if ( !config.compare( mock.actualArguments, mock.expectsArguments ) ) {
           throwMockException( mock.actualArguments, mock.expectsArguments, "IncorrectParameterException", "Constructor function" );
           result = false;
         }
