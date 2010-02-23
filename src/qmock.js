@@ -167,10 +167,10 @@
     return comparePresentation( presentation, expectations, "returns" ) || method._returns;
   }
 
-  // FUNCTIONS FOR VERIFYING
+  // FUNCTIONS FOR VERIFICATION
 
   // Evaluate expected method invocations against actual
-  function testInvocations ( method ) {
+  function verifyInvocations ( method ) {
     return (
       // explicit call number defined
       method._minCalls === method._calls ||
@@ -182,7 +182,7 @@
   }
 
   // Evaluate number of parameters received during invocations
-  function testOverloading ( method ) {
+  function verifyOverloading ( method ) {
     return ( ( method._overload )
       // At least n Arg length checking - overloading allowed
       ? ( method._requires > method._received[0].length )
@@ -192,7 +192,7 @@
   }
   
   // Evaluate single presentation against method expectations if match ANY will return true
-  function testPresentation ( presentation, expectations, opt_overload ) {
+  function verifyPresentation ( presentation, expectations, opt_overload ) {
     for (var i = 0, len = expectations.length, expected, result = true; i < len; i++) {
       // reset so that empty presentation and empty expectation return true
       result = false;
@@ -217,11 +217,11 @@
   
   // Evaluate ALL parameters against expectations, only return true if
   // all match an expectation
-  function testInterface ( method, opt_raise ) {
+  function verifyInterface ( method, opt_raise ) {
     // For each presentation to the interface...
     for (var params = 0, total = method._received.length, result = true; params < total; params++) {
       // ...Check if a matching expectation
-      result &= testPresentation( method._received[ params ], method._expected, method._overload );
+      result &= verifyPresentation( method._received[ params ], method._expected, method._overload );
       // Record which presentations fail
       if ( !!!result && opt_raise ) {
         opt_raise( method._received[ params ], method._expected, "IncorrectParameterException", method._id + '()' );
@@ -452,7 +452,7 @@
 
     "verifyMethod": function ( opt_raise ) {
       // 1. Check number of method invocations
-      if ( testInvocations( this ) ) {
+      if ( verifyInvocations( this ) ) {
         // If true and no calls then exclude from further interrogation
         if ( this._calls === 0 ) {
           return true;
@@ -465,13 +465,13 @@
       // 2. Check number of parameters received
       // TBD: This doesn't seem to support multiple presentations to an interface? Checks 'global' _received
       // See if any paramters actually required, if so, verify against overloading behaviour
-      if ( this._requires && testOverloading( this ) ) {
+      if ( this._requires && verifyOverloading( this ) ) {
         opt_raise && opt_raise( this._received[0].length, this._expected.length, "IncorrectNumberOfArgumentsException", this._id );
         return false;
       }
 
       // 3. Assert all presentations to interface
-      return testInterface( this, opt_raise );
+      return verifyInterface( this, opt_raise );
     },
 
     atLeast: function ( num ) {
