@@ -110,12 +110,40 @@
     }
     return result;
   }
+  
+  // FUNCTIONS FOR SETUP
+  
+  // Essentially a factory
+  function createStub ( method ) {
 
+    function stub () {
+      // Normalise actual parameters
+      var presentation = slice.call( arguments );
+      // Track method invocations
+      method._calls++;
+      // Store presentation to method for verify phase
+      method._received.push( presentation );
+      // Trigger callbacks with stubbed responses
+      exerciseCallbacks( presentation, method._expected, method );
+      // Return stubbed fn value
+      return exerciseReturn( presentation, method._expected, method );
+    }
+
+    // Accessor to internal state of mock
+    // Useful for debugging and watch()
+    stub._getState = function () {
+      return method;
+    };
+
+    // Stub is invoked when mocked method is called within the SUT.
+    return stub;
+  }
+  
   // FUNCTIONS FOR EXERCISING
 
   // ( String: presentation, Collection: expectations[, String: opt_prop )
 
-  function exerciseCallback ( presentation, expectations, method ) {
+  function exerciseCallbacks ( presentation, expectations, method ) {
     // Execute any callback functions specified with associated args
     for (var i = 0, len = presentation.length, data; i < len; i++) {
       // Check if potential callback passed
@@ -133,35 +161,9 @@
     }
   }
 
-  // Essentially a factory
-  function createStub ( method ) {
-
-    function stub () {
-      // Normalise actual parameters
-      var presentation = slice.call( arguments );
-      // Track method invocations
-      method._calls++;
-      // Store presentation to method for verify phase
-      method._received.push( presentation );
-      // Trigger callbacks with stubbed responses
-      exerciseCallback( presentation, method._expected, method );
-      // Return stubbed fn value
-      return matchReturn( presentation, method._expected, method );
-    }
-
-    // Accessor to internal state of mock
-    // Useful for debugging and watch()
-    stub._getState = function () {
-      return method;
-    };
-
-    // Stub is invoked when mocked method is called within the SUT.
-    return stub;
-  }
-
   // Compare presentations with expectations and match to return value if specified
   // Else use global, which is 'undefined' by default
-  function matchReturn ( presentation, expectations, method ) {
+  function exerciseReturn ( presentation, expectations, method ) {
     return comparePresentation( presentation, expectations, "returns" ) || method._returns;
   }
 
@@ -314,7 +316,7 @@
   
   // Prototype for mocked method/property
   // Can I strip out 'un-required' properties - save initialisation...
-  function __Mock ( min, max ) {
+  function Member ( min, max ) {
     // Default stub behaviours
     this._returns = undefined;
     this._requires = 0;
@@ -329,7 +331,7 @@
     this._calls = 0;
   };
 
-  __Mock.prototype = {
+  Member.prototype = {
 
     "method": function ( key ) {
       // Throw error if collision with mockMember API
@@ -486,10 +488,10 @@
   }; // End MockedMember.prototype declaration
 
   // Backward compatibility for QMock v0.1 API
-  __Mock.prototype["withArguments"] = __Mock.prototype.accepts;
-  __Mock.prototype["andReturns"] = __Mock.prototype.returns;
-  __Mock.prototype["andChain"] = __Mock.prototype.chain;
-  __Mock.prototype["callFunctionWith"] = __Mock.prototype.data;
+  Member.prototype["withArguments"] = Member.prototype.accepts;
+  Member.prototype["andReturns"] = Member.prototype.returns;
+  Member.prototype["andChain"] = Member.prototype.chain;
+  Member.prototype["callFunctionWith"] = Member.prototype.data;
 
   // PUBLIC MOCK OBJECT CONSTRUCTOR
   function Mock ( definition ) {
@@ -518,7 +520,7 @@
     // Creates new MockedMember instance on Mock Object and sets-up initial method expectation
     mock.expects = mock.andExpects = function ( min, max ) {
       // Create a new member
-      var member = new __Mock( min, max );
+      var member = new Member( min, max );
       // Store reference to namespace on each member instance
       member._mock = mock;
       // Store reference to method in method list for reset functionality 
