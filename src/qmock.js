@@ -70,12 +70,12 @@
 
 //////////////////////////////////
 
-(function ( container ) {
+(function ( container, undefined ) {
 
   // Try to ensure following are originals / built-in objects as can be shadowed / overwritten
-  var undefined,
-      slice = Array.prototype.slice,
+  var slice = Array.prototype.slice,
       toString = Object.prototype.toString,
+      hasOwnProperty = Object.prototype.hasOwnProperty;
 
       // default configuration options
       config = {
@@ -85,7 +85,7 @@
 
   // UTILITY Functions
 
-  // Following inspired by jQuery but most credit to Mark Miller for 'Miller Device'
+  // Following borrowed from jQuery but most credit to Mark Miller for 'Miller Device'
   function is ( nativeType, obj ) {
     return toString.call( obj ) === "[object " + nativeType + "]";
   }
@@ -97,22 +97,22 @@
   function trimCollection ( a, b ) {
     return slice.call( a, 0, b.length );
   }
-  
-  function comparePresentation ( presentation, expectations, opt_prop ) {
+
+  function comparePresentation ( presentation, expectations, opt_property ) {
     for ( var result = false, i = 0, len = expectations.length; i < len; i++ ) {
       // If match found against presentation return bound object (or self if chained)
       if ( config.compare( presentation, expectations[ i ][ "accepts" ] ) ) {
-        result = ( opt_prop )
-          ? expectations[ i ][ opt_prop ]
+        result = ( opt_property )
+          ? expectations[ i ][ opt_property ]
           : true
         break;
       }
     }
     return result;
   }
-  
+
   // FUNCTIONS FOR SETUP
-  
+
   // Essentially a factory
   function createStub ( method ) {
 
@@ -138,7 +138,21 @@
     // Stub is invoked when mocked method is called within the SUT.
     return stub;
   }
-  
+
+  function createMember ( opt_min, opt_max, opt_receiver ) {
+    // Create member instance
+    var self = new Member( opt_min, opt_max );
+    // If namespace provided setup references for recording interactions
+    if ( opt_receiver ) {
+      // Store reference to namespace on each member instance
+      self._mock = opt_receiver;
+      // Store reference to method in method list for reset functionality
+      // <str>and potential strict execution order tracking<str>.
+      opt_receiver._methods && opt_receiver._methods.push( self );
+    }
+    return self;
+  }
+
   // FUNCTIONS FOR EXERCISING
 
   // ( String: presentation, Collection: expectations[, String: opt_prop )
@@ -171,14 +185,19 @@
 
   // Evaluate expected method invocations against actual
   function verifyInvocations ( method ) {
-    return (
-      // explicit call number defined
-      method._minCalls === method._calls ||
-      // arbitrary range defined
-      ( method._minCalls <= method._calls ) && ( method._maxCalls >= method._calls ) ||
-      // at least n calls
-      ( method._minCalls < method._calls ) && ( method._maxCalls === Infinity )
-    );
+    return ( method._minCalls != null )
+      // If minCalls set there is an expectation
+      // If one expression below true then return else expectations not met so false
+      ? (
+        // explicit call number defined
+        method._minCalls === method._calls ||
+        // arbitrary range defined
+        ( method._minCalls <= method._calls ) && ( method._maxCalls >= method._calls ) ||
+        // at least n calls
+        ( method._minCalls < method._calls ) && ( method._maxCalls === Infinity ) )
+      // Since no minCalls then no inovation expectations, all results are true.
+      : true
+    ;
   }
 
   // Evaluate number of parameters received during invocations
@@ -190,23 +209,27 @@
       : ( method._requires !== method._received[0].length )
     );
   }
-  
+
   // Evaluate single presentation against method expectations if match ANY will return true
   function verifyPresentation ( presentation, expectations, opt_overload ) {
     for (var i = 0, len = expectations.length, expected, result = true; i < len; i++) {
       // reset so that empty presentation and empty expectation return true
+      // If no expectations then won't be reached... retuns true.
       result = false;
+
       // expectation to compare
       expected = expectations[ i ].accepts;
+
       // If overloading allowed only want to check parameters passed-in (otherwise will fail)
       // Must also trim off overloaded args as no expectations for them.
       if ( !!opt_overload ) {
         presentation = trimCollection( presentation, expected );
         expected  = trimCollection( expected, presentation );
       }
+
       // If strict argument total checking is on just pass through expected and actual
       result |= config.compare( presentation, expected );
-      
+
       // If true then exit early
       if ( !!result ) {
         return true;
@@ -214,7 +237,7 @@
     }
     return !!result;
   }
-  
+
   // Evaluate ALL parameters against expectations, only return true if
   // all match an expectation
   function verifyInterface ( method, opt_raise ) {
@@ -313,7 +336,7 @@
     }
     return e;
   }
-  
+
   // Prototype for mocked method/property
   // Can I strip out 'un-required' properties - save initialisation...
   function Member ( min, max ) {
@@ -326,16 +349,21 @@
     // Default stub state
     this._expected = [];
     this._received = [];
-    this._minCalls = min || 0;
-    this._maxCalls = max;
+    this._minCalls = min || null;
+    this._maxCalls = max || null;
     this._calls = 0;
   };
 
   Member.prototype = {
 
+    "id": function ( identifier ) {
+      this._id = identifier;
+      return this;
+    },
+
     "method": function ( key ) {
       // Throw error if collision with mockMember API
-      if ( this._mock.hasOwnProperty( key ) ) {
+      if ( hasOwnProperty.call( this._mock, key ) ) {
         throw {
           type: "InvalidMethodNameException",
           msg: "Qmock expects a unique identifier for each mocked method"
@@ -345,7 +373,7 @@
       // Useful for error messages / debugging
       this._id = key;
 
-      // Register public interface to mocked method instance on mock klass
+      // Register public interface to mocked method instance on target object
       this._mock[ key ] = createStub( this );
 
       // chain for pretty declaration
@@ -420,7 +448,7 @@
     },
 
     "property": function ( key ) {
-      if ( this._mock.hasOwnProperty( key ) ) {
+      if ( hasOwnProperty.call( this._mock, key ) ) {
         throw {
           type: "InvalidPropertyNameException",
           msg: "Qmock expects a unique key for each stubbed property"
@@ -431,10 +459,10 @@
     },
 
     "withValue": function ( value ) {
-      for ( property in this._mock ) {
-        if ( this._mock.hasOwnProperty( property ) ) {
-          if ( this._mock[ property ] === "stub" ) {
-            this._mock[ property ] = value;
+      for ( var key in this._mock ) {
+        if ( hasOwnProperty.call( this._mock, key ) ) {
+          if ( this._mock[ key ] === "stub" ) {
+            this._mock[ key ] = value;
           }
         }
       }
@@ -446,12 +474,17 @@
       return this;
     },
 
-    "andExpects": function ( calls ) {
-      return this._mock.expects( calls );
+    "andExpects": function ( min, max ) {
+      return this._mock.expects( min, max );
+    },
+
+    "reset": function () {
+      this._calls = 0;
+      this._received = [];
     },
 
     "verifyMethod": function ( opt_raise ) {
-      // 1. Check number of method invocations
+      // 1. Check number of method invocations if set
       if ( verifyInvocations( this ) ) {
         // If true and no calls then exclude from further interrogation
         if ( this._calls === 0 ) {
@@ -466,7 +499,7 @@
       // TBD: This doesn't seem to support multiple presentations to an interface? Checks 'global' _received
       // See if any paramters actually required, if so, verify against overloading behaviour
       if ( this._requires && verifyOverloading( this ) ) {
-        opt_raise && opt_raise( this._received[0].length, this._expected.length, "IncorrectNumberOfArgumentsException", this._id );
+        opt_raise && opt_raise( this._received[ 0 ].length, this._expected.length, "IncorrectNumberOfArgumentsException", this._id );
         return false;
       }
 
@@ -483,6 +516,11 @@
     noMoreThan: function ( num ) {
       this._maxCalls = num;
       return this;
+    },
+
+    calls: function ( min, max ) {
+      this._minCalls = min || this._minCalls;
+      this._maxCalls = max || this._maxCalls;
     }
 
   }; // End MockedMember.prototype declaration
@@ -493,24 +531,112 @@
   Member.prototype["andChain"] = Member.prototype.chain;
   Member.prototype["callFunctionWith"] = Member.prototype.data;
 
-  // PUBLIC MOCK OBJECT CONSTRUCTOR
   function Mock ( definition ) {
+
+    // Create internal state
+    var self = new Member,
+        recorder;
+
+    function receiver () {
+      return recorder.apply( null, arguments );
+    }
+
+    // Pseudo-inheritance by copying values & references over to instance
+    // Internal state is this public, otherwise all methods on Member.prototype would
+    // need manual scoping with .call()
+    // Can't use prototype as function literal prototype not in prototype chain, e.g. a
+    // lookup for (function () {}).foo goes to Function.prototype.foo (__proto__)
+    for ( var key in self ) {
+      receiver[ key ] = self[ key ];
+    }
+
+    // Update default return state on Constuctors to themselves (for cascade-invocation declarations)
+    // If the return value is overidden post-instance then it is assumed the mock is a standalone
+    // constuctor and not acting as a receiver object (aka namespace)
+    receiver._returns = receiver;
+
+    // Augment with Konstructor instance state
+    // Track methods declared on receiver
+    receiver._methods = [];
+    // Track verification errors
+    receiver._exceptions = [];
+
+    // Initialise recorder declaration to update constructor state
+    recorder = createStub( receiver );
+
+    // Augment with receiver-only method expects
+    receiver.expects = receiver.andExpects = function ( opt_min, opt_max ) {
+      return createMember( opt_min, opt_max, receiver );
+    };
+
+    // Verify method, tests both constructor and declared method's respective states.
+    receiver.verify = function () {
+
+      var result = true;
+
+      // Verify constructor
+      result &= receiver.verifyMethod( throwMockException );
+
+      // Verify Mocked Methods
+      for (var i = 0, len = receiver._methods.length; i < len; i++) {
+        result &= receiver._methods[ i ].verifyMethod( throwMockException );
+      }
+
+      // Live() or Die()
+      if ( !!!result ) {
+        // Meh.
+        throw receiver._exceptions;
+      } else {
+        // Disco! \o/
+        return !!result;
+      }
+    }
+
+    // Resets internal state of Mock instance
+    receiver.reset = ( function ( _reset ) {
+      return function () {
+        receiver._exceptions = [];
+        _reset.call( receiver );
+        for (var i = 0, len = receiver._methods.length; i < len; i++) {
+          receiver._methods[ i ].reset();
+        }
+      }
+    })( receiver.reset );
+
+    // Function to push arguments into Mock exceptions list
+    function throwMockException () {
+      receiver._exceptions.push( createException.apply( null, arguments ) );
+    }
+
+    // Backward compatibility for QMock v0.1 API
+    receiver.expectsArguments = receiver.accepts;
+
+    // If params passed to Mock constructor auto-magikally create mocked interface from JSON tree.
+    if ( definition ) {
+      createMockFromJSON.call( receiver, definition );
+    }
+
+    // Mock-tatstic!
+    return receiver;
+  }
+
+  // PUBLIC MOCK OBJECT CONSTRUCTOR
+  /*function Mock ( definition ) {
 
     // Check compare and alias
     if ( !!!QMock.config.compare || isNot( "Function", QMock.config.compare ) ) {
       new Error("QMock requires a legitimate comparison function to be set (Qmock.compare)'");
     }
 
-    var mock = function () {
+    /*var mock = function () {
           // Can't use MockObject fn name, dies in IE <<< Changed to be ES5 compatible - test in IE!!
           // Should be able to use alias though? Held in closure..
           mock.actualArguments = slice.call(arguments); // Need to be normalised to same object type (since arguments don't share prototype with Arrays, thus would fail CommonJS deepEquals assertion)
           return mock;
         },
-        methods = [], // List of MockedMember method instances declared on mock
+    var methods = [], // List of MockedMember method instances declared on mock
         exceptions = []; // List of exceptions thrown by verify/verifyMethod functions,
-        //"'Constructor' (#protip - you can pass in a (String) when instantiating a new Mock, which helps inform constructor-level error messages)";
-        
+
       // Function to push arguments into Mock exceptions list
     function throwMockException () {
       exceptions.push( createException.apply( null, arguments ) );
@@ -523,7 +649,7 @@
       var member = new Member( min, max );
       // Store reference to namespace on each member instance
       member._mock = mock;
-      // Store reference to method in method list for reset functionality 
+      // Store reference to method in method list for reset functionality
       // <str>and potential strict execution order tracking<str>.
       methods.push( member );
       return member;
@@ -583,13 +709,13 @@
 
     // If params passed to Mock constructor auto-magikally create mocked interface from JSON tree.
     if ( is( "Object", definition ) ) {
-      createMockFromJSON.call( mock, arguments[ 0 ] );
+      createMockFromJSON.call( mock, definition );
     }
 
     // On my command, unleash the mock! :-)
     return mock;
 
-  }
+  }*/
 
   // Expose internal methods for unit tests
   /*if ( undefined !== expose ) {

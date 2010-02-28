@@ -1,7 +1,5 @@
-(function QMockTests () {
-
-  // Closure scoped aliases to internal qMock functions
-  var undefined;
+// Closure scoped aliases to internal qMock functions
+(function QMockTests ( undefined ) {
 
 	// Stub to test support for user-defined objects
 	function Custom () {};
@@ -48,7 +46,6 @@
  	  }
 
  	  var ninja = new Mock;
-
  	  ninja
  	    .expects()
  	      .property("rank")
@@ -153,11 +150,11 @@
  	    .andExpects(1)
  	      .method('getStringValue').returns('data')
  	    .andExpects(1)
- 	      .method('getArrayValue').returns( [ 1, 2, 3] )
+ 	      .method('getArrayValue').returns([ 1, 2, 3])
  	    .andExpects(1)
- 	      .method('getFunctionValue').returns( function () { return 'function'; } )
+ 	      .method('getFunctionValue').returns(function () { return 'function'; })
  	    .andExpects(1)
- 	      .method('getObjectValue').returns( { id: 5, value: 'value' } )
+ 	      .method('getObjectValue').returns({ id: 5, value: 'value' })
  	    .andExpects(1)
  	      .method('getNullValue').returns(null)
  	    .andExpects(1)
@@ -171,9 +168,9 @@
  	    .andExpects(1)
  	      .method('getFalseValue').returns(false)
  	    .andExpects(1)
- 	      .method('getEmptyArrayValue').returns([ ])
+ 	      .method('getEmptyArrayValue').returns([])
  	    .andExpects(1)
- 	      .method('getEmptyObjectValue').returns({ });
+ 	      .method('getEmptyObjectValue').returns({});
 
       equals( mock.getNumericValue(), 10, "getNumericValue() on mock should return (Number: 10)");
       equals( mock.getStringValue(), 'data', "getStringValue() on mock should return (String: data)");
@@ -2315,197 +2312,6 @@
 
 	});
 
-	test("mocked method with single strict parameter (String: 'foo') and chained return value", function () {
-
-	  expect(9);
-
-    var $ = new Mock;
-    $.accepts(".ninja")
-      .expects(2)
-        .method('run')
-        .accepts('foo')
-        .chain();
-
-		// Invalid constructor param
-
-    $(1);
-		try {
-		  $.verify();
-		  ok(false, "verify() should throw exception when ($) passed invalid parameter. expected: (String: Constructor), actual: (Number: 1)");
-		} catch (e) {
-		  equals(e.length, 2, "verify() should return an array of 2 exceptions: [IncorrectParameterException, IncorrectNumberOfMethodCallsException, IncorrectNumberOfMethodCallsException]");
-		  equals(e[0].type, "IncorrectParameterException", "verify() exception type should be IncorrectParameterException");
-		  equals(e[1].type, "IncorrectNumberOfMethodCallsException", "verify() exception type should be IncorrectNumberOfMethodCallsException");
-		}
-
-    $.reset();
-
-    // No constructor param
-
-    $().run('foo').run('foo');
-		try {
-		  $.verify();
-		  ok(false, "verify() should throw IncorrectNumberOfArgumentsException when $ passed NO parameters");
-		} catch (e) {
-		  equals(e.length, 1, "verify() should return an array of 1 exception: IncorrectNumberOfArgumentsException");
-		  equals(e[0].type, "IncorrectNumberOfArgumentsException", "verify() exception type should be IncorrectNumberOfArgumentsException");
-		}
-
-    $.reset();
-
-    // Missed call to run
-
-    $(".ninja").run('foo');
-
-		try {
-		  $.verify();
-		  ok(false, "verify() should throw exception when run() is not invoked twice");
-		} catch (e) {
-		  equals(e.length, 1, "verify() should return an array of 1 exceptions: [IncorrectNumberOfMethodCallsException]");
-		  equals(e[0].type, "IncorrectNumberOfMethodCallsException", "verify() exception type should be IncorrectNumberOfMethodCallsException");
-		}
-
-    $.reset();
-
-	  // Good Exercises
-
-	  // Overloaded constructor param with incorrect parameter values
-
-    $('.ninja').run('foo').run('foo');
-
-	  ok($.verify(), "verify() should be true");
-
-    $.reset();
-
-	  // Example - Mock jQuery with chaining
-
-	  var jQuery = new Mock;
-
-    function wrap() {
-	    if ( jQuery.browser.chrome === true ) {
-	      jQuery.wrap('<div />').wrap('<div />').wrap('<div />');
-	    }
-	  }
-
-	  jQuery
-	    .accepts(".ninjas")
-	      .expects(1)
-	        .method('each')
-	        .accepts(wrap)
-	        .data(this)
-	        .chain()
-	      .andExpects(3)
-	        .method('wrap')
-	        .accepts('<div />')
-	        .chain()
-	      .andExpects()
-	        .property('browser')
-	        .withValue({
-	          ie: false,
-	          mozilla: false,
-	          safari: false,
-	          opera: false,
-	          chrome: true
-	        });
-
-	  // Exercise
-	  jQuery(".ninjas").each(wrap);
-	  // Verify
-	  ok(jQuery.verify(), "verify() should be true: jQuery is mocked with chaining");
-
-	});
-
-	module( "QMock: Constructor expectations" );
-
-	test("mocked Constructor with single strict parameter (String: '#foo') expectation", function () {
-
-	  expect(6);
-
-	  // Mock jQuery
-	  var $ = new Mock ();
-
-	  $.accepts("#foo")
-  	  .expects(1)
-	    .method('html')
-  	    .accepts('<span>blah</span>');
-
-	  // Bad Exercise
-
-	  // Test invalid parameter type
-
-    $(1).html('<span>blah</span>');
-
-    try {
-      $.verify();
-      ok(false, "verify() should throw exception when $ passed parameter (Number: 1)");
-    } catch (e) {
-      equals(e.length, 1, "verify() should return an array of 1 exception: IncorrectParameterException");
-      equals(e[0].type, "IncorrectParameterException", "verify() exception type should be IncorrectParameterException");
-    }
-
-	  $.reset();
-
-	  // Test valid parameter type but wrong value
-    $("#bar").html('<span>blah</span>');
-
-    try {
-      $.verify();
-      ok(false, "verify() should throw exception when $ passed parameter (String: #bar)");
-    } catch (e) {
-      equals(e.length, 1, "verify() should return an array of 1 exception: IncorrectParameterException for parameter (String: #bar)");
-      equals(e[0].type, "IncorrectParameterException", "verify() exception type should be IncorrectParameterException");
-    }
-
-    $.reset();
-
-    // Good Exercise
-
-    $("#foo").html('<span>blah</span>');
-    ok($.verify(), "verify() should be true when $ passed (String: '#foo')");
-
-	  // Trigger strict argument checking
-
-	  // Example: Mock the query of the J
-
-	  var jQuery = new Mock;
-
-	  function hide() {
-	    if ( jQuery.browser.chrome === true ) {
-	      jQuery.wrap('<div />');
-	      jQuery.wrap('<div />');
-	      jQuery.wrap('<div />');
-	    }
-	  }
-
-	  jQuery
-	    .accepts(".ninjas")
-	      .expects(1)
-	        .method('each')
-	        .accepts(hide)
-	        .data({})
-	      .andExpects(3)
-	        .method('wrap')
-	        .accepts('<div />')
-	      .andExpects()
-	        .property('browser')
-	        .withValue({
-	          ie: false,
-	          mozilla: false,
-	          safari: false,
-	          opera: false,
-	          chrome: true
-	        });
-
-	  // Exercise
-
-	  jQuery(".ninjas").each(hide);
-
-	  // Verify
-
-	  ok(jQuery.verify(), "verify() should be true: jQuery is mocked :-)");
-
-	});
-
 	module( "QMock: Ajax behaviours" );
 
 	test("mocked method with callback arguments", function () {
@@ -2597,7 +2403,255 @@
 
 	});
 
-  module( "QMock: API" );
+	test("mocked constructor with single strict parameter (String: 'foo') and chained return value", function () {
+
+	  expect(9);
+    var $ = new Mock;
+    $.accepts(".ninja")
+      .expects(2)
+        .method('run')
+        .accepts('foo')
+        .chain();
+
+		// Invalid constructor param
+    $(1);
+		try {
+		  $.verify();
+		  ok(false, "verify() should throw exception when ($) passed invalid parameter. expected: (String: Constructor), actual: (Number: 1)");
+		} catch (e) {
+		  equals(e.length, 2, "verify() should return an array of 2 exceptions: [IncorrectParameterException, IncorrectNumberOfMethodCallsException]");
+		  equals(e[0].type, "IncorrectParameterException", "verify() exception type should be IncorrectParameterException");
+		  equals(e[1].type, "IncorrectNumberOfMethodCallsException", "verify() exception type should be IncorrectNumberOfMethodCallsException since ninja.run not exercised");
+		}
+
+    $.reset();
+
+    // No constructor param
+    $().run('foo').run('foo');
+		try {
+		  $.verify();
+		  ok(false, "verify() should throw IncorrectNumberOfArgumentsException when $ passed NO parameters");
+		} catch (e) {
+		  equals(e.length, 1, "verify() should return an array of 1 exception: IncorrectNumberOfArgumentsException");
+		  equals(e[0].type, "IncorrectNumberOfArgumentsException", "verify() exception type should be IncorrectNumberOfArgumentsException");
+		}
+
+    $.reset();
+
+    // Missed call to run
+
+    $(".ninja").run('foo');
+
+		try {
+		  $.verify();
+		  ok(false, "verify() should throw exception when run() is not invoked twice");
+		} catch (e) {
+		  equals(e.length, 1, "verify() should return an array of 1 exceptions: [IncorrectNumberOfMethodCallsException]");
+		  equals(e[0].type, "IncorrectNumberOfMethodCallsException", "verify() exception type should be IncorrectNumberOfMethodCallsException");
+		}
+
+    $.reset();
+
+	  // Good Exercises
+
+	  // Overloaded constructor param with incorrect parameter values
+
+    $('.ninja').run('foo').run('foo');
+
+	  ok($.verify(), "verify() should be true");
+
+    $.reset();
+
+	  // Example - Mock jQuery with chaining
+
+	  var jQuery = new Mock;
+
+    function wrap() {
+	    if ( jQuery.browser.chrome === true ) {
+	      jQuery.wrap('<div />').wrap('<div />').wrap('<div />');
+	    }
+	  }
+
+	  jQuery
+	    .accepts(".ninjas")
+	      .expects(1)
+	        .method('each')
+	        .accepts(wrap)
+	        .data(this)
+	        .chain()
+	      .andExpects(3)
+	        .method('wrap')
+	        .accepts('<div />')
+	        .chain()
+	      .andExpects()
+	        .property('browser')
+	        .withValue({
+	          ie: false,
+	          mozilla: false,
+	          safari: false,
+	          opera: false,
+	          chrome: true
+	        });
+
+	  // Exercise
+	  jQuery(".ninjas").each(wrap);
+	  // Verify
+	  ok(jQuery.verify(), "verify() should be true: jQuery is mocked with chaining");
+
+	});
+
+	module( "QMock: Constructor expectations" );
+
+	test("mocked constructor with explicit invocation call expectation", function () {
+
+	  expect(5);
+	  var ninja = new Mock
+	  ninja
+	    .calls(1);
+
+	  // Test Bad Exercise phase - no method call
+    try {
+      ninja.verify();
+      ok(false, "verify() should throw exception when swing not called");
+    } catch (e) {
+      equals(e.length, 1, "verify() should return an array of 1 exception");
+      equals(e[0].type, "IncorrectNumberOfMethodCallsException", "verify() exception type should be IncorrectNumberOfMethodCallsException");
+    }
+
+	  ninja.reset();
+
+	  // Too many method calls
+	  ninja();
+	  ninja();
+
+	  try {
+	    ninja.verify();
+	    ok(false, "verify() should throw exception when swing called too many times");
+	  } catch (e) {
+	    equals(e.length, 1, "verify() should return an array of 1 exception");
+	    equals(e[0].type, "IncorrectNumberOfMethodCallsException", "verify() exception type should be IncorrectNumberOfMethodCallsException");
+	  }
+
+	  ninja.reset();
+
+	  // False Positive, expect ZERO calls
+	  var samurai = new Mock;
+
+	  samurai.calls(0);
+
+		ok(samurai.verify(), "verify() should pass if swing not called");
+
+	});
+
+	test("mocked constructor with single strict parameter (String: '#foo') expectation", function () {
+
+	  expect(6);
+
+	  // Mock jQuery
+	  var $ = new Mock ();
+
+	  /* Theoretically *exactly* same API as a Member object */
+	  /* JSON version */
+	  /*
+
+  	  var $ = new Mock({
+
+	      // Constructor config
+	      "accepts": '#foo',
+
+	      // API config
+	      "html": {
+	        accepts:
+	      }
+
+
+      });
+
+    */
+
+	  $.accepts("#foo")
+  	  .expects(1)
+	    .method('html')
+  	    .accepts('<span>blah</span>');
+
+	  // Bad Exercise
+
+	  // Test invalid parameter type
+
+    $(1).html('<span>blah</span>');
+
+    try {
+      $.verify();
+      ok(false, "verify() should throw exception when $ passed parameter (Number: 1)");
+    } catch (e) {
+      equals(e.length, 1, "verify() should return an array of 1 exception: IncorrectParameterException");
+      equals(e[0].type, "IncorrectParameterException", "verify() exception type should be IncorrectParameterException");
+    }
+
+	  $.reset();
+
+	  // Test valid parameter type but wrong value
+    $("#bar").html('<span>blah</span>');
+
+    try {
+      $.verify();
+      ok(false, "verify() should throw exception when $ passed parameter (String: #bar)");
+    } catch (e) {
+      equals(e.length, 1, "verify() should return an array of 1 exception: IncorrectParameterException for parameter (String: #bar)");
+      equals(e[0].type, "IncorrectParameterException", "verify() exception type should be IncorrectParameterException");
+    }
+
+    $.reset();
+
+    // Good Exercise
+
+    $("#foo").html('<span>blah</span>');
+    ok($.verify(), "verify() should be true when $ passed (String: '#foo')");
+
+	  // Trigger strict argument checking
+
+	  // Example: Mock the query of the J
+
+	  var jQuery = new Mock;
+
+	  function hide() {
+	    if ( jQuery.browser.chrome === true ) {
+	      jQuery.wrap('<div />');
+	      jQuery.wrap('<div />');
+	      jQuery.wrap('<div />');
+	    }
+	  }
+
+	  jQuery
+	    .accepts(".ninjas")
+	      .expects(1)
+	        .method('each')
+	        .accepts(hide)
+	        .data({})
+	      .andExpects(3)
+	        .method('wrap')
+	        .accepts('<div />')
+	      .andExpects()
+	        .property('browser')
+	        .withValue({
+	          ie: false,
+	          mozilla: false,
+	          safari: false,
+	          opera: false,
+	          chrome: true
+	        });
+
+	  // Exercise
+
+	  jQuery(".ninjas").each(hide);
+
+	  // Verify
+
+	  ok(jQuery.verify(), "verify() should be true: jQuery-esque chaining is mockable");
+
+	});
+
+	module( "QMock: API" );
 
 	test("[0.1] Constructor and mockedMember object API backward compatibility", function () {
 
