@@ -252,6 +252,25 @@
     }
     return result;
   }
+  
+  function verifyReceiver ( receiver, opt_raise ) {    
+    // Verify Self (Constructor)
+    var result = Member.prototype.verify.call( receiver, opt_raise );
+
+    // Verify Members
+    for (var i = 0, len = receiver._methods.length; i < len; i++) {
+      result &= receiver._methods[ i ].verify( opt_raise );
+    }
+
+    // Live() or Die()
+    if ( !!!result ) {
+      // Meh.
+      throw receiver._exceptions;
+    } else {
+      // Disco! \o/
+      return !!result;
+    }
+  }
 
   // PRIVATE Functions
 
@@ -541,6 +560,10 @@
     function receiver () {
       return recorder.apply( null, arguments );
     }
+    
+    function raiseException () {
+      receiver._exceptions.push( createException.apply( null, arguments ) );
+    }
 
     // Can't use receiver.prototype as function literal prototype not in prototype chain, e.g. a
     // lookup for (function () {}).foo goes to Function.prototype.foo (__proto__)
@@ -550,6 +573,13 @@
     for ( var key in self ) {
       receiver[ key ] = self[ key ];
     }
+    
+    // Overriding some 'inherited' methods
+    receiver.verify = function () {
+      return verifyReceiver( receiver, raiseException );
+    };
+    
+    receiver.reset = receiver.reset;
     
     // Backward compatibility with QMock v0.1 API
     receiver.expectsArguments = receiver.accepts;
@@ -574,7 +604,7 @@
     };
 
     // Verify method, tests both constructor and declared method's respective states.
-    receiver.verify = ( function ( _verify ) {
+    /*receiver.verify = ( function ( _verify ) {
       return function () {
         var result = true;
 
@@ -595,7 +625,7 @@
           return !!result;
         }
       }
-    })( receiver.verify );
+    })( receiver.verify );*/
 
     // Resets internal state of Mock instance
     receiver.reset = ( function ( _reset ) {
@@ -608,11 +638,6 @@
       }
     })( receiver.reset );
 
-    // Function to push arguments into Mock exceptions list
-    function throwMockException () {
-      receiver._exceptions.push( createException.apply( null, arguments ) );
-    }
-
     // If params passed to Mock constructor auto-magikally create mocked interface from JSON tree.
     if ( definition ) {
       createMockFromJSON.call( receiver, definition );
@@ -622,8 +647,6 @@
     return receiver;
   }
   
-  Mock.prototype = {};
-
   // Expose internal methods for unit tests
   /*if ( undefined !== expose ) {
     // mock generator
