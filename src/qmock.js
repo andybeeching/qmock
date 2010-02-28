@@ -483,7 +483,7 @@
       this._received = [];
     },
 
-    "verifyMethod": function ( opt_raise ) {
+    "verify": function ( opt_raise ) {
       // 1. Check number of method invocations if set
       if ( verifyInvocations( this ) ) {
         // If true and no calls then exclude from further interrogation
@@ -574,27 +574,28 @@
     };
 
     // Verify method, tests both constructor and declared method's respective states.
-    receiver.verify = function () {
+    receiver.verify = ( function ( _verify ) {
+      return function () {
+        var result = true;
 
-      var result = true;
+        // Verify constructor
+        result &= _verify.call( receiver, throwMockException );
 
-      // Verify constructor
-      result &= receiver.verifyMethod( throwMockException );
+        // Verify Mocked Methods
+        for (var i = 0, len = receiver._methods.length; i < len; i++) {
+          result &= receiver._methods[ i ].verify( throwMockException );
+        }
 
-      // Verify Mocked Methods
-      for (var i = 0, len = receiver._methods.length; i < len; i++) {
-        result &= receiver._methods[ i ].verifyMethod( throwMockException );
+        // Live() or Die()
+        if ( !!!result ) {
+          // Meh.
+          throw receiver._exceptions;
+        } else {
+          // Disco! \o/
+          return !!result;
+        }
       }
-
-      // Live() or Die()
-      if ( !!!result ) {
-        // Meh.
-        throw receiver._exceptions;
-      } else {
-        // Disco! \o/
-        return !!result;
-      }
-    }
+    })( receiver.verify );
 
     // Resets internal state of Mock instance
     receiver.reset = ( function ( _reset ) {
@@ -620,6 +621,8 @@
     // Mock-tatstic!
     return receiver;
   }
+  
+  Mock.prototype = {};
 
   // Expose internal methods for unit tests
   /*if ( undefined !== expose ) {
