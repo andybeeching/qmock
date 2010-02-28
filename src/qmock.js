@@ -111,9 +111,13 @@
     return result;
   }
 
-  // FUNCTIONS FOR SETUP
+  // FUNCTIONS FOR SETUP PHASE
 
-  // Essentially a factory
+  // Factory for creating a stubbed function
+  // Binds the mutator (stub) to a specific method state (constructor or member)
+  // Adds accessor to internal state for debugging purposes
+  // Method param should implement Member interface
+  // Returns bound stub function
   function createStub ( method ) {
 
     function stub () {
@@ -139,6 +143,8 @@
     return stub;
   }
 
+  // Factory for instantiating a new mocked Member object and associating it 
+  // with a receiver object
   function createMember ( opt_min, opt_max, opt_receiver ) {
     // Create member instance
     var self = new Member( opt_min, opt_max );
@@ -153,7 +159,7 @@
     return self;
   }
 
-  // FUNCTIONS FOR EXERCISING
+  // FUNCTIONS FOR EXERCISE PHASE
 
   // ( String: presentation, Collection: expectations[, String: opt_prop )
 
@@ -269,6 +275,15 @@
     } else {
       // Disco! \o/
       return !!result;
+    }
+  }
+  
+  // Used for teardown
+  function resetReceiver ( receiver ) {
+    receiver._exceptions = [];
+    Member.prototype.reset.call( receiver );
+    for (var i = 0, len = receiver._methods.length; i < len; i++) {
+      receiver._methods[ i ].reset();
     }
   }
 
@@ -550,102 +565,78 @@
   Member.prototype["andChain"] = Member.prototype.chain;
   Member.prototype["callFunctionWith"] = Member.prototype.data;
   
-  // PUBLIC MOCK OBJECT CONSTRUCTOR
-  function Mock ( definition ) {
+  // Receiver Object Constructor
+  // Receiver's can either be simple namespaces-esque functions, 
+  // or full Constructor functions in their own right (a la jQuery $)
+  function Receiver ( definition ) {
 
     // Create internal state
-    var self = new Member,
-        recorder;
+    var state = new Member,
+    // Bind delegated stub invocation to Receiver instance state
+        recorder = createStub( mock );
 
-    function receiver () {
+    function mock () {
+      // Update Receiver instance state and return itself or explicit value
       return recorder.apply( null, arguments );
     }
     
-    function raiseException () {
-      receiver._exceptions.push( createException.apply( null, arguments ) );
-    }
-
     // Can't use receiver.prototype as function literal prototype not in prototype chain, e.g. a
     // lookup for (function () {}).foo goes to Function.prototype.foo (__proto__)
     // Pseudo-inheritance by copying values & references over to instance
     // Internal state is thus public, otherwise all methods on Member.prototype would
     // need manual scoping with .call() which too much of a dependency (and not future-proof)
-    for ( var key in self ) {
-      receiver[ key ] = self[ key ];
+    for ( var key in state ) {
+      mock[ key ] = state[ key ];
     }
     
-    // Overriding some 'inherited' methods
-    receiver.verify = function () {
-      return verifyReceiver( receiver, raiseException );
+    // Augment with Receiver methods
+    
+    // Factory for creating new Members on receiver objects
+    mock.expects = mock.andExpects = function ( opt_min, opt_max ) {
+      return createMember( opt_min, opt_max, mock );
     };
     
-    receiver.reset = receiver.reset;
+    // Overriding some 'inherited' methods
+    // Verify method, tests both constructor and declared method's respective states.
+    mock.verify = function () {
+      return verifyReceiver( mock, function () {
+        mock._exceptions.push( createException.apply( null, arguments ) );
+      });
+    }
     
-    // Backward compatibility with QMock v0.1 API
-    receiver.expectsArguments = receiver.accepts;
-
+    // Reset method, resets both mock Constructor and associated mock member states
+    mock.reset = function () {
+      resetReceiver( mock );
+    };
+    
+    // Augment with Receiver properties
+    
     // Update default return state on Constuctors to themselves (for cascade-invocation declarations)
     // If the return value is overidden post-instance then it is assumed the mock is a standalone
     // constuctor and not acting as a receiver object (aka namespace)
-    receiver._returns = receiver;
+    mock._returns = mock;
+    // Store methods declared on receiver
+    mock._methods = [];
+    // Store verification errors
+    mock._exceptions = [];
 
-    // Augment with extra receiver state properties
-    // Track methods declared on receiver
-    receiver._methods = [];
-    // Track verification errors
-    receiver._exceptions = [];
-
-    // Initialise recorder declaration to update constructor state
-    recorder = createStub( receiver );
-
-    // Augment with receiver-only method expects
-    receiver.expects = receiver.andExpects = function ( opt_min, opt_max ) {
-      return createMember( opt_min, opt_max, receiver );
-    };
-
-    // Verify method, tests both constructor and declared method's respective states.
-    /*receiver.verify = ( function ( _verify ) {
-      return function () {
-        var result = true;
-
-        // Verify constructor
-        result &= _verify.call( receiver, throwMockException );
-
-        // Verify Mocked Methods
-        for (var i = 0, len = receiver._methods.length; i < len; i++) {
-          result &= receiver._methods[ i ].verify( throwMockException );
-        }
-
-        // Live() or Die()
-        if ( !!!result ) {
-          // Meh.
-          throw receiver._exceptions;
-        } else {
-          // Disco! \o/
-          return !!result;
-        }
-      }
-    })( receiver.verify );*/
-
-    // Resets internal state of Mock instance
-    receiver.reset = ( function ( _reset ) {
-      return function () {
-        receiver._exceptions = [];
-        _reset.call( receiver );
-        for (var i = 0, len = receiver._methods.length; i < len; i++) {
-          receiver._methods[ i ].reset();
-        }
-      }
-    })( receiver.reset );
+    // Backward compatibility with QMock v0.1 API
+    mock.expectsArguments = mock.accepts;
 
     // If params passed to Mock constructor auto-magikally create mocked interface from JSON tree.
     if ( definition ) {
-      createMockFromJSON.call( receiver, definition );
+      createMockFromJSON.call( mock, definition );
     }
 
     // Mock-tatstic!
-    return receiver;
+    return mock;
   }
+  
+  /////////////////
+  
+  // PUBLIC QMock API
+  
+  ////////////////
   
   // Expose internal methods for unit tests
   /*if ( undefined !== expose ) {
@@ -655,15 +646,13 @@
 
   // Expose QMock API
   container.QMock = {
-    Mock: Mock,
+    Mock: Receiver,
     config: config,
     version: "0.3" // follow semantic versioning conventions (http://semver.org/)
   };
 
-  // Do I need a setup function a la $.ajax?
-
   // Alias QMock.Mock for pretty Mock initialisation (i.e. new Mock)
-  container.Mock = Mock;
+  container.Mock = Receiver;
 
   // QMock was successfully initialised!
   return true;
