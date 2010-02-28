@@ -530,7 +530,8 @@
   Member.prototype["andReturns"] = Member.prototype.returns;
   Member.prototype["andChain"] = Member.prototype.chain;
   Member.prototype["callFunctionWith"] = Member.prototype.data;
-
+  
+  // PUBLIC MOCK OBJECT CONSTRUCTOR
   function Mock ( definition ) {
 
     // Create internal state
@@ -541,21 +542,24 @@
       return recorder.apply( null, arguments );
     }
 
-    // Pseudo-inheritance by copying values & references over to instance
-    // Internal state is this public, otherwise all methods on Member.prototype would
-    // need manual scoping with .call()
-    // Can't use prototype as function literal prototype not in prototype chain, e.g. a
+    // Can't use receiver.prototype as function literal prototype not in prototype chain, e.g. a
     // lookup for (function () {}).foo goes to Function.prototype.foo (__proto__)
+    // Pseudo-inheritance by copying values & references over to instance
+    // Internal state is thus public, otherwise all methods on Member.prototype would
+    // need manual scoping with .call() which too much of a dependency (and not future-proof)
     for ( var key in self ) {
       receiver[ key ] = self[ key ];
     }
+    
+    // Backward compatibility with QMock v0.1 API
+    receiver.expectsArguments = receiver.accepts;
 
     // Update default return state on Constuctors to themselves (for cascade-invocation declarations)
     // If the return value is overidden post-instance then it is assumed the mock is a standalone
     // constuctor and not acting as a receiver object (aka namespace)
     receiver._returns = receiver;
 
-    // Augment with Konstructor instance state
+    // Augment with extra receiver state properties
     // Track methods declared on receiver
     receiver._methods = [];
     // Track verification errors
@@ -608,9 +612,6 @@
       receiver._exceptions.push( createException.apply( null, arguments ) );
     }
 
-    // Backward compatibility for QMock v0.1 API
-    receiver.expectsArguments = receiver.accepts;
-
     // If params passed to Mock constructor auto-magikally create mocked interface from JSON tree.
     if ( definition ) {
       createMockFromJSON.call( receiver, definition );
@@ -619,103 +620,6 @@
     // Mock-tatstic!
     return receiver;
   }
-
-  // PUBLIC MOCK OBJECT CONSTRUCTOR
-  /*function Mock ( definition ) {
-
-    // Check compare and alias
-    if ( !!!QMock.config.compare || isNot( "Function", QMock.config.compare ) ) {
-      new Error("QMock requires a legitimate comparison function to be set (Qmock.compare)'");
-    }
-
-    /*var mock = function () {
-          // Can't use MockObject fn name, dies in IE <<< Changed to be ES5 compatible - test in IE!!
-          // Should be able to use alias though? Held in closure..
-          mock.actualArguments = slice.call(arguments); // Need to be normalised to same object type (since arguments don't share prototype with Arrays, thus would fail CommonJS deepEquals assertion)
-          return mock;
-        },
-    var methods = [], // List of MockedMember method instances declared on mock
-        exceptions = []; // List of exceptions thrown by verify/verifyMethod functions,
-
-      // Function to push arguments into Mock exceptions list
-    function throwMockException () {
-      exceptions.push( createException.apply( null, arguments ) );
-    }
-
-    // PUBLIC METHODS on mock
-    // Creates new MockedMember instance on Mock Object and sets-up initial method expectation
-    mock.expects = mock.andExpects = function ( min, max ) {
-      // Create a new member
-      var member = new Member( min, max );
-      // Store reference to namespace on each member instance
-      member._mock = mock;
-      // Store reference to method in method list for reset functionality
-      // <str>and potential strict execution order tracking<str>.
-      methods.push( member );
-      return member;
-    };
-
-    mock.accepts = function () {
-      mock.expectsArguments = slice.call(arguments);
-      return mock;
-    };
-
-    mock.actualArguments = []; // Stub, used for symbol binding
-
-    // Verify method, tests both constructor and declared method's respective states.
-    mock.verify = function () {
-
-      var result = true;
-
-      // Check Constructor Arguments
-      if ( mock.expectsArguments.push ) {
-        if ( mock.expectsArguments.length !== mock.actualArguments.length ) {
-          // Thrown in to satisfy tests (for consistency's sake) - NEEDS TO BE REFACTORED OUT!
-          throwMockException( mock.actualArguments.length, mock.expectsArguments.length, "IncorrectNumberOfArgumentsException", "Constructor function" );
-          result = false;
-        } else if ( !config.compare( mock.actualArguments, mock.expectsArguments ) ) {
-          throwMockException( mock.actualArguments, mock.expectsArguments, "IncorrectParameterException", "Constructor function" );
-          result = false;
-        }
-      }
-
-      // Verify Mocked Methods
-      for (var i = 0, len = methods.length; i < len; i++) {
-        result &= methods[ i ].verifyMethod( throwMockException );
-      }
-
-      // Moment of truth...
-      if ( !result ) {
-        // Meh.
-        throw exceptions;
-      } else {
-        // Disco.
-        return !!result;
-      }
-    };
-
-    // Resets internal state of Mock instance
-    mock.reset = function () {
-      exceptions = [];
-      this.actualArguments = [];
-      for (var i = 0, len = methods.length; i < len; i++) {
-        methods[ i ]._calls = 0;
-        methods[ i ]._received = [];
-      }
-    };
-
-    // Backward compatibility for QMock v0.1 API
-    mock.expectsArguments = mock.accepts;
-
-    // If params passed to Mock constructor auto-magikally create mocked interface from JSON tree.
-    if ( is( "Object", definition ) ) {
-      createMockFromJSON.call( mock, definition );
-    }
-
-    // On my command, unleash the mock! :-)
-    return mock;
-
-  }*/
 
   // Expose internal methods for unit tests
   /*if ( undefined !== expose ) {
