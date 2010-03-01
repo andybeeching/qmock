@@ -1,40 +1,38 @@
  /**
  * QMock - Copyright (c) 2008
- * Dual licensed under the MIT (MIT-LICENSE.txt)
- * and GPL (GPL-LICENSE.txt) licenses.
+ * Dual licensed under the MIT (MIT-LICENSE.txt) and GPL (GPL-LICENSE.txt) licenses.
  *
  * @author Mark Meyer // Andy Beeching
  * @classDescription qMock is a lightweight object mocking library
- * @dependencies None - free as a bird
+ * @dependencies A comparison routine set on QMock.compare (e.g. QUnit.equiv)
  * @example var mock = new Mock();
  *
- * TODO: Support multiple callbacks with correlating arguments
+ * QUnit TODO
+ * TODO: Patch QUnit to support a sentence like: 700 tests of 702 run passed, 2 failed and 150 weren't run.
+ *
+ * QMock TODO
  * TODO: Optional strict method ordering flag? e.g. {ordered: true}
  * TODO: Document Mock object (plus Method) API
- * TODO: Add 'Collection' Argument for DOM Manipulation
  * TODO: Skin testrunner
  * TODO: Add scriptDoc support for instance methods and IDE completion
  * TODO: Support for custom exceptions?
  * TODO: Force array literals in params via JSON
- * TODO: Strict flag for argument literal checking...
+
  * TODO: Expectations on invocations to go through calls only - ditch syntactic sugar...
+ * TODO: add a end() utility function for restoration of scope to Mock obj (instead of member) 
+ 
  * TODO: Support for HTMLCollections, nodeLists?
  * TODO: Support for DOM Element References
- * TODO: Refactor out strict type checking function into unit testable privileged object.
- * TODO: Better support for multiple parameter error messages.
- * TODO: Decide how to flag overload vs strict argumement NUMBER check
  * TODO: Ensure support for all major testruners - QUnit/YUI/GOOG/Evidence/ScrewUnit/JsSpec..
- * TODO: Figure out a way to re-use mockedMember constructor wih mock constructors...SERIOUSLY NEED THIS, Constuctor features are messy as f*ck.
- * TODO: Refactor out object checking logic and make leaner....
- * TODO: Make code more readable with if (key in obj) notation... (rather than if(obj[key]))...
- * TODO: Question use of Constructor flag exception object? Really needed if execption thrown has enough detail? Or refactor as propert on exception thrown? e.g. e.objectType: "Constructor", "Method".
- * TODO: Add in optimisations for compilers like YUI & Google Closure.
- * TODO: add a end() utility function for restoration of scope to Mock obj (instead of member)
- * TODO: Look into dynamic generation of mocks based on code lib, and or pdoc comments? Mental.
- * TODO: Refactor conditionals with short-circuit evaluation...
- * TODO: Strict return support for single expected presentations? Too complex?
- * TODO: Protect against API collisions between QMock and Mocks through internal re-mapping (can I not just invoke directly off prototype chain?)
- * TODO: Extend callback parameter invocation to support multiple callback scenarios
+ * TODO: Look into dynamic generation of mocks based on code lib, and/or pdoc comments.
+ * TODO: Change behaviour of the mock so that when passed functions it matches by type (for literals and constructors)
+ * TODO: Make autoMockConstructor thing work for constructors (i.e. call)
+ * TODO: Change how property / withValue work for better (and faster) declaration of stubbed properties
+ * TODO: Add failSlow support
+ * TODO: Add failSlow message support (t/f for msg param)
+ * 
+ * Assay TODO
+ * TODO: Publish CommonJS compliant API for ASSAY
  * TODO: Write simple helper function to test valid stuff in loops
  * TODO: Early exclusions via returns
  * TODO: Need to look into using getPrototypeOf method for object type checking...
@@ -42,37 +40,23 @@
  * TODO: Check able to delete QMock for clean-up purposes?
  * TODO: Add in support for NaN data type
  * TODO: Check whether my assertHash handles {DontEnum} enumeration...!
- * TODO: Group QUnit tests into sub-modules?
- * TODO: Support for identifiers.. might wait until refactor of all constructor/methods to subclassed mockMember instances.
  * TDOO: Support for classical, protypical, & parasitic inheritance instance checking
- * TODO: Double check inheritance properties of instanceof - plus support for 'interface' conformance as well?
- * TODO: Patch QUnit to support a sentence like: 700 tests of 702 run passed, 2 failed and 150 weren't run.
- * TODO: Change behaviour of the mock so that when passed functions it matches by type (for literals and constructors)
- * TODO: Change expose function to accept list of expected methods (e.g. get, set, reset - save memory!)
- * TODO: Add ability for desciptor on Mock Constructors
- * TODO: Make autoMockConstructor thing work for constructors (i.e. call)
- * Refactor hasOWnProperty into method()
+ * TODO: Support for 'interface' conformance as well?
  * TODO: Allow deep option for recursing through trees - typed or stric (or even varied?)
- * TODO: Publish CommonJS compliant API for ASSAY
- * TODO: Add setter method for config options to decouple from QMock idebtifier (see comparePresentations)
- * TODO: Change how property / withValue work for better (and faster) declaration of stubbed properties
+ * TODO: Change expose function to accept list of expected methods (e.g. get, set, reset - save memory!)
  */
 
-///////////////////////////////////
 
-// START of QMOCK
-
-/*
- * QMock requires a comparison routine for all object types (e.g. QUnit.equiv, assert.deepEquals, or Assay.compare)
- * CommonJS assert interface offers a quasi-standard to adhere to for both test runners and matchers
+/* QMock Initialisation
  *
-*/
-
-//////////////////////////////////
+ * QMock requires a comparison routine for all object types
+ * (e.g. QUnit.equiv, assert.deepEquals, or Assay.compare)
+ *
+ */
 
 (function ( container, undefined ) {
 
-  // Try to ensure following are originals / built-in objects as can be shadowed / overwritten
+  // Attempt to trap originals / built-in objects as can be shadowed / overwritten by other scripts
   var slice = Array.prototype.slice,
       toString = Object.prototype.toString,
       hasOwnProperty = Object.prototype.hasOwnProperty;
@@ -413,7 +397,8 @@
       // chain for pretty declaration
       return this;
     },
-
+    
+    // Expected format of arguments - {accepts: [ values ] [, returns: value] [, data: [ values ]] }
     "interface": function () {
       // Check for valid input to interface
       for (var i = 0, len = arguments.length; i < len; i++) {
@@ -431,16 +416,6 @@
         }
       }
 
-      // Expected format of arguments - {accepts: [ values ] [, returns: value] [, response: [ values ]] }
-
-      // Where arguments can equal either any type, or overloadable pairings.
-      // e.g. "string" or {params: foo, returns: bar}. Note array literals must be nested ({params: ["string", [1,2,3]], returns: "meh"})
-      // Normalize input to accepts into key/value expectation pairings
-
-      // THIS NEEDS A DEBATE - DEFAULT IS FOR IMPLICT STRICT NUMBER OF, & VALUE OF, ARG CHECKING FOR 'PRESENTATIONS'.
-      // If required number of arguments not already set, then implicitly set it to length of param array (so let ppl customise it)
-      // Add in per presentation strict argument length unless already set either globally or locally (recommendation to keep it consistent locally - don't let mocks change behaviour in test group too much)
-      // This should probably be part of the refactor... feels messy!
       // Set minimum expectations
       this._requires = arguments[ 0 ][ "accepts" ].length;
 
@@ -592,7 +567,7 @@
     // Augment with Receiver methods
     
     // Factory for creating new Members on receiver objects
-    mock.expects = mock.andExpects = function ( opt_min, opt_max ) {
+    mock.expects = function ( opt_min, opt_max ) {
       return createMember( opt_min, opt_max, mock );
     };
     
@@ -622,6 +597,7 @@
 
     // Backward compatibility with QMock v0.1 API
     mock.expectsArguments = mock.accepts;
+    mock.andExpects = mock.expects;
 
     // If params passed to Mock constructor auto-magikally create mocked interface from JSON tree.
     if ( definition ) {
@@ -643,12 +619,22 @@
     // mock generator
     ;;;; assert.expose( createMockFromJSON, "_createMockFromJSON", MockConstructor );
   }*/
-
+  
   // Expose QMock API
   container.QMock = {
     Mock: Receiver,
+    Method: Member,
     config: config,
-    version: "0.3" // follow semantic versioning conventions (http://semver.org/)
+    version: "0.3", // follow semantic versioning conventions (http://semver.org/)
+    is: is,
+    createStub: createStub,
+    verify: {
+      invocations: verifyInvocations,
+      overloading: verifyOverloading,
+      arguments: verifyPresentation,
+      receiver: verifyReceiver,
+      interface: verifyInterface
+    }
   };
 
   // Alias QMock.Mock for pretty Mock initialisation (i.e. new Mock)

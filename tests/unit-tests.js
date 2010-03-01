@@ -39,7 +39,6 @@
 
  	  // Test invalid property naming
  	  try {
- 	    debugger;
  	    ninja.expects(1).property('expects');
  	    ok(false, "mock should throw 'InvalidPropertyNameException' when trying to set a bad property name of 'expects'");
  	  } catch (e) {
