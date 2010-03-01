@@ -2403,103 +2403,6 @@
 
 	});
 
-	test("mocked constructor with single strict parameter (String: 'foo') and chained return value", function () {
-
-	  expect(9);
-    var $ = new Mock;
-    $.accepts(".ninja")
-      .expects(2)
-        .method('run')
-        .accepts('foo')
-        .chain();
-
-		// Invalid constructor param
-    $(1);
-		try {
-		  $.verify();
-		  ok(false, "verify() should throw exception when ($) passed invalid parameter. expected: (String: Constructor), actual: (Number: 1)");
-		} catch (e) {
-		  equals(e.length, 2, "verify() should return an array of 2 exceptions: [IncorrectParameterException, IncorrectNumberOfMethodCallsException]");
-		  equals(e[0].type, "IncorrectParameterException", "verify() exception type should be IncorrectParameterException");
-		  equals(e[1].type, "IncorrectNumberOfMethodCallsException", "verify() exception type should be IncorrectNumberOfMethodCallsException since ninja.run not exercised");
-		}
-
-    $.reset();
-
-    // No constructor param
-    $().run('foo').run('foo');
-		try {
-		  $.verify();
-		  ok(false, "verify() should throw IncorrectNumberOfArgumentsException when $ passed NO parameters");
-		} catch (e) {
-		  equals(e.length, 1, "verify() should return an array of 1 exception: IncorrectNumberOfArgumentsException");
-		  equals(e[0].type, "IncorrectNumberOfArgumentsException", "verify() exception type should be IncorrectNumberOfArgumentsException");
-		}
-
-    $.reset();
-
-    // Missed call to run
-
-    $(".ninja").run('foo');
-
-		try {
-		  $.verify();
-		  ok(false, "verify() should throw exception when run() is not invoked twice");
-		} catch (e) {
-		  equals(e.length, 1, "verify() should return an array of 1 exceptions: [IncorrectNumberOfMethodCallsException]");
-		  equals(e[0].type, "IncorrectNumberOfMethodCallsException", "verify() exception type should be IncorrectNumberOfMethodCallsException");
-		}
-
-    $.reset();
-
-	  // Good Exercises
-
-	  // Overloaded constructor param with incorrect parameter values
-
-    $('.ninja').run('foo').run('foo');
-
-	  ok($.verify(), "verify() should be true");
-
-    $.reset();
-
-	  // Example - Mock jQuery with chaining
-
-	  var jQuery = new Mock;
-
-    function wrap() {
-	    if ( jQuery.browser.chrome === true ) {
-	      jQuery.wrap('<div />').wrap('<div />').wrap('<div />');
-	    }
-	  }
-
-	  jQuery
-	    .accepts(".ninjas")
-	      .expects(1)
-	        .method('each')
-	        .accepts(wrap)
-	        .data(this)
-	        .chain()
-	      .andExpects(3)
-	        .method('wrap')
-	        .accepts('<div />')
-	        .chain()
-	      .andExpects()
-	        .property('browser')
-	        .withValue({
-	          ie: false,
-	          mozilla: false,
-	          safari: false,
-	          opera: false,
-	          chrome: true
-	        });
-
-	  // Exercise
-	  jQuery(".ninjas").each(wrap);
-	  // Verify
-	  ok(jQuery.verify(), "verify() should be true: jQuery is mocked with chaining");
-
-	});
-
 	module( "QMock: Constructor expectations" );
 
 	test("mocked constructor with explicit invocation call expectation", function () {
@@ -2648,6 +2551,103 @@
 	  // Verify
 
 	  ok(jQuery.verify(), "verify() should be true: jQuery-esque chaining is mockable");
+
+	});
+
+	test("mocked constructor with single strict parameter (String: 'foo') and chained return value", function () {
+
+	  expect(9);
+    var $ = new Mock;
+    $.accepts(".ninja")
+      .expects(2)
+        .method('run')
+        .accepts('foo')
+        .chain();
+
+		// Invalid constructor param
+    $(1);
+		try {
+		  $.verify();
+		  ok(false, "verify() should throw exception when ($) passed invalid parameter. expected: (String: Constructor), actual: (Number: 1)");
+		} catch (e) {
+		  equals(e.length, 2, "verify() should return an array of 2 exceptions: [IncorrectParameterException, IncorrectNumberOfMethodCallsException]");
+		  equals(e[0].type, "IncorrectParameterException", "verify() exception type should be IncorrectParameterException");
+		  equals(e[1].type, "IncorrectNumberOfMethodCallsException", "verify() exception type should be IncorrectNumberOfMethodCallsException since ninja.run not exercised");
+		}
+
+    $.reset();
+
+    // No constructor param
+    $().run('foo').run('foo');
+		try {
+		  $.verify();
+		  ok(false, "verify() should throw IncorrectNumberOfArgumentsException when $ passed NO parameters");
+		} catch (e) {
+		  equals(e.length, 1, "verify() should return an array of 1 exception: IncorrectNumberOfArgumentsException");
+		  equals(e[0].type, "IncorrectNumberOfArgumentsException", "verify() exception type should be IncorrectNumberOfArgumentsException");
+		}
+
+    $.reset();
+
+    // Missed call to run
+
+    $(".ninja").run('foo');
+
+		try {
+		  $.verify();
+		  ok(false, "verify() should throw exception when run() is not invoked twice");
+		} catch (e) {
+		  equals(e.length, 1, "verify() should return an array of 1 exceptions: [IncorrectNumberOfMethodCallsException]");
+		  equals(e[0].type, "IncorrectNumberOfMethodCallsException", "verify() exception type should be IncorrectNumberOfMethodCallsException");
+		}
+
+    $.reset();
+
+	  // Good Exercises
+
+	  // Overloaded constructor param with incorrect parameter values
+
+    $('.ninja').run('foo').run('foo');
+
+	  ok($.verify(), "verify() should be true");
+
+    $.reset();
+
+	  // Example - Mock jQuery with chaining
+
+	  var jQuery = new Mock;
+
+    function wrap() {
+	    if ( jQuery.browser.chrome === true ) {
+	      jQuery.wrap('<div />').wrap('<div />').wrap('<div />');
+	    }
+	  }
+
+	  jQuery
+	    .accepts(".ninjas")
+	      .expects(1)
+	        .method('each')
+	        .accepts(wrap)
+	        .data(this)
+	        .chain()
+	      .andExpects(3)
+	        .method('wrap')
+	        .accepts('<div />')
+	        .chain()
+	      .andExpects()
+	        .property('browser')
+	        .withValue({
+	          ie: false,
+	          mozilla: false,
+	          safari: false,
+	          opera: false,
+	          chrome: true
+	        });
+
+	  // Exercise
+	  jQuery(".ninjas").each(wrap);
+	  // Verify
+	  ok(jQuery.verify(), "verify() should be true: jQuery is mocked with chaining");
 
 	});
 
