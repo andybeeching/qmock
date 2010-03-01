@@ -1,49 +1,45 @@
- /**
- * QMock - Copyright (c) 2008
- * Dual licensed under the MIT (MIT-LICENSE.txt) and GPL (GPL-LICENSE.txt) licenses.
+/*!
+ *  QMock - an 'expect-run-verify' JavaScript object mocking library
+ *  http://github.com/andybeeching/qmock
  *
- * @author Mark Meyer // Andy Beeching
- * @classDescription qMock is a lightweight object mocking library
+ *  Copyright (c) 2007-2010, Andy Beeching <andybeeching at gmail dot com>
+ *  & Mark Meyer <markdotmeyer at gmail dot com>
+ *  Dual licensed under the MIT and GPL Version 3 licenses.
+ */
+
+/*
+ *  class QMock
+ *
+ *  QMock is a 'expect-run-verify' JavaScript mocking library inspired by
+ *  the Java jMock & EasyMock libraries for use in TDD workflow for authoring
+ *  JavaScript. QMock can be used:
+ *
+ *    * By itself for easy mocking of collaborator objects & interfaces with
+ *      'intelligent' canned response stubs. Verification phase optional.
+ *
+ *    * As a standalone testing tool for glass-box business logic assertion...
+ *
+ *    * ...Or most usefully, in conjunction with a test-runner such as QUnit,
+ *      Evidence or YUI Test for automated testing.
+ *
+ *  QMock has been developed in a TDD manner, and has a comprehensive test
+ *  suite designed to be run in multiple testrunners. The software itself
+ *  started life at Channel 4 Television so props to them for letting us share!
+ *
+ */
+
+
+
+/* @classDescription qMock is
  * @dependencies A comparison routine set on QMock.compare (e.g. QUnit.equiv)
  * @example var mock = new Mock();
  *
- * QUnit TODO
- * TODO: Patch QUnit to support a sentence like: 700 tests of 702 run passed, 2 failed and 150 weren't run.
  *
- * QMock TODO
- * TODO: Optional strict method ordering flag? e.g. {ordered: true}
- * TODO: Document Mock object (plus Method) API
- * TODO: Skin testrunner
- * TODO: Add scriptDoc support for instance methods and IDE completion
- * TODO: Support for custom exceptions?
- * TODO: Force array literals in params via JSON
-
+ * QMock Immediate TODO
+ *
  * TODO: Expectations on invocations to go through calls only - ditch syntactic sugar...
- * TODO: add a end() utility function for restoration of scope to Mock obj (instead of member) 
- 
- * TODO: Support for HTMLCollections, nodeLists?
- * TODO: Support for DOM Element References
- * TODO: Ensure support for all major testruners - QUnit/YUI/GOOG/Evidence/ScrewUnit/JsSpec..
- * TODO: Look into dynamic generation of mocks based on code lib, and/or pdoc comments.
- * TODO: Change behaviour of the mock so that when passed functions it matches by type (for literals and constructors)
- * TODO: Make autoMockConstructor thing work for constructors (i.e. call)
- * TODO: Change how property / withValue work for better (and faster) declaration of stubbed properties
- * TODO: Add failSlow support
- * TODO: Add failSlow message support (t/f for msg param)
- * 
- * Assay TODO
- * TODO: Publish CommonJS compliant API for ASSAY
- * TODO: Write simple helper function to test valid stuff in loops
- * TODO: Early exclusions via returns
- * TODO: Need to look into using getPrototypeOf method for object type checking...
- * TODO: Does assertHash check keys as well as values??!
- * TODO: Check able to delete QMock for clean-up purposes?
- * TODO: Add in support for NaN data type
- * TODO: Check whether my assertHash handles {DontEnum} enumeration...!
- * TDOO: Support for classical, protypical, & parasitic inheritance instance checking
- * TODO: Support for 'interface' conformance as well?
- * TODO: Allow deep option for recursing through trees - typed or stric (or even varied?)
- * TODO: Change expose function to accept list of expected methods (e.g. get, set, reset - save memory!)
+ * TODO: add a end() utility function for restoration of scope to Mock obj (instead of member)
+ *
  */
 
 
@@ -127,7 +123,7 @@
     return stub;
   }
 
-  // Factory for instantiating a new mocked Member object and associating it 
+  // Factory for instantiating a new mocked Member object and associating it
   // with a receiver object
   function createMember ( opt_min, opt_max, opt_receiver ) {
     // Create member instance
@@ -242,8 +238,8 @@
     }
     return result;
   }
-  
-  function verifyReceiver ( receiver, opt_raise ) {    
+
+  function verifyReceiver ( receiver, opt_raise ) {
     // Verify Self (Constructor)
     var result = Member.prototype.verify.call( receiver, opt_raise );
 
@@ -261,7 +257,7 @@
       return !!result;
     }
   }
-  
+
   // Used for teardown
   function resetReceiver ( receiver ) {
     receiver._exceptions = [];
@@ -330,8 +326,7 @@
     return undefined;
   }
 
-  // Function to build pretty exception objects - TBR function signature
-  // Can be improved by using Assay.type for expected and actual
+  // Factory for pretty exception objects - TBR function signature
   function createException ( actual, expected, exceptionType, descriptor ) {
 
     var e = {
@@ -397,7 +392,7 @@
       // chain for pretty declaration
       return this;
     },
-    
+
     // Expected format of arguments - {accepts: [ values ] [, returns: value] [, data: [ values ]] }
     "interface": function () {
       // Check for valid input to interface
@@ -530,6 +525,10 @@
     calls: function ( min, max ) {
       this._minCalls = min || this._minCalls;
       this._maxCalls = max || this._maxCalls;
+    },
+
+    end: function () {
+      return this._mock || this;
     }
 
   }; // End MockedMember.prototype declaration
@@ -539,9 +538,9 @@
   Member.prototype["andReturns"] = Member.prototype.returns;
   Member.prototype["andChain"] = Member.prototype.chain;
   Member.prototype["callFunctionWith"] = Member.prototype.data;
-  
+
   // Receiver Object Constructor
-  // Receiver's can either be simple namespaces-esque functions, 
+  // Receiver's can either be simple namespaces-esque functions,
   // or full Constructor functions in their own right (a la jQuery $)
   function Receiver ( definition ) {
 
@@ -554,7 +553,7 @@
       // Update Receiver instance state and return itself or explicit value
       return recorder.apply( null, arguments );
     }
-    
+
     // Can't use receiver.prototype as function literal prototype not in prototype chain, e.g. a
     // lookup for (function () {}).foo goes to Function.prototype.foo (__proto__)
     // Pseudo-inheritance by copying values & references over to instance
@@ -563,14 +562,14 @@
     for ( var key in state ) {
       mock[ key ] = state[ key ];
     }
-    
+
     // Augment with Receiver methods
-    
+
     // Factory for creating new Members on receiver objects
     mock.expects = function ( opt_min, opt_max ) {
       return createMember( opt_min, opt_max, mock );
     };
-    
+
     // Overriding some 'inherited' methods
     // Verify method, tests both constructor and declared method's respective states.
     mock.verify = function () {
@@ -578,14 +577,14 @@
         mock._exceptions.push( createException.apply( null, arguments ) );
       });
     }
-    
+
     // Reset method, resets both mock Constructor and associated mock member states
     mock.reset = function () {
       resetReceiver( mock );
     };
-    
+
     // Augment with Receiver properties
-    
+
     // Update default return state on Constuctors to themselves (for cascade-invocation declarations)
     // If the return value is overidden post-instance then it is assumed the mock is a standalone
     // constuctor and not acting as a receiver object (aka namespace)
@@ -607,19 +606,19 @@
     // Mock-tatstic!
     return mock;
   }
-  
+
   /////////////////
-  
+
   // PUBLIC QMock API
-  
+
   ////////////////
-  
+
   // Expose internal methods for unit tests
   /*if ( undefined !== expose ) {
     // mock generator
     ;;;; assert.expose( createMockFromJSON, "_createMockFromJSON", MockConstructor );
   }*/
-  
+
   // Expose QMock API
   container.QMock = {
     Mock: Receiver,
