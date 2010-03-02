@@ -11,7 +11,7 @@
  *  class QMock
  *
  *  QMock is a 'expect-run-verify' JavaScript mocking library inspired by
- *  the Java jMock & EasyMock libraries for use in TDD workflow for authoring
+ *  the Java JMock & EasyMock libraries for use in TDD workflow for authoring
  *  JavaScript. QMock can be used:
  *
  *    * By itself for easy mocking of collaborator objects & interfaces with
@@ -624,7 +624,7 @@
     Mock: Receiver,
     Method: Member,
     config: config,
-    version: "0.3", // follow semantic versioning conventions (http://semver.org/)
+    version: "0.3.0", // follow semantic versioning conventions (http://semver.org/)
     is: is,
     createStub: createStub,
     verify: {

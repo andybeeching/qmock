@@ -1,7 +1,7 @@
 {
 	"name": "qmock",
 	"version": "0.3.0",
-	"description": "An 'expect-run-verify' JavaScript mocking framework",
+	"description": "An 'expect-run-verify' JavaScript object mocking framework",
 	"keywords": [ "testing", "unit", "stub", "mocking", "mock", "CommonJS" ],
 	"maintainers": [
   	{
@@ -11,6 +11,11 @@
   	}
 	],
 	"contributors" : [
+  	{
+  		"name": "Andy Beeching",
+  		"email": "andybeeching@gmail.com",
+  		"url": "http://twitter.com/andybeeching/"
+  	},
 	  {
   		"name": "Mark Meyer",
   		"email": "markdotmeyer@gmail.com",

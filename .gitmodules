@@ -7,3 +7,6 @@
 [submodule "vendor/riotjs"]
 	path = vendor/riotjs
 	url = git://github.com/alexyoung/riotjs.git
+[submodule "vendor/pdoc"]
+	path = vendor/pdoc
+	url = git://github.com/tobie/pdoc.git
