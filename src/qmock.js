@@ -1,14 +1,12 @@
 /*!
+ *  class QMock
+ *
  *  QMock - an 'expect-run-verify' JavaScript object mocking library
  *  http://github.com/andybeeching/qmock
  *
  *  Copyright (c) 2007-2010, Andy Beeching <andybeeching at gmail dot com>
  *  & Mark Meyer <markdotmeyer at gmail dot com>
  *  Dual licensed under the MIT and GPL Version 3 licenses.
- */
-
-/*
- *  class QMock
  *
  *  QMock is a 'expect-run-verify' JavaScript mocking library inspired by
  *  the Java JMock & EasyMock libraries for use in TDD workflow for authoring
@@ -26,27 +24,13 @@
  *  suite designed to be run in multiple testrunners. The software itself
  *  started life at Channel 4 Television so props to them for letting us share!
  *
- */
-
-
-
-/* @classDescription qMock is
- * @dependencies A comparison routine set on QMock.compare (e.g. QUnit.equiv)
- * @example var mock = new Mock();
+ *  Requirements
  *
+ *  QMock requires a comparison routine to run presentations & expectations
+ *  against (e.g. QUnit.equiv, assert.deepEquals, or Assay.compare)
  *
- * QMock Immediate TODO
- *
- * TODO: Expectations on invocations to go through calls only - ditch syntactic sugar...
- * TODO: add a end() utility function for restoration of scope to Mock obj (instead of member)
- *
- */
-
-
-/* QMock Initialisation
- *
- * QMock requires a comparison routine for all object types
- * (e.g. QUnit.equiv, assert.deepEquals, or Assay.compare)
+ *  // Set comparison
+ *  QMock.compare = QUnit.equiv
  *
  */
 
@@ -63,7 +47,10 @@
         compare: false
       };
 
-  // UTILITY Functions
+  /**
+   * == Utils ==
+   * The Utils Section
+   **/
 
   // Following borrowed from jQuery but most credit to Mark Miller for 'Miller Device'
   function is ( nativeType, obj ) {
@@ -91,7 +78,10 @@
     return result;
   }
 
-  // FUNCTIONS FOR SETUP PHASE
+  /**
+   * == Setup ==
+   * The Utils Section
+   **/
 
   // Factory for creating a stubbed function
   // Binds the mutator (stub) to a specific method state (constructor or member)
@@ -138,8 +128,92 @@
     }
     return self;
   }
+  
+  // Function to handle JSON based mock creation
+  function createMock ( definition ) {
 
-  // FUNCTIONS FOR EXERCISE PHASE
+    if ( !definition ) { return false; }
+
+    var blacklisted = /^(?:calls|min|max)$/; // List of method/property identifiers that are used in Qmock - protected.
+
+    // loop through expected members on mock
+    for ( var key in definition ) {
+
+      var memberConfig = definition[ key ],
+          isMethod = !!( memberConfig["value"] === undefined ),
+
+      // register property or method onto mock interface
+      member = this
+        .expects
+          .apply(member,
+            (memberConfig.calls !== undefined)
+              ? [memberConfig.calls]
+              : [ (memberConfig.min) ? memberConfig.min : 0,
+                  (memberConfig.max) ? memberConfig.max : Infinity ]
+              )[( isMethod ) ? "method" : "property"](key);
+
+      // Set expectations for method or value of property
+      if ( isMethod ) {
+
+        setExpectations:
+          for (var expectation in memberConfig) {
+
+          // Check property exists on mock object and is a callable method
+          if ( (member[expectation] !== undefined)
+            && (member[expectation].constructor === Function) ) {
+
+            // Disco.
+            member[ expectation ][
+              ( (expectation === "interface" || expectation === "accepts")
+              && !isNot( "Array", memberConfig[ expectation ] ))
+                ? "apply"
+                : "call"
+            ](member, memberConfig[ expectation ]);
+
+          } else if ( blacklisted.test( expectation ) ) {
+            // If not callable check property not whitelisted before throwing error
+            //throwMockException("Identifier for method on new Mock instance", "Mock." + member["name"] + "[" + expectation + "]", "InvalidMockInstanceMethodException", member["name"] + '.' + expectation);
+          }
+
+        } // end setExpectations loop
+
+      } else {
+        // If expectation not method then simply set property
+        member.withValue(memberConfig["value"]);
+      }
+
+    }
+    return undefined;
+  }
+  
+  // Factory for pretty exception objects - TBR function signature
+  function createException ( actual, expected, exceptionType, descriptor ) {
+
+    var e = {
+        type : exceptionType
+      },
+      fn = "'" + descriptor + "'";
+
+    switch (true) {
+      case "IncorrectNumberOfArgumentsException" === exceptionType:
+      case "MismatchedNumberOfMembersException" === exceptionType:
+        e.message = fn + " expected: " + expected + " items, actual number was: " + actual;
+        break;
+      case "IncorrectNumberOfMethodCallsException" === exceptionType:
+        e.message = fn + " expected: " + expected + " method calls, actual number was: " + actual;
+        break;
+      case "MissingHashKeyException":
+        e.message = fn + " expected: " + expected + " key/property to exist on 'actual' object, actual was: " + actual;
+      default:
+        e.message = fn + " expected: " + expected + ", actual was: " + actual;
+    }
+    return e;
+  }
+
+  /**
+   * == Exercise ==
+   * The Exercise Section
+   **/
 
   // ( String: presentation, Collection: expectations[, String: opt_prop )
 
@@ -167,7 +241,10 @@
     return comparePresentation( presentation, expectations, "returns" ) || method._returns;
   }
 
-  // FUNCTIONS FOR VERIFICATION
+  /**
+   * == Verify ==
+   * The Verify Section
+   **/
 
   // Evaluate expected method invocations against actual
   function verifyInvocations ( method ) {
@@ -258,7 +335,11 @@
     }
   }
 
-  // Used for teardown
+  /**
+   * == Teardown ==
+   * The Teardown Section
+   **/
+
   function resetReceiver ( receiver ) {
     receiver._exceptions = [];
     Member.prototype.reset.call( receiver );
@@ -266,89 +347,12 @@
       receiver._methods[ i ].reset();
     }
   }
-
-  // PRIVATE Functions
-
-  // Function to handle JSON based mock creation
-  function createMockFromJSON ( mockedMembers ) {
-
-    if ( !mockedMembers ) { return false; }
-
-    var blacklisted = /^(?:calls|min|max)$/; // List of method/property identifiers that are used in Qmock - protected.
-
-    // loop through expected members on mock
-    for ( var key in mockedMembers ) {
-
-      var memberConfig = mockedMembers[key],
-          isMethod = !!( memberConfig["value"] === undefined ),
-
-      // register property or method onto mock interface
-      member = this
-        .expects
-          .apply(member,
-            (memberConfig.calls !== undefined)
-              ? [memberConfig.calls]
-              : [ (memberConfig.min) ? memberConfig.min : 0,
-                  (memberConfig.max) ? memberConfig.max : Infinity ]
-              )[( isMethod ) ? "method" : "property"](key);
-
-      // Set expectations for method or value of property
-      if ( isMethod ) {
-
-        setExpectations:
-          for (var expectation in memberConfig) {
-
-          // Check property exists on mock object and is a callable method
-          if ( (member[expectation] !== undefined)
-            && (member[expectation].constructor === Function) ) {
-
-            // Disco.
-            member[ expectation ][
-              ( (expectation === "interface" || expectation === "accepts")
-              && !isNot( "Array", memberConfig[ expectation ] ))
-                ? "apply"
-                : "call"
-            ](member, memberConfig[ expectation ]);
-
-          } else if ( blacklisted.test( expectation ) ) {
-            // If not callable check property not whitelisted before throwing error
-            //throwMockException("Identifier for method on new Mock instance", "Mock." + member["name"] + "[" + expectation + "]", "InvalidMockInstanceMethodException", member["name"] + '.' + expectation);
-          }
-
-        } // end setExpectations loop
-
-      } else {
-        // If expectation not method then simply set property
-        member.withValue(memberConfig["value"]);
-      }
-
-    }
-    return undefined;
-  }
-
-  // Factory for pretty exception objects - TBR function signature
-  function createException ( actual, expected, exceptionType, descriptor ) {
-
-    var e = {
-        type : exceptionType
-      },
-      fn = "'" + descriptor + "'";
-
-    switch (true) {
-      case "IncorrectNumberOfArgumentsException" === exceptionType:
-      case "MismatchedNumberOfMembersException" === exceptionType:
-        e.message = fn + " expected: " + expected + " items, actual number was: " + actual;
-        break;
-      case "IncorrectNumberOfMethodCallsException" === exceptionType:
-        e.message = fn + " expected: " + expected + " method calls, actual number was: " + actual;
-        break;
-      case "MissingHashKeyException":
-        e.message = fn + " expected: " + expected + " key/property to exist on 'actual' object, actual was: " + actual;
-      default:
-        e.message = fn + " expected: " + expected + ", actual was: " + actual;
-    }
-    return e;
-  }
+  
+  
+  /**
+   * == Mocks ==
+   * The Mock Section
+   **/
 
   // Prototype for mocked method/property
   // Can I strip out 'un-required' properties - save initialisation...
@@ -538,6 +542,12 @@
   Member.prototype["andReturns"] = Member.prototype.returns;
   Member.prototype["andChain"] = Member.prototype.chain;
   Member.prototype["callFunctionWith"] = Member.prototype.data;
+  
+  
+  /**
+   * == Receiver ==
+   * The Receiver Section
+   **/
 
   // Receiver Object Constructor
   // Receiver's can either be simple namespaces-esque functions,
@@ -600,7 +610,7 @@
 
     // If params passed to Mock constructor auto-magikally create mocked interface from JSON tree.
     if ( definition ) {
-      createMockFromJSON.call( mock, definition );
+      createMock.call( mock, definition );
     }
 
     // Mock-tatstic!
@@ -642,4 +652,5 @@
   // QMock was successfully initialised!
   return true;
 
-})( (typeof exports !== "undefined") ? exports : this ); // if exports available assume CommonJS
+// if exports available assume CommonJS
+})( (typeof exports !== "undefined") ? exports : this );
