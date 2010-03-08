@@ -2386,15 +2386,14 @@
 		$.expects(1)
 		  .method('get')
 		    .interface(
-		      {accepts: ['path/to/resource', onSuccess], data: {foo: true}},
-		      {accepts: ['path/to/resource', onFail], data: {baz: true}}
+		      {accepts: ['path/to/resource', onSuccess], data: [{foo: true}]},
+		      {accepts: ['path/to/resource', onFail], data: [{baz: true}]}
 		    );
 
 		// Exercise
 		// Correct Usage
 
 		var called = false;
-
 		$.get('path/to/resource', onSuccess);
 		equals(success, true, "var success should be set to true when $.get() passed (String: url, Function: onSuccess)");
 
@@ -2720,7 +2719,6 @@
     // Correct Usage
 
     var called = false;
-
     mock.get('path/to/resource', function (data) { called = data.foo });
 
 	  // Good exercise & verify
