@@ -2719,6 +2719,7 @@
     // Correct Usage
 
     var called = false;
+    debugger;
     mock.get('path/to/resource', function (data) { called = data.foo });
 
 	  // Good exercise & verify

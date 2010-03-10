@@ -1,31 +1,40 @@
-/**
- * == QMock API ==
- * 
+/*
  * QMock - an 'expect-run-verify' JavaScript mocking library
  *
- *  Copyright (c) 2007-2010, Andy Beeching <andybeeching at gmail dot com>
- *  & Mark Meyer <markdotmeyer at gmail dot com>.
+ *  =========================================================================
  *
+ *  Andy Beeching <andybeeching at gmail dot com> & Mark Meyer (empire42.com).
  * Dual licensed under the MIT and GPL Version 3 licenses.
+ *
+ *  Copyright (c) 2007-2010
  * 
  **/
 
 (function ( container, undefined ) {
+
+  /**
+   * == QMock NS API ==
+   * 
+   * Static methods, configuration options and Classes available on the QMock interface
+   * 
+   **/
 
   // Trap original methods,
   var slice = Array.prototype.slice,
       toString = Object.prototype.toString,
       hasOwnProperty = Object.prototype.hasOwnProperty;
 
-      /** section: QMock API
-       * QMock.config
+      /** section: QMock NS API
+       * class QMock.config
        *
        *  Configuration settings for QMock - can be modified during runtime.
        *
        **/
       config = {
 
-        /*
+        // TODO: Implement 'failSlow' support
+
+        /*[TBD]
          * QMock.config.failFast -> Boolean
          **/
 
@@ -48,8 +57,9 @@
 
   /**
    * QMock.is( nativeType, obj ) -> Boolean
+   *
+   *  - obj (Object): Object to test
    * - nativeType (String): Native type to test object against
-   * - obj (Object): Object to test
    * 
    * Borrowed from jQuery but main credit to Mark Miller for his 'Miller Device'
    *
@@ -57,10 +67,10 @@
    *
    *  #### Example
    *
-   *  <pre><code>QMock.Utils.is( "String", "foo"); // true </code></pre>
+   *  <pre><code>QMock.Utils.is( "foo", "String"); // true </code></pre>
    *
    **/
-  function is ( nativeType, obj ) {
+  function is ( obj, nativeType ) {
     return toString.call( obj ) === "[object " + nativeType + "]";
   }
 
@@ -70,6 +80,10 @@
    * - obj (Object): Object to test
    * 
    *  Inverse of QMock.Utils.is(), see notes for more details.
+   *
+   *  #### Example
+   *
+   *  <pre><code>QMock.Utils.is( "foo", "Number"); // true </code></pre>
    * 
    **/
   function isNot () {
@@ -77,7 +91,7 @@
   }
 
   /**
-   * QMock.comparePresentation( presentation, method[, property] ) -> Boolean | Object
+   * QMock#comparePresentation( presentation, method[, property] ) -> Boolean | Object
    *  - method (Mock | Member): Mock object to which the presentation is / would be passed
    *  - presentation (Array): Array representing a method/constructor interface
    *   'presentation' to test (arguments collection or parameter list)
@@ -139,6 +153,29 @@
       throw new Error('QMock expects a comparison routine to be set on QMock.compare with signature fn( a, b )');
     }
     return true;
+  }
+
+  /* [Private]
+   *
+   * normaliseToArray(obj) -> Array
+   * - obj (Object): Object to normalise
+   * 
+   * Function that determines whether an input (aka expectated prameters, or associated properties like 'data)
+   *  needs to be normalised into a collection for the purpose of functional programming / iteration.
+   *
+   *  Necessary as QMock supports the setting of expected parameters (via accepts property), or callback arguments
+   *  (via 'data') without having to be serialised as arrays where there is only one parameter.
+   *
+   *  e.g.
+   *  <pre><code>
+   *
+   *    // ...
+   *
+   *  </code></pre>
+   *
+   **/
+  function normaliseToArray ( obj ) {
+    return ( isNot( obj, "Array" ) || obj.length === 1 ) ? [ obj ] : obj;
   }
 
   // SETUP PHASE Functions
@@ -259,7 +296,7 @@
             // Disco.
             member[ expectation ][
               ( (expectation === "interface" || expectation === "accepts")
-              && !isNot( "Array", memberConfig[ expectation ] ))
+              && !isNot( memberConfig[ expectation ], "Array" ) )
                 ? "apply"
                 : "call"
             ](member, memberConfig[ expectation ]);
@@ -300,13 +337,12 @@
     // Execute any callback functions specified with associated args
     for (var i = 0, len = presentation.length, data; i < len; i++) {
       // Check if potential callback passed
-      if ( presentation[ i ] && is( "Function", presentation[ i ] ) ) {
+      if ( presentation[ i ] && is( presentation[ i ], "Function" ) ) {
         // Test for presentation match to expectations, and assign callback data if declared
         // Use data associated with presentation, or default to 'global' data if available
         data = comparePresentation( mock, presentation, "data" ) || mock._data;
-        //
         if ( data != null ) {
-          presentation[ i ].apply( null, data );
+          presentation[ i ].apply( null, normaliseToArray( data ) );
         }
         // reset data to undefined for next pass (multiple callbacks)
         data = null;
@@ -370,14 +406,13 @@
 
   // VERIFY PHASE functions
 
-  /**
-    *
-    * QMock#verifyInvocations( method ) -> Boolean
-    * - method (Mock | Method): mock object to test
-    *
-    * Evaluates if amount of times a mock object (method/constructor) has been invoked matches expectations
-    *
-    **/
+  /**
+   * QMock#verifyInvocations( mock ) -> Boolean
+   * - method (Mock | Method): mock object to test
+   *
+   * Evaluates if amount of times a mock object (method/constructor) has been invoked matches expectations
+   *
+   **/
   function verifyInvocations ( mock ) {
     return ( mock._minCalls == null )
       // No inovation expectations so result is true.
@@ -392,13 +427,13 @@
         || ( mock._minCalls < mock._calls ) && ( mock._maxCalls === Infinity ) );
   }
 
-  /**
-    * QMock#verifyOverloading( method ) -> Boolean
-    * - method (Mock | Method): mock object to test
-    *
-    * Evaluates if number of parameters passed to mock object falls below / exceeeds expectations
-    *
-    **/
+  /**
+   * QMock#verifyOverloading( mock ) -> Boolean
+   * - method (Mock | Method): mock object to test
+   *
+   * Evaluates if number of parameters passed to mock object falls below / exceeeds expectations
+   *
+   **/
   function verifyOverloading ( mock ) {
     return ( ( mock._overload )
       // At least n Arg length checking - overloading allowed
@@ -408,14 +443,14 @@
     );
   }
 
-  /**
-    * QMock#verifyPresentation( presentation, expectations[, overload] ) -> Boolean
-    *  - mock (Mock | Member): mock object to test against
-    *  - presentation (Array | Collection): Presentation made / to be made to mock object interface
-    *
-    * Evaluate a single presentation against all mock object interface expectations. Single match equals true.
-    *
-    **/
+  /**
+   * QMock#verifyPresentation( mock, presentation ) -> Boolean
+   *  - mock (Mock | Member): mock object to test against
+   *  - presentation (Array): Presentation made / to be made to mock object interface
+   *
+   * Evaluate a single presentation against all mock object interface expectations. Single match equals true.
+   *
+   **/
   function verifyPresentation ( mock, presentation ) {
     if ( isCompare() ) {
       for (var i = 0, len = mock._expected.length, expected, result = true; i < len; i++) {
@@ -428,7 +463,7 @@
 
         // If overloading allowed only want to check parameters passed-in (otherwise will fail)
         // Must also trim off overloaded args as no expectations for them.
-        if ( !!mock._overload ) {
+        if ( mock._overload === true ) {
           presentation = trimCollection( presentation, expected );
           expected  = trimCollection( expected, presentation );
         }
@@ -446,14 +481,14 @@
   }
 
   /**
-    * QMock#verifyInterface( mock [, raise] ) -> Boolean
-    *  - mock (Mock | Member): mock object to test
-    *  - raise (Function): Function to handle false comparison results
-    *
-    * Evaluate *all* presentations made to mock object interface against all mock interface expectations.
-    * Each presentation must match an expectation. If no match and optional error handler passed then error raised.
-    *
-    **/
+   * QMock#verifyInterface( mock [, raise] ) -> Boolean
+   *  - mock (Mock | Member): mock object to test
+   *  - raise (Function): Function to handle false comparison results
+   *
+   * Evaluate *all* presentations made to mock object interface against all mock interface expectations.
+   * Each presentation must match an expectation. If no match and optional error handler passed then error raised.
+   *
+   **/
   function verifyInterface ( mock, raise ) {
     // For each presentation to the interface...
     for (var params = 0, total = mock._received.length, result = true; params < total; params++) {
@@ -468,14 +503,14 @@
   }
 
   /**
-    * QMock#verifyReceiver( receiver [, raise] ) -> Boolean | Exception
-    *  - receiver (Mock): mock / receiver object to test
-    *  - raise (Function): Function to handle false comparison results
-    *
-    * Verifies the receiver object (the parent mock object) first, then individual members.
-    * Only passes if whole object tree passes, else throws exception (fail fast).
-    *
-    **/
+   * QMock#verifyReceiver( receiver [, raise] ) -> Boolean | Exception
+   *  - receiver (Mock): mock / receiver object to test
+   *  - raise (Function): Function to handle false comparison results
+   *
+   * Verifies the receiver object (the parent mock object) first, then individual members.
+   * Only passes if whole object tree passes, else throws exception (fail fast).
+   *
+   **/
   function verifyReceiver ( receiver, raise ) {
     // Verify Self (Constructor)
     var result = Member.prototype.verify.call( receiver, raise );
@@ -497,7 +532,7 @@
 
   // TEARDOWN
 
-  /**
+  /*
     * QMock#resetReceiver( receiver ) -> Boolean
     *  - receiver (Mock): mock / receiver object to reset
     *
@@ -514,11 +549,11 @@
   }
 
   /**
-   * == Method API ==
+   * == Mock Object ==
    * Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
    **/
 
-  /** section: Method API
+  /** section: Mock Object
    * class Mock
    * Main Stub, or mocked method class
    *
@@ -532,7 +567,7 @@
    *  - max (Number): Maximum number of times mocked method should be called. If want 'at least N'
    *  then just pass Infinity
    *
-   *  Constructor for mocked method and property members.
+   *  Constructor for mock receiver, method and property objects.
    * 
    **/
   function Member ( min, max ) {
@@ -550,13 +585,24 @@
     this._calls = 0;
   };
 
+  // Inherited members
   Member.prototype = {
 
+    /**
+     * Mock#name( identifier ) -> Mock
+     * 
+     * Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
+     **/
     "name": function ( identifier ) {
       this._id = identifier;
       return this;
     },
 
+    /**
+     * Mock#method( key ) -> Mock
+     *
+     *  Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
+     **/
     "method": function ( key ) {
       // Throw error if collision with Member API
       if ( hasOwnProperty.call( this._mock, key ) ) {
@@ -576,6 +622,13 @@
       return this;
     },
 
+    /**
+     * Mock#interface( expectations ) -> Mock
+     *
+     *  Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
+     *
+     **/
+
     // Expected format of arguments - {accepts: [ values ] [, returns: value] [, data: [ values ]] }
     "interface": function () {
       // Check for valid input to interface
@@ -586,7 +639,7 @@
             type: "MissingAcceptsPropertyException",
             msg: "Qmock expects arguments to setInterfaceExpectations() to contain an accepts property"
           }
-        } else if ( isNot( "Array", acceptsProperty ) ) {
+        } else if ( isNot( acceptsProperty, "Array" ) ) {
           throw {
             type: "InvalidAcceptsValueException",
             msg: "Qmock expects value of 'accepts' in arguments to be an Array (note true array, not array-like)"
@@ -604,36 +657,72 @@
           arguments[ i ][ "required" ] = arguments[ i ][ "accepts" ].length;
         }
       }*/
-      this._expected = arguments;
+      this._expected = normaliseToArray( slice.call( arguments ) );
       return this;
     },
 
+    /**
+     * Mock#accepts( parameters ) -> Mock
+     *
+     *  Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
+     *
+     **/
     "accepts": function () {
       this._requires = arguments.length;
       this._expected.push( { "accepts" : slice.call( arguments ) } );
       return this;
     },
 
+    /**
+     * Mock#returns( obj ) -> Mock
+     *
+     *  Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
+     *
+     **/
     "returns": function ( obj ) {
       this._returns = obj; // default is undefined
       return this;
     },
 
+    /**
+     * Mock#required( num ) -> Mock
+     *
+     *  Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
+     *
+     **/
     "required": function ( num ) {
       this._requires = num;
       return this;
     },
 
+    /**
+     * Mock#overload( bool ) -> Mock
+     *
+     *  Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
+     *
+     **/
     "overload": function ( bool ) {
       this._overload = bool;
       return this;
     },
 
+    /**
+     * Mock#data( [arguments] ) -> Mock
+     *
+     *  Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
+     *
+     **/
     "data": function () {
-      this._data = arguments;
+      this._data = slice.call( arguments );
       return this;
     },
 
+    /**
+     * Mock#property( [key] ) -> Mock
+     *
+     *  Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
+     *
+     **/
     "property": function ( key ) {
       if ( hasOwnProperty.call( this._mock, key ) ) {
         throw {
@@ -645,31 +734,61 @@
       return this;
     },
 
-    "withValue": function ( value ) {
+    /**
+     * Mock#withValue( [obj] ) -> Mock
+     *
+     *  Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
+     *
+     **/
+    "withValue": function ( obj ) {
       for ( var key in this._mock ) {
         if ( hasOwnProperty.call( this._mock, key ) ) {
           if ( this._mock[ key ] === "stub" ) {
-            this._mock[ key ] = value;
+            this._mock[ key ] = obj;
           }
         }
       }
       return this;
     },
 
+    /*
+     * Mock#chain() -> Mock
+     *
+     *  Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
+     *
+     **/
     "chain": function () {
       this._returns = this._mock;
       return this;
     },
 
+    /* alias of: Mock.expects
+     * Mock.andExpects( [min][, max] ) -> Mock
+     *
+     *  Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
+     *
+     **/
     "andExpects": function ( min, max ) {
       return this._mock.expects( min, max );
     },
 
+    /**
+     * Mock#reset() -> Mock
+     *
+     *  Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
+     *
+     **/
     "reset": function () {
       this._calls = 0;
       this._received = [];
     },
 
+    /**
+     * Mock#verify( [raise] ) -> Mock
+     *
+     *  Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
+     *
+     **/
     "verify": function ( raise ) {
       // 1. Check number of method invocations if set
       if ( verifyInvocations( this ) ) {
@@ -694,22 +813,46 @@
       return verifyInterface( this, raise );
     },
 
+    /**
+     * Mock#atLeast( num ) -> Mock
+     *
+     *  Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
+     *
+     **/
     atLeast: function ( num ) {
       this._minCalls = num;
       this._maxCalls = Infinity;
       return this;
     },
 
+    /**
+     * Mock#noMoreThan( num ) -> Mock
+     *
+     *  Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
+     *
+     **/
     noMoreThan: function ( num ) {
       this._maxCalls = num;
       return this;
     },
 
+    /**
+     * Mock#calls( [min][, max] ) -> Mock
+     *
+     *  Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
+     *
+     **/
     calls: function ( min, max ) {
       this._minCalls = min || this._minCalls;
       this._maxCalls = max || this._maxCalls;
     },
 
+    /**
+     * Mock#end() -> Mock
+     *
+     *  Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
+     *
+     **/
     end: function () {
       return this._mock || this;
     }
@@ -725,26 +868,6 @@
   // Receiver Object Constructor
   // Receiver's can either be simple namespaces-esque functions,
   // or full Constructor functions in their own right (a la jQuery $)
-  /**
-   * == Mock API ==
-   * Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
-   **/
-
-  /** section: Mock API
-   * class Mock < Member
-   * Main Stub, or mocked method class
-   *
-   *  Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
-   **/
-
-  /**
-   * new Mock( [ definition ])
-   * - definition (Hash):
-   *
-   *  Constructor for mocked method and property members.
-   *
-   **/
-
   function Receiver ( definition ) {
 
     // Create internal state
@@ -808,7 +931,7 @@
     return ( definition ) ? createMock( mock, definition ) : mock;
   }
 
-  /** section: QMock API
+  /** section: QMock NS API
    * QMock
    * lorem ipsum
    **/
@@ -840,7 +963,7 @@
     testParameters: comparePresentation
   };
 
-  // Alias QMock.Mock for pretty Mock initialisation 
+  // Alias QMock.Mock for pretty Mock initialisation
   // (i.e. new Mock( [Definition {}] )
   container.Mock = Receiver;
   container.Stub = Member;
