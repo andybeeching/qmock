@@ -48,8 +48,7 @@
  	  var ninja = new Mock;
  	  ninja
  	    .expects()
- 	      .property("rank")
- 	      .withValue("apprentice");
+ 	      .property("rank", "apprentice");
 
  	  ok( (ninja.rank === "apprentice") , "ninja mock object should have a property with an identifier 'rank' that has a value of 'apprentice'" );
 
@@ -57,26 +56,21 @@
 
  	  ninja
        .expects()
-         .property("rank")
-         .withValue("apprentice")
+         .property("rank", "apprentice")
        .andExpects()
-         .property("master")
-         .withValue("The Chrome");
+         .property("master", "The Chrome");
 
  	  ok( ( (ninja.rank === "apprentice") && (ninja.master === "The Chrome") ) , "ninja mock object should have two properties with the identifiers 'rank' & 'master', and values of 'apprentice' and 'The Chrome' respectively")
 
  	  // Composite
  	  var samurai = new Mock;
-
  	  samurai
  	    .expects()
- 	      .property("rank")
- 	      .withValue("apprentice")
+ 	      .property("rank", "apprentice")
  	    .andExpects(1,2)
  	      .method("swing")
  	    .andExpects()
- 	      .property("master")
- 	      .withValue("The Chrome");
+ 	      .property("master", "The Chrome");
 
  	  samurai.swing();
  	  // Good Exercise
@@ -91,38 +85,27 @@
 
  	  wizard
  	    .expects()
- 	      .property("number")
- 	      .withValue(1)
+ 	      .property("number", 1)
  	    .andExpects()
- 	      .property("boolean")
- 	      .withValue(true)
+ 	      .property("boolean", true)
  	    .andExpects()
- 	      .property("string")
- 	      .withValue("foo")
+ 	      .property("string", "foo")
  	    .andExpects()
- 	      .property("null")
- 	      .withValue(null)
+ 	      .property("null", null)
  	    .andExpects()
- 	      .property("undefined")
- 	      .withValue(undefined)
+ 	      .property("undefined", undefined)
  	    .andExpects()
- 	      .property("function")
- 	      .withValue(function stubbedFunction () {})
+ 	      .property("function", function stubbedFunction () {})
  	    .andExpects()
- 	      .property("object")
- 	      .withValue({})
+ 	      .property("object", {})
  	    .andExpects()
- 	      .property("array")
- 	      .withValue([])
+ 	      .property("array", [])
  	    .andExpects()
- 	      .property("regExp")
- 	      .withValue(/RegExp/)
+ 	      .property("regExp", /RegExp/)
  	    .andExpects()
- 	      .property("date")
- 	      .withValue(new Date(1970))
+ 	      .property("date", new Date(1970))
  	    .andExpects()
- 	      .property("custom object")
- 	      .withValue(new Custom);
+ 	      .property("custom object", new Custom)
 
  	  // No need to exercise - all stubs
  	  equals( wizard["number"], 1, "wizard mock object should have a stubbed property of 'number' with a value of (Number: 1)");
@@ -364,8 +347,7 @@
 	  wizard
 	    .expects()
 	      .method('sendFireball')
-	      .atLeast(100)
-	      .noMoreThan(250);
+	      .calls(100, 250);
 
 	  for(var i = 0; i < ( 100 + Math.floor(Math.random() * (250 - 100 + 1))); i++) {
 	    wizard.sendFireball();
@@ -2534,8 +2516,7 @@
 	        .method('wrap')
 	        .accepts('<div />')
 	      .andExpects()
-	        .property('browser')
-	        .withValue({
+	        .property('browser', {
 	          ie: false,
 	          mozilla: false,
 	          safari: false,
@@ -2634,8 +2615,7 @@
 	        .accepts('<div />')
 	        .chain()
 	      .andExpects()
-	        .property('browser')
-	        .withValue({
+	        .property('browser', {
 	          ie: false,
 	          mozilla: false,
 	          safari: false,
@@ -2695,7 +2675,7 @@
 
 	test("[0.2] Constructor and mockedMember object API backward compatibility", function () {
 
-	  expect(2);
+	  expect(3);
 
 	  // Setup - Test support for andChain method on mocked methods
 
@@ -2719,11 +2699,28 @@
     // Correct Usage
 
     var called = false;
-    debugger;
     mock.get('path/to/resource', function (data) { called = data.foo });
 
 	  // Good exercise & verify
 	  equals(called, 'bar', "var called should be set to true when mock.get() passed (String: url, Function: callback)");
+
+	  // Setup - Test support for atLeast & noMoreThan method on mocked methods
+
+	  var mock = new Mock;
+		mock
+		  .expects()
+		    .method('foo')
+		    .atLeast(1)
+		    .noMoreThan(3);
+
+    // Correct Usage
+
+	  for(var i = 0; i < 2; i++) {
+	    mock.foo();
+	  }
+
+	  // Good exercise & verify
+	  ok(mock.verify(), "verify() should pass if foo called a random amount of times between a specified range");
 
 	});
 

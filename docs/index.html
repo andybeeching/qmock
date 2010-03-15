@@ -1,0 +1,166 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+    "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <title>QMock API documentation | Home</title>
+  <meta name="generator" content="PDoc" />
+  
+  <script type="text/javascript" charset="utf-8" src="javascripts/prototype.js"></script>
+  <script type="text/javascript" charset="utf-8" src="javascripts/application.js"></script>
+<script type="text/javascript" charset="utf-8" src="javascripts/tabs.js"></script>
+  <script type="text/javascript" charset="utf-8" src="javascripts/item_index.js"></script>
+  
+  <link type="text/css" rel="stylesheet" charset="utf-8" media="screen, projection" href="stylesheets/api.css" />
+<link type="text/css" rel="stylesheet" charset="utf-8" media="screen, projection" href="stylesheets/pygments.css" />
+  
+  <script type="text/javascript">
+    PDoc.pathPrefix = '';
+  </script>
+</head>
+  <body>
+
+    <div id="sidebar">
+      <ul id="sidebar_tabs" class="sidebar-tabs">
+        <li>
+          <a href="#menu_pane">Menu</a>
+        </li>
+        <li>
+          <a href="#search_pane">Search</a>
+        </li>
+      </ul> <!-- .sidebar-tabs -->
+
+      <form class="search-ribbon">
+        <label>
+          <span class="hidden">Search</span>
+          <input type="text" id="search" size="20" title="Search" />
+        </label>
+      </form>
+      
+      <div class="sidebar-pane scrollable" id="menu_pane">
+        <ul id="api_menu" class="menu-items">
+          
+            <li><div class="menu-item"><a class="section" title="Mock Object section (section)" href="mock object/">Mock Object section</a></div><ul class="menu-section"><li><div class="menu-item"><a class="class" title="Mock (class)" href="mock object/mock/">Mock</a></div></li></ul></li>
+          
+            <li><div class="menu-item"><a class="section" title="QMock API section (section)" href="qmock api/">QMock API section</a></div><ul class="menu-section"><li><div class="menu-item"><a class="class" title="QMock (class)" href="qmock api/qmock/">QMock</a></div><ul class=""><li><div class="menu-item"><a class="class" title="QMock.config (class)" href="qmock api/qmock/config/">QMock.config</a></div></li></ul></li></ul></li>
+          
+        </ul> <!--- #api_menu =-->
+      </div> <!-- .sidebar-pane -->
+      <div class="sidebar-pane" id="search_pane">
+        <ul id="search_results" class="search-results menu-items scrollable"></ul>
+      </div> <!-- .sidebar-pane -->
+    </div> <!-- #sidebar -->
+
+    <div id="page">
+      
+      <div class="masthead">
+        <div class="content">
+          <h1>QMock</h1> 
+          <h4>An <span>'expect-run-verify'</span> JavaScript Object Mocking Library</h4>
+        </div> <!-- .content -->
+      </div> <!-- .masthead -->
+      
+
+      <div id="main" class="page-content">
+        
+
+<div class="page-introduction">
+  <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>
+
+  <h3>Targeted platforms</h3> 
+
+  <p>QMock doesn't rely on host objects such as the DOM, or BOM, and as a CommonJS-compliant module can be run on the server. It targets the following engines:</p> 
+
+  <ul> 
+    <li>Microsoft JScript (IE6+)</li> 
+    <li>Mozilla SpiderMonkey [versions] (Firefox 1.5 and higher)</li> 
+    <li>Webkit JavaScriptCore [versions] 2.0.4 and higher</li> 
+    <li>Opera [presto?] 9.25 and higher</li> 
+    <li>Chrome V8</li> 
+  </ul>
+  
+  <h4>Testrunners</h4>
+  
+  <p>QMock has also been designed to be compatible with as many testrunners as possible, so existing test suites can easily be extended to include integration, or 'glass-box' tests. The only requirement being that the runner, such as <a href="#">QUnit</a>, <a href="#">Evidence</a>, or the <a href="#">CommonJS Assert module</a> (to name a few) expose some kind of comparison method (e.g. QUnit.equiv, assert.deepEquals) which QMock uses to test the received parameters against the mock object expectations.
+    
+    <!--
+    *  *  QMock is a 'expect-run-verify' JavaScript mocking library inspired by
+    *  the Java JMock & EasyMock libraries for use in TDD workflow for authoring
+    *  JavaScript. QMock can be used:
+    *
+    *    * By itself for easy mocking of collaborator objects & interfaces with
+    *      'intelligent' canned response stubs. Verification phase optional.
+    *
+    *    * As a standalone testing tool for glass-box business logic assertion...
+    *
+    *    * ...Or most usefully, in conjunction with a test-runner such as QUnit,
+    *      Evidence or YUI Test for automated testing.
+    *
+    *  QMock has been developed in a TDD manner, and has a comprehensive test
+    *  suite designed to be run in multiple testrunners. The software itself
+    *  started life at Channel 4 Television so props to them for letting us share!
+    *
+    *  Requirements
+    *
+    *  QMock requires a comparison routine to run presentations & expectations
+    *  against (e.g. QUnit.equiv, assert.deepEquals, or Assay.compare)
+    *
+    *  // Set comparison
+    *  QMock.compare = QUnit.equiv
+   *  -->
+  
+  
+</div> <!-- .section -->
+
+              <div class="section section-sections">
+                <div class="section-title">
+                  <h3>Sections</h3>
+                </div> <!-- .section-title -->
+                <div class="section-content">
+
+  <ul class="section-list">
+    
+    <li>
+      <h4>
+        <a href="mock object/">Mock Object</a>
+      </h4>
+      <p><p>Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>
+</p>
+    </li>      
+    
+    <li>
+      <h4>
+        <a href="qmock api/">QMock API</a>
+      </h4>
+      <p><p>Static methods, configuration options and Classes available on the QMock interface</p>
+</p>
+    </li>      
+    
+  </ul>
+              </div> <!-- .section-content -->
+            </div> <!-- .section -->
+
+      </div> <!-- #main -->
+      
+      <div id="footer">
+        <div class="content clearfix">
+          
+          <div class="cc clearfix">
+            <span>
+              <img src="http://creativecommons.org/images/public/somerights20.png"
+                style="border-width: 0pt;" alt="Creative Commons License"/>              
+            </span>
+            
+            <p>This work is licensed under a <a rel="license" href="http://creativecommons.org/licenses/by-sa/3.0/">Creative Commons Attribution-Share Alike 3.0 Unported License</a>.</p>
+          </div> <!-- .cc -->
+          
+          <div class="credits">
+            Generated by <a href="http://pdoc.org">PDoc</a>. Uses <a href="http://famfamfam.com/lab/icons/silk/" title="famfamfam.com: Silk Icons">Silk Icons</a> and portions of <a href="http://github.com/280north/aristo/tree/master" title="280north's aristo at master - GitHub">Aristo</a>.
+          </div> <!-- .credits -->
+          
+        </div> <!-- .content -->
+      </div> <!-- #footer -->
+
+    </div> <!-- #page -->
+  </body>
+</html>
