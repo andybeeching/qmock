@@ -1530,7 +1530,7 @@
 	  ninja
 	    .expects(1)
 	      .method('swing')
-	      .interface(
+	      .receives(
   	      {accepts: [ 'foo' ]},
   	      {accepts: [ 'bar' ]}
 	      );
@@ -1665,7 +1665,7 @@
 	  ninja
 	    .expects(1)
 	      .method('swing')
-	      .interface(
+	      .receives(
   	      {accepts: [ 3 ]},
   	      {accepts: [ 9 ]}
 	      );
@@ -1829,7 +1829,7 @@
 	  ninja
 	    .expects(1)
 	      .method('swing')
-	      .interface(
+	      .receives(
   	      {accepts: [ true ]},
   	      {accepts: [ false ]}
 	      );
@@ -1942,7 +1942,7 @@
     	  ninja
     	    .expects(1)
     	      .method('swing')
-    	      .interface(
+    	      .receives(
       	      {accepts: [ 'foo' ]},
       	      {accepts: [ 1 ]},
       	      {accepts: [ true ]},
@@ -2219,7 +2219,7 @@
 	  ninja
 	    .expects(1)
 	      .method("swing")
-  	      .interface(
+  	      .receives(
   	        {accepts: ['foo'], returns: 'bar'} // Presentation [1]
   	      )
   	      .required(0);
@@ -2258,7 +2258,7 @@
 	  ninja
 	    .expects(1)
 	      .method("swing")
-  	      .interface(
+  	      .receives(
   	        {accepts: ['foo'], returns: 'bar'}, // Presentation [1]
   	        {accepts: ['far'], returns: 'baz'} // Presentation [1]
   	      )
@@ -2319,7 +2319,7 @@
 
     new Mock({
       "get": {
-        interface: [
+        receives: [
           {accepts: ['path/to/resource', callback], response: {foo: 'bar'}}
           {accepts: ['path/to/resource', callback2], response: {far: 'baz'}}
         ]
@@ -2367,7 +2367,7 @@
     // Suggested syntax for 'cleaner' callbacks
 		$.expects(1)
 		  .method('get')
-		    .interface(
+		    .receives(
 		      {accepts: ['path/to/resource', onSuccess], data: [{foo: true}]},
 		      {accepts: ['path/to/resource', onFail], data: [{baz: true}]}
 		    );
