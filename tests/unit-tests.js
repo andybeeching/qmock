@@ -2697,7 +2697,6 @@
         .callFunctionWith({foo: 'bar'});
 
     // Correct Usage
-
     var called = false;
     mock.get('path/to/resource', function (data) { called = data.foo });
 

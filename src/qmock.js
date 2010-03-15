@@ -157,7 +157,7 @@
    *  <pre><code>normaliseToArray( 'foo' ); // ['foo']</code></pre>
    **/
   function normaliseToArray ( obj ) {
-    return ( isNot( obj, "Array" ) || obj.length === 1 ) ? [ obj ] : obj;
+    return ( isNot( obj, "Array" ) || ( obj.length === 1 && is( obj[0], "Array" ) ) ) ? [ obj ] : obj;
   }
 
   // SETUP PHASE Functions
@@ -621,7 +621,7 @@
     },
 
     /**
-     * Mock#interface( expectations ) -> Mock
+     * Mock#receives( expectations ) -> Mock
      *  - expectations (Expectation...n): Expectation object format is:
      *
      *  <pre><code>{accepts: [ parameters ], returns: value, data: [ values ]}</code></pre>
@@ -632,20 +632,20 @@
      *
      *  #### Example
      *
-     *  <pre><code>Mock.method("foo").interface({
+     *  <pre><code>Mock.method("foo").receives({
      *    "accepts": ["bar", callback],
      *    "returns": "baz",
      *    "data": "stub"
      *  });</code></pre>
      **/
-    "interface": function () {
+    "receives": function () {
       // Check for valid input to interface
       for (var i = 0, len = arguments.length; i < len; i++) {
         var acceptsProperty = arguments[ i ].accepts || false; // attach hasOwnProperty check.
         if ( acceptsProperty === false ) {
           throw {
             type: "MissingAcceptsPropertyException",
-            msg: "Qmock expects arguments to setInterfaceExpectations() to contain an accepts property"
+            msg: "Qmock expects arguments to expectations() to contain an accepts property"
           };
         } else if ( isNot( acceptsProperty, "Array" ) ) {
           throw {
@@ -784,14 +784,14 @@
      *  <pre><code>Mock.expects().property('foo', 'bar');
      *  console.log( Mock.foo ); // "bar"</code></pre>
      **/
-    "property": function ( prop, val ) {
+    "property": function ( prop, value ) {
       if ( hasOwnProperty.call( this._receiver, prop ) ) {
         throw {
           type: "InvalidPropertyNameException",
           msg: "Qmock expects a unique key for each stubbed property"
         };
       }
-      this._receiver[ prop ] = val;
+      this._receiver[ prop ] = value;
       return this;
     },
 
@@ -940,6 +940,12 @@
   }; // End Member.prototype declaration
 
   // Backward compatibility for QMock v0.1/0.2 API
+  /**alias of: Mock#receives(), deprecated
+   * Mock#interface() -> Mock
+   *  
+   *  See Mock#receives for usage.
+   **/
+  Member.prototype.interface = Member.prototype.receives;
   Member.prototype.withArguments = Member.prototype.accepts;
   Member.prototype.andReturns = Member.prototype.returns;
   Member.prototype.andChain = Member.prototype.chain;
