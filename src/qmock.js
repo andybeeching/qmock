@@ -11,9 +11,9 @@
 
   /**
    * == QMock API ==
-   * 
+   *
    *  Static methods, configuration options and Classes available on the QMock interface
-   * 
+   *
    **/
 
   // Trap original methods,
@@ -270,50 +270,52 @@
 
     // loop through expected members on mock
     for ( entry in definition ) {
+      if ( hasOwnProperty.call( definition, entry ) ) {
 
-      var memberConfig = definition[ entry ],
-          isMethod = !!( memberConfig["value"] === undefined ),
+        var memberConfig = definition[ entry ],
+            isMethod = ( memberConfig.value === undefined ),
 
-      // augment receiver object with mocked property or method
-      member = this
-        .expects
-          .apply(member,
-            (memberConfig.calls !== undefined)
-              ? [ memberConfig.calls ]
-              : [ memberConfig.min ? memberConfig.min : 0,
-                  memberConfig.max ? memberConfig.max : Infinity ]
-              )[ isMethod ? "method" : "property"]( entry );
+        // augment receiver object with mocked property or method
+        member = this
+          .expects
+            .apply(member,
+              (memberConfig.calls !== undefined)
+                ? [ memberConfig.calls ]
+                : [ memberConfig.min ? memberConfig.min : 0,
+                    memberConfig.max ? memberConfig.max : Infinity ]
+                )[ isMethod ? "method" : "property"]( entry );
 
-      // Set expectations for method or value of property
-      if ( isMethod ) {
+        // Set expectations for method or value of property
+        if ( isMethod ) {
 
-        setExpectations:
-          for (var expectation in memberConfig) {
+          setExpectations:
+            for (var expectation in memberConfig) {
+              if ( hasOwnProperty.call( memberConfig, expectation ) ) {
 
-          // Check property exists on mock object and is a callable method
-          if ( (member[expectation] !== undefined)
-            && (member[expectation].constructor === Function) ) {
+                // Check property exists on mock object and is a callable method
+                if ( (member[expectation] !== undefined)
+                  && (member[expectation].constructor === Function) ) {
 
-            // Disco.
-            member[ expectation ][
-              ( ( expectation === "interface" || expectation === "accepts" )
-              && !isNot( memberConfig[ expectation ], "Array" ) )
-                ? "apply"
-                : "call"
-            ]( member, memberConfig[ expectation ] );
+                  // Disco.
+                  member[ expectation ][
+                    ( ( expectation === "interface" || expectation === "accepts" )
+                    && !isNot( memberConfig[ expectation ], "Array" ) )
+                      ? "apply"
+                      : "call"
+                  ]( member, memberConfig[ expectation ] );
 
-          } else if ( blacklisted.test( expectation ) ) {
-            // If not callable check property not whitelisted before throwing error
-            //throwMockException("Identifier for method on new Mock instance", "Mock." + member["name"] + "[" + expectation + "]", "InvalidMockInstanceMethodException", member["name"] + '.' + expectation);
-          }
+                } else if ( blacklisted.test( expectation ) ) {
+                  // If not callable check property not whitelisted before throwing error
+                  //throwMockException("Identifier for method on new Mock instance", "Mock." + member["name"] + "[" + expectation + "]", "InvalidMockInstanceMethodException", member["name"] + '.' + expectation);
+                }
 
-        } // end setExpectations loop
-
-      } else {
-        // If expectation not method then simply set property
-        member.withValue(memberConfig["value"]);
+              } // end setExpectations loop
+            }
+        } else {
+          // If expectation not method then simply set property
+          member.withValue(memberConfig.value);
+        }
       }
-
     }
     return mock;
   }
@@ -387,16 +389,17 @@
       },
       fn = "'" + identifier + "'";
 
-    switch (true) {
-      case "IncorrectNumberOfArgumentsException" === exceptionType:
-      case "MismatchedNumberOfMembersException" === exceptionType:
+    switch (exceptionType) {
+      case "IncorrectNumberOfArgumentsException":
+      case "MismatchedNumberOfMembersException":
         e.message = fn + " expected: " + expected + " items, actual number was: " + actual;
         break;
-      case "IncorrectNumberOfMethodCallsException" === exceptionType:
+      case "IncorrectNumberOfMethodCallsException":
         e.message = fn + " expected: " + expected + " method calls, actual number was: " + actual;
         break;
       case "MissingHashKeyException":
         e.message = fn + " expected: " + expected + " key/property to exist on 'actual' object, actual was: " + actual;
+        break;
       default:
         e.message = fn + " expected: " + expected + ", actual was: " + actual;
     }
@@ -534,13 +537,13 @@
 
   /* [Private]
    * resetMock( mock ) -> Boolean
-   * 
+   *
    * Utility method to reset the state of any mock object to before any interaction was recorded.
-   * 
+   *
    **/
   function resetMockState ( mock ) {
     if ( mock._exceptions ) {
-      mock._exceptions = []
+      mock._exceptions = [];
     }
     mock._calls = 0;
     mock._received = [];
@@ -600,7 +603,7 @@
     this._minCalls = min || null;
     this._maxCalls = max || null;
     this._calls = 0;
-  };
+  }
 
   // Inherited members
   // All methods return the execution scope for cascading invocations
@@ -672,22 +675,22 @@
     "interface": function () {
       // Check for valid input to interface
       for (var i = 0, len = arguments.length; i < len; i++) {
-        var acceptsProperty = arguments[ i ][ "accepts" ] || false; // attach hasOwnProperty check.
+        var acceptsProperty = arguments[ i ].accepts || false; // attach hasOwnProperty check.
         if ( acceptsProperty === false ) {
           throw {
             type: "MissingAcceptsPropertyException",
             msg: "Qmock expects arguments to setInterfaceExpectations() to contain an accepts property"
-          }
+          };
         } else if ( isNot( acceptsProperty, "Array" ) ) {
           throw {
             type: "InvalidAcceptsValueException",
             msg: "Qmock expects value of 'accepts' in arguments to be an Array (note true array, not array-like)"
-          }
+          };
         }
       }
 
       // Set minimum expectations
-      this._requires = arguments[ 0 ][ "accepts" ].length;
+      this._requires = arguments[ 0 ].accepts.length;
 
      // TODO: Support for different requires per expected presentation
      // Assign explicit expectation if exist
@@ -983,10 +986,10 @@
   }; // End Member.prototype declaration
 
   // Backward compatibility for QMock v0.1/0.2 API
-  Member.prototype["withArguments"] = Member.prototype.accepts;
-  Member.prototype["andReturns"] = Member.prototype.returns;
-  Member.prototype["andChain"] = Member.prototype.chain;
-  Member.prototype["callFunctionWith"] = Member.prototype.data;
+  Member.prototype.withArguments = Member.prototype.accepts;
+  Member.prototype.andReturns = Member.prototype.returns;
+  Member.prototype.andChain = Member.prototype.chain;
+  Member.prototype.callFunctionWith = Member.prototype.data;
 
   /**
    * new Mock( definition )
@@ -1011,16 +1014,17 @@
 
   // Exposed as 'Mock' & 'QMock.Mock'
   function Receiver ( definition ) {
-
-    // Create internal state
-    var state = new Member,
-        // Bind delegated stub invocation to Receiver instance state
-        recorder = createStub( mock );
-
+    
+    // The stub
     function mock () {
       // Update Receiver instance state and return itself or explicit value
       return recorder.apply( null, arguments );
     }
+
+    // Create internal state
+    var state = new Member(),
+        // Bind delegated stub invocation to Receiver instance state
+        recorder = createStub( mock );
 
     // Can't use receiver.prototype as function literal prototype not in prototype chain, e.g. a
     // lookup for (function () {}).foo goes to Function.prototype.foo (__proto__)
@@ -1028,7 +1032,10 @@
     // Internal state is thus public, otherwise all methods on Member.prototype would
     // need manual scoping with .call() which too much of a dependency (and not future-proof)
     for ( var key in state ) {
-      mock[ key ] = state[ key ];
+      // Ultra-protective but Mr. D is right...
+      if ( hasOwnProperty.call( state, key ) || hasOwnProperty.call( Member.prototype, key ) ) {
+        mock[ key ] = state[ key ];
+      }
     }
 
     /**
