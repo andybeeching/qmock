@@ -4,42 +4,37 @@
  *
  *  Copyright (c) 2007-2010, Andy Beeching <andybeeching at gmail dot com>
  *  Dual licensed under the MIT and GPL Version 3 licenses.
- *
+ *  
+ *  jslint laxbreak: true, newcap: true
+ *  
  **/
 
+/**
+ * == QMock ==
+ *  Static methods, configuration options and Classes available on the QMock namespace.
+ **/
 (function ( container, undefined ) {
-
-  /**
-   * == QMock API ==
-   *
-   *  Static methods, configuration options and Classes available on the QMock interface
-   *
-   **/
 
   // Trap original methods,
   var slice = Array.prototype.slice,
       toString = Object.prototype.toString,
       hasOwnProperty = Object.prototype.hasOwnProperty;
-
-      /** section: QMock API
-       * class QMock.config
-       *
-       *  Configuration settings for QMock - can be modified during runtime.
-       *
+      /**
+       * == Config ==
+       * Configuration settings for QMock - can be modified during runtime. Exposed as <code>QMock.config</code>.
+       **/
+       
+      /** section: Config
+       * Config
+       *  _Note_: This is not a global object, but simply a separate documentation section for QMock config options
        **/
       config = {
-
-        // TODO: Implement 'failSlow' support
-
-        /*[TBD]
+        /* TODO: Implement 'failSlow' support
          * QMock.config.failFast -> Boolean
-         *
          **/
-
         failFast: true,
-
         /**
-         * QMock.config.compare -> false | Function
+         * Config.compare -> false | Function
          *
          *  Pointer to comparison method used internally by QMock, and by QMock.comparePresentation.
          *
@@ -49,7 +44,6 @@
          *  #### Example
          *
          *  <pre><code>QMock.config.compare = QUnit.equiv;</code></pre>
-         *
          **/
         compare: false
       };
@@ -66,7 +60,6 @@
    *  #### Example
    *
    *  <pre><code>QMock.Utils.is( "foo", "String"); // true </code></pre>
-   *
    **/
   function is ( obj, nativeType ) {
     return toString.call( obj ) === "[object " + nativeType + "]";
@@ -82,7 +75,6 @@
    *  #### Example
    *
    *  <pre><code>QMock.Utils.is( "foo", "Number"); // true </code></pre>
-   *
    **/
   function isNot () {
     return !is.apply( null, arguments );
@@ -106,7 +98,6 @@
    *  #### Example
    *
    *  <pre><code>comparePresentation(["foo"], new Member, "returns");</code></pre>
-   *
    **/
   function comparePresentation ( mock, presentation, property ) {
     // Check dependencies
@@ -132,7 +123,6 @@
    *  - b (Collection): Target collection to normalise against
    *
    *  Utility function to normalise the length of two collections.
-   *
    **/
   function trimCollection ( a, b ) {
     return slice.call( a, 0, b.length );
@@ -143,7 +133,6 @@
    * isCompare() -> Boolean | Error
    *
    *  Utility function to assert whether a comparison routine has been set on QMock namespace.
-   *
    **/
   function isCompare () {
     // Check dependencies
@@ -155,7 +144,7 @@
 
   /* [Private]
    *
-   * normaliseToArray(obj) -> Array
+   * normaliseToArray( obj ) -> Array
    *  - obj (Object): Object to normalise
    *
    *  Function that determines whether an input (aka expectated prameters, or associated properties like 'data)
@@ -165,12 +154,7 @@
    *  (via 'data') without having to be serialised as arrays where there is only one parameter.
    *
    *  e.g.
-   *  <pre><code>
-   *
-   *    // ...
-   *
-   *  </code></pre>
-   *
+   *  <pre><code>normaliseToArray( 'foo' ); // ['foo']</code></pre>
    **/
   function normaliseToArray ( obj ) {
     return ( isNot( obj, "Array" ) || obj.length === 1 ) ? [ obj ] : obj;
@@ -186,9 +170,8 @@
    *  Factory for creating a mock stub function - acts as a mutator and operates on a specific mock object state.
    *  Instance state is mutated when a stub is invoked as part of a 'system under test' (SUT) exercise phase.
    *
-   *  Returns: Closure-bound mock stub function. Function object also has static accessor (<code>_getState</code>) which
+   *  _Returns_: Closure-bound mock stub function. Function object also has static accessor (<code>_getState</code>) which
    *  returns the internal state of the bound mocked method instance as an object. This can be useful for debugging purposes.
-   *
    **/
   function createStub ( mock ) {
 
@@ -220,8 +203,7 @@
    *
    *  Factory for instantiating a new mocked Member object and associating it with a receiver object (aka a Mock instance).
    *
-   *  Internally the receiver is always a Mock instance.
-   *
+   *  Internally the receiver is _always_ a Mock instance.
    **/
   function createMember ( min, max, receiver ) {
     var mock = new Member( min, max );
@@ -255,8 +237,7 @@
    *  })
    *  </code></pre>
    *
-   *  * See JSON tests or wiki for more in-depth patterns.
-   *
+   *  _See JSON tests or wiki for more in-depth patterns_.
    **/
   function createMock ( mock, definition ) {
 
@@ -334,7 +315,6 @@
    *  If a match is found then the canned data parameters are passed to what is assumed to be callback and it is invoked.
    *
    *  This is mostly used to simulate ajax or event callbacks during an exercise phase.
-   *
    **/
   function exerciseCallbacks ( mock, presentation ) {
     // Execute any callback functions specified with associated args
@@ -363,7 +343,6 @@
    *
    *  If match found then lookup is made for a corresponding 'returns' property. If not found then
    *  catch-all 'return' value is returned, which defaults to 'undefined' (as per spec).
-   *
    **/
   function exerciseReturn ( mock, presentation ) {
     return comparePresentation( mock, presentation, "returns" ) || mock._returns;
@@ -373,14 +352,13 @@
 
   /* [Private]
    *
-   * createException( actual, expected, exceptionType, identifier ) -> Object
+   * createException( actual, expected, exceptionType, identifier ) -> Hash
    *  - actual (Object): The presentation received by the mock interface
    *  - expected (Object): Expectations set on the mock object
    *  - exceptionType (String): Exception type
    *  - identifier (String): Identifier for mock instance
    *
-   * returns Object literal with pertinent information regarding the error caused.
-   *
+   * _returns_: Hash with pertinent information regarding the error caused.
    **/
   function createException ( actual, expected, exceptionType, identifier ) {
 
@@ -414,7 +392,6 @@
    * - method (Mock | Stub): mock object to test
    *
    * Evaluates if amount of times a mock object (method/constructor) has been invoked matches expectations
-   *
    **/
   function verifyInvocations ( mock ) {
     return ( mock._minCalls == null )
@@ -435,7 +412,6 @@
    * - method (Mock | Stub): mock object to test
    *
    * Evaluates if number of parameters passed to mock object falls below / exceeeds expectations
-   *
    **/
   function verifyOverloading ( mock ) {
     return ( ( mock._overload )
@@ -452,7 +428,6 @@
    *  - presentation (Array): Presentation made / to be made to mock object interface
    *
    * Evaluate a single presentation against all mock object interface expectations. Single match equals true.
-   *
    **/
   function verifyPresentation ( mock, presentation ) {
     if ( isCompare() ) {
@@ -490,7 +465,6 @@
    *
    * Evaluate *all* presentations made to mock object interface against all mock interface expectations.
    * Each presentation must match an expectation. If no match and optional error handler passed then error raised.
-   *
    **/
   function verifyInterface ( mock, raise ) {
     // For each presentation to the interface...
@@ -512,7 +486,6 @@
    *
    * Verifies the receiver object (the parent mock object) first, then individual members.
    * Only passes if whole object tree passes, else throws exception (fail fast).
-   *
    **/
   function verifyReceiver ( receiver, raise ) {
     // Verify Self (Constructor)
@@ -533,13 +506,12 @@
     }
   }
 
-  // TEARDOWN
+  // TEARDOWN PHASE functions
 
   /* [Private]
    * resetMock( mock ) -> Boolean
    *
    * Utility method to reset the state of any mock object to before any interaction was recorded.
-   *
    **/
   function resetMockState ( mock ) {
     if ( mock._exceptions ) {
@@ -555,7 +527,6 @@
     *  - mock (Mock): Mock object to reset
     *
     * Resets internal state of the receiver mock object to before any interaction occurred, and any child mock objects associated with it.
-    *
     **/
   function resetMock ( mock ) {
     resetMockState( mock );
@@ -568,7 +539,7 @@
   }
 
   /**
-   * == Mock Object ==
+   * == Mock ==
    * Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
    **/
 
@@ -580,14 +551,12 @@
    *  then just pass Infinity
    *
    *  Prototype for mock objects (constructors, methods & properties).
-   *
    **/
 
-  /** section: Mock Object
+  /** section: Mock
    * class Mock
    *
    *  Main Stub, or mocked method class
-   *
    **/
   function Member ( min, max ) {
     // Default mock behaviours
@@ -617,7 +586,6 @@
      *
      *  #### Example
      *  <pre><code>Mock.expects().method('foo').name('fooBar');</code></pre>
-     *
      **/
     "name": function ( descriptor ) {
       this._id = descriptor;
@@ -634,7 +602,6 @@
      *
      *  #### Example
      *  <pre><code>Mock.expects().method('foo');</code></pre>
-     *
      **/
     "method": function ( name ) {
       // Throw error if collision with mock API
@@ -670,7 +637,6 @@
      *    "returns": "baz",
      *    "data": "stub"
      *  });</code></pre>
-     *
      **/
     "interface": function () {
       // Check for valid input to interface
@@ -716,7 +682,6 @@
      *  #### Example
      *
      *  <pre><code>Mock.method("foo").accepts("bar", "baz");</code></pre>
-     *
      **/
     "accepts": function () {
       this._requires = arguments.length;
@@ -735,7 +700,6 @@
      *
      *  #### Example
      *  <pre><code>Mock.method("foo").accepts('bar').returns('baz');</code></pre>
-     *
      **/
     "returns": function ( obj ) {
       this._returns = obj;
@@ -760,7 +724,6 @@
      *  Verification of presentations to interface will allow 0, 1, or 2 parameters to be passed (though will still test type/value)
      *
      *  _Note_: In the above example, if method overloading has been set to false then the verify phase would only allow presentations of 0 parameters to the mock object interface.
-     *
      **/
     "required": function ( num ) {
       this._requires = num;
@@ -778,7 +741,6 @@
      *
      *  #### Example
      *  <pre><code>Mock.method('foo').accepts('bar', 'baz').overload(false);</code></pre>
-     *
      **/
     "overload": function ( bool ) {
       this._overload = bool;
@@ -803,7 +765,6 @@
      *  // Multiple params
      *  Mock.method('foo').accepts(callback).data(['stub', 'another stub']);
      *  </code></pre>
-     *
      **/
     "data": function () {
       this._data = slice.call( arguments );
@@ -822,7 +783,6 @@
      *  #### Example
      *  <pre><code>Mock.expects().property('foo', 'bar');
      *  console.log( Mock.foo ); // "bar"</code></pre>
-     *
      **/
     "property": function ( prop, val ) {
       if ( hasOwnProperty.call( this._receiver, prop ) ) {
@@ -852,7 +812,6 @@
      *  </code></pre>
      *
      *  _Note_: Can be overwritten if <code>Mock.returns</code> is used after in Mock declaration (or better, in conjunction to override it with <code>Mock.interface</code> for specific use cases)
-     *
      **/
     "chain": function () {
       this._returns = this._receiver;
@@ -870,7 +829,6 @@
      * Mock#reset() -> Mock
      *
      *  Resets the internal state of the mock and any bound child mock objects.
-     *
      **/
     "reset": function () {
       resetMock( this );
@@ -887,8 +845,8 @@
      *    * Verify all sets of parameters passed to interface
      *
      *  Method will bail as any point the verification is false (fail fast), and return <code>false</code>.
+     *  
      *  It will also throw an error if _optional_ <code>raise</code> parameter is passed.
-     *
      **/
     "verify": function ( raise ) {
       // If true and no calls then exclude from further interrogation
@@ -919,7 +877,6 @@
      *  Utility method (well, syntactic sugar) for setting up invocation expectations of 'at least _n_ invocations'.
      *
      *  Recommended to use <code>Mock.expects</code> or <code>Mock.calls</code> instead.
-     *
      **/
     atLeast: function ( num ) {
       this._minCalls = num;
@@ -934,7 +891,6 @@
      *  Utility method (well, syntactic sugar) for setting up invocation expectations of 'no more than _n_ invocations'.
      *
      *  Recommended to use <code>Mock.expects</code> or <code>Mock.calls</code> instead.
-     *
      **/
     noMoreThan: function ( num ) {
       this._maxCalls = num;
@@ -960,7 +916,6 @@
      *  // Set calls on mockmethod
      *  Mock.expects().method('foo').calls(1,5);
      *  </code></pre>
-     *
      **/
     calls: function ( min, max ) {
       this._minCalls = min || this._minCalls;
@@ -977,7 +932,6 @@
      *
      *  #### Example
      *  <pre><code>Mock.expects().method('foo').end(); // returns Mock</code></pre>
-     *
      **/
     end: function () {
       return this._receiver || this;
@@ -1010,9 +964,8 @@
    *      returns: "bar"
    *    }
    *  });
+   *  </code></pre>
    **/
-
-  // Exposed as 'Mock' & 'QMock.Mock'
   function Receiver ( definition ) {
     
     // The stub
@@ -1082,13 +1035,15 @@
 
   // PUBLIC API
 
-  /** section: QMock API
+  /** section: QMock
    * class QMock
    *
    **/
   container.QMock = {
+    /** alias of: Config
+     * QMock.config -> Hash
+     **/
     config: config,
-
     /** alias of: Mock
      * QMock.Mock() -> mock receiver / constructor / method / property object
      **/
@@ -1115,7 +1070,7 @@
     ;;;; assert.expose( createMockFromJSON, "_createMockFromJSON", MockConstructor );
   }*/
 
-  // Oh snap!
+  // Bish bash bosh.
   return true;
 
 // if exports available assume CommonJS
