@@ -1,0 +1,146 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+    "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <title>QMock API documentation | QMock.verifyInterface</title>
+  <meta name="generator" content="PDoc" />
+  
+  <script type="text/javascript" charset="utf-8" src="../../../javascripts/prototype.js"></script>
+  <script type="text/javascript" charset="utf-8" src="../../../javascripts/application.js"></script>
+<script type="text/javascript" charset="utf-8" src="../../../javascripts/tabs.js"></script>
+  <script type="text/javascript" charset="utf-8" src="../../../javascripts/item_index.js"></script>
+  
+  <link type="text/css" rel="stylesheet" charset="utf-8" media="screen, projection" href="../../../stylesheets/api.css" />
+<link type="text/css" rel="stylesheet" charset="utf-8" media="screen, projection" href="../../../stylesheets/pygments.css" />
+  
+  <script type="text/javascript">
+    PDoc.pathPrefix = '../../../';
+  </script>
+</head>
+  <body>
+
+    <div id="sidebar">
+      <ul id="sidebar_tabs" class="sidebar-tabs">
+        <li>
+          <a href="#menu_pane">Menu</a>
+        </li>
+        <li>
+          <a href="#search_pane">Search</a>
+        </li>
+      </ul> <!-- .sidebar-tabs -->
+
+      <form class="search-ribbon">
+        <label>
+          <span class="hidden">Search</span>
+          <input type="text" id="search" size="20" title="Search" />
+        </label>
+      </form>
+      
+      <div class="sidebar-pane scrollable" id="menu_pane">
+        <ul id="api_menu" class="menu-items">
+          
+            <li><div class="menu-item"><a class="section" title="Config section (section)" href="../../../config/">Config section</a></div><ul class="menu-section"><li><div class="menu-item"><a class="namespace" title="Config (namespace)" href="../../../config/config/">Config</a></div></li></ul></li>
+          
+            <li><div class="menu-item"><a class="section" title="Mock section (section)" href="../../../mock/">Mock section</a></div><ul class="menu-section"><li><div class="menu-item"><a class="class" title="Mock (class)" href="../../../mock/mock/">Mock</a></div></li></ul></li>
+          
+            <li><div class="menu-item"><a class="section current-parent" title="QMock section (section)" href="../../../qmock/">QMock section</a></div><ul class="menu-section"><li><div class="menu-item"><a class="class current-parent" title="QMock (class)" href="../../../qmock/qmock/">QMock</a></div><ul><li><div class="menu-item"><a class="class-method" title="QMock.Mock (class method)" href="../../../qmock/qmock/mock/">Mock</a></div></li>
+<li><div class="menu-item"><a class="class-method" title="QMock.is (class method)" href="../../../qmock/qmock/is/">is</a></div></li>
+<li><div class="menu-item"><a class="class-method" title="QMock.isNot (class method)" href="../../../qmock/qmock/isnot/">isNot</a></div></li>
+<li><div class="menu-item"><a class="class-method" title="QMock.resetMock (class method)" href="../../../qmock/qmock/resetmock/">resetMock</a></div></li>
+<li><div class="menu-item"><a class="class-method" title="QMock.testParameters (class method)" href="../../../qmock/qmock/testparameters/">testParameters</a></div></li>
+<li><div class="menu-item"><a class="class-method current" title="QMock.verifyInterface (class method)" href="../../../qmock/qmock/verifyinterface/">verifyInterface</a></div></li>
+<li><div class="menu-item"><a class="class-method" title="QMock.verifyInvocations (class method)" href="../../../qmock/qmock/verifyinvocations/">verifyInvocations</a></div></li>
+<li><div class="menu-item"><a class="class-method" title="QMock.verifyOverloading (class method)" href="../../../qmock/qmock/verifyoverloading/">verifyOverloading</a></div></li>
+<li><div class="menu-item"><a class="class-method" title="QMock.verifyPresentation (class method)" href="../../../qmock/qmock/verifypresentation/">verifyPresentation</a></div></li>
+<li><div class="menu-item"><a class="class-method" title="QMock.verifyReceiver (class method)" href="../../../qmock/qmock/verifyreceiver/">verifyReceiver</a></div></li>
+<li><div class="menu-item"><a class="class-property" title="QMock.config (class property)" href="../../../qmock/qmock/config/">config</a></div></li></ul></li></ul></li>
+          
+        </ul> <!--- #api_menu =-->
+      </div> <!-- .sidebar-pane -->
+      <div class="sidebar-pane" id="search_pane">
+        <ul id="search_results" class="search-results menu-items scrollable"></ul>
+      </div> <!-- .sidebar-pane -->
+    </div> <!-- #sidebar -->
+
+    <div id="page">
+      
+
+      <div id="main" class="page-content">
+        
+
+
+
+
+
+<ul class="breadcrumbs clearfix">
+  <li><a href="../../../">Home</a></li>
+  
+    <li>&rarr; <a title="QMock section (section)" href="../../../qmock/">QMock section</a></li>
+  
+    <li>&rarr; <a title="QMock (class)" href="../../../qmock/qmock/">QMock</a></li>
+  
+    <li>&rarr; <a title="QMock.verifyInterface (class method)" href="../../../qmock/qmock/verifyinterface/">verifyInterface</a></li>
+  
+</ul>
+
+<h2 class="page-title">
+  
+    <span class="type">class method</span> QMock.verifyInterface
+  
+</h2>
+
+
+<div class="section">
+  <div class="section-title">
+  </div> <!-- .section-title -->
+  <div class="section-content">
+    <div class="method-description">
+      
+        <pre class="syntax"><code class="ebnf">QMock.verifyInterface( mock [, raise] ) &rarr; Boolean</code></pre>
+
+      
+
+      <ul>
+<li>mock (Mock | Member): mock object to test</li>
+<li>raise (Function) <em>optional</em>: Function to handle false comparison results</li>
+</ul>
+
+
+<p>Evaluate <em>all</em> presentations made to mock object interface against all mock interface expectations.
+Each presentation must match an expectation. If no match and optional error handler passed then error raised.</p>
+
+      
+      
+
+
+      
+
+    </div>
+  </div> <!-- .section-content -->
+</div> <!-- .section -->
+
+      </div> <!-- #main -->
+      
+      <div id="footer">
+        <div class="content clearfix">
+          
+          <div class="cc clearfix">
+            <span>
+              <img src="http://creativecommons.org/images/public/somerights20.png"
+                style="border-width: 0pt;" alt="Creative Commons License"/>              
+            </span>
+            
+            <p>This work is licensed under a <a rel="license" href="http://creativecommons.org/licenses/by-sa/3.0/">Creative Commons Attribution-Share Alike 3.0 Unported License</a>.</p>
+          </div> <!-- .cc -->
+          
+          <div class="credits">
+            Generated by <a href="http://pdoc.org">PDoc</a>. Uses <a href="http://famfamfam.com/lab/icons/silk/" title="famfamfam.com: Silk Icons">Silk Icons</a> and portions of <a href="http://github.com/280north/aristo/tree/master" title="280north's aristo at master - GitHub">Aristo</a>.
+          </div> <!-- .credits -->
+          
+        </div> <!-- .content -->
+      </div> <!-- #footer -->
+
+    </div> <!-- #page -->
+  </body>
+</html>
