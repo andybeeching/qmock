@@ -6,7 +6,7 @@
 
 	/**
 	 *
-	 * Unit tests for Mock instance interface - asserting against mock API
+	 * Unit tests for Mock instance interface - asserting with mock.verify()
 	 *
 	 */
 
@@ -119,7 +119,6 @@
  	  equals( wizard["custom object"].constructor, Custom, "wizard mock object should have a stubbed property of 'custom object' with a value of (Custom: new Custom)");
 
  	});
-
 
  	test("multiple mocked methods with defined return values", function () {
 
@@ -1249,7 +1248,8 @@
 	  // Expected behaviour would be to conform to the Common JS spec which uses the following
 	  // to determine if two objects are equal (via deepEquals method):
 	  // http://wiki.commonjs.org/wiki/Unit_Testing/1.0
-	  // 7.4. For all other Object pairs, including Array objects, equivalence is determined by having
+	  // ...snip...
+	  // (7.4) For all other Object pairs, including Array objects, equivalence is determined by having
 	  // the same number of owned properties (as verified with Object.prototype.hasOwnProperty.call),
 	  // the same set of keys (although not necessarily the same order), equivalent values for every
 	  // corresponding key, and an identical "prototype" property.
@@ -1970,7 +1970,7 @@
 
     ninja.reset();
 
-    // Test invalid parameter type - (Function: Constructor)
+    // Test invalid parameter value - (Function: Constructor)
 
     ninja.swing('bar');
 
@@ -2434,25 +2434,6 @@
 	  // Mock jQuery
 	  var $ = new Mock ();
 
-	  /* Theoretically *exactly* same API as a Member object */
-	  /* JSON version */
-	  /*
-
-  	  var $ = new Mock({
-
-	      // Constructor config
-	      "accepts": '#foo',
-
-	      // API config
-	      "html": {
-	        accepts:
-	      }
-
-
-      });
-
-    */
-
 	  $.accepts("#foo")
   	  .expects(1)
 	    .method('html')
@@ -2531,6 +2512,282 @@
 	  // Verify
 
 	  ok(jQuery.verify(), "verify() should be true: jQuery-esque chaining is mockable");
+
+	});
+
+	test("mocked constructor with single strict parameter - multiple (*Natives*) expected presentations", function () {
+
+	  expect(12);
+
+    function fn () {}
+
+	  var ninja = new Mock,
+	      re = /foo/;
+	      // expectations
+    	  ninja
+    	    .calls(1)
+  	      .receives(
+    	      {accepts: [ 'foo' ]},
+    	      {accepts: [ 1 ]},
+    	      {accepts: [ true ]},
+    	      {accepts: [ new Date (2010) ]},
+    	      {accepts: [ re ]},
+    	      {accepts: [ fn ]},
+    	      {accepts: [ {foo: 'bar'} ]},
+    	      {accepts: [ ['foo', 1, true] ]},
+    	      {accepts: [ new Custom ]}
+  	      );
+
+    // BAD EXERCISES
+
+    // Test no arguments
+
+    ninja();
+
+    try {
+      ninja.verify();
+      ok(false, "verify() should throw exception when ninja.swing() is passed NO parameters");
+    } catch (exception) {
+      equals(exception.length, 1, "verify() should return 1 exception when ninja.swing() passed NO parameters");
+      equals(exception[0].type, "IncorrectNumberOfArgumentsException", "verify() exception type should be IncorrectNumberOfArgumentsException for NO parameters");
+    }
+
+    ninja.reset();
+
+    // Test invalid parameter value - (Function: Constructor)
+
+    ninja('bar');
+
+    try {
+      ninja.verify();
+      ok(false, "verify() should throw exception when ninja.swing() passed incorrect parameter (String: 'bar')");
+    } catch (exception) {
+      equals(exception.length, 1, "verify() should return 1 exception when swing() passed incorrect parameter (String: 'bar')");
+    }
+
+    ninja.reset();
+
+    // GOOD Exercises
+
+    // Test same parameter type AND expected value [1]
+
+    ninja('foo');
+    ok( ninja.verify(), "verify() should pass after ninja.swing() passed [1] *correct* parameter (String: 'foo')" );
+
+    ninja.reset();
+
+    // Test same parameter type AND expected value [2]
+
+    ninja(1);
+    ok( ninja.verify(), "verify() should pass after ninja.swing() passed [2] *correct* parameter (Number: 1)" );
+
+    ninja.reset();
+
+    // Test same parameter type AND expected value [3]
+
+    ninja(true);
+    ok( ninja.verify(), "verify() should pass after ninja.swing() passed [3] *correct* parameter (Boolean: true)" );
+
+    ninja.reset();
+
+    // Test same parameter type AND expected value [4]
+
+    ninja(new Date (2010));
+    ok( ninja.verify(), "verify() should pass after ninja.swing() passed [4] *correct* parameter (Date: 2010)" );
+
+    ninja.reset();
+
+    // Test same parameter type AND expected value [5]
+
+    ninja(re);
+    ok( ninja.verify(), "verify() should pass after ninja.swing() passed [5] *correct* parameter (RegExp: /foo/)" );
+
+    ninja.reset();
+
+    // Test same parameter type AND expected value [6]
+
+    ninja(fn);
+    ok( ninja.verify(), "verify() should pass after ninja.swing() passed [6] *correct* parameter (Function: functionDeclaration [fn])" );
+
+    ninja.reset();
+
+    // Test same parameter type AND expected value [7]
+
+    ninja({foo: 'bar'});
+    ok( ninja.verify(), "verify() should pass after ninja.swing() passed [7] *correct* parameter (Object: {foo: 'bar'})" );
+
+    ninja.reset();
+
+    // Test same parameter type AND expected value [8]
+
+    ninja(['foo', 1, true]);
+    ok( ninja.verify(), "verify() should pass after ninja.swing() passed [8] *correct* parameter (Array: [foo, 1, true])" );
+
+    ninja.reset();
+
+    // Test same parameter type AND expected value [9]
+
+    ninja(new Custom);
+    ok( ninja.verify(), "verify() should pass after ninja.swing() passed [9] *correct* parameter (Custom: instance)" );
+
+  });
+
+  test("mocked constructor with multiple strict (*Natives*) parameter expectations - all required", function () {
+
+	  expect(6);
+
+	  var ninja = new Mock;
+	  ninja
+	    .calls(1)
+      .accepts(1, "foo", true, null, undefined, {}, [], new Date (2010), new Custom )
+      .required(9)  // This is actually implicit... More interesting is the ability to say *some* are required
+      .overload(false);
+
+	  // Bad Exercise
+
+	  // Test no arguments
+
+	  ninja();
+	  try {
+      ninja.verify();
+      ok(false, "verify() should throw exception when ninja.testMultipleParameters() passed NO parameters");
+    } catch (e) {
+      equals(e[0].type, "IncorrectNumberOfArgumentsException", "verify() exception type should be IncorrectNumberOfArgumentsException");
+    }
+
+	  ninja.reset();
+
+	  // Test too few arguments - method underloading
+
+	  ninja(1, "foo", true, null, undefined, {} );
+	  try {
+	    ninja.verify();
+	    ok(false, "verify() should throw exception when ninja.testMultipleParameters() passed incorrect parameter (Object: [TOO FEW MEMBERS]");
+	  } catch (e) {
+	    equals(e[0].type, "IncorrectNumberOfArgumentsException", "verify() exception type should be IncorrectNumberOfArgumentsException");
+	  }
+
+	  ninja.reset();
+
+	  // Test too many arguments - method overloading
+
+	  ninja(1, "foo", true, null, undefined, {}, [], new Date (2010), new Custom, "bar" );
+	  try {
+	    ninja.verify();
+	    ok(false, "verify() should throw exception when ninja.testMultipleParameters() passed incorrect parameter (Object: [TOO MAN MEMBERS])");
+	  } catch (e) {
+	    equals(e[0].type, "IncorrectNumberOfArgumentsException", "verify() exception type should be IncorrectNumberOfArgumentsException");
+	  }
+
+	  ninja.reset();
+
+	  // Test incorrect arguments - first two switched
+
+	  ninja("foo", 1, true, null, undefined, {}, [], new Date (2010), new Custom );
+    try {
+      ninja.verify();
+	    ok(false, "verify() should throw exception when ninja.testMultipleParameters() passed incorrect parameter (Object: [INCORRECT MEMBERS])");
+    } catch (e) {
+      equals(e.length, 1, "verify() should return an array of 2 exceptions");
+      equals(e[0].type, "IncorrectParameterException", "verify() exception type should be IncorrectParameterException");
+    }
+
+	  ninja.reset();
+
+	  // Good Exercise
+
+	  ninja(1, "foo", true, null, undefined, {}, [], new Date(2010), new Custom );
+	  ok(ninja.verify(), "verify() should be true when ninja.testMultipleParameters() passed correct parameter (Object: [MATCHING MEMBERS])");
+
+	});
+
+	test("mocked method with multiple strict (*Natives*) parameter expectations - all optional", function () {
+
+	  expect(12);
+
+    var samurai = new Mock;
+
+	  samurai
+	    .calls(1)
+      .accepts(1, "foo", true, null, undefined, {}, [], new Date(2010), new Custom )
+      .required(0); // Overwrite implict required of 10 (fn.length). Note comparison object will still match expectation for each member *if* passed
+
+	  // Bad Exercises
+
+	  // Single incorrect argument
+	  samurai("foo");
+		try {
+			samurai.verify();
+		  ok(false, "verify() should throw exception");
+		} catch (e) {
+		  equals(e.length, 1, "verify() should return an array of 1 exceptions");
+			equals(e[0].type, "IncorrectParameterException", "verify() exception type should be IncorrectParameterException");
+		}
+	  samurai.reset();
+
+	  // Some arguments - first two switched around to be incorrect
+
+	  samurai("foo", 1, true, null, undefined, {});
+		try {
+		  samurai.verify();
+		  ok(false, "verify() should throw exception");
+		} catch (e) {
+		  equals(e.length, 1, "verify() should return an array of 1 exceptions");
+		  equals(e[0].type, "IncorrectParameterException", "verify() exception type should be IncorrectParameterException");
+		}
+
+	  samurai.reset();
+
+	  // All arguments - last two switched around to be incorrect
+
+	  samurai("foo", 1, true, null, undefined, {}, [], new Custom, new Date(2010))
+		try {
+		  samurai.verify();
+		  ok(false, "verify() should throw exception");
+		} catch (e) {
+		  equals(e.length, 1, "verify() should return an array of 1 exceptions");
+		  equals(e[0].type, "IncorrectParameterException", "verify() exception type should be IncorrectParameterException");
+		}
+
+	  samurai.reset();
+
+	  // Too many arguments - method overloading - first two switched to be incorrect - overloaded arguments should be ignored
+
+	  samurai("foo", 1, true, null, undefined, {}, [], new Custom, new Date(2010), "bar" );
+		try {
+		  samurai.verify();
+		  ok(false, "verify() should throw exception");
+		} catch (e) {
+		  equals(e.length, 1, "verify() should return an array of 2 exceptions");
+		  equals(e[0].type, "IncorrectParameterException", "verify() exception type should be IncorrectParameterException");
+		}
+
+	  samurai.reset();
+
+	  // Good Exercises
+
+	  // No Arguments
+	  samurai();
+	  ok(samurai.verify(), "verify() should be true");
+
+	  samurai.reset();
+
+	  // Some Arguments
+	  samurai(1, "foo", true, null, undefined, {});
+	  ok(samurai.verify(), "verify() should be true");
+
+	  samurai.reset();
+
+	  // All Arguments - test false positive
+
+	  samurai(1, "foo", true, null, undefined, {}, [], new Date (2010), new Custom );
+	  ok(samurai.verify(), "verify() should be true");
+
+	  samurai.reset();
+
+	  // Overloaded method call
+	  samurai(1, "foo", true, null, undefined, {}, [], new Date (2010), new Custom, "bar", "baz" );
+	  ok(samurai.verify(), "verify() should be true");
 
 	});
 
@@ -2630,7 +2887,100 @@
 
 	});
 
+	test("mocked constructor with multiple strict parameter (String: 'foo' | 'far' ) and paired return value (String: 'bar' | 'baz' )", function () {
+
+    expect(7);
+	  var ninja = new Mock;
+	  ninja
+	    .calls(1)
+	    .returns(undefined)
+      .receives(
+        {accepts: ['foo'], returns: 'bar'}, // Presentation [1]
+        {accepts: ['far'], returns: 'baz'} // Presentation [1]
+      )
+      .required(0);
+
+	  // Bad Exercises
+	  // No argument type - should just return 'global' / default undefined
+	  equals( ninja(), undefined, "ninja.swing() should return 'undefined' when called with NO parameter");
+
+	  ninja.reset();
+
+	  // Argument of right type but wrong value
+	  ninja("baz");
+	  try {
+		  ninja.verify();
+		  ok(false, "verify() should throw exception when passed parameter (String: 'baz')");
+		} catch (e) {
+		  equals(e.length, 1, "verify() should return an array of 1 exceptions with Parameter (String: 'baz')");
+		  equals(e[0].type, "IncorrectParameterException", "verify() exception type should be IncorrectParameterException");
+		}
+
+	  ninja.reset();
+
+	  // Argument of right type and matching value [1]
+	  equals( ninja("foo") , "bar", "ninja.swing() should return (String: 'bar') when passed parameter (String: 'foo')");
+	  ok(ninja.verify(), "verify() should be true");
+
+	  ninja.reset();
+	  // Argument of right type and matching value [2]
+	  equals( ninja("far") , "baz", "ninja.swing() should return (String: 'baz') when passed parameter (String: 'far')");
+	  ok(ninja.verify(), "verify() should be true");
+
+	});
+
+	test("mocked constructor with callback arguments", function () {
+
+	  expect(2);
+
+	  // Test multiple callbacks
+
+	  var $ = new Mock;
+
+    var success = false;
+
+    function onSuccess ( data ) {
+      success = data.foo;
+    }
+
+    var fail = false;
+
+    function onFail ( data ) {
+      fail = data.baz;
+    }
+
+    // Suggested syntax for 'cleaner' callbacks
+		$.calls(1)
+	    .receives(
+	      {accepts: ['path/to/resource', onSuccess], data: [{foo: true}]},
+	      {accepts: ['path/to/resource', onFail], data: [{baz: true}]}
+	    );
+
+		// Exercise
+		// Correct Usage
+
+		var called = false;
+		$('path/to/resource', onSuccess);
+		equals(success, true, "var success should be set to true when $.get() passed (String: url, Function: onSuccess)");
+
+		$('path/to/resource', onFail);
+    equals(fail, true, "var fail should be set to true when $.get() passed (String: url, Function: onFail)");
+
+	});
+
 	module( "QMock: API" );
+
+	test("Mock.end() instance method", function () {
+
+	  expect(1);
+
+	  var mock = new Mock;
+
+	  var foo = mock.expects().method('foo').end();
+
+	  ok((mock === foo), "mock.end() should return the receiver object mock");
+
+	});
 
 	test("[0.1] Constructor and mockedMember object API backward compatibility", function () {
 

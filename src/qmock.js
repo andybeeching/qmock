@@ -4,9 +4,9 @@
  *
  *  Copyright (c) 2007-2010, Andy Beeching <andybeeching at gmail dot com>
  *  Dual licensed under the MIT and GPL Version 3 licenses.
- *  
+ *
  *  jslint laxbreak: true, newcap: true
- *  
+ *
  **/
 
 /**
@@ -23,7 +23,7 @@
        * == Config ==
        * Configuration settings for QMock - can be modified during runtime. Exposed as <code>QMock.config</code>.
        **/
-       
+
       /** section: Config
        * Config
        *  _Note_: This is not a global object, but simply a separate documentation section for QMock config options
@@ -845,7 +845,7 @@
      *    * Verify all sets of parameters passed to interface
      *
      *  Method will bail as any point the verification is false (fail fast), and return <code>false</code>.
-     *  
+     *
      *  It will also throw an error if _optional_ <code>raise</code> parameter is passed.
      **/
     "verify": function ( raise ) {
@@ -942,7 +942,7 @@
   // Backward compatibility for QMock v0.1/0.2 API
   /**alias of: Mock#receives(), deprecated
    * Mock#interface() -> Mock
-   *  
+   *
    *  See Mock#receives for usage.
    **/
   Member.prototype.interface = Member.prototype.receives;
@@ -973,7 +973,7 @@
    *  </code></pre>
    **/
   function Receiver ( definition ) {
-    
+
     // The stub
     function mock () {
       // Update Receiver instance state and return itself or explicit value
