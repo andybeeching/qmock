@@ -1,4 +1,3 @@
-// Closure scoped aliases to internal qMock functions
 (function QMockTests ( undefined ) {
 
 	// Stub to test support for user-defined objects
@@ -8,27 +7,40 @@
 	 *
 	 * Unit tests for Mock instance interface - asserting with mock.verify()
 	 *
-	 */
-
-	//module( "qMock Internal Integration Test" );
-
-	/*
-
-  	test("createMockFromJSON()", function() {
-
-  	});
-
-  */
-
-	/**
-	 * All tests follow this simple process:
+	 *  All tests generally follow this simple process:
 	 *
-	 *  1. Setup: Instantiate mocks and set expected interactions upon them. Sometimes located in the 'setup' phase of the testrunner before each test block.
+	 *  1. Setup: Instantiate mocks and set expected interactions upon them. 
+	 *      Sometimes located in the 'setup' phase of the testrunner before each test block.
 	 *  2. Exercise: Execute the relevant collaborator code to interact with the mock object.
 	 *  3. Verify: Call the verify method on each mock object to establish if it was interacted with correctly.
-	 *  4. Reset: [Optional] Call reset method on the mock to return it's internal state to the end of the setup phase. Sometimes located in the 'teardown' phase of the testrunner after each test phase.
+	 *  4. Reset: [Optional] Call reset method on the mock to return it's internal state to the end of the setup phase. 
+	 *    Sometimes located in the 'teardown' phase of the testrunner after each test case.
 	 *
 	 */
+	module( "QMock: Mock object API");
+	test("Mock.end() instance method", function () {
+
+	  expect(1);
+
+	  var mock = new Mock;
+
+	  var foo = mock.expects().method('foo').end();
+
+	  ok((mock === foo), "mock.end() should return the receiver object mock");
+
+	});
+	
+	/**
+	 *  Following tests (until QMock API test groups) are using Mock.verify() to assert 
+	 *  rather than inspecting the internal state of each mock instance (most of the methods 
+	 *  on mock objects tend to mutate this to set up expectations, verify, or reset the state)
+	 *  
+	 *  This is slightly against the TDD way of atomic method assertion (poke / assert), 
+	 *  instead relying on verify() to function correctly, but the approach has been deemed 
+	 *  optimal since there would be a lot of duplication if separate tests were written against 
+	 *  the methods and then every permutation of expectations that might be desired.
+	 */
+	 
 	module( "QMock: Stubbed properties & methods" );
 
  	test("mock with multiple stubbed properties", function () {
@@ -286,7 +298,7 @@
 
 	  // Test _getState for mockedMembers.
 	  var state = ninja.swing._getState();
-	  equals(state._calls, 0, "verify() should be true. Result");
+	  equals(state._called, 0, "verify() should be true. Result");
 
 	  // Bad Exercise - no swings
     try {
@@ -2969,17 +2981,24 @@
 	});
 
 	module( "QMock: API" );
-
-	test("Mock.end() instance method", function () {
-
-	  expect(1);
-
-	  var mock = new Mock;
-
-	  var foo = mock.expects().method('foo').end();
-
-	  ok((mock === foo), "mock.end() should return the receiver object mock");
-
+	
+	test("QMock.create() factory method", function () {
+	  
+	  expect(4);
+	  
+	  // Test two instances are NOT equal
+	  var a = QMock.create(),
+	      b = QMock.create();
+	  
+	  // Mutate the state - let's just set a custom property on the QMock receiver
+	  a.isA = true;
+	  b.isB = true;
+	  
+	  ok( (a !== b), "QMock 'a' is NOT the same instance as QMock 'b'" );
+	  ok( (typeof a.isB === "undefined"),"QMock 'a' does not have a property 'isB' set" );
+	  ok( (typeof b.isA === "undefined"),"QMock 'b' does not have a property 'isA' set" );
+	  ok( a.isA === b.isB, "QMock 'a' and QMock 'b' DO have custom properties set and equal to each other (Boolean: true)" )
+	  
 	});
 
 	test("[0.1] Constructor and mockedMember object API backward compatibility", function () {
@@ -3072,5 +3091,21 @@
 	  ok(mock.verify(), "verify() should pass if foo called a random amount of times between a specified range");
 
 	});
+
+	/**
+	 *
+	 * Integration tests for Mock controller logic - asserting with mock.verify()
+	 *
+	 *  Bit meta, using QMock to mock, er, a Mock instance.
+	 *
+	 */
+
+	module('QMock: Integration tests');
+
+	test('_createMock private factory method', function () {
+
+    
+    
+	})
 
 })(); // Go Go Inspector Gadget!
