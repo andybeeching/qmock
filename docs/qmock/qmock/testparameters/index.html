@@ -45,6 +45,7 @@
             <li><div class="menu-item"><a class="section" title="Mock section (section)" href="../../../mock/">Mock section</a></div><ul class="menu-section"><li><div class="menu-item"><a class="class" title="Mock (class)" href="../../../mock/mock/">Mock</a></div></li></ul></li>
           
             <li><div class="menu-item"><a class="section current-parent" title="QMock section (section)" href="../../../qmock/">QMock section</a></div><ul class="menu-section"><li><div class="menu-item"><a class="class current-parent" title="QMock (class)" href="../../../qmock/qmock/">QMock</a></div><ul><li><div class="menu-item"><a class="class-method" title="QMock.Mock (class method)" href="../../../qmock/qmock/mock/">Mock</a></div></li>
+<li><div class="menu-item"><a class="class-method" title="QMock.create (class method)" href="../../../qmock/qmock/create/">create</a></div></li>
 <li><div class="menu-item"><a class="class-method" title="QMock.is (class method)" href="../../../qmock/qmock/is/">is</a></div></li>
 <li><div class="menu-item"><a class="class-method" title="QMock.isNot (class method)" href="../../../qmock/qmock/isnot/">isNot</a></div></li>
 <li><div class="menu-item"><a class="class-method" title="QMock.resetMock (class method)" href="../../../qmock/qmock/resetmock/">resetMock</a></div></li>
@@ -102,10 +103,12 @@
       
 
       <ul>
-<li>method (Mock | Member): Mock object to which the presentation is / would be passed</li>
+<li>method (Mock | Member): Mock object to which the presentation is / would
+be passed</li>
 <li>presentation (Array): Array representing a method/constructor interface
 'presentation' to test (arguments collection or parameter list)</li>
-<li>property (String) <em>optional</em>: Optional key used to lookup associated data held on an expectation object</li>
+<li>property (String) <em>optional</em>: Optional key used to lookup associated data
+held on an expectation object</li>
 </ul>
 
 
@@ -113,9 +116,11 @@
 on any matching expectation objects and return the correlating value.</p>
 
 <p>For example, internally QMock uses the method to return canned stubbed responses
-during an exercise phase. The method can be used as standalone to test the Stub interface.</p>
+during an exercise phase. The method can be used as standalone to test the Stub
+interface.</p>
 
-<p>If no property parameter passed then a Boolean value is returned depending on match success</p>
+<p>If no property parameter passed then a Boolean value is returned depending on
+match success.</p>
 
 <h4>Example</h4>
 

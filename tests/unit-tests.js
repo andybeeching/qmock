@@ -14,7 +14,7 @@
 	 *  2. Exercise: Execute the relevant collaborator code to interact with the mock object.
 	 *  3. Verify: Call the verify method on each mock object to establish if it was interacted with correctly.
 	 *  4. Reset: [Optional] Call reset method on the mock to return it's internal state to the end of the setup phase. 
-	 *    Sometimes located in the 'teardown' phase of the testrunner after each test case.
+	 *      Sometimes located in the 'teardown' phase of the testrunner after each test case.
 	 *
 	 */
 	module( "QMock: Mock object API");

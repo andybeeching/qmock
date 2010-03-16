@@ -1,12 +1,15 @@
 if (!window.PDoc) window.PDoc = {};
 PDoc.elements = {
   'QMock section': { 'name': 'QMock section', 'type': 'section', 'path': 'qmock/' },
+'QMock.create': { 'name': 'QMock.create', 'type': 'class method', 'path': 'qmock/qmock/create/' },
 'Config section': { 'name': 'Config section', 'type': 'section', 'path': 'config/' },
 'Config': { 'name': 'Config', 'type': 'namespace', 'path': 'config/config/' },
+'Config.failFast': { 'name': 'Config.failFast', 'type': 'class property', 'path': 'config/config/failfast/' },
 'Config.compare': { 'name': 'Config.compare', 'type': 'class property', 'path': 'config/config/compare/' },
 'QMock.is': { 'name': 'QMock.is', 'type': 'class method', 'path': 'qmock/qmock/is/' },
 'QMock.isNot': { 'name': 'QMock.isNot', 'type': 'class method', 'path': 'qmock/qmock/isnot/' },
 'QMock.testParameters': { 'name': 'QMock.testParameters', 'type': 'class method', 'path': 'qmock/qmock/testparameters/' },
+'Mock#_getState': { 'name': 'Mock#_getState', 'type': 'instance method', 'path': 'mock/mock/prototype/_getstate/' },
 'QMock.verifyInvocations': { 'name': 'QMock.verifyInvocations', 'type': 'class method', 'path': 'qmock/qmock/verifyinvocations/' },
 'QMock.verifyOverloading': { 'name': 'QMock.verifyOverloading', 'type': 'class method', 'path': 'qmock/qmock/verifyoverloading/' },
 'QMock.verifyPresentation': { 'name': 'QMock.verifyPresentation', 'type': 'class method', 'path': 'qmock/qmock/verifypresentation/' },
@@ -34,6 +37,7 @@ PDoc.elements = {
 'Mock#interface': { 'name': 'Mock#interface', 'type': 'instance method', 'path': 'mock/mock/prototype/interface/' },
 'new Mock': { 'name': 'new Mock', 'type': 'constructor', 'path': 'mock/mock/new/' },
 'Mock#expects': { 'name': 'Mock#expects', 'type': 'instance method', 'path': 'mock/mock/prototype/expects/' },
+'Mock#_getExceptions': { 'name': 'Mock#_getExceptions', 'type': 'instance method', 'path': 'mock/mock/prototype/_getexceptions/' },
 'QMock': { 'name': 'QMock', 'type': 'class', 'path': 'qmock/qmock/' },
 'QMock.config': { 'name': 'QMock.config', 'type': 'class property', 'path': 'qmock/qmock/config/' },
 'QMock.Mock': { 'name': 'QMock.Mock', 'type': 'class method', 'path': 'qmock/qmock/mock/' }
