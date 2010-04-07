@@ -5,22 +5,25 @@
     	<title>Extended QMock Unit Tests (using Assay.compare)</title>
     	<link rel="stylesheet" href="../../vendor/qunit/qunit/qunit.css" />
     	<!-- Test Runner -->
-        <script type="text/javascript" src="../../vendor/qunit/qunit/qunit.js"></script>
-		<!-- Assay (http://www.github.com/andybeeching/assay) -->
-		<script type="text/javascript" src="../../vendor/assay/src/assay.js"></script>
+      <script type="text/javascript" src="../../vendor/qunit/qunit/qunit.js"></script>
+		  <!-- Assay (http://www.github.com/andybeeching/assay) -->
+		  <script type="text/javascript" src="../../vendor/assay/src/assay.js"></script>
     	<!-- QMock -->
-        <script type="text/javascript" src="../../src/qmock.js"></script>
-		<!-- configure QMock -->
-        <script type="text/javascript">
+      <script type="text/javascript" src="../../src/qmock.js"></script>
+		  <!-- configure QMock -->
+      <script type="text/javascript">
 			
 			// Set Assay.compare as comparison routine
 			// You would normally do this inside of the tests.js file
 			// But in this instance it is shared so as to test compatibility with many testrunners
 			QMock.compare = Assay.compare;
 			
-		</script>
+			// Set to 'fail fast' to test error creation
+			QMock.config.failSlow = false;
+
+		  </script>
     	<!-- qMock Unit Tests -->
-        <script type="text/javascript" src="../unit-tests.js"></script>
+      <script type="text/javascript" src="../unit-tests.js"></script>
     </head>
 
 	<body id="body">

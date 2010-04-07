@@ -52,9 +52,9 @@
 <li><div class="menu-item"><a class="instance-method" title="Mock#data (instance method)" href="../../../mock/mock/prototype/data/">data</a></div></li>
 <li><div class="menu-item"><a class="instance-method" title="Mock#end (instance method)" href="../../../mock/mock/prototype/end/">end</a></div></li>
 <li><div class="menu-item"><a class="instance-method" title="Mock#expects (instance method)" href="../../../mock/mock/prototype/expects/">expects</a></div></li>
+<li><div class="menu-item"><a class="instance-method" title="Mock#id (instance method)" href="../../../mock/mock/prototype/id/">id</a></div></li>
 <li><div class="menu-item"><a class="instance-method deprecated" title="Mock#interface (instance method)" href="../../../mock/mock/prototype/interface/">interface</a></div></li>
 <li><div class="menu-item"><a class="instance-method" title="Mock#method (instance method)" href="../../../mock/mock/prototype/method/">method</a></div></li>
-<li><div class="menu-item"><a class="instance-method" title="Mock#name (instance method)" href="../../../mock/mock/prototype/name/">name</a></div></li>
 <li><div class="menu-item"><a class="instance-method deprecated" title="Mock#noMoreThan (instance method)" href="../../../mock/mock/prototype/nomorethan/">noMoreThan</a></div></li>
 <li><div class="menu-item"><a class="instance-method" title="Mock#overload (instance method)" href="../../../mock/mock/prototype/overload/">overload</a></div></li>
 <li><div class="menu-item"><a class="instance-method" title="Mock#property (instance method)" href="../../../mock/mock/prototype/property/">property</a></div></li>
@@ -124,9 +124,10 @@
 
       
 
-      <p>Constructor for mock receiver, methods and properties. The return object is a
-function that can act as a namespace object (aka a 'receiver'), or as a
-mocked function / constructor with expectations, or both (e.g. jQuery $).</p>
+      <p>Constructor for mock receiver, methods and properties. The return
+object is a function that can act as a namespace object (aka a
+'receiver'), or as a mocked function / constructor with expectations,
+or both (e.g. jQuery $).</p>
 
 <h4>Example</h4>
 
@@ -136,11 +137,24 @@ var ninja = new Mock();
 ninja.expects(1).method('foo').returns('bar');
 
 // Via definition map
-var ninja = new Mock({
+ninja = new Mock({
+  // method
   "foo": {
-    returns: "bar"
+    "id"      : "Descriptor / Identifier"
+    "accepts"   : "bar",
+    "receives"  : {"accepts": "foo", data: "stub", returns: "bar"}
+    "returns"   : "baz",
+    "required"  : 1,
+    "overload"  : true,
+    "data"      : "response",
+    "chain"     : true // arg not used, readability only
+    "calls"     : 1
+  },
+  // property
+  "bar": {
+    "value": "stub"
   }
-});
+})
 </code></pre>
 
 
