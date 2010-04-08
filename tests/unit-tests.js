@@ -20,7 +20,7 @@
 
 	module( "QMock: Mock object API");
 
-	test("Mock.end() instance method", function () {
+	test("Mock.end() [utility] instance method", function () {
 
 	  expect(1);
 
@@ -31,7 +31,7 @@
 
 	});
 
-	test("Mock.id() instance method", function () {
+	test("Mock.id() [utility] instance method", function () {
 
 	  expect(1);
 
@@ -41,6 +41,20 @@
 	  equals(foo._id, "bar", "mock should have the descriptor 'bar'");
 
 	});
+
+	/*test("Mock.excise() [utility] instance method", function () {
+
+	  var mock = new Mock;
+
+	  mock.excise();
+	  debugger;
+	  for (var key in Mock) {
+	    if ( !/_/.test( key ) & mock.hasOwnProperty( key ) ) {
+	      equals( mock[ key ], undefined, "mock should not have the property '" + key + "' associated with it" );
+	    }
+	  }
+
+	});*/
 
 
 	/**
@@ -54,7 +68,7 @@
 	 *  the methods and then every permutation of expectations that might be desired.
 	 */
 
-	module( "QMock: Stubbed properties & methods" );
+	module( "QMock: Mock behaviour (properties & methods)" );
 
  	test("mock with multiple stubbed properties", function () {
 
@@ -196,7 +210,7 @@
 
  	});
 
-	module( "QMock: Method Invocation expectations" );
+	module( "QMock: Mock behaviour (invocation expectations)" );
 
 	test("mocked method with explicit invocation call expectation", function () {
 
@@ -427,7 +441,7 @@
 
 	});
 
-	module( "QMock: Parameter expectations" );
+	module( "QMock: Mock behaviour (parameter expectations)" );
 
   test("mocked method with single strict (String: 'foo') parameter expectation", function () {
 
@@ -2234,7 +2248,7 @@
 
 	});
 
-	module( "QMock: Return value behaviours" );
+	module( "QMock: Mock behaviour (return values)" );
 
 	test("mocked method with single strict parameter (String: 'foo') and paired return value (String: 'bar')", function () {
 
@@ -2319,7 +2333,7 @@
 
 	});
 
-	module( "QMock: Ajax behaviours" );
+	module( "QMock: Mock behaviour (ajax)" );
 
 	test("mocked method with callback arguments", function () {
 
@@ -2409,7 +2423,7 @@
 
 	});
 
-	module( "QMock: Constructor expectations" );
+	module( "QMock: Mock behaviour (constructors)" );
 
 	test("mocked constructor with explicit invocation call expectation", function () {
 
@@ -2993,13 +3007,13 @@
 
 	});
 
-	module( "QMock: API" );
+	module( "QMock: Public API" );
 
-	test("QMock.config.failSlow setting", function () {
+	test("QMock.config.failslow setting", function () {
 
 	  expect(2);
 
-	  // By default set to 'fail slow'
+	  // By default QMock instance is set to 'fail slow'
 	  var app = QMock.create(),
 	      mock = new app.Mock;
 
@@ -3016,6 +3030,17 @@
 
 	test("QMock.config.compare setting", function () {
 
+    expect(1);
+
+    function stub () {}
+
+    // Private QMock instance
+    var app = QMock.create();
+
+    app.config.compare = stub;
+
+    equals(app.config.compare, stub, "Qmock instances should allow the setting of their compare configuration property")
+
 	})
 
 	test("QMock.create() factory method", function () {
@@ -3031,11 +3056,95 @@
 	  b.isB = true;
 
 	  ok( (a !== b), "QMock 'a' is NOT the same instance as QMock 'b'" );
-	  ok( (typeof a.isB === "undefined"),"QMock 'a' does not have a property 'isB' set" );
-	  ok( (typeof b.isA === "undefined"),"QMock 'b' does not have a property 'isA' set" );
+	  ok( (typeof a.isB === "undefined"), "QMock 'a' does not have a property 'isB' set" );
+	  ok( (typeof b.isA === "undefined"), "QMock 'b' does not have a property 'isA' set" );
 	  ok( a.isA === b.isB, "QMock 'a' and QMock 'b' DO have custom properties set and are equal to each other (Boolean: true)" )
 
 	});
+
+	test("QMock.utils.is() utility method", function () {
+
+	  var SUT = QMock.utils.is;
+
+	  equals( SUT(1, "Number"), true, "QMock.utils.is() should return true for (Number: 1, String: 'Number')");
+	  equals( SUT("foo", "String"), true, "QMock.utils.is() should return true for (Number: 1, String: 'String')");
+	  equals( SUT(true, "Boolean"), true, "QMock.utils.is() should return true for (Number: 1, String: 'Boolean')");
+	  equals( SUT([], "Array"), true, "QMock.utils.is() should return true for (Array: [], String: 'Array')");
+	  equals( SUT({}, "Object"), true, "QMock.utils.is() should return true for (Object: {}, String: 'Object')");
+	  equals( SUT(new Date, "Date"), true, "QMock.utils.is() should return true for (Date: new, String: 'Date')");
+	  equals( SUT(new RegExp, "RegExp"), true, "QMock.utils.is() should return true for (RegExp: new, String: 'RegExp')");
+	  equals( SUT(function () {}, "Function"), true, "QMock.utils.is() should return true for (Function: new, String: 'Function')");
+
+	  // Try some false positives
+	  equals( SUT("1", "Number"), false, "QMock.utils.is() should return false for (String: '1', String: 'Number')");
+	  equals( SUT("", "String"), true, "QMock.utils.is() should return true for (String: '', String: 'String')");
+	  equals( SUT(false, "Boolean"), true, "QMock.utils.is() should return true for (Boolean: false, String: 'Boolean')");
+	  equals( SUT(0, "String"), false, "QMock.utils.is() should return false for (Number: 0, String: 'String')");
+    equals( SUT(true, "String"), false, "QMock.utils.is() should return false for (Boolean: true, String: 'String')");
+
+  });
+
+  test("QMock.Utils.verify() utility method", function () {
+
+    var mock = new Mock;
+
+    // Setup
+    mock.accepts("foo").calls(1);
+
+    // Exercise / Verify / Reset
+    mock();
+    equals( QMock.utils.verify(mock), false, "QMock.utils.verify() should return false when mock NOT passed (String: 'foo')")
+    mock.reset();
+
+    mock("foo");
+    equals( QMock.utils.verify(mock), true, "QMock.utils.verify() should return true when mock passed (String: 'foo')")
+    mock.reset();
+
+
+    mock("foo");
+    mock("foo");
+    equals( QMock.utils.verify(mock), false, "QMock.utils.verify() should return false when mock invoked too many times")
+    mock.reset();
+
+  });
+
+  test("QMock.Utils.reset() utility method", function () {
+
+    var mock = new Mock;
+
+    // Setup
+    mock.accepts("foo").calls(1);
+
+    // Exercise
+    mock("foo");
+
+    // Time of writing this info on standalone mocks pseudo-private
+    // Check state was updated
+    equals( mock._called, 1, "mock should have 1 invocation registered");
+    equals( mock._received.length, 1, "mock should have one presentation to 'foo' interface registered");
+
+    // Reset
+    QMock.utils.reset(mock);
+    // Check state has been reset
+    equals( mock._called, 0, "mock should have 0 invocations registered");
+    equals( mock._received.length, 0, "mock should have NO presentations to 'foo' interface registered");
+
+  });
+
+  test("QMock.Utils.test() utility method", function () {
+
+    var mock = new Mock;
+
+    // Setup
+    mock.expects().method("foo").accepts("bar").receives({accepts:["buz"], returns:"fuz"});
+
+    // Test
+    equals( QMock.utils.test( mock.foo, ["bar"]), true, "QMock.utils.test() should return true with (Mock: instance, Array: ['bar'])");
+    equals( QMock.utils.test( mock.foo, ["baz"]), false, "QMock.utils.test() should return false with (Mock: instance, Array: ['baz'])");
+    equals( QMock.utils.test( mock.foo, ["bar"], "returns"), undefined, "QMock.utils.test() should return true with (Mock: instance, Array: ['foo'], String: 'returns')");
+    equals( QMock.utils.test( mock.foo, ["buz"], "returns"), "fuz", "QMock.utils.test() should return true with (Mock: instance, Array: ['buz']), String: 'returns'");
+
+  });
 
 	test("[0.1] Constructor and mockedMember object API backward compatibility", function () {
 
@@ -3150,10 +3259,7 @@
             mock[ k ].reset(); // reset for mock constructor test
           }
         }
-      } catch (e) {
-        var test = e;
-        console.error(e);
-      }
+      } catch (e) {}
     }
 
     // Mock a mock object interface (as in an instantiated mock)
@@ -3164,7 +3270,6 @@
     var mock = {
 
       "name": (function(fn) {
-        debugger;
         return fn
           .id("mock.name")
           .calls(1)

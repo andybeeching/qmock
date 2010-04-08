@@ -33,20 +33,15 @@
    *  <pre><code>QMock.create(); // Object (API)</code></pre>
    **/
   function createQMock () {
-    /**
-     * == Config ==
-     *  Configuration settings for QMock - can be modified during runtime.
-     *  Exposed as <code>QMock.config</code>.
-     **/
 
-    /** section: Config
-     * Config
-     *  _Note_: This is not a global object, but simply a separate
-     *  documentation section for QMock config options
+    /**
+     * QMock.config
+     *  Configuration settings for QMock - can be modified during runtime.
      **/
     var config = {
+
       /**
-       * Config.failSlow -> true | Boolean
+       * QMock.config.failslow -> true | Boolean
        *
        *  Allows a developer to specify whether errors built up during a
        *  verify phase should be thrown or suppressed (by default set to
@@ -65,11 +60,12 @@
        *  to see which exceptions were thrown, and inspect their properties.
        *
        *  #### Example
-       *  <pre><code>QMock.failSlow = true;</code></pre>
+       *  <pre><code>QMock.failslow = true;</code></pre>
        **/
-      failSlow: true,
+      failslow: true,
+
       /**
-       * Config.compare -> false | Function
+       * QMock.config.compare -> false | Function
        *
        *  Pointer to comparison method used internally by QMock, and by
        *  <code>QMock.comparePresentation</code>.
@@ -86,7 +82,7 @@
     };
 
     /**
-     * QMock.is( nativeType, obj ) -> Boolean
+     * QMock.utils.is( nativeType, obj ) -> Boolean
      *  - obj (Object): Object to test
      *  - nativeType (String): Native type to test object against
      *
@@ -104,50 +100,62 @@
     }
 
     /**
-     * QMock.isNot( nativeType, obj ) -> Boolean
-     *  - nativeType (String): Native type to test object against
-     *  - obj (Object): Object to test
-     *
-     *  Inverse of QMock.Utils.is(), see notes for more details.
-     *
-     *  #### Example
-     *  <pre><code>QMock.Utils.is( "foo", "Number"); // true </code></pre>
-     **/
-    function isNot () {
-      return !is.apply( null, arguments );
-    }
-
-    /**
-     * QMock.testParameters( presentation, method[, property] ) -> Boolean | Object
-     *  - method (Mock | Member): Mock object to which the presentation
+     * QMock.utils.test( presentation, method[, prop] ) -> Boolean | Object | undefined
+     *  - method (Mock): Mock object to which the presentation
      *  is / would be passed
-     *  - presentation (Array): Array representing a method/constructor interface
-     *  'presentation' to test (arguments collection or parameter list)
-     *  - property (String) _optional_: Optional key used to lookup associated
+     *  - presentation (Array): Array representing a method/constructor
+     *  interface 'presentation' to test (arguments collection or parameter
+     *  list)
+     *  - prop (String) _optional_: Optional key used to lookup associated
      *  data held on an expectation object
      *
-     *  returns If optional property name is passed then will use that as key
-     *  on any matching expectation objects and return the correlating value.
+     *  Utility method for testing a known parameter list against a mock's
+     *  expected parameters.
      *
-     *  For example, internally QMock uses the method to return canned stubbed
+     *  Can also be used to retrieve associated metadata from an Expectation
+     *  instance.
+     *
+     *  #### Returns
+     *
+     *  * If optional property name is passed then will use that as key
+     *  on any matching expectation objects and return the correlating value.
+     *  e.g. Internally QMock uses the method to return canned stubbed
      *  responses during an exercise phase. The method can be used as
      *  standalone to test the Stub interface.
      *
-     *  If no property parameter passed then a Boolean value is returned
+     *  * If no property parameter passed then a Boolean value is returned
      *  depending on match success.
      *
      *  #### Example
-     *  <pre><code>comparePresentation(["foo"], new Member, "returns");</code></pre>
+     *  <pre><code>var mock = new Mock;
+     *  mock.accepts("bar");
+     *
+     *  // Test - Boolean
+     *  QMock.utils.test(mock, ["foo"]) // true;
+     *  QMock.utils.test(mock, ["bar"]) // false;
+     *
+     *  // Augment
+     *  mock.receives({accepts:"baz", returns:"fuz"});
+     *
+     *  // Test
+     *  QMock.utils.test(mock, ["foo"], "returns") // undefined;
+     *  QMock.utils.test(mock, ["baz"], "returns") // "fuz";
+     *
+     *  </code></pre>
      **/
-    function comparePresentation ( mock, presentation, property ) {
+    function comparePresentation ( mock, presentation, prop ) {
       // Check dependencies
       if ( isCompare() ) {
+        // ensure operating on mock internal state
+        if( mock._getState ) {
+          mock = mock._getState();
+        };
         // Dependency available, let's roll
         for ( var result = false, i = 0, len = mock._expected.length; i < len; i++ ) {
           // If match found against presentation return bound object (or self if chained)
           if ( config.compare( presentation, mock._expected[ i ].accepts ) ) {
-            result = ( property )
-              ? mock._expected[ i ][ property ]
+            result = ( prop )
+              ? mock._expected[ i ][ prop ] || mock[ "_" + prop ]
               : true;
             break;
           }
@@ -201,7 +209,7 @@
      *  <pre><code>normaliseToArray( 'foo' ); // ['foo']</code></pre>
      **/
     function normaliseToArray ( obj ) {
-      return ( isNot( obj, "Array" )
+      return ( !is( obj, "Array" )
         || ( obj.length === 1 && is( obj[0], "Array" ) ) ) ? [ obj ] : obj;
     }
 
@@ -364,7 +372,7 @@
     /* [Private]
      *
      * exerciseCallbacks(presentation, method) -> Boolean
-     *  - mock (Mock | Member): mock object to exercise callbacks on
+     *  - mock (Mock): mock object to exercise callbacks on
      *  - presentation (Array | Collection): Presentation made / to be made to
      *  mocked method
      *
@@ -399,7 +407,7 @@
     /* [Private]
      *
      * exerciseReturn(presentation, method) -> Object | undefined
-     *  - mock (Mock | Stub): mock object to exercise return
+     *  - mock (Mock): mock object to exercise return
      *  - presentation (Array): Presentation made / to be made to mocked method
      *
      *  Function tests presentation against mock object interface expectations.
@@ -457,9 +465,9 @@
 
     // VERIFY PHASE functions
 
-    /** section: QMock
+    /* [Private]
      * QMock.verifyInvocations( mock ) -> Boolean
-     * - method (Mock | Stub): mock object to test
+     * - mock (Mock): mock object to test
      *
      *  Evaluates if amount of times a mock object (method/constructor) has been
      *  invoked matches expectations
@@ -482,9 +490,9 @@
         );
     }
 
-    /**
+    /* [Private]
      * QMock.verifyOverloading( mock ) -> Boolean
-     * - method (Mock | Stub): mock object to test
+     * - mock (Mock): mock object to test
      *
      *  Evaluates if number of parameters passed to mock object falls
      *  below / exceeeds expectations
@@ -498,9 +506,9 @@
       );
     }
 
-    /**
+    /* [Private]
      * QMock.verifyPresentation( mock, presentation ) -> Boolean
-     *  - mock (Mock | Stub): mock object to test against
+     *  - mock (Mock): mock object to test against
      *  - presentation (Array): Presentation made / to be made to mock object
      *  interface
      *
@@ -538,9 +546,9 @@
       }
     }
 
-    /**
+    /* [Private]
      * QMock.verifyInterface( mock [, raise] ) -> Boolean
-     *  - mock (Mock | Member): mock object to test
+     *  - mock (Mock): mock object to test
      *  - raise (Function) _optional_: Function to handle false comparison
      *  results
      *
@@ -570,8 +578,8 @@
       return !!result;
     }
 
-    /**
-     * QMock.verifyReceiver( receiver [, raise] ) -> Boolean | Exception
+    /** section: QMock
+     * QMock.utils.verify( receiver [, raise] ) -> Boolean | Exception
      *  - receiver (Mock): mock / receiver object to test
      *  - raise (Function) _optional_: Function to handle false comparison
      *  results
@@ -590,7 +598,7 @@
       }
 
       // Live() or Die()
-      if ( !!!result && !config.failSlow ) {
+      if ( !!!result && !config.failslow && receiver._exceptions.length ) {
         // Pants.
         throw receiver._exceptions;
       } else {
@@ -617,7 +625,7 @@
     }
 
     /**
-      * QMock.resetMock( mock ) -> Boolean
+      * QMock.utils.reset( mock ) -> Boolean
       *  - mock (Mock): Mock object to reset
       *
       *  Resets internal state of the receiver mock object to before any
@@ -656,15 +664,16 @@
      **/
 
     function Member ( min, max ) {
-      // Default mock behaviours
-      this._returns   = undefined;
-      this._id        = "anonymous";
+      // Mock expectations
+      this._expected  = [];
       this._requires  = 0;
       this._overload  = true;
+      // Mock behaviours
+      this._returns   = undefined;
       this._chained   = false;
       this._data      = null;
-      // Default mock expectations
-      this._expected  = [];
+      // Default mock state
+      this._id        = "anonymous";
       this._received  = [];
       this._minCalls  = min || null;
       this._maxCalls  = max || null;
@@ -680,13 +689,13 @@
        *  - identifier (String): ID of the mock object
        *
        *  Identifier is used to create meaningful error messages. By default
-       *  it is <code>"anonymous"</code>, or the method name 
+       *  it is <code>"anonymous"</code>, or the method name
        *  (assigned by <code>Mock.method</code>).
        *
        *  #### Example
        *  <pre><code>Mock.expects().method('foo').id('fooBar');</code></pre>
        **/
-      "id": function ( descriptor ) {
+      id: function ( descriptor ) {
         this._id = descriptor;
         return this;
       },
@@ -704,7 +713,7 @@
        *  #### Example
        *  <pre><code>Mock.expects().method('foo');</code></pre>
        **/
-      "method": function ( name ) {
+      method: function ( name ) {
         // Throw error if collision with mock API
         if ( hasOwnProperty.call( this._receiver, name ) ) {
           throw {
@@ -743,7 +752,7 @@
        *    "data": "stub"
        *  });</code></pre>
        **/
-      "receives": function () {
+      receives: function () {
         // Check for valid input to interface
         for (var i = 0, len = arguments.length; i < len; i++) {
           var acceptsProperty = arguments[ i ].accepts || false; // attach hasOwnProperty check.
@@ -752,7 +761,7 @@
               type: "MissingAcceptsPropertyException",
               msg: "Qmock expects arguments to expectations() to contain an accepts property"
             };
-          } else if ( isNot( acceptsProperty, "Array" ) ) {
+          } else if ( !is( acceptsProperty, "Array" ) ) {
             throw {
               type: "InvalidAcceptsValueException",
               msg: "Qmock expects value of 'accepts' in arguments to be an Array"
@@ -770,7 +779,7 @@
             arguments[ i ][ "required" ] = arguments[ i ][ "accepts" ].length;
           }
         }*/
-        this._expected = normaliseToArray( slice.call( arguments ) );
+        this._expected = this._expected.concat( slice.call( arguments ) );
         return this;
       },
 
@@ -783,14 +792,15 @@
        *  actual <code>presentation</code> made to a mock object interface.
        *
        *  When called multiple times on a mock object the last expectation
-       *  takes precedent. If multiple expectations are required see the
-       *  <code>Mock.interface</code> method.
+       *  takes precedent in relation to the number of required arguments. If
+       *  multiple expectations are required see the
+       *  <code>Mock.receives</code> method.
        *
        *  #### Example
        *
        *  <pre><code>Mock.method("foo").accepts("bar", "baz");</code></pre>
        **/
-      "accepts": function () {
+      accepts: function () {
         this._requires = arguments.length;
         this._expected.push( { "accepts" : slice.call( arguments ) } );
         return this;
@@ -812,7 +822,7 @@
        *  #### Example
        *  <pre><code>Mock.method("foo").accepts('bar').returns('baz');</code></pre>
        **/
-      "returns": function ( obj ) {
+      returns: function ( obj ) {
         this._returns = obj;
         return this;
       },
@@ -842,7 +852,7 @@
        *  false then the verify phase would *only* allow presentations of ZERO
        *  parameters to the mock object interface.
        **/
-      "required": function ( num ) {
+      required: function ( num ) {
         this._requires = num;
         return this;
       },
@@ -864,7 +874,7 @@
        *  #### Example
        *  <pre><code>Mock.method('foo').accepts('bar', 'baz').overload(false);</code></pre>
        **/
-      "overload": function ( bool ) {
+      overload: function ( bool ) {
         this._overload = bool;
         return this;
       },
@@ -894,7 +904,7 @@
        *  Mock.method('foo').accepts(callback).data(['stub', 'another stub']);
        *  </code></pre>
        **/
-      "data": function () {
+      data: function () {
         this._data = slice.call( arguments );
         return this;
       },
@@ -915,7 +925,7 @@
        *  <pre><code>Mock.expects().property('foo', 'bar');
        *  console.log( Mock.foo ); // "bar"</code></pre>
        **/
-      "property": function ( prop, value ) {
+      property: function ( prop, value ) {
         if ( hasOwnProperty.call( this._receiver, prop ) ) {
           throw {
             type: "InvalidPropertyNameException",
@@ -947,7 +957,7 @@
        *  after in Mock declaration (or better, in conjunction to override
        *  it with <code>Mock.interface</code> for specific use cases)
        **/
-      "chain": function () {
+      chain: function () {
         this._returns = this._receiver || this;
         return this;
       },
@@ -955,7 +965,7 @@
       /** alias of: Mock#expects, deprecated
        * Mock#andExpects( [min][, max] ) -> Mock
        **/
-      "andExpects": function ( min, max ) {
+      andExpects: function ( min, max ) {
         return this._receiver.expects( min, max );
       },
 
@@ -964,7 +974,7 @@
        *
        *  Resets the internal state of the mock and any bound child mock objects.
        **/
-      "reset": function () {
+      reset: function () {
         resetMock( this );
         return this;
       },
@@ -986,7 +996,7 @@
        *  It will also throw an error if _optional_ <code>raise</code>
        *  parameter is passed.
        **/
-      "verify": function ( raise ) {
+      verify: function ( raise ) {
         // If true and no calls thenx exclude from further interrogation
         if ( verifyInvocations( this ) ) {
           if ( this._called === 0 ) {
@@ -1053,7 +1063,7 @@
 
       /**
        * Mock#calls( min [, max = null] ) -> Mock
-       *  - min (Number): Miniumum number of times mock object should be
+       *  - min (Number): Minimum number of times mock object should be
        *  invoked. If max parameter not passed then number becomes a 'strict'
        *  invocation expectation (even zero). Default is <code>null</code>.
        *  - max (Number) _optional_: Maximum number of times mocked method
@@ -1077,15 +1087,15 @@
        *  </code></pre>
        **/
       calls: function ( min, max ) {
-        this._minCalls = Object( min ) ? min : this._minCalls;
-        this._maxCalls = Object( max ) ? max : this._maxCalls;
+        this._minCalls = min;
+        this._maxCalls = (max !== undefined) ? max : this._maxCalls;
         return this;
       },
 
       /**
        * Mock#end() -> Mock
        *
-       *  Utility function to end a mock method expectation declaration, or
+       *  Utility method to end a mock method expectation declaration, or
        *  retrieve the receiver object a mock object is bound to.
        *
        *  This can be thought of analogous to jQuery's <code>end</code> method
@@ -1098,7 +1108,55 @@
        **/
       end: function () {
         return this._receiver || this;
-      }
+      },
+
+      /*
+       * Mock#excise() -> Mock
+       *
+       *  Utility methodto 'excise' a Mock object interface from itself, to
+       *  reduce the chance of errors generated by interactions and
+       *  manipulations of the Mock object on behalf collaborator objects
+       *  due to existence of the Mock object API.
+       *
+       *  For example if a controller were to blindly iterate over the keys
+       *  of a Mock instance, even with a <code>hasOwnProperty</code> check,
+       *  both the mocked interface methods/properties, and the Mock instance
+       *  API will be accessible and/or operated upon.
+       *
+       *  Most often this will not cause issues, but if a true representation
+       *  of a collaborator object is required sans extraneous members, then
+       *  this method will prune the Mock object interface from the instance.
+       *
+       *  If the instance needs further augmentation, or simply verification
+       *  and resetting, developers can either use
+       *  <code>QMock.utils.verify</code>, <code>QMock.utils.reset</code>
+       *  static methods, or any method on <code>Mock.prototype</code> while
+       *  using <code>.call()</code> to set the execution context to the mock
+       *  instance.
+       *
+       *  #### Example
+       *
+       *  <pre><code>var mock = new Mock;
+       *
+       *  // Setup
+       *  mock.calls(1);
+       *
+       *  mock.excise();
+       *
+       *  // Augment post-'excision'
+       *  QMock.Mock.prototype.calls(mock, 2)
+       *
+       *  // Check expectation updated
+       *  mock._getState()._minCalls === 2 // true;
+       *  </code></pre>
+       *
+       excise: function () {
+         for ( var key in this ) {
+           if ( key in Member.prototype ) {
+             delete this[ key ];
+           }
+         }
+       }*/
 
     }; // End Member.prototype declaration
 
@@ -1242,26 +1300,22 @@
      *
      **/
     return {
-      /** alias of: Config
-       * QMock.config -> Hash
-       **/
       config  : config,
       create  : createQMock,
       /** alias of: Mock
        * QMock.Mock() -> mock receiver / constructor / method / property object
        **/
-      Mock : Receiver,
-      // Privileged Pointers
-      verifyInvocations   : verifyInvocations,
-      verifyOverloading   : verifyOverloading,
-      verifyParameters    : verifyPresentation,
-      verifyAllParameters : verifyInterface,
-      verifyMock          : verifyReceiver,
-      resetMock           : resetMock,
-      // Utils
-      is    : is,
-      isNot : isNot,
-      testParameters : comparePresentation,
+      Mock    : Receiver,
+      /**
+       * QMock.utils
+       *  Utility methods for use on 'excised' mock instances or testing.
+       **/
+      utils   : {
+        verify  : verifyReceiver,
+        reset   : resetMock,
+        is      : is,
+        test    : comparePresentation
+      },
       // only exposed for integration tests
       __createMock : createMock
     };
