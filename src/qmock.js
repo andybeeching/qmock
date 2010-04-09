@@ -47,9 +47,10 @@
        *  verify phase should be thrown or suppressed (by default set to
        *  <code>true</code>).
        *
-       *  If in 'fail fast' mode then exceptions are thrown as part of the
-       *  verify phase, and it is up to the invoking test runner code to
-       *  catch and handle them for assertion.
+       *  If in 'fail fast' mode (e.g. <code>QMock.config.failslow = false;</code>)
+       *  then exceptions are thrown as part of the verify phase, and it is
+       *  up to the invoking test runner code to catch and handle them for
+       *  assertion.
        *
        *  This can result in scenarios where expected 'good' exercise phase
        *  fails, an exception is thrown, and the testrunner stops due an
@@ -367,6 +368,16 @@
       return mock;
     }
 
+    /* [Private]
+     * new ErrorHandler( mock )-> Function
+     * - mock ( Mock ): Mock instance to associate error with
+     **/
+    function ErrorHandler ( mock ) {
+      return function () {
+        mock._exceptions.push( createException.apply( null, arguments ) );
+      };
+    }
+
     // EXERCISE PHASE functions
 
     /* [Private]
@@ -590,17 +601,20 @@
      **/
     function verifyReceiver ( receiver, raise ) {
       // Verify Self (Constructor)
-      var result = Member.prototype.verify.call( receiver, raise );
+      var result = Member.prototype.verify.call( receiver, raise ),
+          exceptions = receiver._exceptions;
 
       // Verify Members
       for (var i = 0, len = receiver._methods.length; i < len; i++) {
-        result &= receiver._methods[ i ].verify( raise );
+        result &= receiver._methods[ i ].verify();
+        // Gather exceptions from mock receiver and members instances
+        exceptions = exceptions.concat( receiver._methods[ i ]._exceptions );
       }
 
       // Live() or Die()
-      if ( !!!result && !config.failslow && receiver._exceptions.length ) {
+      if ( !!!result && !config.failslow && exceptions.length ) {
         // Pants.
-        throw receiver._exceptions;
+        throw exceptions;
       } else {
         // WIN.
         return !!result;
@@ -652,6 +666,29 @@
      *  Main Stub, or mocked method class
      **/
 
+    /* [Private]
+     * new Expectation( map )
+     *  - map (Hash): Data properties for Expectation object, can be custom
+     *  if required.
+     **/
+    function Expectation ( map ) {
+      var config = {
+        accepts   : null,
+        requires  : 0,
+        returns   : undefined,
+        chained   : false,
+        data      : null
+      },
+      prop;
+      // augment base expectations
+      for ( prop in config ) {
+        if ( hasOwnProperty.call( config, prop ) ) {
+          map[ prop ] = config[ prop ];
+        }
+      }
+      return map;
+    }
+
     /* [Private]
      * new Member( [ min = 0 ] [, max = null ] )
      *  - min (Number) _optional_: Miniumum number of times mocked method
@@ -664,20 +701,22 @@
      **/
 
     function Member ( min, max ) {
-      // Mock expectations
-      this._expected  = [];
-      this._requires  = 0;
-      this._overload  = true;
-      // Mock behaviours
-      this._returns   = undefined;
-      this._chained   = false;
-      this._data      = null;
+      // Default mock expectations + behaviour
+      this._expected    = [];
+      this._accepts     = null;
+      this._requires    = 0;
+      this._returns     = undefined;
+      this._chained     = false;
+      this._data        = null;
+      // Mock interface constraints
+      this._overload    = true;
       // Default mock state
-      this._id        = "anonymous";
-      this._received  = [];
-      this._minCalls  = min || null;
-      this._maxCalls  = max || null;
-      this._called    = 0;
+      this._id          = "anonymous";
+      this._received    = [];
+      this._minCalls    = min || null;
+      this._maxCalls    = max || null;
+      this._called      = 0;
+      this._exceptions  = [];
     }
 
     // Inherited members
@@ -997,7 +1036,8 @@
        *  parameter is passed.
        **/
       verify: function ( raise ) {
-        // If true and no calls thenx exclude from further interrogation
+        raise = raise || new ErrorHandler( this );
+        // If true and no calls then exclude from further interrogation
         if ( verifyInvocations( this ) ) {
           if ( this._called === 0 ) {
             return true;
@@ -1109,6 +1149,17 @@
       end: function () {
         return this._receiver || this;
       },
+
+      /**
+       * Mock#__getExceptions() -> Array
+       *
+       *  Returns an array of exception objects, used for debugging when
+       *  <code>Mock.verify()</code> returns <code>false</code> in 'fail slow'
+       *  test runner setups (see Config section).
+       **/
+       __getExceptions: function () {
+         return this._exceptions;
+       }
 
       /*
        * Mock#excise() -> Mock
@@ -1256,20 +1307,7 @@
 
       // Test *both* receiver mock and bound mock methods.
       mock.verify = function () {
-        return verifyReceiver( mock, function () {
-          mock._exceptions.push( createException.apply( null, arguments ) );
-        });
-      }
-
-      /**
-       * Mock#_getExceptions() -> Array
-       *
-       *  Returns an array of exception objects, used for debugging when
-       *  <code>Mock.verify()</code> returns <code>false</code> in 'fail slow'
-       *  test runner setups (see Config section).
-       **/
-      mock.getExceptions = function () {
-        return mock._exceptions;
+        return verifyReceiver( mock, new ErrorHandler( mock ) );
       }
 
       // Update default return state on Constuctors to themselves (for

@@ -28,10 +28,10 @@ PDoc.elements = {
 'Mock#noMoreThan': { 'name': 'Mock#noMoreThan', 'type': 'instance method', 'path': 'mock/mock/prototype/nomorethan/' },
 'Mock#calls': { 'name': 'Mock#calls', 'type': 'instance method', 'path': 'mock/mock/prototype/calls/' },
 'Mock#end': { 'name': 'Mock#end', 'type': 'instance method', 'path': 'mock/mock/prototype/end/' },
+'Mock#__getExceptions': { 'name': 'Mock#__getExceptions', 'type': 'instance method', 'path': 'mock/mock/prototype/__getexceptions/' },
 'Mock#interface': { 'name': 'Mock#interface', 'type': 'instance method', 'path': 'mock/mock/prototype/interface/' },
 'new Mock': { 'name': 'new Mock', 'type': 'constructor', 'path': 'mock/mock/new/' },
 'Mock#expects': { 'name': 'Mock#expects', 'type': 'instance method', 'path': 'mock/mock/prototype/expects/' },
-'Mock#_getExceptions': { 'name': 'Mock#_getExceptions', 'type': 'instance method', 'path': 'mock/mock/prototype/_getexceptions/' },
 'QMock': { 'name': 'QMock', 'type': 'class', 'path': 'qmock/qmock/' },
 'QMock.Mock': { 'name': 'QMock.Mock', 'type': 'class method', 'path': 'qmock/qmock/mock/' },
 'QMock.utils': { 'name': 'QMock.utils', 'type': 'namespace', 'path': 'qmock/qmock/utils/' }

@@ -34,7 +34,6 @@
 	test("Mock.id() [utility] instance method", function () {
 
 	  expect(1);
-
 	  var mock = new Mock,
 	      foo = mock.expects().method('foo').id('bar');
 
@@ -3019,12 +3018,11 @@
 
 	  // Prep dummy expectations
 	  mock.expects(1).method('foo').end();
-
 	  // No exercise, just verify, should error
 	  equals(mock.verify(), false, "mock.verify should return 'false', and NOT throw an error when in 'fail slow' mode");
 
 	  // Check exception was actually thrown but suppressed for debugging
-	  equals(mock.getExceptions()[0].type, "IncorrectNumberOfMethodCallsException", "mock.verify() should have raised an 'IncorrectNumberOfMethodCallsException' object");
+	  equals(mock.foo._getState().__getExceptions()[0].type, "IncorrectNumberOfMethodCallsException", "mock.verify() should have raised an 'IncorrectNumberOfMethodCallsException' object");
 
 	});
 
@@ -3093,7 +3091,12 @@
 
     // Exercise / Verify / Reset
     mock();
-    equals( QMock.utils.verify(mock), false, "QMock.utils.verify() should return false when mock NOT passed (String: 'foo')")
+    try {
+      QMock.utils.verify(mock);
+	    ok(false, "QMock.utils.verify() should throw a 'IncorrectNumberOfArgumentsException' error when mock NOT invoked");
+    } catch (e) {
+      equals(e[0].type, "IncorrectNumberOfArgumentsException", "QMock.utils.verify() should throw a 'IncorrectNumberOfArgumentsException' error when mock NOT invoked")
+    }
     mock.reset();
 
     mock("foo");
@@ -3103,7 +3106,12 @@
 
     mock("foo");
     mock("foo");
-    equals( QMock.utils.verify(mock), false, "QMock.utils.verify() should return false when mock invoked too many times")
+    try {
+      QMock.utils.verify(mock);
+	    ok(false, "QMock.utils.verify() should throw a 'IncorrectNumberOfMethodCallsException' error when mock invoked too many times");
+    } catch (e) {
+      equals(e[0].type, "IncorrectNumberOfMethodCallsException", "QMock.utils.verify() should throw a 'IncorrectNumberOfArgumentsException' error when mock invoked too many times")
+    }
     mock.reset();
 
   });
