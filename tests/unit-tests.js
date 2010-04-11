@@ -77,6 +77,7 @@
 
  	  // Test invalid property naming
  	  try {
+ 	    debugger;
  	    ninja.expects(1).property('expects');
  	    ok(false, "mock should throw 'InvalidPropertyNameException' when trying to set a bad property name of 'expects'");
  	  } catch (e) {
@@ -163,7 +164,7 @@
  	  expect(14);
 
  	    var mock = new Mock;
-
+      debugger;
  	    mock
  	    .expects(1)
  	      .method('getNumericValue').returns(10)
@@ -218,6 +219,7 @@
 
 	  // Test invalid method naming - protect API if using mocked member interface to set methods and properties
 	  try {
+	    debugger;
 	    ninja.expects(1).method('expects');
 	    ok(false, "mock should detect bad method name 'expects'");
 	  } catch (e) {
@@ -323,8 +325,7 @@
 	      .method('swing');
 
 	  // Test _getState for mockedMembers.
-	  var state = ninja.swing._getState();
-	  equals(state._called, 0, "verify() should be true. Result");
+	  equals(ninja.swing._getState()._called, 0, "verify() should be true. Result");
 
 	  // Bad Exercise - no swings
     try {
@@ -3122,9 +3123,11 @@
 
     // Setup
     mock.accepts("foo").calls(1);
+    mock.expects().property("bar", "baz")
 
     // Exercise
     mock("foo");
+    mock.bar = "fuz";
 
     // Time of writing this info on standalone mocks pseudo-private
     // Check state was updated
@@ -3136,6 +3139,7 @@
     // Check state has been reset
     equals( mock._called, 0, "mock should have 0 invocations registered");
     equals( mock._received.length, 0, "mock should have NO presentations to 'foo' interface registered");
+    equals( mock.bar, "baz", "mock should have a property 'bar' with a value of 'baz'");
 
   });
 
