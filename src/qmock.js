@@ -648,7 +648,18 @@
       return map;
     }
 
+    /*
+     * Class#methodName(parameters)
+     * 
+     * 
+     * 
+     * 
+     **/
     function Mock ( min, max, receiver ) {
+      // Constructor protection, Mock should be only used as constructor
+      if ( !(this instanceof Mock) ) {
+        return new Mock( min, max, receiver );
+      }
       // Default mock expectations + behaviour
       this.expected     = [];
       this.requires     = 0;
@@ -1206,6 +1217,11 @@
     }
 
     function Receiver () {
+      // Constructor protection
+      if( !(this instanceof Receiver ) ) {
+        return new Receiver;
+      }
+      // Carry on Charlie...
       this.methods    = [];
       this.properties = {};
       this.self       = this;
@@ -1325,6 +1341,8 @@
      *  object is a function that can act as a namespace object (aka a
      *  'receiver'), or as a mocked function / constructor with expectations,
      *  or both (e.g. jQuery $).
+     *  
+     *  Can be called with or without the <code>new</code> keyword
      *
      *  #### Example
      *  <pre><code>// Via API
@@ -1353,7 +1371,7 @@
      *  })
      *  </code></pre>
      **/
-    function ProxyReceiver ( definition, obj ) {
+    function createReceiver ( definition, obj ) {
 
       // Private Receiver state
       var receiver = new Receiver,
@@ -1409,7 +1427,7 @@
        * QMock.Mock() -> mock receiver / constructor / method / property object
        **/
       Mock    :  function ( map ) {
-        return new ProxyReceiver ( map || {} );
+        return createReceiver ( map || {} );
       },
       /**
        * QMock.utils
