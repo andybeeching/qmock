@@ -144,19 +144,16 @@
      *
      *  </code></pre>
      **/
-    function comparePresentation ( mock, presentation, prop ) {
+    function comparePresentation ( state, presentation, prop ) {
       // Check dependencies
       if ( isCompare() ) {
-        // ensure operating on mock internal state
-        if( mock._getState ) {
-          mock = mock._getState();
-        };
         // Dependency available, let's roll
-        for ( var result = false, i = 0, len = mock._expected.length; i < len; i++ ) {
+        for ( var result = false, i = 0, len = state.expected.length; i < len; i++ ) {
           // If match found against presentation return bound object (or self if chained)
-          if ( config.compare( presentation, mock._expected[ i ].accepts ) ) {
+          if ( config.compare( presentation, state.expected[ i ].accepts ) ) {
             result = ( prop )
-              ? mock._expected[ i ][ prop ] || mock[ "_" + prop ]
+              ? state.expected[ i ][ prop ]
+                || state[ ( prop === "returns" ) ? "returnValue" : ( prop === "data") ? "dataRep" : prop ]
               : true;
             break;
           }
@@ -213,75 +210,75 @@
       return ( !is( obj, "Array" )
         || ( obj.length === 1 && is( obj[0], "Array" ) ) ) ? [ obj ] : obj;
     }
+    
+    /* [Private]
+     * TODO: Ensure this conforms to ES5 spec if one
+     *  
+     * bind( fn, scope ) -> Function
+     *  - fn (Function): Function to be bound
+     *  - scope (Object): Object to bind function to (execution scope)
+     * 
+     *  Utility function to bind a function to a specific execution context
+     **/
+    function bind ( fn, scope ) {
+      return function () {
+        return fn.apply( scope, arguments );
+      };
+    }
+    
+    /* [Private]
+     * 
+     *  bindInterface( master, receiver, scope, re )
+     *  - master (Object): Interface to copy and bind (e.g. Mock.prototype)
+     *  - receiver (Object): Object to copy interface to
+     *  - scope (Object): Object to bind copied methods to (the execution scope)
+     *  - re (RegExp) _optional_: RegExp to run against interface keys to cache 
+     *  and execute old method if overwriting.
+     * 
+     *  Utility function to copy a given object's interface over with bound
+     *  function calls to the receiver instance scope (e.g. bind 
+     *  <code>this</code>).
+     *  
+     *  _Note_: Would put a check to ensure on functions being bound, but
+     *  performance hit, and as being used internally is unnessesary.
+     **/
+    function bindInterface ( master, receiver, scope, re ) {
+      for ( var key in master ) {
+        if( hasOwnProperty.call( master, key ) ) {
+          // Create bound function
+          var fn = bind( master[ key ], scope );
+          // Determine if need to cache (and execute) original function if exists
+          receiver[ key ] = ( re && re.test( key ) ) 
+            ? (function ( original, overide ) {
+                return function () {
+                  original();
+                  // Return whatever overide does, inc. undefined if default behaviour
+                  return overide();
+                }
+              })( receiver[ key ], fn )
+            : fn;
+        }
+      }
+    }
+
+    /* [Private]
+     * TODO: Define this!
+     *  get#methodName(parameters)
+     **/
+    function getState ( obj ) {
+      // early exclusion
+      if ( obj instanceof Expectation ) { return obj; }
+      // else try and find it
+      if ( is( obj, "Function") ) {
+        if ( obj.__getState ) {
+          return obj.__getState();
+        }
+        // TODO: Add central repository of *all* mocks to search for cached __getState method
+      }
+      return false;
+    }
 
     // SETUP PHASE Functions
-
-    /* [Private]
-     *
-     * createStub( method ) -> Function
-     *  - method ( Mock | Stub ): Mock object to which stub function is bound.
-     *
-     *  Factory for creating a mock stub function - acts as a mutator and
-     *  operates on a specific mock object state. Instance state is mutated
-     *  when a stub is invoked as part of a 'system under test' (SUT)
-     *  exercise phase.
-     *
-     *  _Returns_: Closure-bound mock stub function. Function object also has
-     *  static accessor (<code>_getState</code>) which returns the internal
-     *  state of the bound mocked method instance as an object. This can be
-     *  useful for debugging purposes.
-     **/
-    function createStub ( mock ) {
-
-      function stub () {
-        // Normalise actual parameters
-        var presentation = slice.call( arguments );
-        // Mutate state
-        mock._called++;
-        mock._received.push( presentation );
-        // Stub responses
-        exerciseCallbacks( mock, presentation );
-        return exerciseReturn( mock, presentation );
-      }
-
-      /** section: Mock
-       * Mock#_getState() -> Object (Mock State)
-       *
-       *  Utility method for retrieving the internal state of a mock object
-       *  for debugging
-       **/
-      stub._getState = function () {
-        return mock;
-      };
-
-      return stub;
-    }
-
-    /* [Private]
-     *
-     * createMember( [ min ] [, max ] [, receiver ] ) -> Member
-     *  - min (Number) _optional_: minimum number of invocations to expect
-     *  - max (Number) _optional_: Maximum number of invocations to expect
-     *  - receiver (Object) _optional_: Receiver object to associate 'hold'
-     *  returned Member.
-     *
-     *  Factory for instantiating a new mocked Member object and associating it
-     *  with a receiver object (aka a Mock instance).
-     *
-     *  Internally the receiver is _always_ a Mock instance.
-     **/
-    function createMember ( min, max, receiver ) {
-      var mock = new Member( min, max );
-      // If receiver provided setup references for recording interactions
-      if ( receiver ) {
-        // Store reference to receiver on each member instance
-        mock._receiver = receiver;
-        // Store reference to method in method list for reset functionality
-        // <str>and potential strict execution order tracking<str>.
-        receiver._methods && receiver._methods.push( mock );
-      }
-      return mock;
-    }
 
     /* [Private]
      *
@@ -290,7 +287,7 @@
      *  - definition (Hash): Hash of Mock expectations mapped to Mock object
      *  API.
      *
-     *  Function which interprets a JSON map of a desired mock object interface
+     *  Factory method which interprets a JSON map of a desired mock object interface
      *  (with expectations) and augments a Mock instance with them.
      *
      *  #### Example
@@ -320,8 +317,11 @@
      **/
     function createMock ( mock, definition ) {
 
-      // interface checks
-      if ( typeof mock.expects === "undefined" || definition == null ) {
+      // interface checks - duck type mock check since instanceof won't work
+      if ( typeof mock.expects === "undefined" ) {
+        // If not valid then create a new mock instance to augment
+        mock = new Recorder( new Mock );
+      } else if ( definition == null ) {
         throw new Error("createMock() requires a defintion map {}");
       }
 
@@ -331,7 +331,7 @@
       setExpectations: for ( name in definition ) {
         if ( hasOwnProperty.call( definition, name ) ) {
 
-          // mock === receiver || constructor
+          // determine if mock === receiver || constructor
           var isBound = typeof mock[ name ] === "undefined",
               // set config for mock type
               config = ( isBound ) ? definition[ name ] : definition,
@@ -370,23 +370,44 @@
 
     /* [Private]
 
-     * new ErrorHandler( mock )
--> Function
-     *
-- mock ( Mock ): Mock instance to associate error with
+     * new ErrorHandler( mock ) -> Function
+     *  - mock ( Mock ): Mock instance to associate error with
      **/
-    function ErrorHandler ( mock ) {
+    function ErrorHandler ( exceptions ) {
       return function () {
-        mock._exceptions.push( createException.apply( null, arguments ) );
+        exceptions.push( createException.apply( null, arguments ) );
       };
     }
 
     // EXERCISE PHASE functions
+    
+    /* [Private]
+     *
+     * exerciseMock( mock ) -> Function
+     *
+     *  Utility for recording inputs to a given mock and mutating it's internal
+     *  state. Instance state is mutated when a stubbed function is invoked as 
+     *  part of a 'system under test' (SUT) exercise phase.
+     *
+     *  _Returns_: The mapped return value for the presentation made to the
+     *  stub interface, or the default mock return (at instantiation is 
+     *  <code>undefined</code>).
+     **/
+    function exerciseMock () {
+      // Normalise actual parameters
+      var presentation = slice.call( arguments );
+      // Mutate state
+      this.called++;
+      this.received.push( presentation );
+      // Stub responses
+      exerciseCallbacks( this, presentation );
+      return exerciseReturn( this, presentation );
+    }
 
     /* [Private]
      *
      * exerciseCallbacks(presentation, method) -> Boolean
-     *  - mock (Mock): mock object to exercise callbacks on
+     *  - mock (Mock): mock instance to exercise callbacks on
      *  - presentation (Array | Collection): Presentation made / to be made to
      *  mocked method
      *
@@ -407,7 +428,7 @@
         if ( presentation[ i ] && is( presentation[ i ], "Function" ) ) {
           // Use data associated with presentation, or default to 'global' data
           // if available
-          data = comparePresentation( mock, presentation, "data" ) || mock._data;
+          data = comparePresentation( mock, presentation, "data" ) || mock.dataRep;
           if ( data != null ) {
             presentation[ i ].apply( null, normaliseToArray( data ) );
           }
@@ -421,7 +442,7 @@
     /* [Private]
      *
      * exerciseReturn(presentation, method) -> Object | undefined
-     *  - mock (Mock): mock object to exercise return
+     *  - mock (Mock): mock instance to exercise return on
      *  - presentation (Array): Presentation made / to be made to mocked method
      *
      *  Function tests presentation against mock object interface expectations.
@@ -433,7 +454,7 @@
      *  to <code>undefined</code> (as per spec).
      **/
     function exerciseReturn ( mock, presentation ) {
-      return comparePresentation( mock, presentation, "returns" ) || mock._returns;
+      return comparePresentation( mock, presentation, "returns" ) || mock.returnVal;
     }
 
     // TODO: Either abstract this out or simplify
@@ -481,42 +502,42 @@
 
     /* [Private]
      * QMock.verifyInvocations( mock ) -> Boolean
-     * - mock (Mock): mock object to test
+     * - mock (Mock): mock instance to test
      *
      *  Evaluates if amount of times a mock object (method/constructor) has been
      *  invoked matches expectations
      **/
     function verifyInvocations ( mock ) {
-      return ( mock._minCalls == null )
+      return ( mock.minCalls == null )
         // No invocation expectation so result is true.
         ? true
         // If one expression below true then return else expectations not met
         // so false
         : (
           // explicit call number defined
-          mock._minCalls === mock._called
+          mock.minCalls === mock.called
           // arbitrary range defined
-          || ( mock._minCalls <= mock._called )
-            && ( mock._maxCalls >= mock._called )
+          || ( mock.minCalls <= mock.called )
+            && ( mock.maxCalls >= mock.called )
           // at least n calls
-          || ( mock._minCalls < mock._called )
-            && ( mock._maxCalls === Infinity )
+          || ( mock.minCalls < mock.called )
+            && ( mock.maxCalls === Infinity )
         );
     }
 
     /* [Private]
      * QMock.verifyOverloading( mock ) -> Boolean
-     * - mock (Mock): mock object to test
+     * - mock (Mock): mock instance to test
      *
      *  Evaluates if number of parameters passed to mock object falls
      *  below / exceeeds expectations
      **/
     function verifyOverloading ( mock ) {
-      return ( ( mock._overload )
+      return ( ( mock.overloadable )
         // At least n Arg length checking - overloading allowed
-        ? ( mock._requires > mock._received[0].length )
+        ? ( mock.requires > mock.received[0].length )
         // Strict Arg length checking - no overload
-        : ( mock._requires !== mock._received[0].length )
+        : ( mock.requires !== mock.received[0].length )
       );
     }
 
@@ -531,18 +552,18 @@
      **/
     function verifyPresentation ( mock, presentation ) {
       if ( isCompare() ) {
-        for (var i = 0, len = mock._expected.length, expected, result = true; i < len; i++) {
+        for (var i = 0, len = mock.expected.length, expected, result = true; i < len; i++) {
           // reset so that empty presentation and empty expectation return true
           // If no expectations then won't be reached... returns true.
           result = false;
 
           // expectation to compare
-          expected = mock._expected[ i ].accepts;
+          expected = mock.expected[ i ].accepts;
 
           // If overloading allowed only want to check parameters passed-in
           // (otherwise will fail). Must also trim off overloaded args as no
           // expectations for them.
-          if ( mock._overload === true ) {
+          if ( mock.overloadable === true ) {
             presentation = trimCollection( presentation, expected );
             expected  = trimCollection( expected, presentation );
           }
@@ -574,98 +595,22 @@
      *  If no match and optional error handler passed then error raised.
      **/
     function verifyInterface ( mock, raise ) {
-      var params = 0, total = mock._received.length, result = true;
+      var params = 0, total = mock.received.length, result = true;
       // For each presentation to the interface...
       for (; params < total; params++) {
         // ...Check if a matching expectation
-        result &= verifyPresentation( mock, mock._received[ params ] );
+        result &= verifyPresentation( mock, mock.received[ params ] );
         // Record which presentations fail
         if ( !!!result ) {
           raise && raise(
-            mock._received[ params ],
-            mock._expected,
+            mock.received[ params ],
+            mock.expected,
             "IncorrectParameterException",
-            mock._id + '()'
+            mock.id + '()'
           );
         }
       }
       return !!result;
-    }
-
-    /** section: QMock
-     * QMock.utils.verify( receiver [, raise] ) -> Boolean | Exception
-     *  - receiver (Mock): mock / receiver object to test
-     *  - raise (Function) _optional_: Function to handle false comparison
-     *  results
-     *
-     *  Verifies the receiver object (the parent mock object) first, then
-     *  individual members. Only passes if whole object tree passes, else
-     *  throws exception (fail fast).
-     **/
-    function verifyReceiver ( receiver, raise ) {
-      // Verify Self (Constructor)
-      var result = Member.prototype.verify.call( receiver, raise ),
-          exceptions = receiver._exceptions;
-
-      // Verify Members
-      for (var i = 0, len = receiver._methods.length; i < len; i++) {
-        result &= receiver._methods[ i ].verify();
-        // Gather exceptions from mock receiver and members instances
-        exceptions = exceptions.concat( receiver._methods[ i ]._exceptions );
-      }
-
-      // Live() or Die()
-      if ( !!!result && !config.failslow && exceptions.length ) {
-        // Pants.
-        throw exceptions;
-      } else {
-        // WIN.
-        return !!result;
-      }
-    }
-
-    // TEARDOWN PHASE functions
-
-    /* [Private]
-     * resetMock( mock ) -> Boolean
-     *
-     *  Utility method to reset the state of any mock object to before any
-     *  interaction was recorded.
-     **/
-    function clearInteractions ( mock ) {
-      if ( mock._exceptions ) {
-        mock._exceptions = [];
-      }
-      mock._called = 0;
-      mock._received = [];
-      return true;
-    }
-
-    /**
-      * QMock.utils.reset( mock ) -> Boolean
-      *  - mock (Mock): Mock object to reset
-      *
-      *  Resets internal state of the receiver mock object to before any
-      *  interaction occurred, and any child mock objects associated with it.
-      **/
-    function resetMock ( mock ) {
-      // Reset Interaction state
-      clearInteractions( mock );
-      // Reset all methods
-      if ( mock._methods ) {
-        for (var i = 0, len = mock._methods.length; i < len; i++) {
-          mock._methods[ i ].reset();
-        }
-      }
-      // Reset Properties (could have been mutated)
-      if ( mock._properties ) {
-        for ( var prop in mock._properties ) {
-          if( hasOwnProperty.call( mock._properties, prop ) ) {
-            mock[ prop ] = mock._properties[ prop ];
-          }
-        }
-      }
-      return true;
     }
 
     /**
@@ -703,39 +648,27 @@
       return map;
     }
 
-    /* [Private]
-     * new Member( [ min = 0 ] [, max = null ] )
-     *  - min (Number) _optional_: Miniumum number of times mocked method
-     *  should be called. If max parameter not passed then number becomes a
-     *  'strict' invocation expectation (even zero).
-     *  - max (Number) _optional_: Maximum number of times mocked method
-     *  should be called. If want 'at least _n_' then just pass Infinity.
-     *
-     *  Prototype for mock objects (constructors, methods & properties).
-     **/
-
-    function Member ( min, max ) {
+    function Mock ( min, max, receiver ) {
       // Default mock expectations + behaviour
-      this._expected    = [];
-      this._accepts     = null;
-      this._requires    = 0;
-      this._returns     = undefined;
-      this._chained     = false;
-      this._data        = null;
+      this.expected     = [];
+      this.requires     = 0;
+      this.returnVal    = undefined;
+      this.chained      = false;
+      this.dataRep      = null;
       // Mock interface constraints
-      this._overload    = true;
+      this.overloadable = true;
       // Default mock state
-      this._id          = "anonymous";
-      this._received    = [];
-      this._minCalls    = min || null;
-      this._maxCalls    = max || null;
-      this._called      = 0;
-      this._exceptions  = [];
+      this.name         = "anonymous";
+      this.received     = [];
+      this.minCalls     = min || null;
+      this.maxCalls     = max || null;
+      this.called       = 0;
+      this.exceptions   = [];
+      // References to container (if bound)
+      this.receiver     = receiver;
     }
 
-    // Inherited members
-    // All methods return the execution scope for cascading invocations
-    Member.prototype = {
+    Mock.prototype = {
 
       /**
        * Mock#id( descriptor ) -> Mock
@@ -749,8 +682,8 @@
        *  <pre><code>Mock.expects().method('foo').id('fooBar');</code></pre>
        **/
       id: function ( descriptor ) {
-        this._id = descriptor;
-        return this;
+        this.name = descriptor;
+        return this.recorder;
       },
 
       /**
@@ -766,25 +699,31 @@
        *  #### Example
        *  <pre><code>Mock.expects().method('foo');</code></pre>
        **/
-      method: function ( identifier ) {
-        var receiver = this._receiver || this;
-        // Throw error if collision with mock API
-        if ( hasOwnProperty.call( receiver, identifier ) ) {
-          throw {
-            type: "InvalidMethodNameException",
-            msg: "Qmock expects a unique identifier for each mocked method"
-          };
-        }
+      method: function ( identifier, min, max ) {
+        return this.receiver.method( identifier, min, max );
+      },
 
-        // Creates the state
-        var state = createMember( this.tmp.min, this.tmp.max, receiver );
-
-        // Useful for error messages / debugging
-        state._id = identifier;
-
-        // Register public pointer to mocked method instance on receiver object
-        receiver[ identifier ] = createStub( state );
-        return receiver[ identifier ]._getState();
+      /**
+       * Mock#accepts( parameters ) -> Mock
+       *  - parameters (Object...n): Parameter list which mocked method is expecting.
+       *
+       *  Method is used to set a single expected parameter list of _n_ length
+       *  for a mock object. During verification this is tested against the
+       *  actual <code>presentation</code> made to a mock object interface.
+       *
+       *  When called multiple times on a mock object the last expectation
+       *  takes precedent in relation to the number of required arguments. If
+       *  multiple expectations are required see the
+       *  <code>Mock.receives</code> method.
+       *
+       *  #### Example
+       *
+       *  <pre><code>Mock.method("foo").accepts("bar", "baz");</code></pre>
+       **/
+      accepts: function () {
+        this.requires = arguments.length;
+        this.expected.push( { "accepts" : slice.call( arguments ) } );
+        return this.recorder;
       },
 
       /**
@@ -827,7 +766,7 @@
         }
 
         // Set minimum expectations
-        this._requires = arguments[ 0 ].accepts.length;
+        this.requires = arguments[ 0 ].accepts.length;
 
        // TODO: Support for different requires per expected presentation
        // Assign explicit expectation if exist
@@ -836,31 +775,8 @@
             arguments[ i ][ "required" ] = arguments[ i ][ "accepts" ].length;
           }
         }*/
-        this._expected = this._expected.concat( slice.call( arguments ) );
-        return this;
-      },
-
-      /**
-       * Mock#accepts( parameters ) -> Mock
-       *  - parameters (Object...n): Parameter list which mocked method is expecting.
-       *
-       *  Method is used to set a single expected parameter list of _n_ length
-       *  for a mock object. During verification this is tested against the
-       *  actual <code>presentation</code> made to a mock object interface.
-       *
-       *  When called multiple times on a mock object the last expectation
-       *  takes precedent in relation to the number of required arguments. If
-       *  multiple expectations are required see the
-       *  <code>Mock.receives</code> method.
-       *
-       *  #### Example
-       *
-       *  <pre><code>Mock.method("foo").accepts("bar", "baz");</code></pre>
-       **/
-      accepts: function () {
-        this._requires = arguments.length;
-        this._expected.push( { "accepts" : slice.call( arguments ) } );
-        return this;
+        this.expected = this.expected.concat( slice.call( arguments ) );
+        return this.recorder;
       },
 
       /**
@@ -880,8 +796,8 @@
        *  <pre><code>Mock.method("foo").accepts('bar').returns('baz');</code></pre>
        **/
       returns: function ( obj ) {
-        this._returns = obj;
-        return this;
+        this.returnVal = obj;
+        return this.recorder;
       },
 
       /**
@@ -910,8 +826,8 @@
        *  parameters to the mock object interface.
        **/
       required: function ( num ) {
-        this._requires = num;
-        return this;
+        this.requires = num;
+        return this.recorder;
       },
 
       /**
@@ -932,8 +848,8 @@
        *  <pre><code>Mock.method('foo').accepts('bar', 'baz').overload(false);</code></pre>
        **/
       overload: function ( bool ) {
-        this._overload = bool;
-        return this;
+        this.overloadable = bool;
+        return this.recorder;
       },
 
       /**
@@ -962,8 +878,8 @@
        *  </code></pre>
        **/
       data: function () {
-        this._data = slice.call( arguments );
-        return this;
+        this.dataRep = slice.call( arguments );
+        return this.recorder;
       },
 
       /**
@@ -983,16 +899,13 @@
        *  console.log( Mock.foo ); // "bar"</code></pre>
        **/
       property: function ( prop, value ) {
-        var receiver = this._receiver || this;
-        if ( hasOwnProperty.call( receiver, prop ) ) {
-          throw {
-            type: "InvalidPropertyNameException",
-            msg: "Qmock expects a unique key for each stubbed property"
-          };
-        }
-        receiver[ prop ] = value;
-        receiver._properties[ prop ] = value;
-        return receiver;
+        return this.receiver.property( prop, value );
+      },
+
+      // NEW METHOD!
+      namespace: function ( identifier ) {
+        this.property( identifier, new Receiver );
+        return this[ identifier ];
       },
 
       /*
@@ -1017,25 +930,8 @@
        *  it with <code>Mock.interface</code> for specific use cases)
        **/
       chain: function () {
-        this._returns = this._receiver || this;
-        return this;
-      },
-
-      /** alias of: Mock#expects, deprecated
-       * Mock#andExpects( [min][, max] ) -> Mock
-       **/
-      andExpects: function ( min, max ) {
-        return this._receiver.expects( min, max );
-      },
-
-      /**
-       * Mock#reset() -> Mock
-       *
-       *  Resets the internal state of the mock and any bound child mock objects.
-       **/
-      reset: function () {
-        resetMock( this );
-        return this;
+        this.returnVal = this.receiver || this.recorder;
+        return this.recorder;
       },
 
       /**
@@ -1056,18 +952,18 @@
        *  parameter is passed.
        **/
       verify: function ( raise ) {
-        raise = raise || new ErrorHandler( this );
+        raise = raise || new ErrorHandler( this.exceptions );
         // If true and no calls then exclude from further interrogation
         if ( verifyInvocations( this ) ) {
-          if ( this._called === 0 ) {
+          if ( this.called === 0 ) {
             return true;
           }
         } else {
           raise && raise(
-            this._called,
-            this._minCalls,
+            this.called,
+            this.minCalls,
             "IncorrectNumberOfMethodCallsException",
-            this._id
+            this.id
           );
           return false;
         }
@@ -1075,50 +971,18 @@
         // TBD: This doesn't seem to support multiple presentations to an interface?
         // Checks 'global' _received to see if any paramters actually required, if so,
         // verify against overloading behaviour
-        if ( this._requires && verifyOverloading( this ) ) {
+        if ( this.requires && verifyOverloading( this ) ) {
           raise && raise(
-              this._received[ 0 ].length,
-              this._expected.length,
+              this.received[ 0 ].length,
+              this.expected.length,
               "IncorrectNumberOfArgumentsException",
-              this._id
+              this.id
             );
           return false;
         }
 
         // 3. Assert all presentations to interface
         return verifyInterface( this, raise );
-      },
-
-      /** deprecated
-       * Mock#atLeast( num ) -> Mock
-       *  - num (Number): Number of times mock object should _at least_ be
-       *  invoked.
-       *
-       *  Utility method (well, syntactic sugar) for setting up invocation
-       *  expectations of 'at least _n_ invocations'.
-       *
-       *  Recommended to use <code>Mock.expects</code> or
-       *  <code>Mock.calls</code> instead.
-       **/
-      atLeast: function ( num ) {
-        this._minCalls = num;
-        this._maxCalls = Infinity;
-        return this;
-      },
-
-      /** deprecated
-       * Mock#noMoreThan( num ) -> Mock
-       *  - num (Number):
-       *
-       *  Utility method (well, syntactic sugar) for setting up invocation
-       *  expectations of 'no more than _n_ invocations'.
-       *
-       *  Recommended to use <code>Mock.expects</code> or
-       *  <code>Mock.calls</code> instead.
-       **/
-      noMoreThan: function ( num ) {
-        this._maxCalls = num;
-        return this;
       },
 
       /**
@@ -1147,9 +1011,9 @@
        *  </code></pre>
        **/
       calls: function ( min, max ) {
-        this._minCalls = min;
-        this._maxCalls = (max !== undefined) ? max : this._maxCalls;
-        return this;
+        this.minCalls = min;
+        this.maxCalls = (max !== undefined) ? max : this.maxCalls;
+        return this.recorder;
       },
 
       /**
@@ -1167,22 +1031,61 @@
        *  <pre><code>Mock.expects().method('foo').end(); // returns Mock</code></pre>
        **/
       end: function () {
-        return this._receiver || this;
+        return this.receiver;
       },
 
       /**
-       * Mock#__getExceptions() -> Array
+       * Mock#reset() -> Mock
        *
-       *  Returns an array of exception objects, used for debugging when
-       *  <code>Mock.verify()</code> returns <code>false</code> in 'fail slow'
-       *  test runner setups (see Config section).
+       *  Resets the internal state of the mock and any bound child mock objects.
        **/
-       __getExceptions: function () {
-         return this._exceptions;
-       }
+      reset: function () {
+        this.exceptions = [];
+        this.called = 0;
+        this.received = [];
+        return true;
+      },
+
+      /** alias of: Mock#expects, deprecated
+       * Mock#andExpects( [min][, max] ) -> Mock
+       **/
+      andExpects: function ( min, max ) {
+        return this.receiver.expects( min, max );
+      },
+
+      /** deprecated
+       * Mock#atLeast( num ) -> Mock
+       *  - num (Number): Number of times mock object should _at least_ be
+       *  invoked.
+       *
+       *  Utility method (well, syntactic sugar) for setting up invocation
+       *  expectations of 'at least _n_ invocations'.
+       *
+       *  Recommended to use <code>Mock.expects</code> or
+       *  <code>Mock.calls</code> instead.
+       **/
+      atLeast: function ( num ) {
+        this.minCalls = num;
+        this.maxCalls = Infinity;
+        return this.recorder;
+      },
+
+      /** deprecated
+       * Mock#noMoreThan( num ) -> Mock
+       *  - num (Number):
+       *
+       *  Utility method (well, syntactic sugar) for setting up invocation
+       *  expectations of 'no more than _n_ invocations'.
+       *
+       *  Recommended to use <code>Mock.expects</code> or
+       *  <code>Mock.calls</code> instead.
+       **/
+      noMoreThan: function ( num ) {
+        this.maxCalls = num;
+        return this.recorder;
+      },
 
       /*
-
        * Mock#excise() -> Mock
        *
        *  Utility method to 'excise' a Mock object interface from itself, to
@@ -1221,28 +1124,196 @@
        *  // Check expectation updated
        *  mock._getState()._minCalls === 2 // true;
        *  </code></pre>
+
+      excise: function () {
+        for ( var key in this ) {
+          if ( key in Recorder.prototype ) {
+            delete this[ key ];
+          }
+        }
+      },
+
+      // Privileged pointers for debugging
+
+      /**
+       * Mock#__getExceptions() -> Array
        *
-       excise: function () {
-         for ( var key in this ) {
-           if ( key in Member.prototype ) {
-             delete this[ key ];
-           }
-         }
-       }*/
+       *  Returns an array of exception objects, used for debugging when
+       *  <code>Mock.verify()</code> returns <code>false</code> in 'fail slow'
+       *  test runner setups (see Config section).
+       **/
+      __getExceptions: function () {
+        return this.exceptions;
+      },
+      
+      /** section: Mock
+       * Mock#__getState() -> Object (Mock State)
+       *
+       *  Utility method for retrieving the internal state of a mock object
+       *  for debugging
+       **/
+      __getState: function () {
+        return this;
+      }
 
-    }; // End Member.prototype declaration
+    }; // end Mock.prototype declaration
 
-    // Backward compatibility for QMock v0.1/0.2 API
-    /** alias of: Mock#receives(), deprecated
-     * Mock#interface() -> Mock
+    /* [Private]
+     * new Recorder( [ min = 0 ] [, max = null ] )
+     *  - min (Number) _optional_: Miniumum number of times mocked method
+     *  should be called. If max parameter not passed then number becomes a
+     *  'strict' invocation expectation (even zero).
+     *  - max (Number) _optional_: Maximum number of times mocked method
+     *  should be called. If want 'at least _n_' then just pass Infinity.
+     *  - receiver (Object) _optional_: Receiver object upon which the mock
+     *  instance is attached.
      *
-     *  See Mock#receives for usage.
+     *  Prototype for mock objects (constructors, methods & properties).
      **/
-    Member.prototype.interface        = Member.prototype.receives;
-    Member.prototype.withArguments    = Member.prototype.accepts;
-    Member.prototype.andReturns       = Member.prototype.returns;
-    Member.prototype.andChain         = Member.prototype.chain;
-    Member.prototype.callFunctionWith = Member.prototype.data;
+    function Recorder ( mock ) {
+
+      // Mutator for mock instance state
+      // Exercises callbacks for async transactions
+      // Returns itself or explicit value
+      var recorder = function () {
+        return exerciseMock.apply( mock, arguments );
+      };
+
+      // API - Curry prototypal inherited methods and bind private mock state
+      for ( var key in Mock.prototype ) {
+        if( hasOwnProperty.call( Mock.prototype, key ) ) {
+          recorder[ key ] = bind( Mock.prototype[ key ], mock ); 
+        }
+      }
+
+      // Backward compatibility for QMock v0.1/0.2 API
+
+      /** alias of: Mock#receives(), deprecated
+       * Mock#interface() -> Mock
+       *
+       *  See Mock#receives for usage.
+       **/
+      recorder.interface        = recorder.receives;
+      recorder.withArguments    = recorder.accepts;
+      recorder.andReturns       = recorder.returns;
+      recorder.andChain         = recorder.chain;
+      recorder.callFunctionWith = recorder.data;
+
+      mock.recorder = recorder;
+      // Do it. Just do it.
+      return recorder;
+    }
+
+    function Receiver () {
+      this.methods    = [];
+      this.properties = {};
+      this.self       = this;
+      // Used to support expects() Receiver instance method till 0.5 tagged.
+      this.tmp        = {};
+    }
+
+    Receiver.prototype = {
+      
+      method: function ( identifier, min, max ) {
+        // Throw error if collision with mock API
+        if ( hasOwnProperty.call( this.self, identifier ) ) {
+          throw {
+            type: "InvalidMethodNameException",
+            msg: "Qmock expects a unique identifier for each mocked method"
+          };
+        }
+
+        // Register public pointer to mocked method instance on receiver object
+        this.self[ identifier ] = new Recorder(
+          new Mock(
+            this.tmp.min || min,
+            this.tmp.max || max,
+            this.self
+          )
+        );
+
+        // Track methods
+        this.methods.push( this.self[ identifier ] );
+
+        // Bam!
+        return this.self[ identifier ].id( identifier );
+      },
+
+      property: function ( prop, value ) {
+        if ( hasOwnProperty.call( this.self, prop ) ) {
+          throw {
+            type: "InvalidPropertyNameException",
+            msg: "Qmock expects a unique key for each stubbed property"
+          };
+        }
+
+        // New property on receiver
+        this.self[ prop ] = value;
+
+        // Track properties
+        this.properties[ prop ] = value;
+        return this.self;
+      },
+
+      /** deprecated
+       * Mock#expects( [min = null] [, max = null] ) -> Mock
+       * - min (Number): Miniumum number of times mock object should be
+       *  invoked. If max parameter not passed then number becomes a 'strict'
+       *  invocation expectation (even zero). Default is <code>null</code>.
+       * - max (Number) _optional_: Maximum number of times mocked method
+       *  should be called. If want 'at least _n_' then just pass
+       *  <code>Infinity</code>. Default is <code>null</code>
+       *
+       *  *DEPRECATED*: Was a factory method for creating new mock objects 
+       *  (methods / properties) on a receiver object, but mock receiver 
+       *  object.
+       *  
+       *  Till version 0.5 will be backward compatible, but developers should
+       *  use <code>.method( name, min, max )</code>, or <code>.calls()</code> 
+       *  instead.
+       **/
+      expects: function ( min, max ) {
+        this.tmp.min = min;
+        this.tmp.max = max;
+        return this.self;
+      },
+
+      verify: function () {
+        // Verify receiver if fn
+        var result      = true,
+            exceptions  = ( this.self.__getExceptions ) ? this.self.__getExceptions() : [];
+
+        // Verify members
+        for (var i = 0, len = this.methods.length; i < len; i++) {
+          result &= this.methods[ i ].verify();
+          // Gather exceptions from tree of mock instances
+          exceptions = exceptions.concat( this.methods[ i ].__getExceptions() );
+        }
+
+        // Live() or Die()
+        if ( !config.failslow && exceptions.length ) {
+          // Pants.
+          throw exceptions;
+        } else {
+        // WIN. \o/
+          return !!result;
+        }
+      },
+
+      reset: function () {
+        // Reset all methods on receiver
+        for (var i = 0, len = this.methods.length; i < len; i++) {
+          this.methods[ i ].reset();
+        }
+        // Reset Properties (could have been mutated)
+        for ( var key in this.properties ) {
+          if( hasOwnProperty.call( this.properties, key ) ) {
+            this.self[ key ] = this.properties[ key ];
+          }
+        }
+        return true;
+      }
+    }
 
     /**
      * new Mock( definition )
@@ -1258,7 +1329,7 @@
      *  <pre><code>// Via API
      *  var ninja = new Mock();
      *
-     *  ninja.expects(1).method('foo').returns('bar');
+     *  ninja.method('foo').returns('bar');
      *
      *  // Via definition map
      *  ninja = new Mock({
@@ -1281,82 +1352,47 @@
      *  })
      *  </code></pre>
      **/
-    function Receiver ( definition ) {
+    function ProxyReceiver ( definition, obj ) {
 
-      // The stub
-      function mock () {
-        // Update Receiver instance state and return itself or explicit value
-        return recorder.apply( null, arguments );
-      }
+      // Private Receiver state
+      var receiver = new Receiver,
 
-      // Create internal state
-      var state = new Member(),
-          // Bind delegated stub invocation to Receiver instance state
-          recorder = createStub( mock );
-
-      // Can't use receiver.prototype as function literal prototype not in prototype chain,
-      // e.g. a lookup for (function () {}).foo goes to Function.prototype.foo (__proto__)
-      // Pseudo-inheritance by copying values & references over to instance
-      // Internal state is thus public, otherwise all methods on Member.prototype would
-      // need manual scoping with .call() which too much of a dependency.
-      for ( var key in state ) {
-        // Ultra-protective but Mr. D is right...
-        if ( hasOwnProperty.call( state, key )
-          || hasOwnProperty.call( Member.prototype, key ) ) {
-          mock[ key ] = state[ key ];
+      // Create mock + recorder if definition supplied, else use passed object
+      // or object literal as simple proxy receiver
+      // update receiver pointer to proxy so methods/props attached correctly
+      proxy = receiver.self = ( definition ) 
+        ? new Recorder( new Mock ) 
+        : obj || {};
+      
+      // API - Curry prototypal inherited methods and bind private receiver state
+      /*for ( var key in Receiver.prototype ) {
+        if( hasOwnProperty.call( Receiver.prototype, key ) ) {
+          proxy[ key ] = (function ( method, fn ) {
+            return function proxy () {
+              if ( fn ) { fn(); }
+              return receiver[ method ].apply( receiver, arguments );
+            };
+          })( key, ( /verify|reset/.test( key ) ) ? proxy[ key ] : null );
         }
-      }
-
-      /**
-       * Mock#expects( [min = null] [, max = null] ) -> Mock
-       * - min (Number): Miniumum number of times mock object should be
-       *  invoked. If max parameter not passed then number becomes a 'strict'
-       *  invocation expectation (even zero). Default is <code>null</code>.
-       * - max (Number) _optional_: Maximum number of times mocked method
-       *  should be called. If want 'at least _n_' then just pass
-       *  <code>Infinity</code>. Default is <code>null</code>
-       *
-       *  Factory for creating new mock objects (methods / properties) on the
-       *  mock receiver object.
-       *
-       *  See QMock wiki for patterns.
-       *
-       **/
-      mock.expects = function ( min, max ) {
-        mock.tmp.min = min;
-        mock.tmp.max = max;
-        return mock;
-        // return createMember( min, max, mock );
-      };
-
-      // Test *both* receiver mock and bound mock methods.
-      mock.verify = function () {
-        return verifyReceiver( mock, new ErrorHandler( mock ) );
-      }
+      }*/
+      
+      bindInterface( Receiver.prototype, proxy, receiver, /verify|reset/ );
 
       // Update default return state on Constuctors to themselves (for
       // cascade-invocation-style declarations). If the return value is overidden
       // post-instantiation then it is assumed the mock is a standalone function
       // constuctor and not acting as a receiver object (aka namespace / class)
-      mock._returns = mock;
-
-      // Store methods & properties declared on receiver
-      mock._methods = [];
-      mock._properties = {};
-
-      // Store verification errors
-      mock._exceptions = [];
+      if ( proxy.__getState && proxy.__getState() instanceof Mock ) {
+        proxy.chain();
+      }
 
       // Backward compatibility with QMock v0.1 API
-      mock.expectsArguments = mock.accepts;
-      mock.andExpects = mock.expects;
-
-      // Backward compatibility with QMock v0.2 API
-      mock.tmp = {};
-
+      proxy.expectsArguments  = proxy.accepts;
+      proxy.andExpects        = proxy.expects;
+      
       // If params passed to Mock constructor auto-magikally create mocked
       // interface from definition map
-      return ( definition ) ? createMock( mock, definition ) : mock;
+      return ( definition ) ? createMock( proxy, definition ) : recorder;
     }
 
     // PUBLIC API
@@ -1371,16 +1407,39 @@
       /** alias of: Mock
        * QMock.Mock() -> mock receiver / constructor / method / property object
        **/
-      Mock    : Receiver,
+      Mock    :  function ( map ) {
+        return new ProxyReceiver ( map || {} );
+      },
       /**
        * QMock.utils
        *  Utility methods for use on 'excised' mock instances or testing.
        **/
       utils   : {
-        verify  : verifyReceiver,
-        reset   : resetMock,
+        /**
+         * QMock.utils.verify( receiver [, raise] ) -> Boolean | Exception
+         *  - receiver (Mock): mock / receiver object to test
+         *  - raise (Function) _optional_: Function to handle false comparison
+         *  results
+         *
+         *  Verifies the receiver object (the parent mock object) first, then
+         *  individual members. Only passes if whole object tree passes, else
+         *  throws exception (fail fast).
+         **/
+        verify  : function ( mock ) {
+          if ( mock.verify ) {
+            return mock.verify();
+          }
+        },
+        reset   : function ( mock) {
+          if ( mock.reset ) {
+            return mock.reset();
+          } 
+        },
         is      : is,
-        test    : comparePresentation
+        test    : function () {
+          arguments[0] = getState( arguments[0] );
+          return comparePresentation.apply( null, arguments );
+        }
       },
       // only exposed for integration tests
       __createMock : createMock

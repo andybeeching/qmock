@@ -23,7 +23,6 @@
 	test("Mock.end() [utility] instance method", function () {
 
 	  expect(1);
-
 	  var mock = new Mock,
 	      foo = mock.expects().method('foo').end();
 
@@ -37,7 +36,7 @@
 	  var mock = new Mock,
 	      foo = mock.expects().method('foo').id('bar');
 
-	  equals(foo._id, "bar", "mock should have the descriptor 'bar'");
+	  equals(foo.__getState().name, "bar", "mock should have the descriptor 'bar'");
 
 	});
 
@@ -77,7 +76,6 @@
 
  	  // Test invalid property naming
  	  try {
- 	    debugger;
  	    ninja.expects(1).property('expects');
  	    ok(false, "mock should throw 'InvalidPropertyNameException' when trying to set a bad property name of 'expects'");
  	  } catch (e) {
@@ -111,8 +109,8 @@
  	    .andExpects()
  	      .property("master", "The Chrome");
 
- 	  samurai.swing();
  	  // Good Exercise
+ 	  samurai.swing();
  	  ok( samurai.verify(), "verify() should pass after swing was called once" );
  	  ok( ( (samurai.rank === "apprentice") && (samurai.master === "The Chrome") ) , "ninja mock object should have a two properties set correctly")
 
@@ -164,7 +162,6 @@
  	  expect(14);
 
  	    var mock = new Mock;
-      debugger;
  	    mock
  	    .expects(1)
  	      .method('getNumericValue').returns(10)
@@ -219,7 +216,6 @@
 
 	  // Test invalid method naming - protect API if using mocked member interface to set methods and properties
 	  try {
-	    debugger;
 	    ninja.expects(1).method('expects');
 	    ok(false, "mock should detect bad method name 'expects'");
 	  } catch (e) {
@@ -324,8 +320,8 @@
 	    .expects(1, 3)
 	      .method('swing');
 
-	  // Test _getState for mockedMembers.
-	  equals(ninja.swing._getState()._called, 0, "verify() should be true. Result");
+	  // Test __getState for mockedMembers.
+	  equals(ninja.swing.__getState().called, 0, "verify() should be true. Result");
 
 	  // Bad Exercise - no swings
     try {
@@ -461,10 +457,10 @@
 
     try {
       ninja.verify();
-        ok(false, "verify() should throw exception when ninja.swing() is passed NO parameters");
+      ok(false, "verify() should throw exception when ninja.swing() is passed NO parameters");
     } catch (exception) {
-        equals(exception.length, 1, "verify() should return 1 exception when ninja.swing() passed NO parameters");
-        equals(exception[0].type, "IncorrectNumberOfArgumentsException", "verify() exception type should be IncorrectNumberOfArgumentsException for NO parameters");
+      equals(exception.length, 1, "verify() should return 1 exception when ninja.swing() passed NO parameters");
+      equals(exception[0].type, "IncorrectNumberOfArgumentsException", "verify() exception type should be IncorrectNumberOfArgumentsException for NO parameters");
     }
 
     ninja.reset();
@@ -2090,7 +2086,6 @@
 	test("mocked method with multiple strict (*Natives*) parameter expectations - all required", function () {
 
 	  expect(6);
-
 	  var ninja = new Mock;
 	  ninja
 	    .expects(1)
@@ -2382,7 +2377,6 @@
 		// Correct Usage
 
 		var called = false;
-
 		$.get('path/to/resource', function (data) { called = data.foo });
 
 	  equals(called, 'bar', "var called should be set to true when $.get() passed (String: url, Function: callback)");
@@ -2472,16 +2466,13 @@
 
 	  // Mock jQuery
 	  var $ = new Mock ();
-
 	  $.accepts("#foo")
   	  .expects(1)
 	    .method('html')
   	    .accepts('<span>blah</span>');
 
 	  // Bad Exercise
-
 	  // Test invalid parameter type
-
     $(1).html('<span>blah</span>');
 
     try {
@@ -2508,7 +2499,6 @@
     $.reset();
 
     // Good Exercise
-
     $("#foo").html('<span>blah</span>');
     ok($.verify(), "verify() should be true when $ passed (String: '#foo')");
 
@@ -3023,7 +3013,7 @@
 	  equals(mock.verify(), false, "mock.verify should return 'false', and NOT throw an error when in 'fail slow' mode");
 
 	  // Check exception was actually thrown but suppressed for debugging
-	  equals(mock.foo._getState().__getExceptions()[0].type, "IncorrectNumberOfMethodCallsException", "mock.verify() should have raised an 'IncorrectNumberOfMethodCallsException' object");
+	  equals(mock.foo.__getExceptions()[0].type, "IncorrectNumberOfMethodCallsException", "mock.verify() should have raised an 'IncorrectNumberOfMethodCallsException' object");
 
 	});
 
@@ -3084,7 +3074,6 @@
   });
 
   test("QMock.Utils.verify() utility method", function () {
-
     var mock = new Mock;
 
     // Setup
@@ -3099,7 +3088,7 @@
       equals(e[0].type, "IncorrectNumberOfArgumentsException", "QMock.utils.verify() should throw a 'IncorrectNumberOfArgumentsException' error when mock NOT invoked")
     }
     mock.reset();
-
+    
     mock("foo");
     equals( QMock.utils.verify(mock), true, "QMock.utils.verify() should return true when mock passed (String: 'foo')")
     mock.reset();
@@ -3131,14 +3120,14 @@
 
     // Time of writing this info on standalone mocks pseudo-private
     // Check state was updated
-    equals( mock._called, 1, "mock should have 1 invocation registered");
-    equals( mock._received.length, 1, "mock should have one presentation to 'foo' interface registered");
+    equals( mock.__getState().called, 1, "mock should have 1 invocation registered");
+    equals( mock.__getState().received.length, 1, "mock should have one presentation to 'foo' interface registered");
 
     // Reset
     QMock.utils.reset(mock);
     // Check state has been reset
-    equals( mock._called, 0, "mock should have 0 invocations registered");
-    equals( mock._received.length, 0, "mock should have NO presentations to 'foo' interface registered");
+    equals( mock.__getState().called, 0, "mock should have 0 invocations registered");
+    equals( mock.__getState().received.length, 0, "mock should have NO presentations to 'foo' interface registered");
     equals( mock.bar, "baz", "mock should have a property 'bar' with a value of 'baz'");
 
   });
@@ -3201,7 +3190,7 @@
 
 	test("[0.2] Constructor and mockedMember object API backward compatibility", function () {
 
-	  expect(3);
+	  expect(5);
 
 	  // Setup - Test support for andChain method on mocked methods
 
@@ -3246,6 +3235,18 @@
 
 	  // Good exercise & verify
 	  ok(mock.verify(), "verify() should pass if foo called a random amount of times between a specified range");
+	  
+	  // Setup - Test support for expects() instantiating member instance method
+
+ 	  var mock = new Mock;
+ 	  mock
+ 	    .expects()
+ 	      .property("foo", "bar")
+ 	    .expects(1,2)
+ 	      .method("baz");
+
+	  equals(mock.foo, "bar", "mock should have a property 'foo' with a value 'bar'");
+	  equals(typeof mock.baz, "function", "mock should have a method 'baz'");
 
 	});
 

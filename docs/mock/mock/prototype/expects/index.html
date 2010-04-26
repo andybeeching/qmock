@@ -42,14 +42,14 @@
           
             <li><div class="menu-item"><a class="section current-parent" title="Mock section (section)" href="../../../../mock/">Mock section</a></div><ul class="menu-section"><li><div class="menu-item"><a class="class current-parent" title="Mock (class)" href="../../../../mock/mock/">Mock</a></div><ul><li><div class="menu-item"><a class="constructor" title="new Mock (constructor)" href="../../../../mock/mock/new/">new</a></div></li>
 <li><div class="menu-item"><a class="instance-method" title="Mock#__getExceptions (instance method)" href="../../../../mock/mock/prototype/__getexceptions/">__getExceptions</a></div></li>
-<li><div class="menu-item"><a class="instance-method" title="Mock#_getState (instance method)" href="../../../../mock/mock/prototype/_getstate/">_getState</a></div></li>
+<li><div class="menu-item"><a class="instance-method" title="Mock#__getState (instance method)" href="../../../../mock/mock/prototype/__getstate/">__getState</a></div></li>
 <li><div class="menu-item"><a class="instance-method" title="Mock#accepts (instance method)" href="../../../../mock/mock/prototype/accepts/">accepts</a></div></li>
 <li><div class="menu-item"><a class="instance-method deprecated" title="Mock#andExpects (instance method)" href="../../../../mock/mock/prototype/andexpects/">andExpects</a></div></li>
 <li><div class="menu-item"><a class="instance-method deprecated" title="Mock#atLeast (instance method)" href="../../../../mock/mock/prototype/atleast/">atLeast</a></div></li>
 <li><div class="menu-item"><a class="instance-method" title="Mock#calls (instance method)" href="../../../../mock/mock/prototype/calls/">calls</a></div></li>
 <li><div class="menu-item"><a class="instance-method" title="Mock#data (instance method)" href="../../../../mock/mock/prototype/data/">data</a></div></li>
 <li><div class="menu-item"><a class="instance-method" title="Mock#end (instance method)" href="../../../../mock/mock/prototype/end/">end</a></div></li>
-<li><div class="menu-item"><a class="instance-method current" title="Mock#expects (instance method)" href="../../../../mock/mock/prototype/expects/">expects</a></div></li>
+<li><div class="menu-item"><a class="instance-method deprecated current" title="Mock#expects (instance method)" href="../../../../mock/mock/prototype/expects/">expects</a></div></li>
 <li><div class="menu-item"><a class="instance-method" title="Mock#id (instance method)" href="../../../../mock/mock/prototype/id/">id</a></div></li>
 <li><div class="menu-item"><a class="instance-method deprecated" title="Mock#interface (instance method)" href="../../../../mock/mock/prototype/interface/">interface</a></div></li>
 <li><div class="menu-item"><a class="instance-method" title="Mock#method (instance method)" href="../../../../mock/mock/prototype/method/">method</a></div></li>
@@ -80,6 +80,8 @@
 
 
 
+
+  <div id="deprecated"><img width="150" alt="Deprecated" src="../../../../images/deprecated.png" height="150" /></div>
 
 
 <ul class="breadcrumbs clearfix">
@@ -120,10 +122,13 @@ should be called. If want 'at least <em>n</em>' then just pass
 </ul>
 
 
-<p> Factory for creating new mock objects (methods / properties) on the
- mock receiver object.</p>
+<p> <em>DEPRECATED</em>: Was a factory method for creating new mock objects
+ (methods / properties) on a receiver object, but mock receiver
+ object.</p>
 
-<p> See QMock wiki for patterns.</p>
+<p> Till version 0.5 will be backward compatible, but developers should
+ use <code>.method( name, min, max )</code>, or <code>.calls()</code>
+ instead.</p>
 
       
       
