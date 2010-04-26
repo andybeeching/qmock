@@ -106,7 +106,7 @@
   <div class="section-content">
     <div class="method-description">
       
-        <pre class="syntax"><code class="ebnf">new Mock( definition )</code></pre>
+        <pre class="syntax"><code class="ebnf">new Mock( definition [, isFunction] )</code></pre>
 
   <ul class="argument-list">
     
@@ -119,6 +119,15 @@
 
       </li>
     
+      <li>
+        <code class="argument-name">isStub</code>
+        
+          <span class="argument-types">(<code>Boolean</code>)</span>
+        
+         &ndash; Designated whether receiver object itself is a stub function (a la jQuery constructor). Default for QMock is true.
+
+      </li>
+    
   </ul> <!-- .argument-list -->
 
       
@@ -127,6 +136,8 @@
 object is a function that can act as a namespace object (aka a
 'receiver'), or as a mocked function / constructor with expectations,
 or both (e.g. jQuery $).</p>
+
+<p>Can be called with or without the <code>new</code> keyword</p>
 
 <h4>Example</h4>
 

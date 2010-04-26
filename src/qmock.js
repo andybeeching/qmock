@@ -228,7 +228,7 @@
     
     /* [Private]
      * 
-     *  bindInterface( master, receiver, scope, re )
+     *  bindInterface( master, receiver, scope [, re] )
      *  - master (Object): Interface to copy and bind (e.g. Mock.prototype)
      *  - receiver (Object): Object to copy interface to
      *  - scope (Object): Object to bind copied methods to (the execution scope)
@@ -261,9 +261,11 @@
       }
     }
 
-    /* [Private]
+    /* [Private]
+
      * TODO: Define this!
-     *  get#methodName(parameters)
+     *  get#methodName(parameters)
+
      **/
     function getState ( obj ) {
       // early exclusion
@@ -648,12 +650,18 @@
       return map;
     }
 
-    /*
-     * Class#methodName(parameters)
-     * 
-     * 
-     * 
-     * 
+    /*
+
+     * Class#methodName(parameters)
+
+     * 
+
+     * 
+
+     * 
+
+     * 
+
      **/
     function Mock ( min, max, receiver ) {
       // Constructor protection, Mock should be only used as constructor
@@ -1191,13 +1199,9 @@
         return exerciseMock.apply( mock, arguments );
       };
 
-      // API - Curry prototypal inherited methods and bind private mock state
-      for ( var key in Mock.prototype ) {
-        if( hasOwnProperty.call( Mock.prototype, key ) ) {
-          recorder[ key ] = bind( Mock.prototype[ key ], mock ); 
-        }
-      }
-
+      // Public API - Bind prototypal inherited methods and to private receiver state
+      bindInterface( Mock.prototype, recorder, mock );
+      
       // Backward compatibility for QMock v0.1/0.2 API
 
       /** alias of: Mock#receives(), deprecated
@@ -1333,9 +1337,11 @@
     }
 
     /**
-     * new Mock( definition )
+     * new Mock( definition [, isFunction] )
      *  - definition (Hash): Hash of Mock expectations mapped to Mock object
      *  API.
+     *  - isStub (Boolean): Designated whether receiver object itself is a 
+     *  stub function (a la jQuery constructor). Default for QMock is true.
      *
      *  Constructor for mock receiver, methods and properties. The return
      *  object is a function that can act as a namespace object (aka a
@@ -1371,30 +1377,20 @@
      *  })
      *  </code></pre>
      **/
-    function createReceiver ( definition, obj ) {
+    function createReceiver ( definition, isStub ) {
 
       // Private Receiver state
-      var receiver = new Receiver,
+      var receiver  = new Receiver,
+          isStub    = (typeof isStub === "boolean") ? isStub : true;
 
       // Create mock + recorder if definition supplied, else use passed object
       // or object literal as simple proxy receiver
       // update receiver pointer to proxy so methods/props attached correctly
-      proxy = receiver.self = ( definition ) 
+      proxy = receiver.self = ( isStub ) 
         ? createRecorder( new Mock ) 
-        : obj || {};
+        : {};
       
-      // API - Curry prototypal inherited methods and bind private receiver state
-      /*for ( var key in Receiver.prototype ) {
-        if( hasOwnProperty.call( Receiver.prototype, key ) ) {
-          proxy[ key ] = (function ( method, fn ) {
-            return function proxy () {
-              if ( fn ) { fn(); }
-              return receiver[ method ].apply( receiver, arguments );
-            };
-          })( key, ( /verify|reset/.test( key ) ) ? proxy[ key ] : null );
-        }
-      }*/
-      
+      // Public API - Bind prototypal inherited methods and to private receiver state
       bindInterface( Receiver.prototype, proxy, receiver, /verify|reset/ );
 
       // Update default return state on Constuctors to themselves (for
@@ -1426,8 +1422,8 @@
       /** alias of: Mock
        * QMock.Mock() -> mock receiver / constructor / method / property object
        **/
-      Mock    :  function ( map ) {
-        return createReceiver ( map || {} );
+      Mock    :  function ( map, bool ) {
+        return createReceiver ( map || {}, bool );
       },
       /**
        * QMock.utils
