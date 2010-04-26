@@ -320,7 +320,7 @@
       // interface checks - duck type mock check since instanceof won't work
       if ( typeof mock.expects === "undefined" ) {
         // If not valid then create a new mock instance to augment
-        mock = new Recorder( new Mock );
+        mock = createRecorder( new Mock );
       } else if ( definition == null ) {
         throw new Error("createMock() requires a defintion map {}");
       }
@@ -1159,18 +1159,19 @@
     }; // end Mock.prototype declaration
 
     /* [Private]
-     * new Recorder( [ min = 0 ] [, max = null ] )
-     *  - min (Number) _optional_: Miniumum number of times mocked method
-     *  should be called. If max parameter not passed then number becomes a
-     *  'strict' invocation expectation (even zero).
-     *  - max (Number) _optional_: Maximum number of times mocked method
-     *  should be called. If want 'at least _n_' then just pass Infinity.
-     *  - receiver (Object) _optional_: Receiver object upon which the mock
-     *  instance is attached.
-     *
-     *  Prototype for mock objects (constructors, methods & properties).
+     * createRecorder( mock ) -> Function
+     *  
+     *  Factory method to create a stub function to be attached to a receiver
+     *  object, bound to a passed mock instance. Upon invocation within an SUT
+     *  the mock state will be mutated, and any corresponding declared return 
+     *  values will be retrieved and output.
      **/
-    function Recorder ( mock ) {
+    function createRecorder ( mock ) {
+      
+      // Check mock implements correct interface
+      if ( !(mock instanceof Mock) ) {
+        throw new Error("createRecorder() expects an instance of mock as the only parameter");
+      }
 
       // Mutator for mock instance state
       // Exercises callbacks for async transactions
@@ -1224,7 +1225,7 @@
         }
 
         // Register public pointer to mocked method instance on receiver object
-        this.self[ identifier ] = new Recorder(
+        this.self[ identifier ] = createRecorder(
           new Mock(
             this.tmp.min || min,
             this.tmp.max || max,
@@ -1361,7 +1362,7 @@
       // or object literal as simple proxy receiver
       // update receiver pointer to proxy so methods/props attached correctly
       proxy = receiver.self = ( definition ) 
-        ? new Recorder( new Mock ) 
+        ? createRecorder( new Mock ) 
         : obj || {};
       
       // API - Curry prototypal inherited methods and bind private receiver state
