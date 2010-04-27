@@ -262,10 +262,8 @@
     }
 
     /* [Private]
-
      * TODO: Define this!
      *  get#methodName(parameters)
-
      **/
     function getState ( obj ) {
       // early exclusion
@@ -279,342 +277,9 @@
       }
       return false;
     }
-
-    // SETUP PHASE Functions
-
-    /* [Private]
-     *
-     * createMock( mock, definition ) -> Boolean
-     *  - mock (Mock): Mock instance to augment
-     *  - definition (Hash): Hash of Mock expectations mapped to Mock object
-     *  API.
-     *
-     *  Factory method which interprets a JSON map of a desired mock object interface
-     *  (with expectations) and augments a Mock instance with them.
-     *
-     *  #### Example
-     *
-     *  <pre><code>
-     *  new Mock({
-     *    // method
-     *    "foo": {
-     *      "id"      : "Descriptor / Identifier"
-     *      "accepts"   : "bar",
-     *      "receives"  : {"accepts": "foo", data: "stub", returns: "bar"}
-     *      "returns"   : "baz",
-     *      "required"  : 1,
-     *      "overload"  : true,
-     *      "data"      : "response",
-     *      "chain"     : true // arg not used, readability only
-     *      "calls"     : 1
-     *    },
-     *    // property
-     *    "bar": {
-     *      "value": "stub"
-     *    }
-     *  })
-     *  </code></pre>
-     *
-     *  _See integration tests or wiki for more in-depth patterns_.
-     **/
-    function createMock ( mock, definition ) {
-
-      // interface checks - duck type mock check since instanceof won't work
-      if ( typeof mock.expects === "undefined" ) {
-        // If not valid then create a new mock instance to augment
-        mock = createRecorder( new Mock );
-      } else if ( definition == null ) {
-        throw new Error("createMock() requires a defintion map {}");
-      }
-
-      var name, obj, prop;
-
-      // iterate through mock expectation and set configuration for each
-      setExpectations: for ( name in definition ) {
-        if ( hasOwnProperty.call( definition, name ) ) {
-
-          // determine if mock === receiver || constructor
-          var isBound = typeof mock[ name ] === "undefined",
-              // set config for mock type
-              config = ( isBound ) ? definition[ name ] : definition,
-              // expectation === method || property
-              isMethod = !!( typeof config.value === "undefined" );
-
-          // augment receiver object with mocked property or method if doesn't exist
-          // else assume mock is a constructor and augment that instance itself
-          if ( isBound ) {
-            mock = mock.expects()[ isMethod ? "method" : "property" ]( name );
-          }
-
-          // For each method expectation check if callable method and invoke
-          if ( isMethod ) {
-            configExpectation: for ( prop in config ) {
-              if ( hasOwnProperty.call( config, prop ) && is( mock[ prop ], "Function" ) ) {
-                  // Use apply in conjunction to normaliseToArray in case of
-                  // multiple values per expectation (e.g. mock.receives)
-                  // Support for [] grouping notation
-                  mock[ prop ].apply( mock, normaliseToArray( config[ prop ] ) );
-              }
-            } // end configExpectation...
-          } else {
-            // If expectation not method then simply set property
-            mock[ name ] = config.value;
-          }
-        }
-        // For now break since only setting expecations on one mock instance
-        // aka the constructor
-        if ( !isBound ) {
-          break setExpectations;
-        }
-      } // end setExpectations...
-      return mock;
-    }
-
-    /* [Private]
-
-     * new ErrorHandler( mock ) -> Function
-     *  - mock ( Mock ): Mock instance to associate error with
-     **/
-    function ErrorHandler ( exceptions ) {
-      return function () {
-        exceptions.push( createException.apply( null, arguments ) );
-      };
-    }
-
-    // EXERCISE PHASE functions
     
-    /* [Private]
-     *
-     * exerciseMock( mock ) -> Function
-     *
-     *  Utility for recording inputs to a given mock and mutating it's internal
-     *  state. Instance state is mutated when a stubbed function is invoked as 
-     *  part of a 'system under test' (SUT) exercise phase.
-     *
-     *  _Returns_: The mapped return value for the presentation made to the
-     *  stub interface, or the default mock return (at instantiation is 
-     *  <code>undefined</code>).
-     **/
-    function exerciseMock () {
-      // Normalise actual parameters
-      var presentation = slice.call( arguments );
-      // Mutate state
-      this.called++;
-      this.received.push( presentation );
-      // Stub responses
-      exerciseCallbacks( this, presentation );
-      return exerciseReturn( this, presentation );
-    }
-
-    /* [Private]
-     *
-     * exerciseCallbacks(presentation, method) -> Boolean
-     *  - mock (Mock): mock instance to exercise callbacks on
-     *  - presentation (Array | Collection): Presentation made / to be made to
-     *  mocked method
-     *
-     *  If the presentation made to the mock object interface contains a
-     *  function object, then the presentation is tested for a matching 'data'
-     *  expectation on the mocked method instance.
-     *
-     *  If a match is found then the canned data parameters are passed to what
-     *  is assumed to be callback and it is invoked.
-     *
-     *  This is mostly used to simulate ajax or event callbacks during an
-     *  exercise phase.
-     **/
-    function exerciseCallbacks ( mock, presentation ) {
-      // Execute any callback functions specified with associated args
-      for (var i = 0, len = presentation.length, data; i < len; i++) {
-        // Check if potential callback passed
-        if ( presentation[ i ] && is( presentation[ i ], "Function" ) ) {
-          // Use data associated with presentation, or default to 'global' data
-          // if available
-          data = comparePresentation( mock, presentation, "data" ) || mock.dataRep;
-          if ( data != null ) {
-            presentation[ i ].apply( null, normaliseToArray( data ) );
-          }
-          // reset data to undefined for next pass (multiple callbacks)
-          data = null;
-        }
-      }
-      return true;
-    }
-
-    /* [Private]
-     *
-     * exerciseReturn(presentation, method) -> Object | undefined
-     *  - mock (Mock): mock instance to exercise return on
-     *  - presentation (Array): Presentation made / to be made to mocked method
-     *
-     *  Function tests presentation against mock object interface expectations.
-     *
-     *  If match found then lookup is made for a corresponding 'returns'
-     *  property.
-     *
-     *  If not found then catch-all 'return' value is returned, which defaults
-     *  to <code>undefined</code> (as per spec).
-     **/
-    function exerciseReturn ( mock, presentation ) {
-      return comparePresentation( mock, presentation, "returns" ) || mock.returnVal;
-    }
-
-    // TODO: Either abstract this out or simplify
-
-    /* [Private]
-     *
-     * createException( actual, expected, exceptionType, identifier ) -> Hash
-     *  - actual (Object): The presentation received by the mock interface
-     *  - expected (Object): Expectations set on the mock object
-     *  - exceptionType (String): Exception type
-     *  - identifier (String): Identifier for mock instance
-     *
-     * _returns_: Hash with pertinent information regarding the error caused.
-     **/
-    function createException ( actual, expected, exceptionType, identifier ) {
-
-      var e = {
-          type : exceptionType
-        },
-        fn = "'" + identifier + "'";
-
-      switch (exceptionType) {
-        case "IncorrectNumberOfArgumentsException":
-        case "MismatchedNumberOfMembersException":
-          e.message = fn + " expected: " + expected
-            + " items, actual number was: " + actual;
-          break;
-        case "IncorrectNumberOfMethodCallsException":
-          e.message = fn + " expected: " + expected
-            + " method calls, actual number was: " + actual;
-          break;
-        case "MissingHashKeyException":
-          e.message = fn + " expected: " + expected
-            + " key/property to exist on 'actual' object, actual was: " + actual;
-          break;
-        default:
-          e.message = fn + " expected: " + expected
-            + ", actual was: " + actual;
-      }
-      return e;
-    }
-
-
-    // VERIFY PHASE functions
-
-    /* [Private]
-     * QMock.verifyInvocations( mock ) -> Boolean
-     * - mock (Mock): mock instance to test
-     *
-     *  Evaluates if amount of times a mock object (method/constructor) has been
-     *  invoked matches expectations
-     **/
-    function verifyInvocations ( mock ) {
-      return ( mock.minCalls == null )
-        // No invocation expectation so result is true.
-        ? true
-        // If one expression below true then return else expectations not met
-        // so false
-        : (
-          // explicit call number defined
-          mock.minCalls === mock.called
-          // arbitrary range defined
-          || ( mock.minCalls <= mock.called )
-            && ( mock.maxCalls >= mock.called )
-          // at least n calls
-          || ( mock.minCalls < mock.called )
-            && ( mock.maxCalls === Infinity )
-        );
-    }
-
-    /* [Private]
-     * QMock.verifyOverloading( mock ) -> Boolean
-     * - mock (Mock): mock instance to test
-     *
-     *  Evaluates if number of parameters passed to mock object falls
-     *  below / exceeeds expectations
-     **/
-    function verifyOverloading ( mock ) {
-      return ( ( mock.overloadable )
-        // At least n Arg length checking - overloading allowed
-        ? ( mock.requires > mock.received[0].length )
-        // Strict Arg length checking - no overload
-        : ( mock.requires !== mock.received[0].length )
-      );
-    }
-
-    /* [Private]
-     * QMock.verifyPresentation( mock, presentation ) -> Boolean
-     *  - mock (Mock): mock object to test against
-     *  - presentation (Array): Presentation made / to be made to mock object
-     *  interface
-     *
-     *  Evaluate a single presentation against all mock object interface
-     *  expectations. Single match equals true.
-     **/
-    function verifyPresentation ( mock, presentation ) {
-      if ( isCompare() ) {
-        for (var i = 0, len = mock.expected.length, expected, result = true; i < len; i++) {
-          // reset so that empty presentation and empty expectation return true
-          // If no expectations then won't be reached... returns true.
-          result = false;
-
-          // expectation to compare
-          expected = mock.expected[ i ].accepts;
-
-          // If overloading allowed only want to check parameters passed-in
-          // (otherwise will fail). Must also trim off overloaded args as no
-          // expectations for them.
-          if ( mock.overloadable === true ) {
-            presentation = trimCollection( presentation, expected );
-            expected  = trimCollection( expected, presentation );
-          }
-
-          // Else if overloading disallowed just pass through expected and
-          // actual
-          result |= config.compare( presentation, expected );
-
-          // If true then exit early
-          if ( !!result ) {
-            return true;
-          }
-        }
-        return !!result;
-      }
-    }
-
-    /* [Private]
-     * QMock.verifyInterface( mock [, raise] ) -> Boolean
-     *  - mock (Mock): mock object to test
-     *  - raise (Function) _optional_: Function to handle false comparison
-     *  results
-     *
-     *  Evaluate *all* presentations made to mock object interface against all
-     *  mock interface expectations.
-     *
-     *  Each presentation must match an expectation.
-     *
-     *  If no match and optional error handler passed then error raised.
-     **/
-    function verifyInterface ( mock, raise ) {
-      var params = 0, total = mock.received.length, result = true;
-      // For each presentation to the interface...
-      for (; params < total; params++) {
-        // ...Check if a matching expectation
-        result &= verifyPresentation( mock, mock.received[ params ] );
-        // Record which presentations fail
-        if ( !!!result ) {
-          raise && raise(
-            mock.received[ params ],
-            mock.expected,
-            "IncorrectParameterException",
-            mock.id + '()'
-          );
-        }
-      }
-      return !!result;
-    }
-
+    // KLASS DECLARATIONS
+    
     /**
      * == Mock ==
      *  Meh.
@@ -651,17 +316,7 @@
     }
 
     /*
-
      * Class#methodName(parameters)
-
-     * 
-
-     * 
-
-     * 
-
-     * 
-
      **/
     function Mock ( min, max, receiver ) {
       // Constructor protection, Mock should be only used as constructor
@@ -1177,49 +832,6 @@
 
     }; // end Mock.prototype declaration
 
-    /* [Private]
-     * createRecorder( mock ) -> Function
-     *  
-     *  Factory method to create a stub function to be attached to a receiver
-     *  object, bound to a passed mock instance. Upon invocation within an SUT
-     *  the mock state will be mutated, and any corresponding declared return 
-     *  values will be retrieved and output.
-     **/
-    function createRecorder ( mock ) {
-      
-      // Check mock implements correct interface
-      if ( !(mock instanceof Mock) ) {
-        throw new Error("createRecorder() expects an instance of mock as the only parameter");
-      }
-
-      // Mutator for mock instance state
-      // Exercises callbacks for async transactions
-      // Returns itself or explicit value
-      var recorder = function () {
-        return exerciseMock.apply( mock, arguments );
-      };
-
-      // Public API - Bind prototypal inherited methods and to private receiver state
-      bindInterface( Mock.prototype, recorder, mock );
-      
-      // Backward compatibility for QMock v0.1/0.2 API
-
-      /** alias of: Mock#receives(), deprecated
-       * Mock#interface() -> Mock
-       *
-       *  See Mock#receives for usage.
-       **/
-      recorder.interface        = recorder.receives;
-      recorder.withArguments    = recorder.accepts;
-      recorder.andReturns       = recorder.returns;
-      recorder.andChain         = recorder.chain;
-      recorder.callFunctionWith = recorder.data;
-
-      mock.recorder = recorder;
-      // Do it. Just do it.
-      return recorder;
-    }
-
     function Receiver () {
       // Constructor protection
       if( !(this instanceof Receiver ) ) {
@@ -1336,6 +948,53 @@
       }
     }
 
+    // SETUP PHASE Functions
+    // Mainly factory methods that handle instantiation and bindings
+    
+    /* [Private]
+     * createRecorder( mock ) -> Function
+     *  
+     *  Factory method to create a stub function to be attached to a receiver
+     *  object, bound to a passed mock instance. Upon invocation within an SUT
+     *  the mock state will be mutated, and any corresponding declared return 
+     *  values will be retrieved and output.
+     **/
+    function createRecorder ( mock ) {
+      
+      // Check mock implements correct interface
+      if ( !(mock instanceof Mock) ) {
+        throw new Error("createRecorder() expects an instance of mock as the only parameter");
+      }
+
+      // Mutator for mock instance state
+      // Exercises callbacks for async transactions
+      // Returns itself or explicit value
+      function recorder () {
+        return exerciseMock( mock, slice.call( arguments ) );
+      };
+
+      // Public API - Bind prototypal inherited methods and to private receiver state
+      bindInterface( Mock.prototype, recorder, mock );
+      
+      // Backward compatibility for QMock v0.1/0.2 API
+
+      /** alias of: Mock#receives(), deprecated
+       * Mock#interface() -> Mock
+       *
+       *  See Mock#receives for usage.
+       **/
+      recorder.interface        = recorder.receives;
+      recorder.withArguments    = recorder.accepts;
+      recorder.andReturns       = recorder.returns;
+      recorder.andChain         = recorder.chain;
+      recorder.callFunctionWith = recorder.data;
+      
+      // Reference to bound mutator on instance itself (in case of detachment)
+      mock.recorder = recorder;
+      // Do it. Just do it.
+      return recorder;
+    }
+
     /**
      * new Mock( definition [, isFunction] )
      *  - definition (Hash): Hash of Mock expectations mapped to Mock object
@@ -1408,6 +1067,339 @@
       // If params passed to Mock constructor auto-magikally create mocked
       // interface from definition map
       return ( definition ) ? createMock( proxy, definition ) : recorder;
+    }
+    
+    /* [Private]
+     *
+     * createMock( mock, definition ) -> Boolean
+     *  - mock (Mock): Mock instance to augment
+     *  - definition (Hash): Hash of Mock expectations mapped to Mock object
+     *  API.
+     *
+     *  Factory method which interprets a JSON map of a desired mock object interface
+     *  (with expectations) and augments a Mock instance with them.
+     *
+     *  #### Example
+     *
+     *  <pre><code>
+     *  new Mock({
+     *    // method
+     *    "foo": {
+     *      "id"      : "Descriptor / Identifier"
+     *      "accepts"   : "bar",
+     *      "receives"  : {"accepts": "foo", data: "stub", returns: "bar"}
+     *      "returns"   : "baz",
+     *      "required"  : 1,
+     *      "overload"  : true,
+     *      "data"      : "response",
+     *      "chain"     : true // arg not used, readability only
+     *      "calls"     : 1
+     *    },
+     *    // property
+     *    "bar": {
+     *      "value": "stub"
+     *    }
+     *  })
+     *  </code></pre>
+     *
+     *  _See integration tests or wiki for more in-depth patterns_.
+     **/
+    function createMock ( mock, definition ) {
+
+      // interface checks - duck type mock check since instanceof won't work
+      if ( typeof mock.expects === "undefined" ) {
+        // If not valid then create a new mock instance to augment
+        mock = createRecorder( new Mock );
+      } else if ( definition == null ) {
+        throw new Error("createMock() requires a defintion map {}");
+      }
+
+      var name, obj, prop;
+
+      // iterate through mock expectation and set configuration for each
+      setExpectations: for ( name in definition ) {
+        if ( hasOwnProperty.call( definition, name ) ) {
+
+          // determine if mock === receiver || constructor
+          var isBound = typeof mock[ name ] === "undefined",
+              // set config for mock type
+              config = ( isBound ) ? definition[ name ] : definition,
+              // expectation === method || property
+              isMethod = !!( typeof config.value === "undefined" );
+
+          // augment receiver object with mocked property or method if doesn't exist
+          // else assume mock is a constructor and augment that instance itself
+          if ( isBound ) {
+            mock = mock.expects()[ isMethod ? "method" : "property" ]( name );
+          }
+
+          // For each method expectation check if callable method and invoke
+          if ( isMethod ) {
+            configExpectation: for ( prop in config ) {
+              if ( hasOwnProperty.call( config, prop ) && is( mock[ prop ], "Function" ) ) {
+                  // Use apply in conjunction to normaliseToArray in case of
+                  // multiple values per expectation (e.g. mock.receives)
+                  // Support for [] grouping notation
+                  mock[ prop ].apply( mock, normaliseToArray( config[ prop ] ) );
+              }
+            } // end configExpectation...
+          } else {
+            // If expectation not method then simply set property
+            mock[ name ] = config.value;
+          }
+        }
+        // For now break since only setting expecations on one mock instance
+        // aka the constructor
+        if ( !isBound ) {
+          break setExpectations;
+        }
+      } // end setExpectations...
+      return mock;
+    }
+
+    /* [Private]
+
+     * new ErrorHandler( mock ) -> Function
+     *  - mock ( Mock ): Mock instance to associate error with
+     **/
+    function ErrorHandler ( exceptions ) {
+      return function () {
+        exceptions.push( createException.apply( null, arguments ) );
+      };
+    }
+
+    // EXERCISE PHASE functions
+    
+    /* [Private]
+     *
+     * exerciseMock( mock ) -> Function
+     *
+     *  Utility for recording inputs to a given mock and mutating it's internal
+     *  state. Instance state is mutated when a stubbed function is invoked as 
+     *  part of a 'system under test' (SUT) exercise phase.
+     *  
+     *  Has to use <code>this</code> as arguments to recorder consititute a
+     *  'presentation' to the mocked member / object interface.
+     *
+     *  _Returns_: The mapped return value for the presentation made to the
+     *  stub interface, or the default mock return (at instantiation is 
+     *  <code>undefined</code>).
+     **/
+    function exerciseMock ( mock, presentation ) {
+      // Mutate state
+      mock.called++;
+      mock.received.push( presentation );
+      // Stub responses
+      exerciseCallbacks( mock, presentation );
+      return exerciseReturn( mock, presentation );
+    }
+
+    /* [Private]
+     *
+     * exerciseCallbacks(mock, method) -> Boolean
+     *  - mock (Mock): mock instance to exercise callbacks on
+     *  - presentation (Array | Collection): Presentation made / to be made to
+     *  mocked method
+     *
+     *  If the presentation made to the mock object interface contains a
+     *  function object, then the presentation is tested for a matching 'data'
+     *  expectation on the mocked method instance.
+     *
+     *  If a match is found then the canned data parameters are passed to what
+     *  is assumed to be callback and it is invoked.
+     *
+     *  This is mostly used to simulate ajax or event callbacks during an
+     *  exercise phase.
+     **/
+    function exerciseCallbacks ( mock, presentation ) {
+      // Execute any callback functions specified with associated args
+      for (var i = 0, len = presentation.length, data; i < len; i++) {
+        // Check if potential callback passed
+        if ( presentation[ i ] && is( presentation[ i ], "Function" ) ) {
+          // Use data associated with presentation, or default to 'global' data
+          // if available
+          data = comparePresentation( mock, presentation, "data" ) || mock.dataRep;
+          if ( data != null ) {
+            presentation[ i ].apply( null, normaliseToArray( data ) );
+          }
+          // reset data to undefined for next pass (multiple callbacks)
+          data = null;
+        }
+      }
+      return true;
+    }
+
+    /* [Private]
+     *
+     * exerciseReturn(presentation, method) -> Object | undefined
+     *  - mock (Mock): mock instance to exercise return on
+     *  - presentation (Array): Presentation made / to be made to mocked method
+     *
+     *  Function tests presentation against mock object interface expectations.
+     *
+     *  If match found then lookup is made for a corresponding 'returns'
+     *  property.
+     *
+     *  If not found then catch-all 'return' value is returned, which defaults
+     *  to <code>undefined</code> (as per spec).
+     **/
+    function exerciseReturn ( mock, presentation ) {
+      return comparePresentation( mock, presentation, "returns" ) || mock.returnVal;
+    }
+
+    // TODO: Either abstract this out or simplify
+
+    /* [Private]
+     *
+     * createException( actual, expected, exceptionType, identifier ) -> Hash
+     *  - actual (Object): The presentation received by the mock interface
+     *  - expected (Object): Expectations set on the mock object
+     *  - exceptionType (String): Exception type
+     *  - identifier (String): Identifier for mock instance
+     *
+     * _returns_: Hash with pertinent information regarding the error caused.
+     **/
+    function createException ( actual, expected, exceptionType, identifier ) {
+
+      var e = {
+          type : exceptionType
+        },
+        fn = "'" + identifier + "'";
+
+      switch (exceptionType) {
+        case "IncorrectNumberOfArgumentsException":
+        case "MismatchedNumberOfMembersException":
+          e.message = fn + " expected: " + expected
+            + " items, actual number was: " + actual;
+          break;
+        case "IncorrectNumberOfMethodCallsException":
+          e.message = fn + " expected: " + expected
+            + " method calls, actual number was: " + actual;
+          break;
+        case "MissingHashKeyException":
+          e.message = fn + " expected: " + expected
+            + " key/property to exist on 'actual' object, actual was: " + actual;
+          break;
+        default:
+          e.message = fn + " expected: " + expected
+            + ", actual was: " + actual;
+      }
+      return e;
+    }
+
+    // VERIFY PHASE functions
+
+    /* [Private]
+     * QMock.verifyInvocations( mock ) -> Boolean
+     * - mock (Mock): mock instance to test
+     *
+     *  Evaluates if amount of times a mock object (method/constructor) has been
+     *  invoked matches expectations
+     **/
+    function verifyInvocations ( mock ) {
+      return ( mock.minCalls == null )
+        // No invocation expectation so result is true.
+        ? true
+        // If one expression below true then return else expectations not met
+        // so false
+        : (
+          // explicit call number defined
+          mock.minCalls === mock.called
+          // arbitrary range defined
+          || ( mock.minCalls <= mock.called )
+            && ( mock.maxCalls >= mock.called )
+          // at least n calls
+          || ( mock.minCalls < mock.called )
+            && ( mock.maxCalls === Infinity )
+        );
+    }
+
+    /* [Private]
+     * QMock.verifyOverloading( mock ) -> Boolean
+     * - mock (Mock): mock instance to test
+     *
+     *  Evaluates if number of parameters passed to mock object falls
+     *  below / exceeeds expectations
+     **/
+    function verifyOverloading ( mock ) {
+      return ( ( mock.overloadable )
+        // At least n Arg length checking - overloading allowed
+        ? ( mock.requires > mock.received[0].length )
+        // Strict Arg length checking - no overload
+        : ( mock.requires !== mock.received[0].length )
+      );
+    }
+
+    /* [Private]
+     * QMock.verifyPresentation( mock, presentation ) -> Boolean
+     *  - mock (Mock): mock object to test against
+     *  - presentation (Array): Presentation made / to be made to mock object
+     *  interface
+     *
+     *  Evaluate a single presentation against all mock object interface
+     *  expectations. Single match equals true.
+     **/
+    function verifyPresentation ( mock, presentation ) {
+      if ( isCompare() ) {
+        for (var i = 0, len = mock.expected.length, expected, result = true; i < len; i++) {
+          // reset so that empty presentation and empty expectation return true
+          // If no expectations then won't be reached... returns true.
+          result = false;
+
+          // expectation to compare
+          expected = mock.expected[ i ].accepts;
+
+          // If overloading allowed only want to check parameters passed-in
+          // (otherwise will fail). Must also trim off overloaded args as no
+          // expectations for them.
+          if ( mock.overloadable === true ) {
+            presentation = trimCollection( presentation, expected );
+            expected  = trimCollection( expected, presentation );
+          }
+
+          // Else if overloading disallowed just pass through expected and
+          // actual
+          result |= config.compare( presentation, expected );
+
+          // If true then exit early
+          if ( !!result ) {
+            return true;
+          }
+        }
+        return !!result;
+      }
+    }
+
+    /* [Private]
+     * QMock.verifyInterface( mock [, raise] ) -> Boolean
+     *  - mock (Mock): mock object to test
+     *  - raise (Function) _optional_: Function to handle false comparison
+     *  results
+     *
+     *  Evaluate *all* presentations made to mock object interface against all
+     *  mock interface expectations.
+     *
+     *  Each presentation must match an expectation.
+     *
+     *  If no match and optional error handler passed then error raised.
+     **/
+    function verifyInterface ( mock, raise ) {
+      var params = 0, total = mock.received.length, result = true;
+      // For each presentation to the interface...
+      for (; params < total; params++) {
+        // ...Check if a matching expectation
+        result &= verifyPresentation( mock, mock.received[ params ] );
+        // Record which presentations fail
+        if ( !!!result ) {
+          raise && raise(
+            mock.received[ params ],
+            mock.expected,
+            "IncorrectParameterException",
+            mock.id + '()'
+          );
+        }
+      }
+      return !!result;
     }
 
     // PUBLIC API

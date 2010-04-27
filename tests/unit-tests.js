@@ -3030,7 +3030,43 @@
 
     equals(app.config.compare, stub, "Qmock instances should allow the setting of their compare configuration property")
 
-	})
+	});
+	
+	test("QMock.Mock constructor (aliased as global Mock variable)", function () {
+
+    var mock = new QMock.Mock;
+    // Actual mock object constructor isn't exposed (for an instanceof check) so duck type the interface
+    // Since we haven't specified the type of object a receiver should be it returns a mixin function
+    // That implements both the (internal) Receiver & Mock klass interfaces
+    ok(!!(mock.accepts && mock.calls && mock.verify && mock.reset), "Default instantiation of QMock.Mock should implement the Mock klass interface");
+    ok(!!(mock.method && mock.property), "Default instantiation of QMock.Mock should implement the Receiver klass interface");
+    
+    
+    // Try without new keyword
+    mock = QMock.Mock();
+    ok(!!(mock.accepts && mock.calls && mock.verify && mock.reset), "Default instantiation of QMock.Mock (without new keyword) should implement the Mock klass interface");
+    ok(!!(mock.method && mock.property), "Default instantiation of QMock.Mock (without new keyword) should implement the Receiver klass interface");
+    
+    // Try specifying receiver should just be an object (so acts as namespace)
+    var receiver = QMock.Mock({}, false);
+    debugger;
+    // Note plain receiver *shouldn't* 'inherit' methods of Mock if not a function
+    ok(!!(typeof receiver.accepts === "undefined" && typeof receiver.accepts === "undefined"), "Instantitation of QMock.Mock with Boolean flag 'false' for function should return object that doesn't implement Mock klass interface")
+    // But should still implement Receiver klass interface
+    ok(!!(receiver.method && receiver.property && receiver.verify && receiver.reset), "Instantitation of QMock.Mock with Boolean flag 'false' for function should return object that implements Receiver klass interface")
+
+
+    // Try without new keyword
+    receiver = QMock.Mock({}, false);
+    // Note plain receiver *shouldn't* 'inherit' methods of Mock if not a function
+    ok(!!(typeof receiver.accepts === "undefined" && typeof receiver.accepts === "undefined"), "Instantitation of QMock.Mock with Boolean flag 'false' for function should return object (without new keyword) that doesn't implement Mock klass interface")
+    // But should still implement Receiver klass interface
+    ok(!!(receiver.method && receiver.property && receiver.verify && receiver.reset), "Instantitation of QMock.Mock with Boolean flag 'false' for function should return object (without new keyword) that implements Receiver klass interface")
+    
+    // Setup
+    // Try attaching methods / props to 'receiver', exercising, and verifying (same tests used for Mock.receiver() unit tests)
+
+	});
 
 	test("QMock.create() factory method", function () {
 
@@ -3106,7 +3142,7 @@
 
   });
 
-  test("QMock.Utils.reset() utility method", function () {
+  test("QMock.utils.reset() utility method", function () {
 
     var mock = new Mock;
 
@@ -3132,7 +3168,7 @@
 
   });
 
-  test("QMock.Utils.test() utility method", function () {
+  test("QMock.utils.test() utility method", function () {
 
     var mock = new Mock;
 
@@ -3254,7 +3290,7 @@
 	 *
 	 * Integration tests for Mock controller logic - asserting with mock.verify()
 	 *
-	 *  Bit meta, using QMock to mock, er, a the main Mock constructor interface.
+	 *  Bit meta, using QMock to mock, er, it's own returned instance API.
 	 *
 	 */
 
@@ -3265,7 +3301,7 @@
 	  function verifyMetaMock ( mock, type ) {
 	    // For methods we just test interaction with mock object interface by __createMock()
       try {
-        for ( k in mock ) {
+        for ( var k in mock ) {
           if ( mock[ k ].verify ) {
             ok(mock[ k ].verify(), "mock." + k + ".verify() should pass if interacted as expected by __createMock() [" + type + " mock]");
             mock[ k ].verify();
