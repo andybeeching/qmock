@@ -3335,7 +3335,7 @@
       try {
         for ( var k in mock ) {
           if ( mock[ k ].verify ) {
-            ok(mock[ k ].verify(), "mock." + k + ".verify() should pass if interacted as expected by __createMock() [" + type + " mock]");
+            ok(mock[ k ].verify(), "mock." + k + ".verify() should pass if interacted as expected by __createMock() factory method [" + type + " mock]");
             mock[ k ].verify();
             mock[ k ].reset(); // reset for mock constructor test
           }
@@ -3405,6 +3405,13 @@
           .calls(1)
           .accepts("response")
       })(new Mock),
+      
+      "async": (function(fn) {
+        return fn
+          .id("mock.async")
+          .calls(1)
+          .accepts(true)
+      })(new Mock),
 
       "chain": (function(fn) {
         return fn
@@ -3446,15 +3453,16 @@
     var definition = {
       // method called foo
       "foo": {
-        "name": "foobarbaz",
-        "accepts": "foo",
+        "name"    : "foobarbaz",
+        "accepts" : "foo",
         "receives": {"accepts": "foo", data: "stub", returns: "bar"},
-        "returns": "bar",
+        "returns" : "bar",
         "required": 1,
         "overload": true,
-        "data": "response",
-        "chain": {},
-        "calls": [1,2]
+        "data"    : "response",
+        "async"   : true,
+        "chain"   : {},
+        "calls"   : [1,2]
       },
       // property called 'bar'
       "bar": {
@@ -3473,7 +3481,7 @@
 
     // Test Standalone constructor definition via __createMock()
 
-    // Setup - adjust some expectations
+    // Setup - adjust some expectations for constructor only declaration
     mock.method.calls(0);
     mock.property.calls(0);
     mock.expects.calls(1);

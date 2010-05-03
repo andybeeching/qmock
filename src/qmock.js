@@ -567,18 +567,18 @@
         this.dataRep = slice.call( arguments );
         return this.recorder;
       },
-      
+
       /**
        * Mock#async( bool ) -> Mock
-       *  - bool (Boolean): Boolean flag indicating whether callbacks are 
+       *  - bool (Boolean): Boolean flag indicating whether callbacks are
        *  executed asynchronously (even with a delay of 0ms - queued on thread)
-       *  or synchronously (blocking). 
-       *  
-       *  Functions can be passed for a variety of reasons, most commonly as 
+       *  or synchronously (blocking).
+       *
+       *  Functions can be passed for a variety of reasons, most commonly as
        *  callbacks for Ajax transactions, but also as references in closures
-       *  (binding/currying), or as collection mutators (e.g. 
+       *  (binding/currying), or as collection mutators (e.g.
        *  <code>Array.filter</code>).
-       *  
+       *
        *  Additionally Ajax calls can also be made synchronous, thus the mock
        *  interface should be configuarable as to replicate a real collaborator
        *  interface as closely as possible
@@ -1280,7 +1280,7 @@
             if ( mock.async ) {
               // Use a setTimeout to simulate an async transaction
               // Need to bind scope to avoid pesky multiples
-              setTimeout( (function ( callback, params ) {
+              setTimeout((function ( callback, params ) {
                 return function () {
                   callback.apply( null, normaliseToArray( params ) );
                 }
