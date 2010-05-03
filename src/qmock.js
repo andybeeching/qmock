@@ -79,7 +79,18 @@
        *  #### Example
        *  <pre><code>QMock.config.compare = QUnit.equiv;</code></pre>
        **/
-      compare: false
+      compare: false,
+
+      /**
+       * QMock.config.delay -> 100 | Number
+       *
+       *  Configuration for the delay on Ajax callbacks. This is used to help
+       *  simulate asynchronous transactions and the latency of a round-trip
+       *  to a server. In turn this encourages developers to developers to
+       *  ensure callbacks enact upon the right data or view when executed.
+       **/
+
+      delay: 100
     };
 
     /**
@@ -210,14 +221,14 @@
       return ( !is( obj, "Array" )
         || ( obj.length === 1 && is( obj[0], "Array" ) ) ) ? [ obj ] : obj;
     }
-    
+
     /* [Private]
      * TODO: Ensure this conforms to ES5 spec if one
-     *  
+     *
      * bind( fn, scope ) -> Function
      *  - fn (Function): Function to be bound
      *  - scope (Object): Object to bind function to (execution scope)
-     * 
+     *
      *  Utility function to bind a function to a specific execution context
      **/
     function bind ( fn, scope ) {
@@ -225,30 +236,30 @@
         return fn.apply( scope, arguments );
       };
     }
-    
+
     /* [Private]
-     * 
-     *  bindInterface( master, receiver, scope [, re] )
-     *  - master (Object): Interface to copy and bind (e.g. Mock.prototype)
+     *
+     *  bindInterface( obj, receiver, scope [, re] )
+     *  - obj (Object): Interface to copy and bind (e.g. Mock.prototype)
      *  - receiver (Object): Object to copy interface to
      *  - scope (Object): Object to bind copied methods to (the execution scope)
-     *  - re (RegExp) _optional_: RegExp to run against interface keys to cache 
+     *  - re (RegExp) _optional_: RegExp to run against interface keys to cache
      *  and execute old method if overwriting.
-     * 
+     *
      *  Utility function to copy a given object's interface over with bound
-     *  function calls to the receiver instance scope (e.g. bind 
+     *  function calls to the receiver instance scope (e.g. bind
      *  <code>this</code>).
-     *  
+     *
      *  _Note_: Would put a check to ensure on functions being bound, but
      *  performance hit, and as being used internally is unnessesary.
      **/
-    function bindInterface ( master, receiver, scope, re ) {
-      for ( var key in master ) {
-        if( hasOwnProperty.call( master, key ) ) {
+    function bindInterface ( obj, receiver, scope, re ) {
+      for ( var key in obj ) {
+        if( hasOwnProperty.call( obj, key ) ) {
           // Create bound function
-          var fn = bind( master[ key ], scope );
+          var fn = bind( obj[ key ], scope );
           // Determine if need to cache (and execute) original function if exists
-          receiver[ key ] = ( re && re.test( key ) ) 
+          receiver[ key ] = ( re && re.test( key ) )
             ? (function ( original, overide ) {
                 return function () {
                   original();
@@ -277,9 +288,9 @@
       }
       return false;
     }
-    
+
     // KLASS DECLARATIONS
-    
+
     /**
      * == Mock ==
      *  Meh.
@@ -303,7 +314,8 @@
         requires  : 0,
         returns   : undefined,
         chained   : false,
-        data      : null
+        data      : null,
+        async     : true
       },
       prop;
       // augment base expectations
@@ -522,7 +534,7 @@
        *  <pre><code>Mock.method('foo').accepts('bar', 'baz').overload(false);</code></pre>
        **/
       overload: function ( bool ) {
-        this.overloadable = bool;
+        this.overloadable = !!bool;
         return this.recorder;
       },
 
@@ -555,6 +567,26 @@
         this.dataRep = slice.call( arguments );
         return this.recorder;
       },
+      
+      /**
+       * Mock#async( bool ) -> Mock
+       *  - bool (Boolean): Boolean flag indicating whether callbacks are 
+       *  executed asynchronously (even with a delay of 0ms - queued on thread)
+       *  or synchronously (blocking). 
+       *  
+       *  Functions can be passed for a variety of reasons, most commonly as 
+       *  callbacks for Ajax transactions, but also as references in closures
+       *  (binding/currying), or as collection mutators (e.g. 
+       *  <code>Array.filter</code>).
+       *  
+       *  Additionally Ajax calls can also be made synchronous, thus the mock
+       *  interface should be configuarable as to replicate a real collaborator
+       *  interface as closely as possible
+       **/
+      async: function ( bool ) {
+        this.async = !!bool;
+        return this.recorder;
+      },
 
       /**
        * Mock#property( prop, val ) -> Mock
@@ -576,10 +608,14 @@
         return this.receiver.property( prop, value );
       },
 
-      // NEW METHOD!
+      /**
+       * Mock#namespace( identifier ) -> Mock
+       *
+       *  // TODO: DESCRIPTION & TESTS!!!
+       *
+       **/
       namespace: function ( identifier ) {
-        this.property( identifier, new Receiver );
-        return this[ identifier ];
+        return this.receiver.namespace( identifier );
       },
 
       /*
@@ -819,7 +855,7 @@
       __getExceptions: function () {
         return this.exceptions;
       },
-      
+
       /** section: Mock
        * Mock#__getState() -> Object (Mock State)
        *
@@ -840,15 +876,17 @@
       // Carry on Charlie...
       this.methods    = [];
       this.properties = {};
+      this.namespaces = [];
+      // Used to reference public receiver object - might be original or a 'recorder'
       this.self       = this;
-      // Used to support expects() Receiver instance method till 0.5 tagged.
+      // Used to support expects() Receiver instance method till 0.5 is tagged.
       this.tmp        = {};
     }
 
     Receiver.prototype = {
-      
+
       method: function ( identifier, min, max ) {
-        // Throw error if collision with mock API
+        // Throw error if collision with mock instance interface
         if ( hasOwnProperty.call( this.self, identifier ) ) {
           throw {
             type: "InvalidMethodNameException",
@@ -873,6 +911,7 @@
       },
 
       property: function ( prop, value ) {
+        // Throw error if collision with mock instance interface
         if ( hasOwnProperty.call( this.self, prop ) ) {
           throw {
             type: "InvalidPropertyNameException",
@@ -880,12 +919,28 @@
           };
         }
 
-        // New property on receiver
-        this.self[ prop ] = value;
-
-        // Track properties
-        this.properties[ prop ] = value;
+        // New property on receiver + track properties
+        this.self[ prop ] = this.properties[ prop ] = value;
         return this.self;
+      },
+
+      namespace: function ( identifier, map, bool ) {
+        // Throw error if collision with mock instance interface
+        if ( hasOwnProperty.call( this.self, identifier ) ) {
+          throw {
+            type: "InvalidNamespaceIdentiferException",
+            msg: "Qmock expects a unique key for a namespace identifer"
+          };
+        }
+
+        // New property on receiver + track namespaces
+        this.self[ identifier ] = createReceiver(
+          map || {},
+          is( bool, "Boolean" ) ? bool : false // For createMock()
+        );
+
+        // Track and return correct receiver scope for augmentation
+        return this.namespaces[ identifer ] = this.self[ identifier ];
       },
 
       /** deprecated
@@ -897,12 +952,12 @@
        *  should be called. If want 'at least _n_' then just pass
        *  <code>Infinity</code>. Default is <code>null</code>
        *
-       *  *DEPRECATED*: Was a factory method for creating new mock objects 
-       *  (methods / properties) on a receiver object, but mock receiver 
+       *  *DEPRECATED*: Was a factory method for creating new mock objects
+       *  (methods / properties) on a receiver object, but mock receiver
        *  object.
-       *  
+       *
        *  Till version 0.5 will be backward compatible, but developers should
-       *  use <code>.method( name, min, max )</code>, or <code>.calls()</code> 
+       *  use <code>.method( name, min, max )</code>, or <code>.calls()</code>
        *  instead.
        **/
       expects: function ( min, max ) {
@@ -950,17 +1005,17 @@
 
     // SETUP PHASE Functions
     // Mainly factory methods that handle instantiation and bindings
-    
+
     /* [Private]
      * createRecorder( mock ) -> Function
-     *  
+     *
      *  Factory method to create a stub function to be attached to a receiver
      *  object, bound to a passed mock instance. Upon invocation within an SUT
-     *  the mock state will be mutated, and any corresponding declared return 
+     *  the mock state will be mutated, and any corresponding declared return
      *  values will be retrieved and output.
      **/
     function createRecorder ( mock ) {
-      
+
       // Check mock implements correct interface
       if ( !(mock instanceof Mock) ) {
         throw new Error("createRecorder() expects an instance of mock as the only parameter");
@@ -975,7 +1030,7 @@
 
       // Public API - Bind prototypal inherited methods and to private receiver state
       bindInterface( Mock.prototype, recorder, mock );
-      
+
       // Backward compatibility for QMock v0.1/0.2 API
 
       /** alias of: Mock#receives(), deprecated
@@ -988,7 +1043,7 @@
       recorder.andReturns       = recorder.returns;
       recorder.andChain         = recorder.chain;
       recorder.callFunctionWith = recorder.data;
-      
+
       // Reference to bound mutator on instance itself (in case of detachment)
       mock.recorder = recorder;
       // Do it. Just do it.
@@ -999,14 +1054,14 @@
      * new Mock( definition [, isFunction] )
      *  - definition (Hash): Hash of Mock expectations mapped to Mock object
      *  API.
-     *  - isStub (Boolean): Designated whether receiver object itself is a 
+     *  - isStub (Boolean): Designated whether receiver object itself is a
      *  stub function (a la jQuery constructor). Default for QMock is true.
      *
      *  Constructor for mock receiver, methods and properties. The return
      *  object is a function that can act as a namespace object (aka a
      *  'receiver'), or as a mocked function / constructor with expectations,
      *  or both (e.g. jQuery $).
-     *  
+     *
      *  Can be called with or without the <code>new</code> keyword
      *
      *  #### Example
@@ -1045,10 +1100,10 @@
       // Create mock + recorder if definition supplied, else use passed object
       // or object literal as simple proxy receiver
       // update receiver pointer to proxy so methods/props attached correctly
-      proxy = receiver.self = ( isStub ) 
-        ? createRecorder( new Mock ) 
+      proxy = receiver.self = ( isStub )
+        ? createRecorder( new Mock )
         : {};
-      
+
       // Public API - Bind prototypal inherited methods and to private receiver state
       bindInterface( Receiver.prototype, proxy, receiver, /verify|reset/ );
 
@@ -1063,12 +1118,12 @@
       // Backward compatibility with QMock v0.1 API
       proxy.expectsArguments  = proxy.accepts;
       proxy.andExpects        = proxy.expects;
-      
+
       // If params passed to Mock constructor auto-magikally create mocked
       // interface from definition map
       return ( definition ) ? createMock( proxy, definition ) : recorder;
     }
-    
+
     /* [Private]
      *
      * createMock( mock, definition ) -> Boolean
@@ -1169,20 +1224,20 @@
     }
 
     // EXERCISE PHASE functions
-    
+
     /* [Private]
      *
      * exerciseMock( mock ) -> Function
      *
      *  Utility for recording inputs to a given mock and mutating it's internal
-     *  state. Instance state is mutated when a stubbed function is invoked as 
+     *  state. Instance state is mutated when a stubbed function is invoked as
      *  part of a 'system under test' (SUT) exercise phase.
-     *  
+     *
      *  Has to use <code>this</code> as arguments to recorder consititute a
      *  'presentation' to the mocked member / object interface.
      *
      *  _Returns_: The mapped return value for the presentation made to the
-     *  stub interface, or the default mock return (at instantiation is 
+     *  stub interface, or the default mock return (at instantiation is
      *  <code>undefined</code>).
      **/
     function exerciseMock ( mock, presentation ) {
@@ -1219,8 +1274,21 @@
           // Use data associated with presentation, or default to 'global' data
           // if available
           data = comparePresentation( mock, presentation, "data" ) || mock.dataRep;
+          // If response data declared then invoke callbacks in timely manner
           if ( data != null ) {
-            presentation[ i ].apply( null, normaliseToArray( data ) );
+            // default is asynchronous / deferred execution
+            if ( mock.async ) {
+              // Use a setTimeout to simulate an async transaction
+              // Need to bind scope to avoid pesky multiples
+              setTimeout( (function ( callback, params ) {
+                return function () {
+                  callback.apply( null, normaliseToArray( params ) );
+                }
+              })( presentation[ i ], data ), config.latency);
+            } else {
+              // else a blocking invocation on same 'thread'
+              presentation[ i ].apply( null, normaliseToArray( data ) );
+            }
           }
           // reset data to undefined for next pass (multiple callbacks)
           data = null;
@@ -1440,7 +1508,7 @@
         reset   : function ( mock) {
           if ( mock.reset ) {
             return mock.reset();
-          } 
+          }
         },
         is      : is,
         test    : function () {

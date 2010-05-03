@@ -45,7 +45,6 @@
 	  var mock = new Mock;
 
 	  mock.excise();
-	  debugger;
 	  for (var key in Mock) {
 	    if ( !/_/.test( key ) & mock.hasOwnProperty( key ) ) {
 	      equals( mock[ key ], undefined, "mock should not have the property '" + key + "' associated with it" );
@@ -2343,7 +2342,7 @@
         .accepts('path/to/resource', function onSuccess() {})
         .data({foo: 'bar'});
 
-    /* JSON equivalent
+    /* "JSON" equivalent
     new Mock({
       "get": {
         accepts: ['path/to/resource', callback]
@@ -2354,8 +2353,8 @@
     new Mock({
       "get": {
         receives: [
-          {accepts: ['path/to/resource', callback], response: {foo: 'bar'}}
-          {accepts: ['path/to/resource', callback2], response: {far: 'baz'}}
+          {accepts: ['path/to/resource', callback], data: {foo: 'bar'}}
+          {accepts: ['path/to/resource', callback2], data: {far: 'baz'}}
         ]
       }
     });
@@ -2375,11 +2374,17 @@
 		$.reset();
 
 		// Correct Usage
-
+		
 		var called = false;
-		$.get('path/to/resource', function (data) { called = data.foo });
 
-	  equals(called, 'bar', "var called should be set to true when $.get() passed (String: url, Function: callback)");
+		stop();
+		
+		$.get('path/to/resource', function (data) { called = data.foo; });
+		
+		setTimeout(function() {  
+      // continue the test
+      equals(called, 'bar', "var called should be set to true when $.get() passed (String: url, Function: callback)");
+    }, QMock.config.delay);
 
 	  // Test multiple callbacks
 
@@ -2409,12 +2414,24 @@
 		// Correct Usage
 
 		var called = false;
+		
+		stop();
+		
 		$.get('path/to/resource', onSuccess);
-		equals(success, true, "var success should be set to true when $.get() passed (String: url, Function: onSuccess)");
-
+		
+		setTimeout(function() { 
+      // continue the test
+  		equals(success, true, "var success should be set to true when $.get() passed (String: url, Function: onSuccess)");
+    }, QMock.config.delay);
+    		
 		$.get('path/to/resource', onFail);
-    equals(fail, true, "var fail should be set to true when $.get() passed (String: url, Function: onFail)");
-
+		
+		setTimeout(function() {  
+      // continue the test
+      equals(fail, true, "var fail should be set to true when $.get() passed (String: url, Function: onFail)");
+      start();
+    }, QMock.config.delay);
+		
 	});
 
 	module( "QMock: Mock behaviour (constructors)" );
@@ -2465,7 +2482,7 @@
 	  expect(6);
 
 	  // Mock jQuery
-	  var $ = new Mock ();
+	  var $ = new Mock;
 	  $.accepts("#foo")
   	  .expects(1)
 	    .method('html')
@@ -2515,13 +2532,14 @@
 	      jQuery.wrap('<div />');
 	    }
 	  }
-
+    
 	  jQuery
 	    .accepts(".ninjas")
 	      .expects(1)
 	        .method('each')
 	        .accepts(hide)
 	        .data({})
+	        .async(false)
 	      .andExpects(3)
 	        .method('wrap')
 	        .accepts('<div />')
@@ -2875,7 +2893,7 @@
 
     $('.ninja').run('foo').run('foo');
 
-	  ok($.verify(), "verify() should be true");
+	  ok($.verify(), "verify() should be true when $ constructor overloaded with incorrect parameter values");
 
     $.reset();
 
@@ -2896,6 +2914,7 @@
 	        .accepts(wrap)
 	        .data(this)
 	        .chain()
+	        .async(false)
 	      .andExpects(3)
 	        .method('wrap')
 	        .accepts('<div />')
@@ -2990,11 +3009,21 @@
 
 		var called = false;
 		$('path/to/resource', onSuccess);
-		equals(success, true, "var success should be set to true when $.get() passed (String: url, Function: onSuccess)");
+		
+		stop();
+
+		// Simulate round-trip ajax transaction
+		setTimeout(function () {
+		  equals(success, true, "var success should be set to true when $.get() passed (String: url, Function: onSuccess)");
+		}, QMock.config.delay);
 
 		$('path/to/resource', onFail);
-    equals(fail, true, "var fail should be set to true when $.get() passed (String: url, Function: onFail)");
 
+		setTimeout(function () {
+      equals(fail, true, "var fail should be set to true when $.get() passed (String: url, Function: onFail)");
+  		start();
+		}, QMock.config.delay);
+		
 	});
 
 	module( "QMock: Public API" );
@@ -3049,7 +3078,6 @@
     
     // Try specifying receiver should just be an object (so acts as namespace)
     var receiver = QMock.Mock({}, false);
-    debugger;
     // Note plain receiver *shouldn't* 'inherit' methods of Mock if not a function
     ok(!!(typeof receiver.accepts === "undefined" && typeof receiver.accepts === "undefined"), "Instantitation of QMock.Mock with Boolean flag 'false' for function should return object that doesn't implement Mock klass interface")
     // But should still implement Receiver klass interface
@@ -3240,7 +3268,6 @@
 	  ok("swing" in (mock.swing()), "mock.swing() should return the mock itself (API v 0.2)");
 
 	  // Setup - Test support for callFunctionWith method on mocked methods
-
 	  var mock = new Mock;
 		mock
 		  .expects(1).method('get')
@@ -3250,9 +3277,14 @@
     // Correct Usage
     var called = false;
     mock.get('path/to/resource', function (data) { called = data.foo });
-
-	  // Good exercise & verify
-	  equals(called, 'bar', "var called should be set to true when mock.get() passed (String: url, Function: callback)");
+    
+    stop();
+    
+    setTimeout(function() {
+      // Good exercise & verify
+  	  equals(called, 'bar', "var called should be set to true when mock.get() passed (String: url, Function: callback)");
+  	  start();
+    }, QMock.config.delay);
 
 	  // Setup - Test support for atLeast & noMoreThan method on mocked methods
 
@@ -3288,9 +3320,9 @@
 
 	/**
 	 *
-	 * Integration tests for Mock controller logic - asserting with mock.verify()
+	 * Integration tests for Mock factory method domain logic - asserting with mock.verify()
 	 *
-	 *  Bit meta, using QMock to mock, er, it's own returned instance API.
+	 *  Bit meta, using QMock to mock a mock instance interface. #eatsowndogfood
 	 *
 	 */
 
@@ -3454,4 +3486,4 @@
 
 	})
 
-})(); // Go Go Inspector Gadget!
+})(); // Run forest, run!
