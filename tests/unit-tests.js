@@ -24,7 +24,7 @@
 
 	  expect(1);
 	  var mock = new Mock,
-	      foo = mock.expects().method('foo').end();
+	      foo  = mock.expects().method('foo').end();
 
 	  ok((mock === foo), "mock.end() should return the receiver object mock");
 
@@ -34,9 +34,53 @@
 
 	  expect(1);
 	  var mock = new Mock,
-	      foo = mock.expects().method('foo').id('bar');
+	      foo  = mock.expects().method('foo').id('bar');
 
 	  equals(foo.__getState().name, "bar", "mock should have the descriptor 'bar'");
+
+	});
+	
+	test("Mock.namespace() [utility] instance method", function () {
+
+	  expect(8);
+	  var mock = new Mock,
+	      foo  = mock.namespace("foo");
+	      
+	  // Check doesn't implement mock interface via duck typing
+	  ok( typeof foo.accepts === "undefined", "mock namespace/receiver 'foo' doesn't implement the accepts() method (part of Mock stub interface)" )
+	  ok( typeof foo.calls === "undefined", "mock namespace/receiver 'foo' doesn't implement the calls() method (part of Mock stub interface)" )
+
+    // Check can actually set methods and properties on the nested mock namespace and use them!
+    mock.foo
+      .method("bar")
+        .accepts("baz")
+      .property("faz", true);
+    
+    // Exercise
+    mock.foo.bar("baz");
+    mock.foo.faz = false;
+    
+    // Verify whole mock
+	  ok( mock.verify(), "The mock 'mock' should be true [mock.verify()]");
+	  // Verify just the namespace
+	  ok( mock.foo.verify(), "The namespace 'mock.foo' should be true [mock.foo.verify()]");
+    // Verify just the mock stub method
+    ok( mock.foo.bar.verify(), "The method 'mock.foo.bar()' should be true [mock.foo.bar.verify()]");
+	  // Check the property was changed
+	  equals( mock.foo.faz, false, "'mock.foo.faz' should equal false");
+	  
+	  // Reset from namespace
+	  mock.foo.reset();
+	  // Check the property is back to setup value
+	  equals( mock.foo.faz, true, "'mock.foo.faz' should equal true");
+	  
+	  // Change the property again
+	  mock.foo.faz = false;
+	  
+	  // Reset from parent mock
+	  mock.reset();
+	  // Check the property is back to setup value
+	  equals( mock.foo.faz, true, "'mock.foo.faz' should equal true");
 
 	});
 
@@ -2445,6 +2489,7 @@
 
 	  // Test Bad Exercise phase - no method call
     try {
+      debugger;
       ninja.verify();
       ok(false, "verify() should throw exception when swing not called");
     } catch (e) {
@@ -3070,7 +3115,6 @@
     ok(!!(mock.accepts && mock.calls && mock.verify && mock.reset), "Default instantiation of QMock.Mock should implement the Mock klass interface");
     ok(!!(mock.method && mock.property), "Default instantiation of QMock.Mock should implement the Receiver klass interface");
     
-    
     // Try without new keyword
     mock = QMock.Mock();
     ok(!!(mock.accepts && mock.calls && mock.verify && mock.reset), "Default instantiation of QMock.Mock (without new keyword) should implement the Mock klass interface");
@@ -3083,7 +3127,6 @@
     // But should still implement Receiver klass interface
     ok(!!(receiver.method && receiver.property && receiver.verify && receiver.reset), "Instantitation of QMock.Mock with Boolean flag 'false' for function should return object that implements Receiver klass interface")
 
-
     // Try without new keyword
     receiver = QMock.Mock({}, false);
     // Note plain receiver *shouldn't* 'inherit' methods of Mock if not a function
@@ -3093,6 +3136,36 @@
     
     // Setup
     // Try attaching methods / props to 'receiver', exercising, and verifying (same tests used for Mock.receiver() unit tests)
+    receiver
+      .method("bar")
+        .accepts("baz")
+      .property("faz", true);
+    
+    // Exercise
+    receiver.bar("baz");
+    receiver.faz = false;
+    
+    // Verify whole mock
+	  ok( receiver.verify(), "The mock 'mock' should be true [receiver.verify()]");
+	  // Verify just the namespace
+	  ok( receiver.verify(), "The namespace 'mock.foo' should be true [receiver.verify()]");
+    // Verify just the mock stub method
+    ok( receiver.bar.verify(), "The method 'receiver.bar()' should be true [receiver.bar.verify()]");
+	  // Check the property was changed
+	  equals( receiver.faz, false, "'receiver.faz' should equal false");
+	  
+	  // Reset from namespace
+	  receiver.reset();
+	  // Check the property is back to setup value
+	  equals( receiver.faz, true, "'receiver.faz' should equal true");
+	  
+	  // Change the property again
+	  receiver.faz = false;
+	  
+	  // Reset from parent mock
+	  receiver.reset();
+	  // Check the property is back to setup value
+	  equals( receiver.faz, true, "'receiver.faz' should equal true");
 
 	});
 
@@ -3319,11 +3392,9 @@
 	});
 
 	/**
-	 *
 	 * Integration tests for Mock factory method domain logic - asserting with mock.verify()
 	 *
 	 *  Bit meta, using QMock to mock a mock instance interface. #eatsowndogfood
-	 *
 	 */
 
 	module('QMock: Integration tests');

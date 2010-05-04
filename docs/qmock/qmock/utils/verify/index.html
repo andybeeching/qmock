@@ -102,8 +102,10 @@ results</li>
 
 
 <p>Verifies the receiver object (the parent mock object) first, then
-individual members. Only passes if whole object tree passes, else
-throws exception (fail fast).</p>
+individual members (both methods and nested namespaces).</p>
+
+<p>Only passes if whole object tree passes, else throws exception
+or returns <code>false</code> depending on mode (fail slow/fast).</p>
 
       
       
