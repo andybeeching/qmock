@@ -302,8 +302,8 @@
      *  
      *  # Implement excise method to decouple collaborator interface from mock interface
      *  # Public method unit tests (aka verify/reset), with excised mock
-     *  # Unit test namespace method, add to __createMock tests
      *  # Refactor Expectations and Presentation Constructors, and expose.
+     *  # Add support via a flag for namespace receivers through __createMock factory
      *  
      **/
 
@@ -621,13 +621,13 @@
       },
 
       /**
-       * Mock#namespace( identifier ) -> Mock
-       *
-       *  // TODO: DESCRIPTION & TESTS!!!
-       *
+       * Mock#namespace( id ) -> Mock
+       *  - id (String): Identifer or key for the nested namespace receiver
+       *  instance on the Mock. Instance implements all Receiver klass 
+       *  methods.
        **/
-      namespace: function ( identifier ) {
-        return this.receiver.namespace( identifier );
+      namespace: function ( id ) {
+        return this.receiver.namespace( id );
       },
 
       /*
