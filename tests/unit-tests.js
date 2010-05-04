@@ -3462,6 +3462,13 @@
           .calls(1)
           .accepts(1);
       })(new Mock),
+      
+      "namespace": (function(fn) {
+        return fn
+          .id("mock.namespace")
+          .calls(1)
+          .accepts("faz");
+      })(new Mock),
 
       "overload": (function(fn) {
         return fn
@@ -3524,16 +3531,17 @@
     var definition = {
       // method called foo
       "foo": {
-        "name"    : "foobarbaz",
-        "accepts" : "foo",
-        "receives": {"accepts": "foo", data: "stub", returns: "bar"},
-        "returns" : "bar",
-        "required": 1,
-        "overload": true,
-        "data"    : "response",
-        "async"   : true,
-        "chain"   : {},
-        "calls"   : [1,2]
+        "name"      : "foobarbaz",
+        "accepts"   : "foo",
+        "receives"  : {"accepts": "foo", data: "stub", returns: "bar"},
+        "returns"   : "bar",
+        "required"  : 1,
+        "namespace" : "faz",
+        "overload"  : true,
+        "data"      : "response",
+        "async"     : true,
+        "chain"     : {},
+        "calls"     : [1,2]
       },
       // property called 'bar'
       "bar": {
