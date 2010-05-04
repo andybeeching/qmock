@@ -110,13 +110,28 @@
       
         <pre class="syntax"><code class="ebnf">Mock#namespace( id ) &rarr; <a title="Mock (class)" href="../../../../mock/mock/">Mock</a></code></pre>
 
+  <ul class="argument-list">
+    
+      <li>
+        <code class="argument-name">id</code>
+        
+          <span class="argument-types">(<code>String</code>)</span>
+        
+         &ndash; Identifer or key for the nested namespace receiver instance on the Mock. Instance implements all Receiver klass methods.
+
+      </li>
+    
+  </ul> <!-- .argument-list -->
+
       
 
-      <ul>
-<li>id (String): Identifer or key for the nested namespace receiver
-instance on the Mock. Instance implements all Receiver klass
-methods.</li>
-</ul>
+      <h4>Example</h4>
+
+<pre><code>var mock = new Mock;
+// Create a nested namespace with a method called 'bar' on it.
+Mock.namespace("foo")
+  .method("bar");
+</code></pre>
 
 
       

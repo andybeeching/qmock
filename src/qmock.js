@@ -625,6 +625,13 @@
        *  - id (String): Identifer or key for the nested namespace receiver
        *  instance on the Mock. Instance implements all Receiver klass 
        *  methods.
+       *  
+       *  #### Example
+       *  <pre><code>var mock = new Mock;
+       *  // Create a nested namespace with a method called 'bar' on it.
+       *  Mock.namespace("foo")
+       *    .method("bar");
+       *  </code></pre>
        **/
       namespace: function ( id ) {
         return this.receiver.namespace( id );
