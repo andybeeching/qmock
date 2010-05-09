@@ -67,6 +67,8 @@
             <li><div class="menu-item"><a class="section" title="QMock section (section)" href="../../../../qmock/">QMock section</a></div><ul class="menu-section"><li><div class="menu-item"><a class="class" title="QMock (class)" href="../../../../qmock/qmock/">QMock</a></div><ul class=""><li><div class="menu-item"><a class="namespace" title="QMock.config (namespace)" href="../../../../qmock/qmock/config/">QMock.config</a></div></li>
 <li><div class="menu-item"><a class="namespace" title="QMock.utils (namespace)" href="../../../../qmock/qmock/utils/">QMock.utils</a></div></li></ul></li></ul></li>
           
+            <li><div class="menu-item"><a class="section" title="Receiver section (section)" href="../../../../receiver/">Receiver section</a></div><ul class="menu-section"><li><div class="menu-item"><a class="class" title="Receiver (class)" href="../../../../receiver/receiver/">Receiver</a></div></li></ul></li>
+          
         </ul> <!--- #api_menu =-->
       </div> <!-- .sidebar-pane -->
       <div class="sidebar-pane" id="search_pane">
@@ -108,24 +110,19 @@
   <div class="section-content">
     <div class="method-description">
       
-        <pre class="syntax"><code class="ebnf">Mock#namespace( id ) &rarr; <a title="Mock (class)" href="../../../../mock/mock/">Mock</a></code></pre>
-
-  <ul class="argument-list">
-    
-      <li>
-        <code class="argument-name">id</code>
-        
-          <span class="argument-types">(<code>String</code>)</span>
-        
-         &ndash; Identifer or key for the nested namespace receiver instance on the Mock. Instance implements all Receiver klass methods.
-
-      </li>
-    
-  </ul> <!-- .argument-list -->
+        <pre class="syntax"><code class="ebnf">Mock#namespace( id [, definition ] ) &rarr; <a title="Mock (class)" href="../../../../mock/mock/">Mock</a></code></pre>
 
       
 
-      <h4>Example</h4>
+      <ul>
+<li>id (String): Identifer or key for the nested namespace receiver
+instance on the Mock. Instance implements all Receiver klass
+methods.</li>
+<li>definition (Map) <em>optional</em>: TODO</li>
+</ul>
+
+
+<h4>Example</h4>
 
 <pre><code>var mock = new Mock;
 // Create a nested namespace with a method called 'bar' on it.
@@ -136,6 +133,8 @@ Mock.namespace("foo")
 
       
       
+  <p class="alias aliases">Aliased as: <code><a title="Receiver#namespace (instance method)" href="../../../../receiver/receiver/prototype/namespace/">Receiver#namespace</a></code></p>
+
 
 
       

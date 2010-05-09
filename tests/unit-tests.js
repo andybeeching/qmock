@@ -10,11 +10,11 @@
 	 *  All tests generally follow this simple process:
 	 *
 	 *  1. Setup: Instantiate mocks and set expected interactions upon them.
-	 *      Sometimes located in the 'setup' phase of the testrunner before each test block.
+	 *     Sometimes located in the 'setup' phase of the testrunner before each test block.
 	 *  2. Exercise: Execute the relevant collaborator code to interact with the mock object.
 	 *  3. Verify: Call the verify method on each mock object to establish if it was interacted with correctly.
 	 *  4. Reset: [Optional] Call reset method on the mock to return it's internal state to the end of the setup phase.
-	 *      Sometimes located in the 'teardown' phase of the testrunner after each test case.
+	 *     Sometimes located in the 'teardown' phase of the testrunner after each test case.
 	 *
 	 */
 
@@ -84,19 +84,80 @@
 
 	});
 
-	/*test("Mock.excise() [utility] instance method", function () {
-
-	  var mock = new Mock;
-
+	test("Mock.excise() [utility] instance method", function () {
+    
+	  var mock = new Mock(null, false), // plain namespace/receiver
+	      result = true,
+	      i;
+    
+    // Excise mock completely
 	  mock.excise();
-	  for (var key in Mock) {
-	    if ( !/_/.test( key ) & mock.hasOwnProperty( key ) ) {
-	      equals( mock[ key ], undefined, "mock should not have the property '" + key + "' associated with it" );
-	    }
+	  
+	  // Verify by testing no properties on mock (if a function stub then will have a prototype property)
+	  for (var i in mock) {
+      result = false; break;
 	  }
+    ok(result, "excised mock shouldn't have any properties on itself after 'excise' except 'prototype'");
 
-	});*/
+    // setup with some customproperties
+    mock = new Mock({
+      // method called foo
+      "foo": {
+        "id"        : "foobarbaz",
+        "accepts"   : "foo",
+        "receives"  : {"accepts": "foo", data: "stub", returns: "bar"},
+        "returns"   : "bar",
+        "required"  : 1,
+        "namespace" : "faz",
+        "overload"  : true,
+        "data"      : "response",
+        "async"     : true,
+        "chain"     : {},
+        "calls"     : [1,2],
+        "key"       : {
+          "value"   : true
+        }
+      },
+      // property called 'bar'
+      "bar": {
+        "value" : 'stub'
+      },
+      // namespace called 'buz' with method
+      "buz": {
+        // Test method setup
+        "baz": {
+          "accepts": "test"
+        },
+        // Test property setup
+        "daz": {
+          "value": "stub"
+        },
+        // Test nested namspace setup
+        "gaz": null
+      }
+    }, false);
+    
+    // excise all mocks
+    mock.excise();
+    
+    function verifyMock ( obj, keys ) {
+      var result = true, key;
+      for (var key in mock ) {
+        if ( obj.hasOwnProperty( key ) && !keys.exec( key )[0] ) {
+          result = false;
+          break;
+        }
+      }
+      return result;
+    }
 
+    // verify
+    ok(typeof mock == "object", "The mock should be a plain receiver and not a function.");
+    ok(verifyMock( mock, /foo|bar|buz|/ ), "The parent mock receiver should only have the properties ('foo', 'bar', 'buz') set upon it.");
+    ok(verifyMock( mock.foo, /faz|key/ ), "The mock function 'mock.foo()' should only have the properties ('faz', 'key') set upon it.");
+    ok(verifyMock( mock.buz, /baz|daz|gaz/ ), "The mock receiver 'mock.buz' should only have the properties ('baz', 'daz', 'gaz') set upon it.");
+    
+	});
 
 	/**
 	 *  Following tests (until QMock API test groups) are using Mock.verify() to assert
@@ -133,7 +194,6 @@
  	  ok( (ninja.rank === "apprentice") , "ninja mock object should have a property with an identifier 'rank' that has a value of 'apprentice'" );
 
  	  ninja = new Mock;
-
  	  ninja
        .expects()
          .property("rank", "apprentice")
@@ -2489,7 +2549,6 @@
 
 	  // Test Bad Exercise phase - no method call
     try {
-      debugger;
       ninja.verify();
       ok(false, "verify() should throw exception when swing not called");
     } catch (e) {
@@ -2610,24 +2669,22 @@
 	test("mocked constructor with single strict parameter - multiple (*Natives*) expected presentations", function () {
 
 	  expect(12);
-
     function fn () {}
-
 	  var ninja = new Mock,
 	      re = /foo/;
 	      // expectations
     	  ninja
     	    .calls(1)
   	      .receives(
-    	      {accepts: [ 'foo' ]},
-    	      {accepts: [ 1 ]},
-    	      {accepts: [ true ]},
-    	      {accepts: [ new Date (2010) ]},
-    	      {accepts: [ re ]},
-    	      {accepts: [ fn ]},
-    	      {accepts: [ {foo: 'bar'} ]},
-    	      {accepts: [ ['foo', 1, true] ]},
-    	      {accepts: [ new Custom ]}
+    	      {accepts: 'foo'},
+    	      {accepts: 1},
+    	      {accepts: true},
+    	      {accepts: new Date (2010)},
+    	      {accepts: re},
+    	      {accepts: fn},
+    	      {accepts: {foo: 'bar'}},
+    	      {accepts: [['foo', 1, true]]},
+    	      {accepts: new Custom}
   	      );
 
     // BAD EXERCISES
@@ -2711,7 +2768,6 @@
     ninja.reset();
 
     // Test same parameter type AND expected value [8]
-
     ninja(['foo', 1, true]);
     ok( ninja.verify(), "verify() should pass after ninja.swing() passed [8] *correct* parameter (Array: [foo, 1, true])" );
 
@@ -3411,7 +3467,10 @@
             mock[ k ].reset(); // reset for mock constructor test
           }
         }
-      } catch (e) {}
+      } catch (e) {
+        console.log(e)
+        throw e;
+      }
     }
 
     // Mock a mock object interface (as in an instantiated mock)
@@ -3421,7 +3480,7 @@
     // throw API collison) errors, use name() method to help debugging in case of error on verify
     var mock = {
 
-      "name": (function(fn) {
+      "id": (function(fn) {
         return fn
           .id("mock.name")
           .calls(1)
@@ -3431,8 +3490,8 @@
       "method": (function(fn) {
         return fn
           .id("mock.method")
-          .calls(1)
-          .accepts("foo");
+          .calls(2)
+          .receives({accepts: "foo"}, {accepts: "baz"});
       })(new Mock),
 
       "receives": (function(fn) {
@@ -3445,8 +3504,8 @@
       "accepts": (function(fn) {
         return fn
           .id("mock.accepts")
-          .calls(1)
-          .accepts("foo");
+          .calls(2)
+          .receives({accepts: "foo"}, {accepts: "test"});
       })(new Mock),
 
       "returns": (function(fn) {
@@ -3466,8 +3525,8 @@
       "namespace": (function(fn) {
         return fn
           .id("mock.namespace")
-          .calls(1)
-          .accepts("faz");
+          .calls(3)
+          .receives({accepts: "faz"}, {accepts: "buz"}, {accepts: "gaz"});
       })(new Mock),
 
       "overload": (function(fn) {
@@ -3507,14 +3566,14 @@
       "expects": (function(fn) {
         return fn
           .id("mock.expects")
-          .calls(2);
+          .calls(0); // since deprecated
       })(new Mock),
 
       "property": (function(fn) {
         return fn
           .id("mock.property")
-          .calls(1)
-          .accepts("bar", "stub");
+          .calls(2)
+          .receives({accepts: ["bar", "stub"]}, {accepts: ["daz", "stub"]});
       })(new Mock)
 
     };
@@ -3528,10 +3587,10 @@
     }
 
     // Mock Definition
-    var definition = {
+    var mockDefinition = {
       // method called foo
       "foo": {
-        "name"      : "foobarbaz",
+        "id"        : "foobarbaz",
         "accepts"   : "foo",
         "receives"  : {"accepts": "foo", data: "stub", returns: "bar"},
         "returns"   : "bar",
@@ -3545,12 +3604,27 @@
       },
       // property called 'bar'
       "bar": {
-        "value": 'stub'
+        "value" : 'stub'
+      },
+      // namespace called 'buz' with method
+      "buz": {
+        // Test method setup
+        "baz": {
+          "accepts": "test"
+        },
+        // Test property setup
+        "daz": {
+          "value": "stub"
+        },
+        // Test nested namspace setup
+        "gaz": null
       }
     };
+    
     // Exercise
+
     // Expect ONE method & ONE Property created on mock
-    QMock.__createMock( mock, definition );
+    QMock.__createMock( mock, mockDefinition );
 
     // Verify
     verifyMetaMock( mock, "receiver" );
@@ -3563,14 +3637,15 @@
     // Setup - adjust some expectations for constructor only declaration
     mock.method.calls(0);
     mock.property.calls(0);
-    mock.expects.calls(1);
-
+    mock.accepts.calls(1);
+    mock.namespace.calls(1);
+    
     // Exercise - use previous method definition as constructor definition
-    QMock.__createMock( mock, definition.foo );
+    QMock.__createMock( mock, mockDefinition.foo );
 
     // Verify
     verifyMetaMock( mock, "constructor" );
-
-	})
+    
+	});
 
 })(); // Run forest, run!

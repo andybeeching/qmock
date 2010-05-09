@@ -67,6 +67,8 @@
             <li><div class="menu-item"><a class="section" title="QMock section (section)" href="../../../../qmock/">QMock section</a></div><ul class="menu-section"><li><div class="menu-item"><a class="class" title="QMock (class)" href="../../../../qmock/qmock/">QMock</a></div><ul class=""><li><div class="menu-item"><a class="namespace" title="QMock.config (namespace)" href="../../../../qmock/qmock/config/">QMock.config</a></div></li>
 <li><div class="menu-item"><a class="namespace" title="QMock.utils (namespace)" href="../../../../qmock/qmock/utils/">QMock.utils</a></div></li></ul></li></ul></li>
           
+            <li><div class="menu-item"><a class="section" title="Receiver section (section)" href="../../../../receiver/">Receiver section</a></div><ul class="menu-section"><li><div class="menu-item"><a class="class" title="Receiver (class)" href="../../../../receiver/receiver/">Receiver</a></div></li></ul></li>
+          
         </ul> <!--- #api_menu =-->
       </div> <!-- .sidebar-pane -->
       <div class="sidebar-pane" id="search_pane">
@@ -108,7 +110,7 @@
   <div class="section-content">
     <div class="method-description">
       
-        <pre class="syntax"><code class="ebnf">Mock#id( descriptor ) &rarr; <a title="Mock (class)" href="../../../../mock/mock/">Mock</a></code></pre>
+        <pre class="syntax"><code class="ebnf">Mock#id( identifier ) &rarr; <a title="Mock (class)" href="../../../../mock/mock/">Mock</a></code></pre>
 
   <ul class="argument-list">
     
@@ -125,13 +127,17 @@
 
       
 
-      <p>Identifier is used to create meaningful error messages. By default
-it is <code>"anonymous"</code>, or the method name
-(assigned by <code>Mock.method</code>).</p>
+      <p>Identifier is used to create more meaningful error messages. By
+default it is <code>"anonymous"</code>, or the method name
+(assigned by <code>Mock.method()</code>).</p>
 
 <h4>Example</h4>
 
-<pre><code>Mock.expects().method('foo').id('fooBar');</code></pre>
+<pre><code>// Without setting the id
+var $ = new Mock;
+$.method('foo'); // just says function 'foo' in error message
+// With id
+$.foo.id('$.foo'); // Will now output '$.foo' in error message</code></pre>
 
 
       
