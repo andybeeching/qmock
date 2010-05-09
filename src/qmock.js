@@ -939,8 +939,8 @@
       /** alias of: Mock#method
        * Receiver#method( identifier, min, max) -> Receiver
        **/
-      method: function ( identifier, min, max ) {
-        if ( hasOwnProperty.call( this.self, identifier ) ) {
+      method: function ( prop, min, max ) {
+        if ( hasOwnProperty.call( this.self, prop ) ) {
           throw {
             type: "InvalidMethodNameException",
             msg: "Qmock expects a unique identifier for each mocked method"
@@ -948,7 +948,7 @@
         }
 
         // Register public pointer to mocked method instance on receiver object
-        this.self[ identifier ] = createRecorder(
+        this.self[ prop ] = createRecorder(
           new Mock(
             this.tmp.min || min,
             this.tmp.max || max,
@@ -957,10 +957,10 @@
         );
 
         // Track methods
-        this.methods.push( this.self[ identifier ] );
+        this.methods.push( this.self[ prop ] );
 
         // Wham!
-        return this.self[ identifier ].id( identifier );
+        return this.self[ prop ].id( prop );
       },
 
       /** alias of: Mock#property
@@ -984,8 +984,8 @@
       /** alias of: Mock#namespace
        * Receiver#namespace( id, map ) -> new Receiver
        **/
-      namespace: function ( id, definition ) {
-        if ( hasOwnProperty.call( this.self, id ) ) {
+      namespace: function ( prop, desc ) {
+        if ( hasOwnProperty.call( this.self, prop ) ) {
           throw {
             type: "InvalidNamespaceIdentiferException",
             msg: "Qmock expects a unique key for a namespace identifer"
@@ -993,14 +993,14 @@
         }
 
         // New property on receiver + track namespaces
-        this.self[ id ] = createReceiver( definition || {}, false );
+        this.self[ prop ] = createReceiver( desc || {}, false );
 
         // Track namespace
-        this.namespaces.push( this.self[ id ] );
+        this.namespaces.push( this.self[ prop ] );
 
         // Return correct receiver scope for augmentation
         // Pow!
-        return this.self[ id ];
+        return this.self[ prop ];
       },
 
       /** deprecated
