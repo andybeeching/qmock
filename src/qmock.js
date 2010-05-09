@@ -300,6 +300,8 @@
      *  # Change behaviour of Mock.property, Mock.method & Mock.namespace to nest instead
      *    of return to parent for association...
      *  # Best practice to look for parent id's if set for errors
+     *  # Pull out setUp Mock stuff from createMock factory.
+     *  # createMock's duty to setup inheritance model & actual object
      *
      **/
 
@@ -1234,19 +1236,19 @@
 
       // If params passed to Mock constructor auto-magikally create mocked
       // interface from definition map
-      return ( definition ) ? createMock( proxy, definition ) : recorder;
+      return ( definition ) ? bootstrap( proxy, definition ) : recorder;
     }
 
     /* [Private]
      *
-     * createMock( mock, definition ) -> Boolean
+     * bootstrap( mock, definition ) -> Boolean
      *  - mock (Mock): Mock instance to augment
      *  - definition (Hash): Hash of Mock expectations mapped to Mock object
      *  API.
      *
-     *  Factory method which interprets a JSON formatted map of a desired mock
-     *  object interface and augments a given Mock instance by performing the
-     *  set-up cascade invocation for you.
+     *  Helper method which interprets a JSON formatted map of a desired mock
+     *  object interface, and augments a given Mock instance by performing the
+     *  set-up cascading invocation for you (i.e. the bootstrap phase).
      *
      *  #### Example
      *
@@ -1275,10 +1277,10 @@
      *
      *  _See integration tests or wiki for more in-depth patterns_.
      **/
-    var createMock = (function () {
+    var bootstrap = ( function () {
 
       // Fn to test object definition against defined interface
-      function getDefinitionType ( map ) {
+      function getDescriptorType ( map ) {
         var isMethod = false, key;
         for( key in map ) {
           if( hasOwnProperty.call( map, key ) && ( key in Mock.prototype ) ) {
@@ -1292,7 +1294,7 @@
       }
 
       // Fn to iterate actually call fns on interface from map
-      function setUpExpectations ( obj, map ) {
+      function setupMethod ( obj, map ) {
         for ( var prop in map ) {
           if ( hasOwnProperty.call( map, prop ) && is( obj[ prop ], "Function" ) ) {
               // Use apply in conjunction to toArray in case of
@@ -1303,41 +1305,41 @@
         }
       }
 
-      return function __createMock ( mock, definition ) {
-        //debugger;
+      return function ( mock, desc ) {
+
         // interface checks - duck type mock check since proxied interface
         if ( !mock.property && !mock.method && !mock.namespace ) {
           // If not valid then create a new mock instance to augment
+          // Use Mock function as receiver since implements Receiver interface
           mock = createRecorder( new Mock );
         }
 
-        var name, obj, prop, member;
+        var obj, prop, member, isMember, expectations, type;
 
-        // iterate through mock expectation and set configuration for each
-        for ( name in definition ) {
-          if ( hasOwnProperty.call( definition, name ) ) {
+        // iterate through mock expectations and setup config for each
+        for ( prop in desc ) {
+          if ( hasOwnProperty.call( desc, prop ) ) {
 
-            // determine if mock == receiver || constructor || member
-            var isBound = typeof mock[ name ] == "undefined",
-                // set config for mock type
-                map = ( isBound ) ? definition[ name ] : definition || {},
-                // expectation === method || namespace || property
-                type = getDefinitionType( map );
+            // Konstructor or member?
+            isMember = typeof mock[ prop ] == "undefined",
+            expectations = ( isMember ) ? desc[ prop ] : desc || {},
+            type = getDescriptorType( expectations ); //method || namespace || property
 
-            // augment receiver object with mocked property or method if doesn't exist
-            // else assume mock is a constructor and augment that instance itself
-            if ( isBound ) {
-              member = mock[ type ]( name, type === "property" ? map.value : map );
+            // if member augment receiver object with new mocked member
+            if ( isMember ) {
+              member = mock[ type ]( 
+                prop,
+                type === "property" ? expectations.value : expectations 
+              );
             }
             
-            // namespaces are set up recursively in factory method so only ever
-            // setup method mocks.
+            // Auto-setup methods
             if( type === "method" ) {
-              setUpExpectations( member, map );
+              setupMethod( member, expectations );
             }
           }
           // If standalone fn then stop (constructor or method)
-          if ( !isBound ) {
+          if ( !isMember ) {
             break;
           }
         }
@@ -1651,7 +1653,7 @@
         }
       },
       // only exposed for integration tests
-      __createMock : createMock
+      __bootstrap : bootstrap
     };
 
   }// end init
