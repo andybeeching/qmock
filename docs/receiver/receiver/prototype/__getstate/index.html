@@ -3,7 +3,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
 <head>
   <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-  <title>QMock API documentation | QMock.utils.verify</title>
+  <title>QMock API documentation | Receiver#__getState</title>
   <meta name="generator" content="PDoc" />
   
   <script type="text/javascript" charset="utf-8" src="../../../../javascripts/prototype.js"></script>
@@ -42,14 +42,17 @@
           
             <li><div class="menu-item"><a class="section" title="Mock section (section)" href="../../../../mock/">Mock section</a></div><ul class="menu-section"><li><div class="menu-item"><a class="class" title="Mock (class)" href="../../../../mock/mock/">Mock</a></div></li></ul></li>
           
-            <li><div class="menu-item"><a class="section current-parent" title="QMock section (section)" href="../../../../qmock/">QMock section</a></div><ul class="menu-section"><li><div class="menu-item"><a class="class current-parent" title="QMock (class)" href="../../../../qmock/qmock/">QMock</a></div><ul class=""><li><div class="menu-item"><a class="namespace" title="QMock.config (namespace)" href="../../../../qmock/qmock/config/">QMock.config</a></div></li>
-<li><div class="menu-item"><a class="namespace current-parent" title="QMock.utils (namespace)" href="../../../../qmock/qmock/utils/">QMock.utils</a></div><ul><li><div class="menu-item"><a class="class-method" title="QMock.utils.enumerate (class method)" href="../../../../qmock/qmock/utils/enumerate/">enumerate</a></div></li>
-<li><div class="menu-item"><a class="class-method" title="QMock.utils.is (class method)" href="../../../../qmock/qmock/utils/is/">is</a></div></li>
-<li><div class="menu-item"><a class="class-method" title="QMock.utils.iterate (class method)" href="../../../../qmock/qmock/utils/iterate/">iterate</a></div></li>
-<li><div class="menu-item"><a class="class-method" title="QMock.utils.test (class method)" href="../../../../qmock/qmock/utils/test/">test</a></div></li>
-<li><div class="menu-item"><a class="class-method current" title="QMock.utils.verify (class method)" href="../../../../qmock/qmock/utils/verify/">verify</a></div></li></ul></li></ul></li></ul></li>
+            <li><div class="menu-item"><a class="section" title="QMock section (section)" href="../../../../qmock/">QMock section</a></div><ul class="menu-section"><li><div class="menu-item"><a class="class" title="QMock (class)" href="../../../../qmock/qmock/">QMock</a></div><ul class=""><li><div class="menu-item"><a class="namespace" title="QMock.config (namespace)" href="../../../../qmock/qmock/config/">QMock.config</a></div></li>
+<li><div class="menu-item"><a class="namespace" title="QMock.utils (namespace)" href="../../../../qmock/qmock/utils/">QMock.utils</a></div></li></ul></li></ul></li>
           
-            <li><div class="menu-item"><a class="section" title="Receiver section (section)" href="../../../../receiver/">Receiver section</a></div><ul class="menu-section"><li><div class="menu-item"><a class="class" title="Receiver (class)" href="../../../../receiver/receiver/">Receiver</a></div></li></ul></li>
+            <li><div class="menu-item"><a class="section current-parent" title="Receiver section (section)" href="../../../../receiver/">Receiver section</a></div><ul class="menu-section"><li><div class="menu-item"><a class="class current-parent" title="Receiver (class)" href="../../../../receiver/receiver/">Receiver</a></div><ul><li><div class="menu-item"><a class="instance-method" title="Receiver#__getExceptions (instance method)" href="../../../../receiver/receiver/prototype/__getexceptions/">__getExceptions</a></div></li>
+<li><div class="menu-item"><a class="instance-method current" title="Receiver#__getState (instance method)" href="../../../../receiver/receiver/prototype/__getstate/">__getState</a></div></li>
+<li><div class="menu-item"><a class="instance-method" title="Receiver#excise (instance method)" href="../../../../receiver/receiver/prototype/excise/">excise</a></div></li>
+<li><div class="menu-item"><a class="instance-method" title="Receiver#method (instance method)" href="../../../../receiver/receiver/prototype/method/">method</a></div></li>
+<li><div class="menu-item"><a class="instance-method" title="Receiver#namespace (instance method)" href="../../../../receiver/receiver/prototype/namespace/">namespace</a></div></li>
+<li><div class="menu-item"><a class="instance-method" title="Receiver#property (instance method)" href="../../../../receiver/receiver/prototype/property/">property</a></div></li>
+<li><div class="menu-item"><a class="instance-method" title="Receiver#reset (instance method)" href="../../../../receiver/receiver/prototype/reset/">reset</a></div></li>
+<li><div class="menu-item"><a class="instance-method" title="Receiver#verify (instance method)" href="../../../../receiver/receiver/prototype/verify/">verify</a></div></li></ul></li></ul></li>
           
         </ul> <!--- #api_menu =-->
       </div> <!-- .sidebar-pane -->
@@ -71,19 +74,17 @@
 <ul class="breadcrumbs clearfix">
   <li><a href="../../../../">Home</a></li>
   
-    <li>&rarr; <a title="QMock section (section)" href="../../../../qmock/">QMock section</a></li>
+    <li>&rarr; <a title="Receiver section (section)" href="../../../../receiver/">Receiver section</a></li>
   
-    <li>&rarr; <a title="QMock (class)" href="../../../../qmock/qmock/">QMock</a></li>
+    <li>&rarr; <a title="Receiver (class)" href="../../../../receiver/receiver/">Receiver</a></li>
   
-    <li>&rarr; <a title="QMock.utils (namespace)" href="../../../../qmock/qmock/utils/">QMock.utils</a></li>
-  
-    <li>&rarr; <a title="QMock.utils.verify (class method)" href="../../../../qmock/qmock/utils/verify/">verify</a></li>
+    <li>&rarr; <a title="Receiver#__getState (instance method)" href="../../../../receiver/receiver/prototype/__getstate/">__getState</a></li>
   
 </ul>
 
 <h2 class="page-title">
   
-    <span class="type">class method</span> QMock.utils.verify
+    <span class="type">instance method</span> Receiver#__getState
   
 </h2>
 
@@ -94,25 +95,17 @@
   <div class="section-content">
     <div class="method-description">
       
-        <pre class="syntax"><code class="ebnf">QMock.utils.verify( receiver [, raise] ) &rarr; Boolean | Exception</code></pre>
+        <pre class="syntax"><code class="ebnf">Receiver#__getState() &rarr; Object (Mock instance state machine)</code></pre>
 
       
 
-      <ul>
-<li>receiver (Mock): mock / receiver object to test</li>
-<li>raise (Function) <em>optional</em>: Function to handle false comparison
-results</li>
-</ul>
-
-
-<p>Verifies the receiver object (the parent mock object) first, then
-individual members (both methods and nested namespaces).</p>
-
-<p>Only passes if whole object tree passes, else throws exception
-or returns <code>false</code> depending on mode (fail slow/fast).</p>
+      <p>Utility method for retrieving the internal state of a mock object
+for debugging and inspection</p>
 
       
       
+  <p class="alias aliases">Aliased as: <code><a title="Mock#__getState (instance method)" href="../../../../mock/mock/prototype/__getstate/">Mock#__getState</a></code></p>
+
 
 
       

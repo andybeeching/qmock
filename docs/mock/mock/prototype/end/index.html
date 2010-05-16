@@ -48,11 +48,12 @@
 <li><div class="menu-item"><a class="instance-method" title="Mock#async (instance method)" href="../../../../mock/mock/prototype/async/">async</a></div></li>
 <li><div class="menu-item"><a class="instance-method deprecated" title="Mock#atLeast (instance method)" href="../../../../mock/mock/prototype/atleast/">atLeast</a></div></li>
 <li><div class="menu-item"><a class="instance-method" title="Mock#calls (instance method)" href="../../../../mock/mock/prototype/calls/">calls</a></div></li>
+<li><div class="menu-item"><a class="instance-method" title="Mock#chain (instance method)" href="../../../../mock/mock/prototype/chain/">chain</a></div></li>
 <li><div class="menu-item"><a class="instance-method" title="Mock#data (instance method)" href="../../../../mock/mock/prototype/data/">data</a></div></li>
 <li><div class="menu-item"><a class="instance-method current" title="Mock#end (instance method)" href="../../../../mock/mock/prototype/end/">end</a></div></li>
+<li><div class="menu-item"><a class="instance-method" title="Mock#excise (instance method)" href="../../../../mock/mock/prototype/excise/">excise</a></div></li>
 <li><div class="menu-item"><a class="instance-method deprecated" title="Mock#expects (instance method)" href="../../../../mock/mock/prototype/expects/">expects</a></div></li>
 <li><div class="menu-item"><a class="instance-method" title="Mock#id (instance method)" href="../../../../mock/mock/prototype/id/">id</a></div></li>
-<li><div class="menu-item"><a class="instance-method deprecated" title="Mock#interface (instance method)" href="../../../../mock/mock/prototype/interface/">interface</a></div></li>
 <li><div class="menu-item"><a class="instance-method" title="Mock#method (instance method)" href="../../../../mock/mock/prototype/method/">method</a></div></li>
 <li><div class="menu-item"><a class="instance-method" title="Mock#namespace (instance method)" href="../../../../mock/mock/prototype/namespace/">namespace</a></div></li>
 <li><div class="menu-item"><a class="instance-method deprecated" title="Mock#noMoreThan (instance method)" href="../../../../mock/mock/prototype/nomorethan/">noMoreThan</a></div></li>
@@ -115,16 +116,64 @@
       
 
       <p>Utility method to end a mock method expectation declaration, or
-retrieve the receiver object a mock object is bound to.</p>
+retrieve the receiver object a mock object is bound to. In other
+words it sets the receiver object context for setting new methods,
+properties, or namespaces on mock interfaces. It should also be used
+as the last item in a mock declaration cascading invocation chain (or
+rather wherever the last method is set).</p>
 
-<p>This can be thought of analogous to jQuery's <code>end()</code> method
-which is used on 'wrapped sets' to restore a collection to it's
-original state post-destructive operations (like
-<code>$().filter()</code>).</p>
+<p>Why? Since functional mocks can also act as receivers / namespaces in
+their own right, it allows more fine-grained control over what object
+a mock is actually set upon, especially when objects have deep(ish)
+hierarchies.</p>
+
+<p>The common use case when setting mocks via cascading invocation is
+to set new member mocks on the <em>same</em> receiver, so
+<code>mock.end()</code> <em>must</em> be used after expectations for a mock
+at the same level have been set. This means subsequent mock
+declarations are set within the same receiver object context.</p>
+
+<p>Without calling <code>Mock.end()</code> then subsequent mocks are
+set on the current mock, and are thus nested at a deeper level.</p>
+
+<p>For this reason it might be less work to set your mocks up by passing
+the mock constructor a 'property mapping' (see main Mock docs), and
+let the constructor handle the work for you.</p>
+
+<p><em>Please note calling <code>Mock.end()</code> does not mean a mock
+object cannot be further augmented/manipulated (that would be
+<code>Mock.excise()</code>)</em>.</p>
+
+<p>For the jQuery-conversant, the method acts in part like the
+<code>$("..").end()</code> method, which is used to restore the
+execution context to a given jQuery 'wrapped set' (thanks Cody!) (as
+well as it's original state), post-manipulation (via
+$.find()/$.filter()).</p>
 
 <h4>Example</h4>
 
-<pre><code>Mock.expects().method('foo').end(); // returns Mock</code></pre>
+<pre><code>// Declare nested methods...
+var mock = new Mock;
+mock.method('foo').method("bar");
+
+// Looks like...
+mock = {
+  foo: { // foo is also a function (functions are first-class citizens too!)
+    bar: function () {}
+  }
+}
+
+// Declare methods on equal level
+// Note last call *required*!! Else mock set to 'bar' mock, not it's
+// receiver.
+mock.method('foo').end().method("bar").end();
+
+// Looks like...
+mock = {
+  foo: function () {},
+  bar: function () {}
+}
+</code></pre>
 
 
       

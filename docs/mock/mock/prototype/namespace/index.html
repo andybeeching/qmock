@@ -48,11 +48,12 @@
 <li><div class="menu-item"><a class="instance-method" title="Mock#async (instance method)" href="../../../../mock/mock/prototype/async/">async</a></div></li>
 <li><div class="menu-item"><a class="instance-method deprecated" title="Mock#atLeast (instance method)" href="../../../../mock/mock/prototype/atleast/">atLeast</a></div></li>
 <li><div class="menu-item"><a class="instance-method" title="Mock#calls (instance method)" href="../../../../mock/mock/prototype/calls/">calls</a></div></li>
+<li><div class="menu-item"><a class="instance-method" title="Mock#chain (instance method)" href="../../../../mock/mock/prototype/chain/">chain</a></div></li>
 <li><div class="menu-item"><a class="instance-method" title="Mock#data (instance method)" href="../../../../mock/mock/prototype/data/">data</a></div></li>
 <li><div class="menu-item"><a class="instance-method" title="Mock#end (instance method)" href="../../../../mock/mock/prototype/end/">end</a></div></li>
+<li><div class="menu-item"><a class="instance-method" title="Mock#excise (instance method)" href="../../../../mock/mock/prototype/excise/">excise</a></div></li>
 <li><div class="menu-item"><a class="instance-method deprecated" title="Mock#expects (instance method)" href="../../../../mock/mock/prototype/expects/">expects</a></div></li>
 <li><div class="menu-item"><a class="instance-method" title="Mock#id (instance method)" href="../../../../mock/mock/prototype/id/">id</a></div></li>
-<li><div class="menu-item"><a class="instance-method deprecated" title="Mock#interface (instance method)" href="../../../../mock/mock/prototype/interface/">interface</a></div></li>
 <li><div class="menu-item"><a class="instance-method" title="Mock#method (instance method)" href="../../../../mock/mock/prototype/method/">method</a></div></li>
 <li><div class="menu-item"><a class="instance-method current" title="Mock#namespace (instance method)" href="../../../../mock/mock/prototype/namespace/">namespace</a></div></li>
 <li><div class="menu-item"><a class="instance-method deprecated" title="Mock#noMoreThan (instance method)" href="../../../../mock/mock/prototype/nomorethan/">noMoreThan</a></div></li>
@@ -110,31 +111,16 @@
   <div class="section-content">
     <div class="method-description">
       
-        <pre class="syntax"><code class="ebnf">Mock#namespace( id [, definition ] ) &rarr; <a title="Mock (class)" href="../../../../mock/mock/">Mock</a></code></pre>
+        <pre class="syntax"><code class="ebnf">Mock#namespace( id, map ) &rarr; new Receiver</code></pre>
 
       
 
-      <ul>
-<li>id (String): Identifer or key for the nested namespace receiver
-instance on the Mock. Instance implements all Receiver klass
-methods.</li>
-<li>definition (Map) <em>optional</em>: TODO</li>
-</ul>
-
-
-<h4>Example</h4>
-
-<pre><code>var mock = new Mock;
-// Create a nested namespace with a method called 'bar' on it.
-Mock.namespace("foo")
-  .method("bar");
-</code></pre>
-
+      
 
       
       
-  <p class="alias aliases">Aliased as: <code><a title="Receiver#namespace (instance method)" href="../../../../receiver/receiver/prototype/namespace/">Receiver#namespace</a></code></p>
 
+  <p class="alias alias-of">Alias of: <code><a title="Receiver#namespace (instance method)" href="../../../../receiver/receiver/prototype/namespace/">Receiver#namespace</a></code></p>
 
 
       

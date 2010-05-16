@@ -48,11 +48,12 @@
 <li><div class="menu-item"><a class="instance-method" title="Mock#async (instance method)" href="../../../../mock/mock/prototype/async/">async</a></div></li>
 <li><div class="menu-item"><a class="instance-method deprecated" title="Mock#atLeast (instance method)" href="../../../../mock/mock/prototype/atleast/">atLeast</a></div></li>
 <li><div class="menu-item"><a class="instance-method" title="Mock#calls (instance method)" href="../../../../mock/mock/prototype/calls/">calls</a></div></li>
+<li><div class="menu-item"><a class="instance-method" title="Mock#chain (instance method)" href="../../../../mock/mock/prototype/chain/">chain</a></div></li>
 <li><div class="menu-item"><a class="instance-method" title="Mock#data (instance method)" href="../../../../mock/mock/prototype/data/">data</a></div></li>
 <li><div class="menu-item"><a class="instance-method" title="Mock#end (instance method)" href="../../../../mock/mock/prototype/end/">end</a></div></li>
+<li><div class="menu-item"><a class="instance-method" title="Mock#excise (instance method)" href="../../../../mock/mock/prototype/excise/">excise</a></div></li>
 <li><div class="menu-item"><a class="instance-method deprecated" title="Mock#expects (instance method)" href="../../../../mock/mock/prototype/expects/">expects</a></div></li>
 <li><div class="menu-item"><a class="instance-method" title="Mock#id (instance method)" href="../../../../mock/mock/prototype/id/">id</a></div></li>
-<li><div class="menu-item"><a class="instance-method deprecated" title="Mock#interface (instance method)" href="../../../../mock/mock/prototype/interface/">interface</a></div></li>
 <li><div class="menu-item"><a class="instance-method" title="Mock#method (instance method)" href="../../../../mock/mock/prototype/method/">method</a></div></li>
 <li><div class="menu-item"><a class="instance-method" title="Mock#namespace (instance method)" href="../../../../mock/mock/prototype/namespace/">namespace</a></div></li>
 <li><div class="menu-item"><a class="instance-method deprecated" title="Mock#noMoreThan (instance method)" href="../../../../mock/mock/prototype/nomorethan/">noMoreThan</a></div></li>
@@ -110,49 +111,16 @@
   <div class="section-content">
     <div class="method-description">
       
-        <pre class="syntax"><code class="ebnf">Mock#property( prop, val ) &rarr; <a title="Mock (class)" href="../../../../mock/mock/">Mock</a></code></pre>
-
-  <ul class="argument-list">
-    
-      <li>
-        <code class="argument-name">prop</code>
-        
-          <span class="argument-types">(<code>String</code>)</span>
-        
-         &ndash; Name of the property to attach to receiver object
-
-      </li>
-    
-      <li>
-        <code class="argument-name">val</code>
-        
-          <span class="argument-types">(<code>Object</code>)</span>
-        
-         &ndash; Value to set on <code>prop</code>.
-
-      </li>
-    
-  </ul> <!-- .argument-list -->
+        <pre class="syntax"><code class="ebnf">Mock#property( prop, value ) &rarr; <a title="Receiver (class)" href="../../../../receiver/receiver/">Receiver</a> | <a title="Mock (class)" href="../../../../mock/mock/">Mock</a></code></pre>
 
       
 
-      <p>When <code>method()</code> is called on a receiver object it is
-augmented with a new property bound to the identifier
-<code>prop</code> with the value <code>val</code>.</p>
-
-<p>Throws <code>InvalidPropertyNameException</code> if member with key
-<code>name</code> already exists on receiver.</p>
-
-<h4>Example</h4>
-
-<pre><code>Mock.expects().property('foo', 'bar');
-console.log( Mock.foo ); // "bar"</code></pre>
-
+      
 
       
       
-  <p class="alias aliases">Aliased as: <code><a title="Receiver#property (instance method)" href="../../../../receiver/receiver/prototype/property/">Receiver#property</a></code></p>
 
+  <p class="alias alias-of">Alias of: <code><a title="Receiver#property (instance method)" href="../../../../receiver/receiver/prototype/property/">Receiver#property</a></code></p>
 
 
       

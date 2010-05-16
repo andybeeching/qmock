@@ -13,11 +13,11 @@
  * == QMock ==
  *  Static methods, config options and Classes available on QMock namespace.
  **/
-(function ( container, undefined ) {
+;(function ( container, undefined ) {
 
   // Trap original methods - protected scope
-  var slice = Array.prototype.slice,
-      toString = Object.prototype.toString,
+  var slice          = Array.prototype.slice,
+      toString       = Object.prototype.toString,
       hasOwnProperty = Object.prototype.hasOwnProperty;
 
   /** section: QMock
@@ -30,6 +30,7 @@
    *  custom comparison methods, or modifiying any of the public members.
    *
    *  #### Example
+   *  
    *  <pre><code>QMock.create(); // Object (API)</code></pre>
    **/
   function createQMock () {
@@ -61,6 +62,7 @@
        *  to see which exceptions were thrown, and inspect their properties.
        *
        *  #### Example
+       *  
        *  <pre><code>QMock.failslow = true;</code></pre>
        **/
       failslow: true,
@@ -77,6 +79,7 @@
        *  mock instantiated.
        *
        *  #### Example
+       *  
        *  <pre><code>QMock.config.compare = QUnit.equiv;</code></pre>
        **/
       compare: false,
@@ -89,7 +92,6 @@
        *  to a server. In turn this encourages developers to developers to
        *  ensure callbacks enact upon the right data or view when executed.
        **/
-
       delay: 100
     };
 
@@ -105,10 +107,99 @@
      *  Function, Array, Object</code>
      *
      *  #### Example
+     *  
      *  <pre><code>QMock.Utils.is( "foo", "String"); // true </code></pre>
      **/
     function is ( obj, nativeType ) {
       return toString.call( obj ) === "[object " + nativeType + "]";
+    }
+
+    /**
+     * QMock.utils.enumerate( obj, fn[, scope][, bool] ) -> undefined
+     *  - obj (Object): Object whose properties to enumerate
+     *  - fn (Function): Callback function applied to current property. Passed
+     *  three parameters, the current property value, the property
+     *  identifier (the key) it's associated by on receiver, and the object
+     *  (receiver) it is bound to.
+     *  - scope (Object) _optional_: Object to set as execution context on
+     *  callback invocation (i.e. <code>this</code> binding). Defaults to the
+     *  <code>obj</code> parameter value.
+     *  - bool (Boolean) _optional_: Optional flag to determine enumeration
+     *  upon inherited (via [[prototype]]) properties. Default is
+     *  <code>false</code>.
+     *
+     *  This is a helper function inspired by the functional programming 
+     *  syntactic sugar methods on Array.prototype. It's purpose to provide a 
+     *  simple mechanism for enumerating over an object interface, and 
+     *  enacting upon it's properties.
+     *
+     *  It also aims to fix the broken enumeration in browsers (IE6-8) which
+     *  fails to enumerate any keys which shadow natively inherited properties
+     *  (even where ES3/5 spec states they should indeed be enumerable).
+     *
+     *  Currently it's really to ensure <code>toString</code> and 
+     *  <code>valueOf</code> properties are accessible for enactment 
+     *  (e.g. copying/invoking/overriding).
+     *
+     *  The esteemed Garrett Smith has the bullet on DHTMLKitchen.
+     *
+     *  TODO: Get dhtmlkitchen link
+     *  
+     *  #### Example
+     *  
+     *  <pre><code>// Enumrate over object
+     *  QMock.utils.enumerate({
+     *      "toString": "stringify"
+     *    },
+     *    function ( prop, key, obj ) {
+     *      console.log( prop === obj[ key ] ); // true
+     *    },
+     *    this, // Execution context of callback 
+     *    true // Enumerate prototypically inherited properties
+     *  );
+     *  </code></pre>
+     **/
+    function enumerate ( obj, fn, scope, bool ) {
+      for ( var key in obj ) {
+        if ( ( bool || hasOwnProperty.call( obj, key) )
+          && obj.propertyIsEnumerable( key ) || key === "toString"
+          || key === "valueOf" ) {
+            fn.call( scope || obj, obj[ key ], key, obj );
+          }
+      }
+    }
+    
+    /**
+     * QMock.utils.iterate( obj, fn[, scope] ) -> undefined
+     * - obj (Collection): Collection to iterate through, can be any object 
+     *  with a <code>length</code> property.
+     *  - fn (Function): Callback function applied to current item. Passed 
+     *  three parameters, the current item value, the current index 
+     *  (identifier) the item corresponds to, and the collection itself.
+     * 
+     * This basically emulates <code>Array.prototype.forEach</code> but 
+     *  ensures the order of items is maintained when iterating through a 
+     *  collection.
+     *  
+     *  Functional programming FTW! 8-)
+     *  
+     *  #### Example
+     *  
+     *  <pre><code>// Iterate through a collection
+     *  QMock.utils.iterate([
+     *      "foo", "bar", "baz"
+     *    ],
+     *    function ( item, index, collection ) {
+     *      console.log( item === collection[ index ] ); // true
+     *    },
+     *    this // scope
+     *  );
+     *  </code></pre>
+     **/
+    function iterate ( obj, fn, scope ) {
+      for ( var i = 0, len = obj.length; i < len; i++ ) {
+        fn.call( scope || obj, obj[ i ], i, obj );
+      }
     }
 
     /**
@@ -118,7 +209,7 @@
      *  - presentation (Array): Array representing a method/constructor
      *  interface 'presentation' to test (arguments collection or parameter
      *  list)
-     *  - prop (String) _optional_: Optional key used to lookup associated
+     *  - key (String) _optional_: Optional key used to lookup associated
      *  data held on an expectation object
      *
      *  Utility method for testing a known parameter list against a mock's
@@ -139,6 +230,7 @@
      *  depending on match success.
      *
      *  #### Example
+     *  
      *  <pre><code>var mock = new Mock;
      *  mock.accepts("bar");
      *
@@ -155,20 +247,21 @@
      *
      *  </code></pre>
      **/
-    function comparePresentation ( state, presentation, prop ) {
-      if ( isCompare() ) {
-        for ( var result = false, i = 0, len = state.expected.length; i < len; i++ ) {
-          // If match found against presentation return bound object (or self if chained)
-          if ( config.compare( presentation, state.expected[ i ].accepts ) ) {
-            result = ( prop )
-              ? state.expected[ i ][ prop ]
-                || state[ ( prop === "returns" ) ? "returnValue" : ( prop === "data") ? "dataRep" : prop ]
-              : true;
-            break;
-          }
+    function comparePresentation ( mock, presentation, key ) {
+      isCompare();
+      var result  = false,
+          mapping = {"returns": "returnValue","data": "dataRep"},
+          i       = 0,
+          len     = mock.expected.length,
+          val;
+      // Compare presention vs expectations
+      for (; i < len; i++ ) {
+        if ( config.compare( presentation, mock.expected[ i ][ "accepts" ] ) ) {
+          result = key ? mock.expected[ i ][ key ] || mock[ mapping[ key ] ] : true;
+          break;
         }
-        return result;
       }
+      return result;
     }
 
     /* [Private]
@@ -214,8 +307,47 @@
      *  <pre><code>normaliseToArray( 'foo' ); // ['foo']</code></pre>
      **/
     function toArray ( obj ) {
-      return ( !is( obj, "Array" ) ) ? [ obj ] : obj;
+      return !is( obj, "Array" ) ? [ obj ] : obj;
     }
+
+    /* [Private]
+     *
+     * mixin( target, obj[, re ] ) -> undefined
+     *  - target (Object): Receiver object to be extended
+     *  - obj (Object): Giver object interface to merge into target
+     *  - re (RegExp) _optional_: RegExp to run against interface keys to cache
+     *  and execute old method if overwriting.
+     *
+     *  Function to merge the properties / interface of a target object
+     *  with another object. Used for rudimentary inheritance as deep
+     *  class hierarchies are not cool. Also used to merge optional config
+     *  objects with defaults (a la jQuery).
+     *
+     *  If optional <code>re</code> parameter passed then runs match on object
+     *  keys and partially applies function in a new closure, running it before
+     *  the new bound function. This is mainly used when overriding an existing
+     *  function through augmented prototypal inheritance. Note the parent
+     *  closure delegates both it's execution context and received parameters
+     *  to the cached method and override method. Sort of wholesale currying
+     *  if you will (work with me here!). Mmm, bacon.
+     *
+     *  _Note: Using <code>typeof</code> to test property type (and not
+     *  <code>QMock.utils.is()</code>) as a bit quicker, and method not
+     *  being exposed publically. We (maybe foolishly), trust the input!_
+     **/
+     function mixin ( target, obj, re ) {
+       enumerate( obj, function( prop, key ) {
+         // Handle overriding
+         target[ key ] = re && re.test( key ) && (typeof prop == "function")
+          ? (function ( zuper, nue ) {
+              return function () {
+                zuper.apply(this, arguments);
+                return nue.apply(this, arguments);
+              }
+            })( target[ key ], prop ) // mitigate pesky multiples
+          : prop
+       });
+     }
 
     /* [Private]
      *
@@ -224,7 +356,7 @@
      *  - scope (Object): Object to bind function to (execution scope)
      *
      *  Utility function to bind a function to a specific execution context.
-     *  This only partially implements Function.prototype.bind (as seen in 
+     *  This only partially implements Function.prototype.bind (as seen in
      *  prototype js and ES5), as haven't required currying arguments yet.
      **/
     function bind ( fn, scope ) {
@@ -235,42 +367,21 @@
 
     /* [Private]
      *
-     *  bindInterface( obj, receiver, scope [, re] )
+     *  bindInterface( obj, receiver, scope )
+     *  - target (Object): Object to copy interface to
      *  - obj (Object): Interface to copy and bind (e.g. Mock.prototype)
-     *  - receiver (Object): Object to copy interface to
      *  - scope (Object): The execution context to bind methods to
-     *  - re (RegExp) _optional_: RegExp to run against interface keys to cache
-     *  and execute old method if overwriting.
      *
      *  Utility function to copy a given object's interface over with bound
      *  function calls to the receiver instance scope (e.g. bind
      *  <code>this</code>).
-     *
-     *  If optional <code>re</code> parameter passed then runs match on object
-     *  keys and partially applies function in a new closure, running it before
-     *  the new bound function. This is mainly used when overriding an existing
-     *  function through cloned prototypal inheritance.
-     *
-     *  _Note_: Check if member is a function can be made more robust using
-     *  QMock.is(), but since private can rely on collaborator callees.
-     *  Hopefully.
      **/
-    function bindInterface ( obj, receiver, scope, re ) {
-      var key, fn;
-      for ( var key in obj ) {
-        if( hasOwnProperty.call( obj, key ) && ( typeof obj[ key ] == "function" ) ) {
-          // Determine if need to cache (and execute) original function if exists
-          fn = bind( obj[ key ], scope );
-          receiver[ key ] = ( re && re.test( key ) )
-            ? (function ( original, overide ) {
-                return function () {
-                  original();
-                  return overide();
-                }
-              })( receiver[ key ], fn )
-            : fn;
+    function bindInterface ( target, obj, scope ) {
+      enumerate(obj, function( prop, key ) {
+        if ( typeof prop == "function" ) {
+          target[ key ] = bind( prop, scope );
         }
-      }
+      });
     }
 
     /* [Private]
@@ -288,7 +399,337 @@
       return false;
     }
 
-    // KLASS DECLARATIONS
+    // KLASS DEFINITIONS
+
+    /**
+     * == Receiver ==
+     *
+     *  Receivers are dumb objects which act as namespaces for methods and
+     *  properties. QMock allows receivers to be either plain old object
+     *  literals, or Mock stubs (aka smart stub functions) depending on need,
+     *  or desire to accurately replicate a real-world collaborator object.
+     *
+     *  Technically the Mock klass implements the Receiver klass interface, but
+     *  since Mock objects as functions, and not object literals, are the
+     *  primary use case, it's easier to think of all methods in a Receiver
+     *  instance as acting identically as their Mock (function) instance
+     *  counterpart.
+     **/
+
+    /** section: Receiver
+     * class Receiver
+     *  The Receiver interface.
+     **/
+    function Receiver () {
+      if( !(this instanceof Receiver ) ) {
+        return new Receiver;
+      }
+      this.methods    = [];
+      this.properties = {};
+      this.namespaces = [];
+      // Normally overridden in factory to reference public receiver object
+      this.self       = this;
+    }
+
+    Receiver.prototype = {
+
+      // Used to support expects() - Receiver instance method till 0.5 is tagged.
+      tmp: {},
+
+     /**
+      * Receiver#method( name ) -> new Mock
+      *  - name (String): Name of the method
+      *
+      *  When <code>method()</code> is called on a receiver object it is
+      *  augmented with a new method bound to the identifier <code>name</code>.
+      *
+      *  Throws <code>InvalidMethodNameException</code> if member with key
+      *  <code>name</code> already exists on receiver.
+      *
+      *  #### Example
+      *  
+      *  <pre><code>Mock.method('foo');</code></pre>
+      **/
+      method: function ( prop, min, max ) {
+        if ( hasOwnProperty.call( this.self, prop ) ) {
+          throw {
+            type: "InvalidMethodNameException",
+            msg: "Qmock expects a unique identifier for each mocked method"
+          };
+        }
+
+        // Register public pointer to mocked method instance on receiver object
+        this.self[ prop ] = createRecorder(
+          new Mock(
+            min || this.tmp.min || this.min,
+            max || this.tmp.max || this.max,
+            this.self
+          )
+        );
+
+        // Track methods
+        this.methods.push( this.self[ prop ] );
+
+        // Wham!
+        return this.self[ prop ].id( prop );
+      },
+
+     /**
+      * Receiver#property( prop, val ) -> Receiver | Mock
+      *  - prop (String): Name of the property to attach to receiver object
+      *  - val (Object): Value to set on <code>prop</code>.
+      *
+      *  When <code>method()</code> is called on a receiver object it is
+      *  augmented with a new property bound to the identifier
+      *  <code>prop</code> with the value <code>val</code>.
+      *
+      *  Throws <code>InvalidPropertyNameException</code> if member with key
+      *  <code>name</code> already exists on receiver.
+      *
+      *  #### Example
+      *  
+      *  <pre><code>Mock.property('foo', 'bar');
+      *  console.log( Mock.foo ); // "bar"</code></pre>
+      **/
+      property: function ( prop, value ) {
+        if ( hasOwnProperty.call( this.self, prop ) ) {
+          throw {
+            type: "InvalidPropertyNameException",
+            msg: "Qmock expects a unique key for each stubbed property"
+          };
+        }
+
+        // New property on receiver + track properties
+        this.self[ prop ] = this.properties[ prop ] = value;
+
+        // Bam!
+        return this.self;
+      },
+
+     /**
+      * Receiver#namespace( id [, definition ] ) -> new Receiver
+      *  - id (String): Identifer or key for the nested namespace receiver
+      *  instance on the Mock. Instance implements all Receiver klass
+      *  methods.
+      *  - definition (Map) _optional_: TODO
+      *
+      *  #### Example
+      *  
+      *  <pre><code>var mock = new Mock;
+      *  // Create a nested namespace with a method called 'bar' on it.
+      *  Mock.namespace("foo")
+      *    .method("bar");
+      *  </code></pre>
+      **/
+      namespace: function ( prop, desc ) {
+        if ( hasOwnProperty.call( this.self, prop ) ) {
+          throw {
+            type: "InvalidNamespaceIdentiferException",
+            msg: "Qmock expects a unique key for a namespace identifer"
+          };
+        }
+
+        // New property on receiver + track namespaces
+        this.self[ prop ] = createReceiver( desc || {}, false );
+
+        // Track namespace
+        this.namespaces.push( this.self[ prop ] );
+
+        // Return correct receiver scope for augmentation
+        // Pow!
+        return this.self[ prop ];
+      },
+
+      /** deprecated
+       * Mock#expects( [min = null] [, max = null] ) -> Mock
+       * - min (Number): Miniumum number of times mock object should be
+       *  invoked. If max parameter not passed then number becomes a 'strict'
+       *  invocation expectation (even zero). Default is <code>null</code>.
+       * - max (Number) _optional_: Maximum number of times mocked method
+       *  should be called. If want 'at least _n_' then just pass
+       *  <code>Infinity</code>. Default is <code>null</code>
+       *
+       *  *DEPRECATED*: Was a factory method for creating new mock objects
+       *  (methods / properties) on a receiver object, but mock receiver
+       *  object.
+       *
+       *  Till version 0.5 will be backward compatible, but developers should
+       *  use <code>Mock.method( name, min, max )</code>, or
+       *  <code>Mock.calls()</code> instead.
+       **/
+      expects: function ( min, max ) {
+        this.tmp.min = min;
+        this.tmp.max = max;
+        return this.self;
+      },
+
+      /**
+       * Receiver#verify( [raise] ) -> Boolean
+       *
+       *  Method recurses through all the child mock object members of a
+       *  receiver mock object, verifying their interactions. It delegates
+       *  the actual instance verification routine to Mock#verify. It will
+       *  returns a Boolean, wher an overall result is determined by whether
+       *  the receiver, or any 'leaves' had a negative result.
+       *
+       *  It will also throw an error if _optional_ <code>raise</code>
+       *  parameter is passed. This is thrown if <code>QMock.config.failfast</code>
+       *  is set to <code>true</code>. It can also be retrieve by calling
+       *  <code>Mock.__getExceptions()</code>.
+       *
+       *  See <code>Mock#verify</code> for mock object verification
+       *  details.
+       **/
+      verify: function () {
+        // Verify 'leaf' member mock objects
+        var result  = true,
+            members = this.methods.concat( this.namespaces ),
+            i       = 0,
+            len     = members.length,
+            tmp     = config.failslow;
+
+        // Suppress errors thrown at higher level
+        // Allows all errors to be collated and thrown as a set
+        config.failslow = true;
+
+        for (; i < len; i++) {
+          result &= members[ i ].verify();
+        }
+
+        // Restore failslow setting
+        config.failslow = tmp;
+
+        // Gather all exceptions
+        var exceptions = this.__getExceptions();
+
+        // Live() || Die()
+        if ( !config.failslow && exceptions.length ) {
+          // Pants.
+          throw exceptions;
+        } else {
+        // WIN. \o/
+          return (!!result) && (exceptions.length === 0);
+        }
+      },
+
+      /**
+       * Receiver#reset() -> Boolean
+       *
+       *  Resets the Receiver instance internal state machine, and mock 
+       *  instances that comprise it's interface. Also resets any properties 
+       *  (set by <code>Mock.property()</code>) to their original value (in 
+       *  case of mutation) during the exercise phase.
+       *
+       *  See Mock#property for details on resetting mock function objects.
+       **/
+      reset: function () {
+        // Reset all child mocks
+        var members = this.methods.concat( this.namespaces ),
+            i = 0,
+            len = members.length;
+
+        for (;i < len; i++) {
+          members[ i ].reset();
+        }
+
+        // Reset Properties (could have been mutated)
+        for ( var key in this.properties ) {
+          if( hasOwnProperty.call( this.properties, key ) ) {
+            this.self[ key ] = this.properties[ key ];
+          }
+        }
+        return true;
+      },
+
+     /**
+      * Receiver#excise() -> Boolean | Error
+      *
+      *  Utility method to 'excise' a Mock object interface from itself, to
+      *  reduce the chance of errors generated by interactions and
+      *  manipulations of the Mock object on behalf collaborator objects
+      *  due to existence of the Mock object API.
+      *
+      *  For example if a controller were to blindly iterate over the keys
+      *  of a Mock instance, even with a <code>hasOwnProperty</code> check,
+      *  both the mocked interface methods/properties, and the Mock instance
+      *  API will be accessible and/or operated upon.
+      *
+      *  Most often this will not cause issues, but if a true representation
+      *  of a collaborator object is required sans extraneous members, then
+      *  this method will prune the Mock object interface from the instance.
+      *
+      *  If the instance needs further augmentation, or simply verification
+      *  and resetting, developers can either use
+      *  <code>QMock.utils.verify</code>, <code>QMock.utils.reset</code>
+      *  static methods, or any method on <code>Mock.prototype</code> while
+      *  using <code>.call()</code> to set the execution context to the mock
+      *  instance.
+      *
+      *  #### Example
+      *  
+      *  <pre><code>var mock = new Mock;
+      *
+      *  // Setup
+      *  mock.calls(1);
+      *
+      *  mock.excise();
+      *
+      *  // Augmention 'post-excision'
+      *  QMock.Mock.prototype.calls(mock, 2)
+      *
+      *  // Check expectation updated
+      *  mock._getState()._minCalls === 2 // true;
+      *  </code></pre>
+      **/
+      excise: function () {
+        // 'excise' receiver
+        enumerate( Receiver.prototype, function ( prop, key ) {
+          delete this.self[ key ];
+        }, this);
+
+        // 'excise' children
+        var members = this.methods.concat( this.namespaces ),
+            len = members.length,
+            i = 0;
+        for (; i < len; i++) {
+          members[ i ].excise();
+        }
+        return true;
+      },
+
+      // Privileged references for debugging
+
+      /**
+       * Receiver#__getExceptions() -> Array
+       *
+       *  Returns an array of exception objects, used for debugging when
+       *  <code>Mock.verify()</code> returns <code>false</code> in 'fail slow'
+       *  test runner setups (see Config section).
+       **/
+      __getExceptions: function () {
+        var exceptions = this.self.__getState && this.self.__getState().exceptions || [],
+            i = 0,
+            len = this.methods.length;
+        for (; i < len; i++) {
+          exceptions = exceptions.concat( this.methods[ i ].__getExceptions() );
+        }
+        return exceptions;
+      },
+
+      /**
+       * Receiver#__getState() -> Object (Mock instance state machine)
+       *
+       *  Utility method for retrieving the internal state of a mock object
+       *  for debugging and inspection
+       **/
+      __getState: function () {
+        return this;
+      }
+    };
+
+
+    // Backward compatibility with QMock API v0.1
+    Receiver.prototype.andExpects = Receiver.prototype.expects;
 
     /**
      * == Mock ==
@@ -306,13 +747,14 @@
      **/
 
     /** section: Mock
-     * class Mock
+     * class Mock < Receiver
+     *  includes mixin
      *
-     *  Main Stub, or mocked method class
+     *  // TODO
+     *  Chips
      **/
 
     /* [Private]
-
      * new Expectation( map )
      *  - map (Hash): Data properties for Expectation object, can be custom
      *  if required.
@@ -336,9 +778,6 @@
       return map;
     }
 
-    /*
-     * Class#methodName(parameters)
-     **/
     function Mock ( min, max, receiver ) {
       // Constructor protection, Mock should be only used as constructor
       if ( !(this instanceof Mock) ) {
@@ -362,6 +801,10 @@
       // Instance references
       this.receiver     = receiver;
       this.self         = this;
+      // Implements Receiver
+      this.methods      = [];
+      this.properties   = {};
+      this.namespaces   = [];
     }
 
     Mock.prototype = {
@@ -370,11 +813,12 @@
        * Mock#id( identifier ) -> Mock
        *  - identifier (String): ID of the mock object
        *
-       *  Identifier is used to create more meaningful error messages. By 
-       *  default it is <code>"anonymous"</code>, or the method name
-       *  (assigned by <code>Mock.method()</code>).
+       *  Identifier is used to create more meaningful error messages. By
+       *  default it is _"anonymous"_, or the method name (assigned by
+       *  <code>Mock.method()</code>).
        *
        *  #### Example
+       *  
        *  <pre><code>// Without setting the id
        *  var $ = new Mock;
        *  $.method('foo'); // just says function 'foo' in error message
@@ -384,23 +828,6 @@
       id: function ( identifier ) {
         this.name = identifier;
         return this.self;
-      },
-
-      /**
-       * Mock#method( name ) -> Mock
-       *  - name (String): Name of the method
-       *
-       *  When <code>method()</code> is called on a receiver object it is
-       *  augmented with a new method bound to the identifier <code>name</code>.
-       *
-       *  Throws <code>InvalidMethodNameException</code> if member with key
-       *  <code>name</code> already exists on receiver.
-       *
-       *  #### Example
-       *  <pre><code>Mock.expects().method('foo');</code></pre>
-       **/
-      method: function ( identifier, min, max ) {
-        return this.receiver.method( identifier, min, max );
       },
 
       /**
@@ -417,7 +844,7 @@
        *  <code>Mock.receives</code> method.
        *
        *  #### Example
-       *
+       *  
        *  <pre><code>Mock.method("foo").accepts("bar", "baz");</code></pre>
        **/
       accepts: function () {
@@ -429,7 +856,6 @@
       /**
        * Mock#receives( expectations ) -> Mock
        *  - expectations (Expectation...n): Expectation object format is:
-       *
        *  <pre><code>{accepts: [ parameters ], returns: value, data: [ values ]}</code></pre>
        *
        *  Where the <code>returns</code> & <code>data</code> properties are
@@ -441,7 +867,7 @@
        *  mock object interface is tested against all expectations for a match.
        *
        *  #### Example
-       *
+       *  
        *  <pre><code>Mock.method("foo").receives({
        *    "accepts": ["bar", callback],
        *    "returns": "baz",
@@ -490,6 +916,7 @@
        *  specification.
        *
        *  #### Example
+       *  
        *  <pre><code>Mock.method("foo").accepts('bar').returns('baz');</code></pre>
        **/
       returns: function ( obj ) {
@@ -511,7 +938,7 @@
        *  parameter expectations on a mock object interface.
        *
        *  #### Example
-       *
+       *  
        *  <pre><code>// All parameters optional, overloading is set to true (by default)
        *  Mock.method('foo').accepts('bar', 'baz').required(0);</code></pre>
        *
@@ -542,6 +969,7 @@
        *  the required number of parameters.
        *
        *  #### Example
+       *  
        *  <pre><code>Mock.method('foo').accepts('bar', 'baz').overload(false);</code></pre>
        **/
       overload: function ( bool ) {
@@ -563,6 +991,7 @@
        *  callbacks. See the QMock wiki for more use cases and patterns.
        *
        *  #### Example
+       *  
        *  <pre><code>// Invoked by the mock object during exercise phase
        *  // Stubbed data being passed in at time of invocation
        *  function callback ( str ) { console.log( str ); }
@@ -600,55 +1029,18 @@
       },
 
       /**
-       * Mock#property( prop, val ) -> Mock
-       *  - prop (String): Name of the property to attach to receiver object
-       *  - val (Object): Value to set on <code>prop</code>.
-       *
-       *  When <code>method()</code> is called on a receiver object it is
-       *  augmented with a new property bound to the identifier
-       *  <code>prop</code> with the value <code>val</code>.
-       *
-       *  Throws <code>InvalidPropertyNameException</code> if member with key
-       *  <code>name</code> already exists on receiver.
-       *
-       *  #### Example
-       *  <pre><code>Mock.expects().property('foo', 'bar');
-       *  console.log( Mock.foo ); // "bar"</code></pre>
-       **/
-      property: function ( prop, value ) {
-        return this.receiver.property( prop, value );
-      },
-
-      /**
-       * Mock#namespace( id [, definition ] ) -> Mock
-       *  - id (String): Identifer or key for the nested namespace receiver
-       *  instance on the Mock. Instance implements all Receiver klass
-       *  methods.
-       *  - definition (Map) _optional_: TODO
-       *
-       *  #### Example
-       *  <pre><code>var mock = new Mock;
-       *  // Create a nested namespace with a method called 'bar' on it.
-       *  Mock.namespace("foo")
-       *    .method("bar");
-       *  </code></pre>
-       **/
-      namespace: function ( id, definition ) {
-        return this.receiver.namespace( id, definition );
-      },
-
-      /*
        * Mock#chain() -> Mock
        *
        *  Tells the mocked method to return the receiver object it is bound
        *  to enable cascading (chained) invocations during the exercise phase.
        *
        *  #### Example
+       *  
        *  <pre><code>var $ = new Mock;
-       *  $.expects()
-       *    .method('foo').chain()
-       *  .expects()
-       *    .method('bar');
+       *  $.method('foo')
+       *    .chain()
+       *    .end()
+       *  .method('bar');
        *
        *  // Exercise
        *  $.foo().bar();
@@ -663,7 +1055,7 @@
         return this.self;
       },
 
-      /**
+      /** alias of: Receiver#verify
        * Mock#verify( [raise] ) -> Boolean
        *
        *  Tests actual mock interaction with expected interaction on mock
@@ -679,6 +1071,9 @@
        *
        *  It will also throw an error if _optional_ <code>raise</code>
        *  parameter is passed.
+       *
+       *  See <code>Receiver#verify</code> for receiver object verification
+       *  details.
        **/
       verify: function ( raise ) {
         raise = raise || new ErrorHandler( this.exceptions );
@@ -725,18 +1120,18 @@
        *
        *  This method mainly used to set invocation expectations on
        *  constructors / receiver objects, as conventional usage for mock
-       *  methods is to pass parameters to <code>Mock.expects</code>.
+       *  methods is to pass parameters to <code>Mock.method()</code>.
        *
        *  However, <code>Mock.calls</code> can be called on an instance of
        *  <code>Mock</code>.
        *
-       *  #### Examples
-       *
+       *  #### Example
+       *  
        *  <pre><code>// Set expected calls on mock constructor / receiver
        *  Mock.calls(1,5);
        *
        *  // Set calls on mockmethod
-       *  Mock.expects().method('foo').calls(1,5);
+       *  Mock.method('foo').calls(1,5);
        *  </code></pre>
        **/
       calls: function ( min, max ) {
@@ -749,24 +1144,76 @@
        * Mock#end() -> Mock
        *
        *  Utility method to end a mock method expectation declaration, or
-       *  retrieve the receiver object a mock object is bound to.
+       *  retrieve the receiver object a mock object is bound to. In other
+       *  words it sets the receiver object context for setting new methods,
+       *  properties, or namespaces on mock interfaces. It should also be used
+       *  as the last item in a mock declaration cascading invocation chain (or
+       *  rather wherever the last method is set).
        *
-       *  This can be thought of analogous to jQuery's <code>end()</code> method
-       *  which is used on 'wrapped sets' to restore a collection to it's
-       *  original state post-destructive operations (like
-       *  <code>$().filter()</code>).
+       *  Why? Since functional mocks can also act as receivers / namespaces in
+       *  their own right, it allows more fine-grained control over what object
+       *  a mock is actually set upon, especially when objects have deep(ish)
+       *  hierarchies.
+       *
+       *  The common use case when setting mocks via cascading invocation is
+       *  to set new member mocks on the _same_ receiver, so
+       *  <code>mock.end()</code> *must* be used after expectations for a mock
+       *  at the same level have been set. This means subsequent mock
+       *  declarations are set within the same receiver object context.
+       *
+       *  Without calling <code>Mock.end()</code> then subsequent mocks are
+       *  set on the current mock, and are thus nested at a deeper level.
+       *
+       *  For this reason it might be less work to set your mocks up by passing
+       *  the mock constructor a 'property mapping' (see main Mock docs), and
+       *  let the constructor handle the work for you.
+       *
+       *  _Please note calling <code>Mock.end()</code> does not mean a mock
+       *  object cannot be further augmented/manipulated (that would be
+       *  <code>Mock.excise()</code>)_.
+       *
+       *  For the jQuery-conversant, the method acts in part like the
+       *  <code>$("..").end()</code> method, which is used to restore the
+       *  execution context to a given jQuery 'wrapped set' (thanks Cody!) (as
+       *  well as it's original state), post-manipulation (via
+       *  $.find()/$.filter()).
        *
        *  #### Example
-       *  <pre><code>Mock.expects().method('foo').end(); // returns Mock</code></pre>
+       *  
+       *  <pre><code>// Declare nested methods...
+       *  var mock = new Mock;
+       *  mock.method('foo').method("bar");
+       *
+       *  // Looks like...
+       *  mock = {
+       *    foo: { // foo is also a function (functions are first-class citizens too!)
+       *      bar: function () {}
+       *    }
+       *  }
+       *
+       *  // Declare methods on equal level
+       *  // Note last call *required*!! Else mock set to 'bar' mock, not it's
+       *  // receiver.
+       *  mock.method('foo').end().method("bar").end();
+       *
+       *  // Looks like...
+       *  mock = {
+       *    foo: function () {},
+       *    bar: function () {}
+       *  }
+       *  </code></pre>
        **/
       end: function () {
         return this.receiver;
       },
 
-      /**
+      /** alias of: Receiver#reset
        * Mock#reset() -> Mock
        *
-       *  Resets the internal state of the mock and any bound child mock objects.
+       *  Resets the internal state machine of a mock instance.
+       *
+       *  See <code>Receiver#reset()</code> for details on resetting Receiver
+       *  mock objects.
        **/
       reset: function () {
         this.exceptions = [];
@@ -790,8 +1237,8 @@
        *  Utility method (well, syntactic sugar) for setting up invocation
        *  expectations of 'at least _n_ invocations'.
        *
-       *  Recommended to use <code>Mock.expects</code> or
-       *  <code>Mock.calls</code> instead.
+       *  Recommended to use <code>Mock.method()</code> or
+       *  <code>Mock.calls()</code> instead.
        **/
       atLeast: function ( num ) {
         this.minCalls = num;
@@ -806,94 +1253,51 @@
        *  Utility method (well, syntactic sugar) for setting up invocation
        *  expectations of 'no more than _n_ invocations'.
        *
-       *  Recommended to use <code>Mock.expects</code> or
-       *  <code>Mock.calls</code> instead.
+       *  Recommended to use <code>Mock.method()</code> or
+       *  <code>Mock.calls()</code> instead.
        **/
       noMoreThan: function ( num ) {
         this.maxCalls = num;
         return this.self;
       },
 
-      /*
-       * Mock#excise() -> Mock
-       *
-       *  Utility method to 'excise' a Mock object interface from itself, to
-       *  reduce the chance of errors generated by interactions and
-       *  manipulations of the Mock object on behalf collaborator objects
-       *  due to existence of the Mock object API.
-       *
-       *  For example if a controller were to blindly iterate over the keys
-       *  of a Mock instance, even with a <code>hasOwnProperty</code> check,
-       *  both the mocked interface methods/properties, and the Mock instance
-       *  API will be accessible and/or operated upon.
-       *
-       *  Most often this will not cause issues, but if a true representation
-       *  of a collaborator object is required sans extraneous members, then
-       *  this method will prune the Mock object interface from the instance.
-       *
-       *  If the instance needs further augmentation, or simply verification
-       *  and resetting, developers can either use
-       *  <code>QMock.utils.verify</code>, <code>QMock.utils.reset</code>
-       *  static methods, or any method on <code>Mock.prototype</code> while
-       *  using <code>.call()</code> to set the execution context to the mock
-       *  instance.
-       *
-       *  #### Example
-       *
-       *  <pre><code>var mock = new Mock;
-       *
-       *  // Setup
-       *  mock.calls(1);
-       *
-       *  mock.excise();
-       *
-       *  // Augmention 'post-excision'
-       *  QMock.Mock.prototype.calls(mock, 2)
-       *
-       *  // Check expectation updated
-       *  mock._getState()._minCalls === 2 // true;
-       *  </code></pre>
+      /** alias of: Receiver#excise
+       * Mock#excise() -> Object
        **/
       excise: function () {
-        for ( var key in Mock.prototype ) {
-          if ( hasOwnProperty.call( Mock.prototype, key ) ) {
-            delete this.self[ key ];
-          }
-        }
-      },
-
-      // Privileged pointers for debugging
-
-      /**
-       * Mock#__getExceptions() -> Array
-       *
-       *  Returns an array of exception objects, used for debugging when
-       *  <code>Mock.verify()</code> returns <code>false</code> in 'fail slow'
-       *  test runner setups (see Config section).
-       **/
-      __getExceptions: function () {
-        return this.exceptions;
-      },
-
-      /**
-       * Mock#__getState() -> Object (Mock State)
-       *
-       *  Utility method for retrieving the internal state of a mock object
-       *  for debugging
-       **/
-      __getState: function () {
-        return this;
+        enumerate( Mock.prototype, function ( prop, key ) {
+          delete this.self[ key ];
+        }, this);
       }
+
+      // Inherited methods from Receiver - docs
+
+      /** alias of: Receiver#property
+       * Mock#property( prop, value ) -> Receiver | Mock
+       **/
+
+      /** alias of: Receiver#namespace
+       * Mock#namespace( id, map ) -> new Receiver
+       **/
+
+      /** alias of: Receiver#method
+       * Mock#method( identifier, min, max) -> new Mock
+       **/
+
+      /** alias of: Receiver#__getState
+       * Mock#__getState() -> Object (Mock instance State machine)
+       **/
+
+      /** alias of: Receiver#__getExceptions
+       * Mock#__getExceptions() -> Array (of exception objects)
+       **/
 
     }; // end Mock.prototype declaration
 
-    // Backward compatibility for QMock v0.1/0.2 API
+    // Mixin Receiver and Mock klasses
+    mixin( Mock.prototype, Receiver.prototype, /verify|reset/ );
 
-    /** alias of: Mock#receives(), deprecated
-     * Mock#interface() -> Mock
-     *
-     *  See Mock#receives for usage.
-     **/
+    // Backward compatibility for QMock v0.1/0.2 API
     Mock.prototype.interface        = Mock.prototype.receives;
     Mock.prototype.withArguments    = Mock.prototype.accepts;
     Mock.prototype.andReturns       = Mock.prototype.returns;
@@ -901,216 +1305,6 @@
     Mock.prototype.callFunctionWith = Mock.prototype.data;
     Mock.prototype.expectsArguments = Mock.prototype.accepts;
     Mock.prototype.expects          = Mock.prototype.andExpects;
-
-    /**
-     * == Receiver ==
-     *
-     *  Receivers are dumb objects which act as namespaces for methods and
-     *  properties. QMock allows receivers to be either plain old object
-     *  literals, or Mock stubs (aka smart stub functions) depending on need,
-     *  or desire to accurately replicate a real-world collaborator object.
-     *
-     *  Technically the Mock klass implements the Receiver klass interface, but
-     *  since Mock objects as functions, and not object literals, are the
-     *  primary use case, it's easier to think of all methods in a Receiver
-     *  instance as acting identically as thei Mock (function) instance
-     *  counterpart.
-     **/
-
-    /** section: Receiver
-     * class Receiver < Mock
-     *  The Receiver interface.
-     **/
-    function Receiver () {
-      if( !(this instanceof Receiver ) ) {
-        return new Receiver;
-      }
-      this.methods    = [];
-      this.properties = {};
-      this.namespaces = [];
-      // Normally overridden in factory to reference public receiver object
-      this.self       = this;
-      // Used to support expects() Receiver instance method till 0.5 is tagged.
-      this.tmp        = {};
-    }
-
-    Receiver.prototype = {
-
-      /** alias of: Mock#method
-       * Receiver#method( identifier, min, max) -> Receiver
-       **/
-      method: function ( prop, min, max ) {
-        if ( hasOwnProperty.call( this.self, prop ) ) {
-          throw {
-            type: "InvalidMethodNameException",
-            msg: "Qmock expects a unique identifier for each mocked method"
-          };
-        }
-
-        // Register public pointer to mocked method instance on receiver object
-        this.self[ prop ] = createRecorder(
-          new Mock(
-            this.tmp.min || min,
-            this.tmp.max || max,
-            this.self
-          )
-        );
-
-        // Track methods
-        this.methods.push( this.self[ prop ] );
-
-        // Wham!
-        return this.self[ prop ].id( prop );
-      },
-
-      /** alias of: Mock#property
-       * Receiver#property( prop, value ) -> Mock
-       **/
-      property: function ( prop, value ) {
-        if ( hasOwnProperty.call( this.self, prop ) ) {
-          throw {
-            type: "InvalidPropertyNameException",
-            msg: "Qmock expects a unique key for each stubbed property"
-          };
-        }
-
-        // New property on receiver + track properties
-        this.self[ prop ] = this.properties[ prop ] = value;
-
-        // Bam!
-        return this.self;
-      },
-
-      /** alias of: Mock#namespace
-       * Receiver#namespace( id, map ) -> new Receiver
-       **/
-      namespace: function ( prop, desc ) {
-        if ( hasOwnProperty.call( this.self, prop ) ) {
-          throw {
-            type: "InvalidNamespaceIdentiferException",
-            msg: "Qmock expects a unique key for a namespace identifer"
-          };
-        }
-
-        // New property on receiver + track namespaces
-        this.self[ prop ] = createReceiver( desc || {}, false );
-
-        // Track namespace
-        this.namespaces.push( this.self[ prop ] );
-
-        // Return correct receiver scope for augmentation
-        // Pow!
-        return this.self[ prop ];
-      },
-
-      /** deprecated
-       * Mock#expects( [min = null] [, max = null] ) -> Mock
-       * - min (Number): Miniumum number of times mock object should be
-       *  invoked. If max parameter not passed then number becomes a 'strict'
-       *  invocation expectation (even zero). Default is <code>null</code>.
-       * - max (Number) _optional_: Maximum number of times mocked method
-       *  should be called. If want 'at least _n_' then just pass
-       *  <code>Infinity</code>. Default is <code>null</code>
-       *
-       *  *DEPRECATED*: Was a factory method for creating new mock objects
-       *  (methods / properties) on a receiver object, but mock receiver
-       *  object.
-       *
-       *  Till version 0.5 will be backward compatible, but developers should
-       *  use <code>Mock.method( name, min, max )</code>, or
-       *  <code>Mock.calls()</code> instead.
-       **/
-      expects: function ( min, max ) {
-        this.tmp.min = min;
-        this.tmp.max = max;
-        return this.self;
-      },
-
-      /** alias of: Mock#verify
-       * Receiver#verify() -> Boolean
-       **/
-      verify: function () {
-        var result  = true,
-            members = this.methods.concat( this.namespaces ),
-            i       = 0,
-            len     = members.length,
-            exceptions;
-
-        // Verify child mocks
-        for (; i < len; i++) {
-          result &= members[ i ].verify();
-        }
-
-        // Gather all exceptions
-        exceptions = this.__getExceptions();
-
-        // Live() or Die()
-        if ( !config.failslow && exceptions.length ) {
-          // Pants.
-          throw exceptions;
-        } else {
-        // WIN. \o/
-          return !!result;
-        }
-      },
-
-      /** alias of: Mock#reset
-       * Receiver#reset() -> Boolean
-       **/
-      reset: function () {
-        var members = this.methods.concat( this.namespaces ),
-            i = 0,
-            len = members.length;
-
-        // Reset all child mocks
-        for (;i < len; i++) {
-          members[ i ].reset();
-        }
-
-        // Reset Properties (could have been mutated)
-        for ( var key in this.properties ) {
-          if( hasOwnProperty.call( this.properties, key ) ) {
-            this.self[ key ] = this.properties[ key ];
-          }
-        }
-        return true;
-      },
-      
-      /**alias of: Mock#excise
-       * Receiver#excise() -> Object
-       **/
-      excise: function () {
-        for ( var key in Mock.prototype ) {
-          if ( hasOwnProperty.call( Mock.prototype, key ) ) {
-            delete this.self[ key ];
-          }
-        }
-        // 'excise' children
-        var members = this.methods.concat( this.namespaces ),
-            len = members.length,
-            i = 0;
-        for (; i < len; i++) {
-          members[ i ].excise();
-        }
-        return true;
-      },
-
-      /** alias of: Mock#__getExceptions
-       * Receiver#__getExceptions() -> Array (of exception objects)
-       **/
-      __getExceptions: function () {
-        var exceptions = ( this.self.__getState ) ? this.self.__getState().exceptions : [],
-            i = 0,
-            len = this.methods.length;
-        for (; i < len; i++) {
-          exceptions = exceptions.concat( this.methods[ i ].__getExceptions() );
-        }
-        return exceptions;
-      }
-    };
-
-    // Backward compatibility with QMock API v0.1
-    Receiver.prototype.andExpects = Receiver.prototype.expects;
 
     // SETUP PHASE Functions
     // Mainly factory methods that handle instantiation and bindings
@@ -1121,14 +1315,16 @@
      *
      *  Factory method to create a stub function to be attached to a receiver
      *  object, bound to a passed mock instance. Upon invocation within an SUT
-     *  the mock state will be mutated, and any corresponding declared return
-     *  values will be retrieved and output.
+     *  the mock state will be mutated, callbacks (sync/async) will be applied
+     *  and any corresponding set return values will be retrieved and output.
      **/
     function createRecorder ( mock ) {
 
       // Check mock implements correct interface
       if ( !(mock instanceof Mock) ) {
-        throw new Error("createRecorder() expects an instance of Mock as mock parameter");
+        throw new Error(
+          "createRecorder() expects an instance of Mock as mock parameter"
+        );
       }
 
       // Mutator for mock instance state
@@ -1138,8 +1334,8 @@
         return exerciseMock( mock, slice.call( arguments ) );
       };
 
-      // Public API - Bind prototypal inherited methods and to private receiver state
-      bindInterface( Mock.prototype, recorder, mock );
+      // Public API - Bind prototypically inherited methods to private statemachine
+      bindInterface( recorder, Mock.prototype, mock );
 
       // Reference to bound mutator on instance itself (in case of detachment)
       mock.self = recorder;
@@ -1163,6 +1359,7 @@
      *  Can be called with or without the <code>new</code> keyword
      *
      *  #### Example
+     *  
      *  <pre><code>// Via API
      *  var ninja = new Mock();
      *
@@ -1216,14 +1413,10 @@
         ? createRecorder( new Mock )
         : {};
 
-      // Public API - Bind prototypically inherited methods and to private
-      // receiver state
-      bindInterface(
-        Receiver.prototype,
-        proxy,
-        receiver,
-        !!bool ? /verify|reset/ : null // If proxy is a fn then curry interface
-      );
+      // Bind private state to public interface
+      if ( typeof proxy == "object" ) {
+        bindInterface( proxy, Receiver.prototype, receiver );
+      }
 
       // Update default return state on Constuctors to themselves (for
       // cascade-invocation-style declarations). If the return value is
@@ -1243,7 +1436,7 @@
      *
      * bootstrap( mock, definition ) -> Boolean
      *  - mock (Mock): Mock instance to augment
-     *  - definition (Hash): Hash of Mock expectations mapped to Mock object
+     *  - descriptor (Map): Hash of Mock expectations mapped to Mock object
      *  API.
      *
      *  Helper method which interprets a JSON formatted map of a desired mock
@@ -1251,7 +1444,7 @@
      *  set-up cascading invocation for you (i.e. the bootstrap phase).
      *
      *  #### Example
-     *
+     *  
      *  <pre><code>
      *  new Mock({
      *    // method
@@ -1293,16 +1486,16 @@
             ? "property" : "namespace";
       }
 
-      // Fn to iterate actually call fns on interface from map
-      function setupMethod ( obj, map ) {
-        for ( var prop in map ) {
-          if ( hasOwnProperty.call( map, prop ) && is( obj[ prop ], "Function" ) ) {
-              // Use apply in conjunction to toArray in case of
-              // multiple values per expectation (e.g. mock.receives)
-              // Support for [] grouping notation
-              obj[ prop ].apply( obj, toArray( map[ prop ] ) );
+      // Function which invokes methods on an interface based on a mapping
+      function invoker ( obj, map ) {
+        enumerate( map, function ( prop, key ) {
+          if( is( obj[ key ], "Function" ) ) {
+            // Use apply in conjunction to toArray in case of
+            // multiple values per expectation (e.g. mock.receives)
+            // Support for [] grouping notation
+            obj[ key ].apply( obj, toArray( prop ) );
           }
-        }
+        });
       }
 
       return function ( mock, desc ) {
@@ -1327,15 +1520,15 @@
 
             // if member augment receiver object with new mocked member
             if ( isMember ) {
-              member = mock[ type ]( 
+              member = mock[ type ](
                 prop,
-                type === "property" ? expectations.value : expectations 
+                type === "property" ? expectations.value : expectations
               );
             }
-            
+
             // Auto-setup methods
             if( type === "method" ) {
-              setupMethod( member, expectations );
+              invoker( member || mock, expectations );
             }
           }
           // If standalone fn then stop (constructor or method)
@@ -1363,6 +1556,9 @@
     /* [Private]
      *
      * exerciseMock( mock ) -> Function
+     *  - mock (Mock): mock instance to mutate
+     *  - presentation (Array): Array(-like) object containing parameters
+     *  passed to associated proxy recorder function.
      *
      *  Utility for recording inputs to a given mock and mutating it's internal
      *  state. Instance state is mutated when a stubbed function is invoked as
@@ -1388,7 +1584,7 @@
      *
      * exerciseCallbacks(mock, method) -> Boolean
      *  - mock (Mock): mock instance to exercise callbacks on
-     *  - presentation (Array | Collection): Presentation made / to be made to
+     *  - presentation (Array): Presentation made / to be made to
      *  mocked method
      *
      *  If the presentation made to the mock object interface contains a
@@ -1587,21 +1783,21 @@
      *  If no match and optional error handler passed then error raised.
      **/
     function verifyInterface ( mock, raise ) {
-      var params = 0, total = mock.received.length, result = true;
+      var result = true;
       // For each presentation to the interface...
-      for (; params < total; params++) {
+      iterate( mock.received, function ( presentation ) {
         // ...Check if a matching expectation
-        result &= verifyPresentation( mock, mock.received[ params ] );
+        result &= verifyPresentation( mock, presentation );
         // Record which presentations fail
         if ( !!!result ) {
           raise && raise(
-            mock.received[ params ],
+            presentation,
             mock.expected,
             "IncorrectParameterException",
             mock.name + '()'
           );
         }
-      }
+      });
       return !!result;
     }
 
@@ -1611,19 +1807,20 @@
      * class QMock
      **/
     return {
-      config : config,
-      create : createQMock,
+      version: "0.4rc",
+      config: config,
+      create: createQMock,
       /** alias of: Mock
        * QMock.Mock() -> mock receiver / constructor / method / property object
        **/
-      Mock   :  function ( map, bool ) {
+      Mock:  function ( map, bool ) {
         return createReceiver( map || {}, is( bool, "Boolean") ? bool : true );
       },
       /**
        * QMock.utils
        *  Utility methods for use on 'excised' mock instances or testing.
        **/
-      utils  : {
+      utils: {
         /**
          * QMock.utils.verify( receiver [, raise] ) -> Boolean | Exception
          *  - receiver (Mock): mock / receiver object to test
@@ -1636,24 +1833,25 @@
          *  Only passes if whole object tree passes, else throws exception
          *  or returns <code>false</code> depending on mode (fail slow/fast).
          **/
-        verify : function ( mock ) {
+        verify: function ( mock ) {
           if ( mock.verify ) {
             return mock.verify();
           }
         },
-        reset  : function ( mock) {
+        reset: function ( mock) {
           if ( mock.reset ) {
             return mock.reset();
           }
         },
-        is     : is,
-        test   : function () {
+        is: is,
+        eumerate: enumerate,
+        test: function () {
           arguments[0] = getState( arguments[0] );
           return comparePresentation.apply( null, arguments );
         }
       },
       // only exposed for integration tests
-      __bootstrap : bootstrap
+      __bootstrap: bootstrap
     };
 
   }// end init

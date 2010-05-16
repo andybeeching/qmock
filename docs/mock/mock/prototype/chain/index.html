@@ -3,7 +3,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
 <head>
   <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-  <title>QMock API documentation | Mock#andExpects</title>
+  <title>QMock API documentation | Mock#chain</title>
   <meta name="generator" content="PDoc" />
   
   <script type="text/javascript" charset="utf-8" src="../../../../javascripts/prototype.js"></script>
@@ -44,11 +44,11 @@
 <li><div class="menu-item"><a class="instance-method" title="Mock#__getExceptions (instance method)" href="../../../../mock/mock/prototype/__getexceptions/">__getExceptions</a></div></li>
 <li><div class="menu-item"><a class="instance-method" title="Mock#__getState (instance method)" href="../../../../mock/mock/prototype/__getstate/">__getState</a></div></li>
 <li><div class="menu-item"><a class="instance-method" title="Mock#accepts (instance method)" href="../../../../mock/mock/prototype/accepts/">accepts</a></div></li>
-<li><div class="menu-item"><a class="instance-method deprecated current" title="Mock#andExpects (instance method)" href="../../../../mock/mock/prototype/andexpects/">andExpects</a></div></li>
+<li><div class="menu-item"><a class="instance-method deprecated" title="Mock#andExpects (instance method)" href="../../../../mock/mock/prototype/andexpects/">andExpects</a></div></li>
 <li><div class="menu-item"><a class="instance-method" title="Mock#async (instance method)" href="../../../../mock/mock/prototype/async/">async</a></div></li>
 <li><div class="menu-item"><a class="instance-method deprecated" title="Mock#atLeast (instance method)" href="../../../../mock/mock/prototype/atleast/">atLeast</a></div></li>
 <li><div class="menu-item"><a class="instance-method" title="Mock#calls (instance method)" href="../../../../mock/mock/prototype/calls/">calls</a></div></li>
-<li><div class="menu-item"><a class="instance-method" title="Mock#chain (instance method)" href="../../../../mock/mock/prototype/chain/">chain</a></div></li>
+<li><div class="menu-item"><a class="instance-method current" title="Mock#chain (instance method)" href="../../../../mock/mock/prototype/chain/">chain</a></div></li>
 <li><div class="menu-item"><a class="instance-method" title="Mock#data (instance method)" href="../../../../mock/mock/prototype/data/">data</a></div></li>
 <li><div class="menu-item"><a class="instance-method" title="Mock#end (instance method)" href="../../../../mock/mock/prototype/end/">end</a></div></li>
 <li><div class="menu-item"><a class="instance-method" title="Mock#excise (instance method)" href="../../../../mock/mock/prototype/excise/">excise</a></div></li>
@@ -86,8 +86,6 @@
 
 
 
-  <div id="deprecated"><img width="150" alt="Deprecated" src="../../../../images/deprecated.png" height="150" /></div>
-
 
 <ul class="breadcrumbs clearfix">
   <li><a href="../../../../">Home</a></li>
@@ -96,13 +94,13 @@
   
     <li>&rarr; <a title="Mock (class)" href="../../../../mock/mock/">Mock</a></li>
   
-    <li>&rarr; <a title="Mock#andExpects (instance method)" href="../../../../mock/mock/prototype/andexpects/">andExpects</a></li>
+    <li>&rarr; <a title="Mock#chain (instance method)" href="../../../../mock/mock/prototype/chain/">chain</a></li>
   
 </ul>
 
 <h2 class="page-title">
   
-    <span class="type">instance method</span> Mock#andExpects
+    <span class="type">instance method</span> Mock#chain
   
 </h2>
 
@@ -113,16 +111,32 @@
   <div class="section-content">
     <div class="method-description">
       
-        <pre class="syntax"><code class="ebnf">Mock#andExpects( [min][, max] ) &rarr; <a title="Mock (class)" href="../../../../mock/mock/">Mock</a></code></pre>
+        <pre class="syntax"><code class="ebnf">Mock#chain() &rarr; <a title="Mock (class)" href="../../../../mock/mock/">Mock</a></code></pre>
 
       
 
-      
+      <p>Tells the mocked method to return the receiver object it is bound
+to enable cascading (chained) invocations during the exercise phase.</p>
+
+<h4>Example</h4>
+
+<pre><code>var $ = new Mock;
+$.method('foo')
+  .chain()
+  .end()
+.method('bar');
+
+// Exercise
+$.foo().bar();
+</code></pre>
+
+
+<p><em>Note</em>: Can be overwritten if <code>Mock.returns</code> is used
+after in Mock declaration (or better, in conjunction to override
+it with <code>Mock.interface</code> for specific use cases)</p>
 
       
       
-
-  <p class="alias alias-of">Alias of: <code><a title="Mock#expects (instance method)" href="../../../../mock/mock/prototype/expects/">Mock#expects</a></code></p>
 
 
       
