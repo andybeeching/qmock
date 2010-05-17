@@ -68,9 +68,9 @@
       failslow: true,
 
       /**
-       * QMock.config.compare -> false | Function
+       * QMock.config.compare -> null | Function
        *
-       *  Pointer to comparison method used internally by QMock, and by
+       *  Reference to comparison routine used internally by QMock, and by
        *  <code>QMock.comparePresentation</code>.
        *
        *  Default value is <code>false</code>, and if function not set than an
@@ -82,7 +82,7 @@
        *
        *  <pre><code>QMock.config.compare = QUnit.equiv;</code></pre>
        **/
-      compare: false,
+      compare: null,
 
       /**
        * QMock.config.delay -> 100 | Number
@@ -251,7 +251,7 @@
       checkCompare();
       var result  = false,
           mapping = {"returns": "returnValue","data": "dataRep"},
-          stop = false;
+          stop    = false;
       // Compare presention vs expectations
       iterate( mock.expected, function( item ) {
         if ( !stop && config.compare( presentation, item.accepts ) ) {
@@ -402,21 +402,27 @@
     /**
      * == Receiver ==
      *
-     *  Receivers are dumb objects which act as namespaces for methods and
-     *  properties. QMock allows receivers to be either plain old object
-     *  literals, or Mock stubs (aka smart stub functions) depending on need,
-     *  or desire to accurately replicate a real-world collaborator object.
-     *
-     *  Technically the Mock klass implements the Receiver klass interface, but
-     *  since Mock objects as functions, and not object literals, are the
-     *  primary use case, it's easier to think of all methods in a Receiver
-     *  instance as acting identically as their Mock (function) instance
-     *  counterpart.
+     *  Receiver mock objects are simply pseudo-namespaces for mocked methods 
+     *  and stubbed properties. 
+     *  
+     *  QMock allows receivers to be either plain old object literals, or 
+     *  functions (aka smart mocks) depending on the requirement to accurately 
+     *  replicate a given real-world collaborator object interface (with 
+     *  associated behaviours).
      **/
 
     /** section: Receiver
      * class Receiver
-     *  The Receiver interface.
+     *  
+     *  Receiver is the central superclass in QMock for the simple reason that 
+     *  Mock objects (aka functions), can also be receiver mock objects. Hence 
+     *  the Mock klass (and insatnces) implements the Receiver klass interface.
+     *  
+     *  So if one were to define a Constructor akin to jQuery's <code>$</code>, 
+     *  they can also still attach member methods and properties to that.
+     *  
+     *  The public interface for both klasses act identically no matter which 
+     *  type the mock is.
      **/
     function Receiver () {
       if( !(this instanceof Receiver ) ) {
@@ -425,7 +431,7 @@
       this.methods    = [];
       this.properties = {};
       this.namespaces = [];
-      // Normally overridden in factory to reference public receiver object
+      // Conventionally overridden in factory to reference public proxy interface
       this.self       = this;
     }
 
@@ -1706,13 +1712,15 @@
      **/
     function verifyPresentation ( mock, presentation ) {
       checkCompare();
-      for (var i = 0, len = mock.expected.length, expected, result = true; i < len; i++) {
+      var result = true, stop = false;
+      iterate( mock.expected, function ( item ) {
+        if ( stop ) { return; }
         // reset so that empty presentation and empty expectation return true
         // If no expectations then won't be reached... returns true.
         result = false;
 
         // expectation to compare
-        expected = mock.expected[ i ].accepts;
+        var expected = item.accepts;
 
         // If overloading allowed only want to check parameters passed-in
         // (otherwise will fail). Must also trim off overloaded args as no
@@ -1728,9 +1736,9 @@
 
         // If true then exit early
         if ( !!result ) {
-          return true;
+          stop =  true;
         }
-      }
+      });
       return !!result;
     }
 
