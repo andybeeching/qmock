@@ -248,7 +248,7 @@
      *  </code></pre>
      **/
     function comparePresentation ( mock, presentation, key ) {
-      isCompare();
+      checkCompare();
       var result  = false,
           mapping = {"returns": "returnValue","data": "dataRep"},
           stop = false;
@@ -276,12 +276,12 @@
 
     /* [Private]
      *
-     * isCompare() -> Boolean | Error
+     * checkCompare() -> Boolean | Error
      *
      *  Utility function to assert whether a comparison routine has been set on
      *  QMock namespace.
      **/
-    function isCompare () {
+    function checkCompare () {
       if ( !config.compare ) {
         throw new Error('Comparison routine must be set on QMock.compare with signature fn( a, b )');
       }
@@ -718,10 +718,10 @@
 
     // Backward compatibility with QMock API v0.1
     Receiver.prototype.andExpects = Receiver.prototype.expects;
-    
+
     // Receiver Factory Method
     Receiver.create = function ( desc, bool ) {
-      
+
       var receiver = new Receiver,
 
       // Create mock + recorder if definition supplied else plain old object
@@ -767,7 +767,7 @@
      *  // TODO
      *  Chips
      **/
-     
+
     /* [Private]
      * new Expectation( map )
      *  - map (Hash): Data properties for Expectation object, can be custom
@@ -1705,7 +1705,7 @@
      *  expectations. Single match equals true.
      **/
     function verifyPresentation ( mock, presentation ) {
-      isCompare();
+      checkCompare();
       for (var i = 0, len = mock.expected.length, expected, result = true; i < len; i++) {
         // reset so that empty presentation and empty expectation return true
         // If no expectations then won't be reached... returns true.
