@@ -253,7 +253,7 @@
           mapping = {"returns": "returnValue","data": "dataRep"},
           stop    = false;
       // Compare presention vs expectations
-      iterate( mock.expected, function( item ) {
+      iterate( mock.expectations, function( item ) {
         if ( !stop && config.compare( presentation, item.accepts ) ) {
           result = key ? item[ key ] || mock[ mapping[ key ] ] : true;
           stop = true;
@@ -858,7 +858,7 @@
         return new Mock( min, max, receiver );
       }
       // Default mock expectations + behaviour
-      this.expected     = [];
+      this.expectations = [];
       this.requires     = 0;
       this.returnVal    = undefined;
       this.chained      = false;
@@ -923,7 +923,7 @@
        **/
       accepts: function () {
         this.requires = arguments.length;
-        this.expected.push( { "accepts" : slice.call( arguments ) } );
+        this.expectations.push( { "accepts" : slice.call( arguments ) } );
         return this.self;
       },
 
@@ -971,7 +971,7 @@
             arguments[ i ][ "required" ] = arguments[ i ][ "accepts" ].length;
           }
         }*/
-        this.expected = this.expected.concat( slice.call( arguments ) );
+        this.expectations = this.expectations.concat( slice.call( arguments ) );
         return this.self;
       },
 
@@ -1171,7 +1171,7 @@
         if ( this.requires && verifyOverloading( this ) ) {
           raise && raise(
               this.received[ 0 ].length,
-              this.expected.length,
+              this.expectations.length,
               "IncorrectNumberOfArgumentsException",
               this.name
             );
@@ -1713,7 +1713,7 @@
     function verifyPresentation ( mock, presentation ) {
       checkCompare();
       var result = true, stop = false;
-      iterate( mock.expected, function ( item ) {
+      iterate( mock.expectations, function ( item ) {
         if ( stop ) { return; }
         // reset so that empty presentation and empty expectation return true
         // If no expectations then won't be reached... returns true.
@@ -1765,7 +1765,7 @@
         if ( !!!result ) {
           raise && raise(
             presentation,
-            mock.expected,
+            mock.expectations,
             "IncorrectParameterException",
             mock.name + '()'
           );
