@@ -97,7 +97,7 @@
 	  for (var i in mock) {
       result = false; break;
 	  }
-    ok(result, "excised mock shouldn't have any properties on itself after 'excise' except 'prototype'");
+    ok(result, "excised mock shouldn't have any properties on itself");
 
     // setup with some customproperties
     mock = new Mock({
@@ -2389,29 +2389,9 @@
 
 		// Invalid callback
 
-		$.expects(1)
-		  .method('get')
-        .accepts('path/to/resource', function onSuccess() {})
-        .data({foo: 'bar'});
-
-    /* "JSON" equivalent
-    new Mock({
-      "get": {
-        accepts: ['path/to/resource', callback]
-        response: {foo: 'bar'}
-      }
-    });
-
-    new Mock({
-      "get": {
-        receives: [
-          {accepts: ['path/to/resource', callback], data: {foo: 'bar'}}
-          {accepts: ['path/to/resource', callback2], data: {far: 'baz'}}
-        ]
-      }
-    });
-
-    */
+		$.method('get', 1)
+      .accepts('path/to/resource', function onSuccess() {})
+      .data({foo: 'bar'});
 
 		$.get('path/to/resource');
 
@@ -2455,12 +2435,11 @@
     }
 
     // Suggested syntax for 'cleaner' callbacks
-		$.expects(1)
-		  .method('get')
-		    .receives(
-		      {accepts: ['path/to/resource', onSuccess], data: [{foo: true}]},
-		      {accepts: ['path/to/resource', onFail], data: [{baz: true}]}
-		    );
+		$.method('get', 1)
+		  .receives(
+		    {accepts: ['path/to/resource', onSuccess], data: [{foo: true}]},
+		    {accepts: ['path/to/resource', onFail], data: [{baz: true}]}
+		  );
 
 		// Exercise
 		// Correct Usage
@@ -2468,7 +2447,6 @@
 		var called = false;
 		
 		stop();
-		
 		$.get('path/to/resource', onSuccess);
 		
 		setTimeout(function() { 

@@ -94,20 +94,33 @@
   <div class="section-content">
     <div class="method-description">
       
-        <pre class="syntax"><code class="ebnf">QMock.utils.iterate( obj, fn[, scope] ) &rarr; undefined</code></pre>
+        <pre class="syntax"><code class="ebnf">QMock.utils.iterate( obj, fn[, scope] ) &rarr; Array || Collection</code></pre>
+
+  <ul class="argument-list">
+    
+      <li>
+        <code class="argument-name">obj</code>
+        
+          <span class="argument-types">(<code>Collection</code>)</span>
+        
+         &ndash; Collection to iterate through, can be any object with a <code>length</code> property.
+
+      </li>
+    
+      <li>
+        <code class="argument-name">fn</code>
+        
+          <span class="argument-types">(<code>Function</code>)</span>
+        
+         &ndash; Callback function applied to current item. Passed three parameters, the current item value, the current index (identifier) the item corresponds to, and the collection itself.
+
+      </li>
+    
+  </ul> <!-- .argument-list -->
 
       
 
-      <ul>
-<li>obj (Collection): Collection to iterate through, can be any object
-with a <code>length</code> property.</li>
-<li>fn (Function): Callback function applied to current item. Passed
-three parameters, the current item value, the current index
-(identifier) the item corresponds to, and the collection itself.</li>
-</ul>
-
-
-<p>This basically emulates <code>Array.prototype.forEach</code> but
+      <p>This basically emulates <code>Array.prototype.forEach</code> but
 ensures the order of items is maintained when iterating through a
 collection.</p>
 
