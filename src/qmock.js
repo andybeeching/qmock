@@ -250,7 +250,7 @@
     function comparePresentation ( mock, presentation, key ) {
       checkCompare();
       var result  = false,
-          mapping = {"returns": "returnValue","data": "dataRep"},
+          mapping = {"returns": "output","data": "stub"},
           stop    = false;
       // Compare presention vs expectations
       iterate( mock.expectations, function( item ) {
@@ -775,25 +775,24 @@
      **/
 
     /* [Private]
-     * new Expectation( map )
-     *  - map (Hash): Data properties for Expectation object, can be custom
+     * new Expectation( config )
+     *  - map ( Map ): Data properties for Expectation object, can be custom
      *  if required.
      **/
-    function Expectation ( map ) {
-      var config = {
-        accepts   : null,
-        requires  : 0,
-        returns   : undefined,
-        chained   : false,
-        data      : null,
-        async     : true
-      };
+    function Expectation ( config ) {
       // augment base expectations
-      enumerate( config, function ( prop, key ) {
-        map[ key ] = prop;
-      });
-      return map;
+      mixin( this, config );
     }
+    
+    Expectation.prototype = {
+      // Default Options
+      "accepts"  : null,
+      "requires" : 0,
+      "output"   : undefined,
+      "chained"  : false,
+      "stub"     : null,
+      "async"    : true
+    };
 
     /**
      * new Mock( definition [, bool] )
@@ -857,15 +856,10 @@
       if ( !(this instanceof Mock) ) {
         return new Mock( min, max, receiver );
       }
-      // Default mock expectations + behaviour
-      this.expectations = [];
-      this.requires     = 0;
-      this.returnVal    = undefined;
-      this.chained      = false;
-      this.dataRep      = null;
       // Mock interface constraints
       this.overloadable = true;
       // Default mock state
+      this.expectations = [];
       this.name         = "anonymous";
       this.received     = [];
       this.minCalls     = min || null;
@@ -897,7 +891,8 @@
        *  var $ = new Mock;
        *  $.method('foo'); // just says function 'foo' in error message
        *  // With id
-       *  $.foo.id('$.foo'); // Will now output '$.foo' in error message</code></pre>
+       *  $.foo.id('$.foo'); // Will now output '$.foo' in error message
+       *  </code></pre>
        **/
       id: function ( identifier ) {
         this.name = identifier;
@@ -906,7 +901,8 @@
 
       /**
        * Mock#accepts( parameters ) -> Mock
-       *  - parameters (Object...n): Parameter list which mocked method is expecting.
+       *  - parameters (Object...n): Parameter list which mocked method is 
+       *  expecting.
        *
        *  Method is used to set a single expected parameter list of _n_ length
        *  for a mock object. During verification this is tested against the
@@ -930,7 +926,8 @@
       /**
        * Mock#receives( expectations ) -> Mock
        *  - expectations (Expectation...n): Expectation object format is:
-       *  <pre><code>{accepts: [ parameters ], returns: value, data: [ values ]}</code></pre>
+       *  <pre><code>{accepts: [ parameters ], returns: value, data: [ values ]}
+       *  </code></pre>
        *
        *  Where the <code>returns</code> & <code>data</code> properties are
        *  _optional_. For more info on these properties see
@@ -993,7 +990,7 @@
        *  <pre><code>Mock.method("foo").accepts('bar').returns('baz');</code></pre>
        **/
       returns: function ( obj ) {
-        this.returnVal = obj;
+        this.output = obj;
         return this.self;
       },
 
@@ -1077,7 +1074,7 @@
        *  </code></pre>
        **/
       data: function () {
-        this.dataRep = slice.call( arguments );
+        this.stub = slice.call( arguments );
         return this.self;
       },
 
@@ -1124,7 +1121,7 @@
        *  it with <code>Mock.interface</code> for specific use cases)
        **/
       chain: function () {
-        this.returnVal = this.receiver || this.self;
+        this.output = this.receiver || this.self;
         return this.self;
       },
 
@@ -1394,7 +1391,10 @@
     Mock.create = function ( mock ) {
       // instantiate statemachine if not passed
       if ( !mock || !mock instanceof Mock ) { mock = new Mock; }
-
+      
+      // Set common interface expectations
+      mixin( mock, Expectation.prototype );
+      
       // Mutator for mock instance statemachine
       // Exercises callbacks for async transactions
       // Returns itself, explicit value, or undefined
@@ -1577,7 +1577,7 @@
         // Check if potential callback passed
         if ( is( item, "Function" ) ) {
           // Use data on presentation, or default to common properties
-          var data = comparePresentation( mock, ar, "data" ) || mock.dataRep;
+          var data = comparePresentation( mock, ar, "data" ) || mock.stub;
           // If response data declared then invoke callbacks in timely manner
           // default is asynchronous / deferred execution
           // else a blocking invocation on same thread
@@ -1615,7 +1615,7 @@
      *  to <code>undefined</code> (as per spec).
      **/
     function exerciseReturn ( mock, presentation ) {
-      return comparePresentation( mock, presentation, "returns" ) || mock.returnVal;
+      return comparePresentation( mock, presentation, "returns" ) || mock.output;
     }
 
     // TODO: Either abstract this out or simplify
