@@ -39,13 +39,13 @@
 	  equals(foo.__getState().name, "bar", "mock should have the descriptor 'bar'");
 
 	});
-	
+
 	test("Mock.namespace() [utility] instance method", function () {
 
 	  expect(8);
 	  var mock = new Mock,
 	      foo  = mock.namespace("foo");
-	      
+
 	  // Check doesn't implement mock interface via duck typing
 	  ok( typeof foo.accepts === "undefined", "mock namespace/receiver 'foo' doesn't implement the accepts() method (part of Mock stub interface)" )
 	  ok( typeof foo.calls === "undefined", "mock namespace/receiver 'foo' doesn't implement the calls() method (part of Mock stub interface)" )
@@ -56,7 +56,7 @@
         .accepts("baz")
         .end()
       .property("faz", true);
-    
+
     // Exercise
     mock.foo.bar("baz");
     mock.foo.faz = false;
@@ -68,15 +68,15 @@
     ok( mock.foo.bar.verify(), "The method 'mock.foo.bar()' should be true [mock.foo.bar.verify()]");
 	  // Check the property was changed
 	  equals( mock.foo.faz, false, "'mock.foo.faz' should equal false");
-	  
+
 	  // Reset from namespace
 	  mock.foo.reset();
 	  // Check the property is back to setup value
 	  equals( mock.foo.faz, true, "'mock.foo.faz' should equal true");
-	  
+
 	  // Change the property again
 	  mock.foo.faz = false;
-	  
+
 	  // Reset from parent mock
 	  mock.reset();
 	  // Check the property is back to setup value
@@ -85,14 +85,14 @@
 	});
 
 	test("Mock.excise() [utility] instance method", function () {
-    
+
 	  var mock = new Mock(null, false), // plain namespace/receiver
 	      result = true,
 	      i;
-    
+
     // Excise mock completely
 	  mock.excise();
-	  
+
 	  // Verify by testing no properties on mock (if a function stub then will have a prototype property)
 	  for (var i in mock) {
       result = false; break;
@@ -136,10 +136,10 @@
         "gaz": null
       }
     }, false);
-    
+
     // excise all mocks
     mock.excise();
-    
+
     function verifyMock ( obj, keys ) {
       var result = true, key;
       for (var key in mock ) {
@@ -156,7 +156,7 @@
     ok(verifyMock( mock, /foo|bar|buz|/ ), "The parent mock receiver should only have the properties ('foo', 'bar', 'buz') set upon it.");
     ok(verifyMock( mock.foo, /faz|key/ ), "The mock function 'mock.foo()' should only have the properties ('faz', 'key') set upon it.");
     ok(verifyMock( mock.buz, /baz|daz|gaz/ ), "The mock receiver 'mock.buz' should only have the properties ('baz', 'daz', 'gaz') set upon it.");
-    
+
 	});
 
 	/**
@@ -493,19 +493,16 @@
   test("mocked method with single strict (String: 'foo') parameter expectation", function () {
 
     // Test single parameter value expectations, no return value
-    var ninja = new Mock
-        // expectations
-        ninja
-        .expects( 1 )
-        .method( 'swing' )
-          .accepts( 'foo' );
+    var ninja = ( new Mock )
+        .method( "swing", 1 )
+        .accepts( "foo" )
+        .end();
 
     // BAD EXERCISES
 
     // Test no arguments
 
     ninja.swing();
-
     try {
       ninja.verify();
       ok(false, "verify() should throw exception when ninja.swing() is passed NO parameters");
@@ -1444,11 +1441,10 @@
 
 	  expect( 11 );
 
-	  var ninja = new Mock;
-	  ninja
-	    .expects( 1 )
-	      .method( 'giveUp' )
-	      .accepts( null );
+	  var ninja = (new Mock)
+	      .method( 'giveUp', 1 )
+  	      .accepts( null )
+  	      .end();
 
 	  // Bad Exercise
 
@@ -1528,11 +1524,10 @@
 
 	  expect( 11 );
 
-	  var ninja = new Mock;
-	  ninja
-	    .expects( 1 )
-	      .method( 'giveUp' )
-	      .accepts( undefined );
+	  var ninja = (new Mock)
+	      .method( 'giveUp', 1 )
+  	      .accepts( undefined )
+  	      .end();
 
     // Bad Exercise
 
@@ -1611,20 +1606,14 @@
   test("mocked method with single strict parameter - multiple (String: 'foo' | 'bar') expected presentations", function () {
 
 	  expect(18);
-
-	  var ninja = new Mock;
-	  ninja
-	    .expects(1)
-	      .method('swing')
-	      .receives(
-  	      {accepts: [ 'foo' ]},
-  	      {accepts: [ 'bar' ]}
-	      );
+	  var ninja = (new Mock)
+	      .method('swing', 1)
+  	      .receives({accepts: 'foo'}, {accepts: 'bar'})
+  	      .end();
 
     // BAD EXERCISES
 
     // Test no arguments
-
     ninja.swing();
 
     try {
@@ -1747,14 +1736,10 @@
 
 	  expect(22);
 
-	  var ninja = new Mock;
-	  ninja
-	    .expects(1)
-	      .method('swing')
-	      .receives(
-  	      {accepts: [ 3 ]},
-  	      {accepts: [ 9 ]}
-	      );
+	  var ninja = (new Mock)
+        .method('swing', 1)
+  	      .receives({accepts: 3}, {accepts: 9})
+  	      .end();
 
     // BAD EXERCISES
 
@@ -1910,15 +1895,10 @@
     // aka, it's not advised to list all the possible (acceptable) values like true || false || etc...
 
 	  expect(14);
-
-	  var ninja = new Mock;
-	  ninja
-	    .expects(1)
-	      .method('swing')
-	      .receives(
-  	      {accepts: [ true ]},
-  	      {accepts: [ false ]}
-	      );
+	  var ninja = (new Mock)
+	      .method('swing', 1)
+	        .receives({accepts: true}, {accepts: false})
+	        .end();
 
     // BAD EXERCISES
 
@@ -2022,23 +2002,22 @@
 
     function fn () {}
 
-	  var ninja = new Mock,
-	      re = /foo/;
-	      // expectations
-    	  ninja
-    	    .expects(1)
-    	      .method('swing')
+	  var re = /foo/,
+	      ninja = (new Mock)
+  	      // expectations
+  	      .method('swing', 1)
     	      .receives(
-      	      {accepts: [ 'foo' ]},
-      	      {accepts: [ 1 ]},
-      	      {accepts: [ true ]},
-      	      {accepts: [ new Date (2010) ]},
-      	      {accepts: [ re ]},
-      	      {accepts: [ fn ]},
-      	      {accepts: [ {foo: 'bar'} ]},
-      	      {accepts: [ ['foo', 1, true] ]},
-      	      {accepts: [ new Custom ]}
-    	      );
+      	      {accepts: 'foo'},
+      	      {accepts: 1},
+      	      {accepts: true},
+      	      {accepts: new Date (2010)},
+      	      {accepts: re},
+      	      {accepts: fn},
+      	      {accepts: {foo: 'bar'}},
+      	      {accepts: [['foo', 1, true]]}, // Note: nesting multiple expected params in array literal required
+      	      {accepts: new Custom}
+    	      )
+    	      .end();
 
     // BAD EXERCISES
 
@@ -2072,7 +2051,6 @@
     // GOOD Exercises
 
     // Test same parameter type AND expected value [1]
-
     ninja.swing('foo');
     ok( ninja.verify(), "verify() should pass after ninja.swing() passed [1] *correct* parameter (String: 'foo')" );
 
@@ -2137,13 +2115,12 @@
 	test("mocked method with multiple strict (*Natives*) parameter expectations - all required", function () {
 
 	  expect(6);
-	  var ninja = new Mock;
-	  ninja
-	    .expects(1)
-	      .method("testMultipleParameters")
-	      .accepts(1, "foo", true, null, undefined, {}, [], new Date (2010), new Custom )
-	      .required(9)  // This is actually implicit... More interesting is the ability to say *some* are required
-	      .overload(false);
+	  var ninja = (new Mock)
+	      .method("testMultipleParameters", 1)
+	        .accepts(1, "foo", true, null, undefined, {}, [], new Date (2010), new Custom )
+	        .required(9)  // This is actually implicit... More interesting is the ability to say *some* are required
+	        .overload(false)
+	        .end();
 
 	  // Bad Exercise
 
@@ -2207,13 +2184,11 @@
 
 	  expect(12);
 
-    var samurai = new Mock;
-
-	  samurai
-	    .expects(1)
-	      .method("testMultipleParameters")
-	      .accepts(1, "foo", true, null, undefined, {}, [], new Date(2010), new Custom )
-	      .required(0); // Overwrite implict required of 10 (fn.length). Note comparison object will still match expectation for each member *if* passed
+    var samurai = (new Mock)
+	      .method("testMultipleParameters", 1)
+	        .accepts(1, "foo", true, null, undefined, {}, [], new Date(2010), new Custom )
+	        .required(0) // Overwrite implict required of 10 (fn.length). Note comparison object will still match expectation for each member *if* passed
+          .end();
 
 	  // Bad Exercises
 
@@ -2300,14 +2275,11 @@
 
 	  expect(5);
 
-	  var ninja = new Mock;
-	  ninja
-	    .expects(1)
-	      .method("swing")
-  	      .receives(
-  	        {accepts: ['foo'], returns: 'bar'} // Presentation [1]
-  	      )
-  	      .required(0);
+	  var ninja = (new Mock)
+	      .method("swing", 1)
+  	      .receives({accepts: 'foo', returns: 'bar'}) // Presentation [1]
+  	      .required(0)
+  	      .end();
 
 	  // Bad Exercises
 
@@ -2339,15 +2311,14 @@
 
     expect(7);
 
-	  var ninja = new Mock;
-	  ninja
-	    .expects(1)
-	      .method("swing")
+	  var ninja = (new Mock)
+	      .method("swing",1)
   	      .receives(
-  	        {accepts: ['foo'], returns: 'bar'}, // Presentation [1]
-  	        {accepts: ['far'], returns: 'baz'} // Presentation [1]
+  	        {accepts: 'foo', returns: 'bar'}, // Presentation [1]
+  	        {accepts: 'far', returns: 'baz'} // Presentation [1]
   	      )
-  	      .required(0);
+  	      .required(0)
+  	      .end();
 
 	  // Bad Exercises
 
@@ -2385,13 +2356,12 @@
 
 	  expect(5);
 
-	  var $ = new Mock;
-
-		// Invalid callback
-
-		$.method('get', 1)
-      .accepts('path/to/resource', function onSuccess() {})
-      .data({foo: 'bar'});
+	  var $ = (new Mock)
+		    // Invalid callback
+		    .method('get', 1)
+          .accepts('path/to/resource', function onSuccess() {})
+          .data({foo: 'bar'})
+          .end();
 
 		$.get('path/to/resource');
 
@@ -2406,14 +2376,14 @@
 		$.reset();
 
 		// Correct Usage
-		
+
 		var called = false;
 
 		stop();
-		
+
 		$.get('path/to/resource', function (data) { called = data.foo; });
-		
-		setTimeout(function() {  
+
+		setTimeout(function() {
       // continue the test
       equals(called, 'bar', "var called should be set to true when $.get() passed (String: url, Function: callback)");
     }, QMock.config.delay);
@@ -2437,31 +2407,31 @@
     // Suggested syntax for 'cleaner' callbacks
 		$.method('get', 1)
 		  .receives(
-		    {accepts: ['path/to/resource', onSuccess], data: [{foo: true}]},
-		    {accepts: ['path/to/resource', onFail], data: [{baz: true}]}
+		    {accepts: ['path/to/resource', onSuccess], data: {foo: true}},
+		    {accepts: ['path/to/resource', onFail], data: {baz: true}}
 		  );
 
 		// Exercise
 		// Correct Usage
 
 		var called = false;
-		
+
 		stop();
 		$.get('path/to/resource', onSuccess);
-		
-		setTimeout(function() { 
+
+		setTimeout(function() {
       // continue the test
   		equals(success, true, "var success should be set to true when $.get() passed (String: url, Function: onSuccess)");
     }, QMock.config.delay);
-    		
+
 		$.get('path/to/resource', onFail);
-		
-		setTimeout(function() {  
+
+		setTimeout(function() {
       // continue the test
       equals(fail, true, "var fail should be set to true when $.get() passed (String: url, Function: onFail)");
       start();
     }, QMock.config.delay);
-		
+
 	});
 
 	module( "QMock: Mock behaviour (constructors)" );
@@ -2551,17 +2521,7 @@
 	  // Trigger strict argument checking
 
 	  // Example: Mock the query of the J
-	  var jQuery = new Mock;
-
-	  function hide() {
-	    if ( jQuery.browser.chrome === true ) {
-	      jQuery.wrap('<div />');
-	      jQuery.wrap('<div />');
-	      jQuery.wrap('<div />');
-	    }
-	  }
-	  
-	  jQuery
+	  var jQuery = (new Mock)
 	    .accepts(".ninjas")
       .method('each', 1)
 	      .accepts(hide)
@@ -2577,7 +2537,15 @@
         safari: false,
         opera: false,
         chrome: true
-      });
+      }); // Don't need an end() call here as .property() returns receiver object (i.e. $)
+
+	  function hide() {
+	    if ( jQuery.browser.chrome === true ) {
+	      jQuery.wrap('<div />');
+	      jQuery.wrap('<div />');
+	      jQuery.wrap('<div />');
+	    }
+	  }
 
 	  // Exercise
 
@@ -2776,12 +2744,10 @@
 
 	  expect(12);
 
-    var samurai = new Mock;
-
-	  samurai
-	    .calls(1)
-      .accepts(1, "foo", true, null, undefined, {}, [], new Date(2010), new Custom )
-      .required(0); // Overwrite implict required of 10 (fn.length). Note comparison object will still match expectation for each member *if* passed
+    var samurai = (new Mock)
+	      .calls(1)
+        .accepts(1, "foo", true, null, undefined, {}, [], new Date(2010), new Custom )
+        .required(0); // Overwrite implict required of 10 (fn.length). Note comparison object will still match expectation for each member *if* passed
 
 	  // Bad Exercises
 
@@ -2961,15 +2927,14 @@
 	test("mocked constructor with multiple strict parameter (String: 'foo' | 'far' ) and paired return value (String: 'bar' | 'baz' )", function () {
 
     expect(7);
-	  var ninja = new Mock;
-	  ninja
-	    .calls(1)
-	    .returns(undefined)
-      .receives(
-        {accepts: ['foo'], returns: 'bar'}, // Presentation [1]
-        {accepts: ['far'], returns: 'baz'} // Presentation [1]
-      )
-      .required(0);
+	  var ninja = (new Mock)
+	      .calls(1)
+	      .returns(undefined)
+        .receives(
+          {accepts: 'foo', returns: 'bar'}, // Presentation [1]
+          {accepts: 'far', returns: 'baz'}  // Presentation [1]
+        )
+        .required(0);
 
 	  // Bad Exercises
 	  // No argument type - should just return 'global' / default undefined
@@ -3006,7 +2971,12 @@
 
 	  // Test multiple callbacks
 
-	  var $ = new Mock;
+	  var $ = (new Mock)
+	      .calls(1)
+	      .receives(
+	        {accepts: ['path/to/resource', onSuccess], data: {foo: true}},
+	        {accepts: ['path/to/resource', onFail], data: {baz: true}}
+	      );
 
     var success = false;
 
@@ -3020,19 +2990,12 @@
       fail = data.baz;
     }
 
-    // Suggested syntax for 'cleaner' callbacks
-		$.calls(1)
-	    .receives(
-	      {accepts: ['path/to/resource', onSuccess], data: [{foo: true}]},
-	      {accepts: ['path/to/resource', onFail], data: [{baz: true}]}
-	    );
-
 		// Exercise
 		// Correct Usage
 
 		var called = false;
 		$('path/to/resource', onSuccess);
-		
+
 		stop();
 
 		// Simulate round-trip ajax transaction
@@ -3046,7 +3009,7 @@
       equals(fail, true, "var fail should be set to true when $.get() passed (String: url, Function: onFail)");
   		start();
 		}, QMock.config.delay);
-		
+
 	});
 
 	module( "QMock: Public API" );
@@ -3083,7 +3046,7 @@
     equals(app.config.compare, stub, "Qmock instances should allow the setting of their compare configuration property")
 
 	});
-	
+
 	test("QMock.Mock constructor (aliased as global Mock variable)", function () {
 
     var mock = new QMock.Mock;
@@ -3092,12 +3055,12 @@
     // That implements both the (internal) Receiver & Mock klass interfaces
     ok(!!(mock.accepts && mock.calls && mock.verify && mock.reset), "Default instantiation of QMock.Mock should implement the Mock klass interface");
     ok(!!(mock.method && mock.property), "Default instantiation of QMock.Mock should implement the Receiver klass interface");
-    
+
     // Try without new keyword
     mock = QMock.Mock();
     ok(!!(mock.accepts && mock.calls && mock.verify && mock.reset), "Default instantiation of QMock.Mock (without new keyword) should implement the Mock klass interface");
     ok(!!(mock.method && mock.property), "Default instantiation of QMock.Mock (without new keyword) should implement the Receiver klass interface");
-    
+
     // Try specifying receiver should just be an object (so acts as namespace)
     var receiver = QMock.Mock({}, false);
     // Note plain receiver *shouldn't* 'inherit' methods of Mock if not a function
@@ -3111,7 +3074,7 @@
     ok(!!(typeof receiver.accepts === "undefined" && typeof receiver.accepts === "undefined"), "Instantitation of QMock.Mock with Boolean flag 'false' for function should return object (without new keyword) that doesn't implement Mock klass interface")
     // But should still implement Receiver klass interface
     ok(!!(receiver.method && receiver.property && receiver.verify && receiver.reset), "Instantitation of QMock.Mock with Boolean flag 'false' for function should return object (without new keyword) that implements Receiver klass interface")
-    
+
     // Setup
     // Try attaching methods / props to 'receiver', exercising, and verifying (same tests used for Mock.receiver() unit tests)
     receiver
@@ -3119,11 +3082,11 @@
         .accepts("baz")
         .end()
       .property("faz", true);
-    
+
     // Exercise
     receiver.bar("baz");
     receiver.faz = false;
-    
+
     // Verify whole mock
 	  ok( receiver.verify(), "The mock 'mock' should be true [receiver.verify()]");
 	  // Verify just the namespace
@@ -3136,10 +3099,10 @@
 	  receiver.reset();
 	  // Check the property is back to setup value
 	  equals( receiver.faz, true, "'receiver.faz' should equal true");
-	  
+
 	  // Change the property again
 	  receiver.faz = false;
-	  
+
 	  // Reset from parent mock
 	  receiver.reset();
 	  // Check the property is back to setup value
@@ -3203,7 +3166,7 @@
       equals(e[0].type, "IncorrectNumberOfArgumentsException", "QMock.utils.verify() should throw a 'IncorrectNumberOfArgumentsException' error when mock NOT invoked")
     }
     mock.reset();
-    
+
     mock("foo");
     equals( QMock.utils.verify(mock), true, "QMock.utils.verify() should return true when mock passed (String: 'foo')")
     mock.reset();
@@ -3327,9 +3290,9 @@
     // Correct Usage
     var called = false;
     mock.get('path/to/resource', function (data) { called = data.foo });
-    
+
     stop();
-    
+
     setTimeout(function() {
       // Good exercise & verify
   	  equals(called, 'bar', "var called should be set to true when mock.get() passed (String: url, Function: callback)");
@@ -3353,7 +3316,7 @@
 
 	  // Good exercise & verify
 	  ok(mock.verify(), "verify() should pass if foo called a random amount of times between a specified range");
-	  
+
 	  // Setup - Test support for expects() instantiating member instance method
 
  	  var mock = new Mock;
@@ -3442,7 +3405,7 @@
           .calls(1)
           .accepts(1);
       })(new Mock),
-      
+
       "namespace": (function(fn) {
         return fn
           .id("mock.namespace")
@@ -3463,7 +3426,7 @@
           .calls(1)
           .accepts("response")
       })(new Mock),
-      
+
       "async": (function(fn) {
         return fn
           .id("mock.async")
@@ -3541,7 +3504,7 @@
         "gaz": null
       }
     };
-    
+
     // Exercise
     // Expect ONE method & ONE Property created on mock
     QMock.__bootstrap( mock, descriptor );
@@ -3555,13 +3518,13 @@
     mock.method.calls(0);
     mock.property.calls(0);
     mock.namespace.calls(1);
-    
+
     // Exercise - use previous method definition as constructor definition
     QMock.__bootstrap(mock, descriptor.foo);
 
     // Verify
     verifyMetaMock(mock, "constructor");
-    
+
 	});
 
 })(); // Run forest, run!

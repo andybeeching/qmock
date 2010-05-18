@@ -402,26 +402,26 @@
     /**
      * == Receiver ==
      *
-     *  Receiver mock objects are simply pseudo-namespaces for mocked methods 
-     *  and stubbed properties. 
-     *  
-     *  QMock allows receivers to be either plain old object literals, or 
-     *  functions (aka smart mocks) depending on the requirement to accurately 
-     *  replicate a given real-world collaborator object interface (with 
+     *  Receiver mock objects are simply pseudo-namespaces for mocked methods
+     *  and stubbed properties.
+     *
+     *  QMock allows receivers to be either plain old object literals, or
+     *  functions (aka smart mocks) depending on the requirement to accurately
+     *  replicate a given real-world collaborator object interface (with
      *  associated behaviours).
      **/
 
     /** section: Receiver
      * class Receiver
-     *  
-     *  Receiver is the central superclass in QMock for the simple reason that 
-     *  Mock objects (aka functions), can also be receiver mock objects. Hence 
+     *
+     *  Receiver is the central superclass in QMock for the simple reason that
+     *  Mock objects (aka functions), can also be receiver mock objects. Hence
      *  the Mock klass (and insatnces) implements the Receiver klass interface.
-     *  
-     *  So if one were to define a Constructor akin to jQuery's <code>$</code>, 
+     *
+     *  So if one were to define a Constructor akin to jQuery's <code>$</code>,
      *  they can also still attach member methods and properties to that.
-     *  
-     *  The public interface for both klasses act identically no matter which 
+     *
+     *  The public interface for both klasses act identically no matter which
      *  type the mock is.
      **/
     function Receiver () {
@@ -587,26 +587,22 @@
       verify: function () {
         // Verify 'leaf' member mock objects
         var result  = true,
-            members = this.methods.concat( this.namespaces ),
-            i       = 0,
-            len     = members.length,
             tmp     = config.failslow;
 
         // Suppress errors thrown at higher level
         // Allows all errors to be collated and thrown as a set
         config.failslow = true;
 
-        iterate( members, function ( item ) {
+        // Verify all mock methods & nested namespaces
+        iterate( this.methods.concat( this.namespaces ), function ( item ) {
           result &= item.verify();
         });
 
         // Restore failslow setting
         config.failslow = tmp;
 
-        // Gather all exceptions
-        var exceptions = this.__getExceptions();
-
         // Live() || Die()
+        var exceptions = this.__getExceptions();
         if ( !config.failslow && exceptions.length ) {
           // Pants.
           throw exceptions;
@@ -780,10 +776,13 @@
      *  if required.
      **/
     function Expectation ( config ) {
+      if ( !(this instanceof Expectation) ) {
+        return new Expectation( config );
+      }
       // augment base expectations
       mixin( this, config );
     }
-    
+
     Expectation.prototype = {
       // Default Options
       "accepts"  : null,
@@ -852,7 +851,6 @@
      *  </code></pre>
      **/
     function Mock ( min, max, receiver ) {
-      // Constructor protection, Mock should be only used as constructor
       if ( !(this instanceof Mock) ) {
         return new Mock( min, max, receiver );
       }
@@ -901,7 +899,7 @@
 
       /**
        * Mock#accepts( parameters ) -> Mock
-       *  - parameters (Object...n): Parameter list which mocked method is 
+       *  - parameters (Object...n): Parameter list which mocked method is
        *  expecting.
        *
        *  Method is used to set a single expected parameter list of _n_ length
@@ -918,8 +916,11 @@
        *  <pre><code>Mock.method("foo").accepts("bar", "baz");</code></pre>
        **/
       accepts: function () {
-        this.requires = arguments.length;
-        this.expectations.push( { "accepts" : slice.call( arguments ) } );
+        var args = slice.call( arguments );
+        this.expectations.push( new Expectation({
+          "accepts"  : args
+        }));
+        this.requires = args.length;
         return this.self;
       },
 
@@ -933,6 +934,8 @@
        *  _optional_. For more info on these properties see
        *  <code>Mock.returns</code> and <code>Mock.data</code> resepctively.
        *
+       *  TODO: Document Expectation interface, and rules of required parameters
+       *
        *  Method can be overloaded with as many expectations as required.
        *  During verification each actual <code>presentation</code> made to a
        *  mock object interface is tested against all expectations for a match.
@@ -943,32 +946,31 @@
        *    "accepts": ["bar", callback],
        *    "returns": "baz",
        *    "data": "stub"
+       *  },{
+       *    "accepts": "foo"
        *  });</code></pre>
        **/
       receives: function () {
         // Check for valid input to parameterList
-        // TODO: Needs to be refactored to factory for creating Expectations
-        iterate( arguments, function ( item ) {
-          if ( !item.accepts ) {
+        var args = arguments;
+        iterate( args, function ( obj ) {
+          if ( !"accepts" in (obj || {}) ) {
             throw {
               type: "MissingAcceptsPropertyException",
-              msg: "Qmock expects arguments to expectations() to contain an accepts property"
+              msg: "Qmock requires an 'accepts' property for each interface Expectation"
             }
           }
-          item.accepts = toArray( item.accepts );
-        });
+          // Handle single/multiple expected parameters
+          obj.accepts = toArray( obj.accepts );
 
-        // Set minimum expectations
-        this.requires = arguments[ 0 ].accepts.length;
-
-       // TODO: Support for different requires per expected presentation
-       // Assign explicit expectation if exist
-       /* for ( var i = 0, len = arguments.length; i < len; i++ ) {
-          if ( !arguments[ i ][ "required" ] ) {
-            arguments[ i ][ "required" ] = arguments[ i ][ "accepts" ].length;
+          // Update common requires expectation
+          var len = obj.requires || obj.accepts.length;
+          if( len > this.requires ) {
+            this.requires = len;
           }
-        }*/
-        this.expectations = this.expectations.concat( slice.call( arguments ) );
+          // Cache Expctation
+          this.expectations.push( new Expectation(obj) );
+        }, this);
         return this.self;
       },
 
@@ -1153,7 +1155,7 @@
             return true;
           }
         } else {
-          raise && raise(
+          raise(
             this.called,
             this.minCalls,
             "IncorrectNumberOfMethodCallsException",
@@ -1166,12 +1168,12 @@
         // Checks 'global' _received to see if any paramters actually required, if so,
         // verify against overloading behaviour
         if ( this.requires && verifyOverloading( this ) ) {
-          raise && raise(
-              this.received[ 0 ].length,
-              this.expectations.length,
-              "IncorrectNumberOfArgumentsException",
-              this.name
-            );
+          raise(
+            this.received[ 0 ].length,
+            this.expectations.length,
+            "IncorrectNumberOfArgumentsException",
+            this.name
+          );
           return false;
         }
 
@@ -1391,10 +1393,10 @@
     Mock.create = function ( mock ) {
       // instantiate statemachine if not passed
       if ( !mock || !mock instanceof Mock ) { mock = new Mock; }
-      
+
       // Set common interface expectations
       mixin( mock, Expectation.prototype );
-      
+
       // Mutator for mock instance statemachine
       // Exercises callbacks for async transactions
       // Returns itself, explicit value, or undefined
