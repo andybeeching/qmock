@@ -94,7 +94,15 @@
                 </div> <!-- .section-title -->
                 <div class="section-content">
 
-    <p>The Receiver interface.</p>
+    <p>Receiver is the central superclass in QMock for the simple reason that
+Mock objects (aka functions), can also be receiver mock objects. Hence
+the Mock klass (and insatnces) implements the Receiver klass interface.</p>
+
+<p>So if one were to define a Constructor akin to jQuery's <code>$</code>,
+they can also still attach member methods and properties to that.</p>
+
+<p>The public interface for both klasses act identically no matter which
+type the mock is.</p>
 
                 </div> <!-- .section-content -->
             </div> <!-- .section -->

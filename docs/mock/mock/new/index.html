@@ -111,38 +111,31 @@
   <div class="section-content">
     <div class="method-description">
       
-        <pre class="syntax"><code class="ebnf">new Mock( definition [, isFunction] )</code></pre>
-
-  <ul class="argument-list">
-    
-      <li>
-        <code class="argument-name">desc</code>
-        
-          <span class="argument-types">(<code>Hash</code>)</span>
-        
-         &ndash; Hash of Mock expectations mapped to Mock object API.
-
-      </li>
-    
-      <li>
-        <code class="argument-name">bool</code>
-        
-          <span class="argument-types">(<code>Boolean</code>)</span>
-        
-         &ndash; Designated whether receiver object itself is a stub function (a la jQuery constructor). Default for QMock is true.
-
-      </li>
-    
-  </ul> <!-- .argument-list -->
+        <pre class="syntax"><code class="ebnf">new Mock( desc [, bool] )</code></pre>
 
       
 
-      <p>Constructor for mock receiver, methods and properties. The return
-object is a function that can act as a namespace object (aka a
-'receiver'), or as a mocked function / constructor with expectations,
-or both (e.g. jQuery $).</p>
+      <ul>
+<li>desc (Map): Hash of Mock expectations mapped to Mock object
+interface.</li>
+<li>bool (Boolean) <em>optional</em>: Flag whether Mock is a function
+or an object. N.b. Functions are also receivers (think jQuery).
+The default for QMock is <code>true</code>.</li>
+</ul>
 
-<p>Can be called with or without the <code>new</code> keyword</p>
+
+<p>Constructor for mock receiver, methods and properties. The returned
+object implements either the Receiver, or Mock interface</p>
+
+<p><em>Note</em>: Can be called with or without the <code>new</code> keyword</p>
+
+<p><em>Note: If using Mock descriptor mappings for Mock construction
+(<em>recommended!</em>), then QMock will automatically detect the type (method|
+namespace|stub) of property you are setting based on the property value
+(be that a top-level, or nested property). Therefore it is best to
+avoid using <code>property</code> or <code>namespace</code> as keys in
+a descriptor, as this is both cumbersome, and limits their use to a
+single instance per mock object.</em></p>
 
 <h4>Example</h4>
 
@@ -151,40 +144,36 @@ var ninja = new Mock();
 
 ninja.method('foo').returns('bar');
 
-// Via definition map
-ninja = new Mock({
+// Via descriptor mapping
+mock = new Mock({
   // method
   "foo": {
-    "id"        : "Descriptor / Identifier"
-    "accepts"   : "bar",
-    "receives"  : {"accepts": "foo", data: "stub", returns: "bar"}
-    "returns"   : "baz",
-    "required"  : 1,
-    "namespace" : "faz"
-    "overload"  : true,
-    "data"      : "response",
-    "async"     : true,
-    "chain"     : true // arg not used, readability only
-    "calls"     : 1
+    "id"      : "Descriptor / Identifier"
+    "accepts" : "bar",
+    "receives": {"accepts": "foo", data: "stub", returns: "bar"}
+    "returns" : "baz",
+    "required": 1,
+    "async"   : true
+    "overload": true,
+    "data"    : "response",
+    "chain"   : true // arg not used, readability only
+    "calls"   : 1
+    // Nested namesapce on 'foo'.
+    "baz"     : {},
+    // Single use alternative
+    "namespace" : ["baz", {
+      // descriptor object
+    }],
+    // Nested property on 'foo'
+    "key"     : "value"
+    // Single use alternative
+    "property": ["key", "value"]
   },
   // property
   "bar": {
     "value": "stub"
   }
-  // namespace
-  "buz": {
-    // method
-    "stub": {
-      "accepts": 1
-    }
-    // property
-    "key": {
-      "value": false
-    },
-    // nested namespace
-    "ns": {}
-  }
-})
+});
 </code></pre>
 
 

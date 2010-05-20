@@ -120,12 +120,15 @@
 </ul>
 
 
-<pre><code>{accepts: [ parameters ], returns: value, data: [ values ]}</code></pre>
+<pre><code>{accepts: [ parameters ], returns: value, data: [ values ]}
+</code></pre>
 
 
 <p>Where the <code>returns</code> &amp; <code>data</code> properties are
 <em>optional</em>. For more info on these properties see
 <code>Mock.returns</code> and <code>Mock.data</code> resepctively.</p>
+
+<p>TODO: Document Expectation interface, and rules of required parameters</p>
 
 <p>Method can be overloaded with as many expectations as required.
 During verification each actual <code>presentation</code> made to a
@@ -137,6 +140,8 @@ mock object interface is tested against all expectations for a match.</p>
   "accepts": ["bar", callback],
   "returns": "baz",
   "data": "stub"
+},{
+  "accepts": "foo"
 });</code></pre>
 
 

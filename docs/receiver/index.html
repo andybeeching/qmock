@@ -84,16 +84,13 @@
                 </div> <!-- .section-title -->
                 <div class="section-content">
 
-  <p>Receivers are dumb objects which act as namespaces for methods and
-properties. QMock allows receivers to be either plain old object
-literals, or Mock stubs (aka smart stub functions) depending on need,
-or desire to accurately replicate a real-world collaborator object.</p>
+  <p>Receiver mock objects are simply pseudo-namespaces for mocked methods
+and stubbed properties.</p>
 
-<p>Technically the Mock klass implements the Receiver klass interface, but
-since Mock objects as functions, and not object literals, are the
-primary use case, it's easier to think of all methods in a Receiver
-instance as acting identically as their Mock (function) instance
-counterpart.</p>
+<p>QMock allows receivers to be either plain old object literals, or
+functions (aka smart mocks) depending on the requirement to accurately
+replicate a given real-world collaborator object interface (with
+associated behaviours).</p>
 
               </div> <!-- .section-content -->
             </div> <!-- .section -->
@@ -115,7 +112,9 @@ counterpart.</p>
   <h4><a href="../receiver/receiver/">Receiver</a></h4>
 
   
-    <p><p>The Receiver interface.</p>
+    <p><p>Receiver is the central superclass in QMock for the simple reason that
+Mock objects (aka functions), can also be receiver mock objects. Hence
+the Mock klass (and insatnces) implements the Receiver klass interface.</p>
 </p>
   
 </li>

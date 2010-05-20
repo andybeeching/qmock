@@ -40,7 +40,7 @@
 
 	});
 
-	test("Mock.namespace() [utility] instance method", function () {
+	test("Mock.namespace() [core] instance method", function () {
 
 	  expect(8);
 	  var mock = new Mock,
@@ -108,20 +108,18 @@
         "receives"  : {"accepts": "foo", data: "stub", returns: "bar"},
         "returns"   : "bar",
         "required"  : 1,
-        "namespace" : "faz",
+        // nested namespace on 'foo'
+        "faz"       : {},
         "overload"  : true,
         "data"      : "response",
         "async"     : true,
         "chain"     : {},
         "calls"     : [1,2],
-        "key"       : {
-          "value"   : true
-        }
+        // nested property on 'foo'
+        "key"       : true
       },
       // property called 'bar'
-      "bar": {
-        "value" : 'stub'
-      },
+      "bar": "stub",
       // namespace called 'buz' with method
       "buz": {
         // Test method setup
@@ -129,11 +127,9 @@
           "accepts": "test"
         },
         // Test property setup
-        "daz": {
-          "value": "stub"
-        },
+        "daz": "stub",
         // Test nested namspace setup
-        "gaz": null
+        "gaz": {}
       }
     }, false);
 
@@ -3474,22 +3470,20 @@
     var descriptor = {
       // method called foo
       "foo": {
-        "id"        : "foobarbaz",
-        "accepts"   : "foo",
-        "receives"  : {"accepts": "foo", data: "stub", returns: "bar"},
-        "returns"   : "bar",
-        "required"  : 1,
-        "namespace" : "faz",
-        "overload"  : true,
-        "data"      : "response",
-        "async"     : true,
-        "chain"     : {},
-        "calls"     : [1,2]
+        "id"       : "foobarbaz",
+        "accepts"  : "foo",
+        "receives" : {"accepts": "foo", data: "stub", returns: "bar"},
+        "returns"  : "bar",
+        "required" : 1,
+        "faz"      : {},
+        "overload" : true,
+        "data"     : "response",
+        "async"    : true,
+        "chain"    : {},
+        "calls"    : [1,2]
       },
       // property called 'bar'
-      "bar": {
-        "value" : 'stub'
-      },
+      "bar": "stub",
       // namespace called 'buz' with method
       "buz": {
         // Test method setup
@@ -3497,11 +3491,9 @@
           "accepts": "test"
         },
         // Test property setup
-        "daz": {
-          "value": "stub"
-        },
+        "daz": "stub",
         // Test nested namspace setup
-        "gaz": null
+        "gaz": {}
       }
     };
 

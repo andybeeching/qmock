@@ -547,8 +547,7 @@
         // Track namespace
         this.namespaces.push( this.self[ prop ] );
 
-        // Return correct receiver scope for augmentation
-        // Pow!
+        // Return correct receiver scope for augmentation. Pow!
         return this.self[ prop ];
       },
 
@@ -755,6 +754,8 @@
      *  # Implement excise method to decouple collaborator interface from mock interface
      *  # Public method unit tests (aka verify/reset), with excised mock
      *  # Best practice to look for parent id's if set for errors
+     *  # Methodization of Mock interface on public Mock constructor
+     *  # Spy functionality that supports Ben thingy's use inheritance use-case
      *
      **/
 
@@ -789,18 +790,25 @@
     };
 
     /**
-     * new Mock( definition [, bool] )
+     * new Mock( desc [, bool] )
      *  - desc (Map): Hash of Mock expectations mapped to Mock object
-     *  API.
-     *  - bool (Boolean): Designated whether receiver object itself is a
-     *  stub function (a la jQuery constructor). Default for QMock is true.
+     *  interface.
+     *  - bool (Boolean) _optional_: Flag whether Mock is a function
+     *  or an object. N.b. Functions are also receivers (think jQuery).
+     *  The default for QMock is <code>true</code>.
      *
-     *  Constructor for mock receiver, methods and properties. The return
-     *  object is a function that can act as a namespace object (aka a
-     *  'receiver'), or as a mocked function / constructor with expectations,
-     *  or both (e.g. jQuery $).
+     *  Constructor for mock receiver, methods and properties. The returned
+     *  object implements either the Receiver, or Mock interface
      *
-     *  Can be called with or without the <code>new</code> keyword
+     *  _Note_: Can be called with or without the <code>new</code> keyword
+     *
+     *  _Note: If using Mock descriptor mappings for Mock construction
+     *  (*recommended!*), then QMock will automatically detect the type (method|
+     *  namespace|stub) of property you are setting based on the property value
+     *  (be that a top-level, or nested property). Therefore it is best to
+     *  avoid using <code>property</code> or <code>namespace</code> as keys in
+     *  a descriptor, as this is both cumbersome, and limits their use to a
+     *  single instance per mock object._
      *
      *  #### Example
      *
@@ -809,40 +817,36 @@
      *
      *  ninja.method('foo').returns('bar');
      *
-     *  // Via definition map
-     *  ninja = new Mock({
+     *  // Via descriptor mapping
+     *  mock = new Mock({
      *    // method
      *    "foo": {
-     *      "id"        : "Descriptor / Identifier"
-     *      "accepts"   : "bar",
-     *      "receives"  : {"accepts": "foo", data: "stub", returns: "bar"}
-     *      "returns"   : "baz",
-     *      "required"  : 1,
-     *      "namespace" : "faz"
-     *      "overload"  : true,
-     *      "data"      : "response",
-     *      "async"     : true,
-     *      "chain"     : true // arg not used, readability only
-     *      "calls"     : 1
+     *      "id"      : "Descriptor / Identifier"
+     *      "accepts" : "bar",
+     *      "receives": {"accepts": "foo", data: "stub", returns: "bar"}
+     *      "returns" : "baz",
+     *      "required": 1,
+     *      "async"   : true
+     *      "overload": true,
+     *      "data"    : "response",
+     *      "chain"   : true // arg not used, readability only
+     *      "calls"   : 1
+     *      // Nested namesapce on 'foo'.
+     *      "baz"     : {},
+     *      // Single use alternative
+     *      "namespace" : ["baz", {
+     *        // descriptor object
+     *      }],
+     *      // Nested property on 'foo'
+     *      "key"     : "value"
+     *      // Single use alternative
+     *      "property": ["key", "value"]
      *    },
      *    // property
      *    "bar": {
      *      "value": "stub"
      *    }
-     *    // namespace
-     *    "buz": {
-     *      // method
-     *      "stub": {
-     *        "accepts": 1
-     *      }
-     *      // property
-     *      "key": {
-     *        "value": false
-     *      },
-     *      // nested namespace
-     *      "ns": {}
-     *    }
-     *  })
+     *  });
      *  </code></pre>
      **/
     function Mock ( min, max, receiver ) {
@@ -1388,9 +1392,9 @@
 
     /* [Private]
      *
-     * bootstrap( mock, definition ) -> Boolean
+     * bootstrap( mock, desc ) -> Boolean
      *  - mock (Mock): Mock instance to augment
-     *  - descriptor (Map): Hash of Mock expectations mapped to Mock object
+     *  - desc (Map): Hash of Mock expectations mapped to Mock object
      *  API.
      *
      *  Helper method which interprets a JSON formatted map of a desired mock
@@ -1399,21 +1403,29 @@
      *
      *  #### Example
      *
-     *  <pre><code>
-     *  new Mock({
+     *  <pre><code>new Mock({
      *    // method
      *    "foo": {
      *      "id"      : "Descriptor / Identifier"
-     *      "accepts"   : "bar",
-     *      "receives"  : {"accepts": "foo", data: "stub", returns: "bar"}
-     *      "returns"   : "baz",
-     *      "required"  : 1,
-     *      "namespace" : "faz",
-     *      "async"     : true
-     *      "overload"  : true,
-     *      "data"      : "response",
-     *      "chain"     : true // arg not used, readability only
-     *      "calls"     : 1
+     *      "accepts" : "bar",
+     *      "receives": {"accepts": "foo", data: "stub", returns: "bar"}
+     *      "returns" : "baz",
+     *      "required": 1,
+     *      "async"   : true
+     *      "overload": true,
+     *      "data"    : "response",
+     *      "chain"   : true // arg not used, readability only
+     *      "calls"   : 1
+     *      // Nested namesapce on 'foo'.
+     *      "baz"     : {},
+     *      // Single use alternative
+     *      "namespace" : ["baz", {
+     *        // descriptor object
+     *      }],
+     *      // Nested property on 'foo'
+     *      "key"     : "value"
+     *      // Single use alternative
+     *      "property": ["key", "value"]
      *    },
      *    // property
      *    "bar": {
@@ -1424,20 +1436,22 @@
      *
      *  _See integration tests or wiki for more in-depth patterns_.
      **/
-    var bootstrap = ( function () {
+    var bootstrap = (function () {
 
       // Test object definition against defined interface
       function getDescriptorType ( map ) {
-        var isMethod = false, key;
-        for( key in map ) {
+        // Property
+        if ( !is( map, "Object") ) {
+          return "property";
+        }
+        // Method
+        for( var key in map ) {
           if( key in Mock.prototype ) {
-            isMethod = true;
-            break;
+            return "method";
           }
         }
-        return ( isMethod )
-          ? "method" : !!( "value" in ( map || {} ) )
-            ? "property" : "namespace";
+        // Namespace
+        return "namespace";
       }
 
       // Invokes methods on an interface based on a property mapping
@@ -1448,47 +1462,47 @@
             // multiple values per expectation (e.g. mock.receives)
             // Support for [] grouping notation
             obj[ key ].apply( obj, toArray( prop ) );
+          } else {
+            // Set namespace or property on mock object
+            obj[ getDescriptorType( prop ) ]( key, prop );
           }
         });
       }
 
       return function ( mock, desc ) {
-        // interface checks - duck type mock check since proxied interface
-        if ( !mock.property && !mock.method && !mock.namespace ) {
-          // If not valid then create a new mock instance to augment
-          // Use Mock function as receiver since implements Receiver interface
-          mock = Mock.create();
-        }
-
         // pseudo-break;
         var stop = false;
+
+        // Duck typed mock check since interface proxied (no instanceof)
+        if ( !mock.property && !mock.method && !mock.namespace ) {
+          // If not valid then create a new MockReceiver instance to augment
+          mock = Mock.create();
+        }
 
         // iterate through mock expectations and setup config for each
         enumerate( desc, function ( prop, key, obj ) {
           if ( stop ) { return; }
           // constructor or member?
-          var bool = typeof mock[ key ] == "undefined",
-              expectations = bool ? prop : obj || {},
+          var bool  = typeof mock[ key ] == "undefined",
+              entry = bool ? prop : obj || {},
               // method || namespace || property
-              type = getDescriptorType( expectations ),
+              type  = getDescriptorType( entry ),
               member;
 
           // if member augment receiver object with new mocked member
           if ( bool ) {
-            member = mock[ type ]( key, type === "property"
-              ? expectations.value
-              : expectations
-            );
+            member = mock[ type ]( key, entry );
           }
           // Auto-setup methods
           if( type === "method" ) {
-            invoker( member || mock, expectations );
+            invoker( member || mock, entry );
           }
           // If standalone fn then stop (constructor or method)
           if ( !bool ) {
             stop = true;
           }
         });
+        // Sweet.
         return mock;
       };
     })();
@@ -1776,7 +1790,7 @@
      * class QMock
      **/
     return {
-      version: "0.4rc",
+      version: "0.4.1",
       config: config,
       create: createQMock,
       /** alias of: Mock

@@ -95,7 +95,7 @@
   <div class="section-content">
     <div class="method-description">
       
-        <pre class="syntax"><code class="ebnf">Receiver#namespace( id [, definition ] ) &rarr; new Receiver</code></pre>
+        <pre class="syntax"><code class="ebnf">Receiver#namespace( id [, desc ] ) &rarr; new Receiver</code></pre>
 
       
 
@@ -103,7 +103,8 @@
 <li>id (String): Identifer or key for the nested namespace receiver
 instance on the Mock. Instance implements all Receiver klass
 methods.</li>
-<li>definition (Map) <em>optional</em>: TODO</li>
+<li>desc (Map) <em>optional</em>: Mock Receiver descriptor which works exactly
+like those passed to the Mock constructor (see corresponding docs)</li>
 </ul>
 
 
@@ -113,6 +114,13 @@ methods.</li>
 // Create a nested namespace with a method called 'bar' on it.
 Mock.namespace("foo")
   .method("bar");
+
+// With optinal descriptor
+Mock.namespace("foo", {
+  "bar": {
+    "accepts": "baz"
+  }
+});
 </code></pre>
 
 
