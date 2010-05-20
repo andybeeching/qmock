@@ -143,7 +143,7 @@
      *
      *  The esteemed Garrett Smith has the bullet on DHTMLKitchen.
      *
-     *  TODO: Get dhtmlkitchen link
+     *    * http://dhtmlkitchen.com/learn/js/enumeration/dontenum.jsp
      *
      *  #### Example
      *
@@ -162,7 +162,7 @@
     function enumerate ( obj, fn, scope, bool ) {
       for ( var key in obj ) {
         if ( ( bool || hasOwnProperty.call( obj, key) )
-          && obj.propertyIsEnumerable( key ) || key === "toString"
+          || key === "toString"
           || key === "valueOf" ) {
             fn.call( scope || obj, obj[ key ], key, obj );
           }
@@ -248,7 +248,7 @@
      *  </code></pre>
      **/
     function comparePresentation ( mock, presentation, key ) {
-      checkCompare();
+      isCompareSet();
       var result  = false,
           mapping = {"returns": "output","data": "stub"},
           stop    = false;
@@ -276,12 +276,12 @@
 
     /* [Private]
      *
-     * checkCompare() -> Boolean | Error
+     * isCompareSet() -> Boolean | Error
      *
      *  Utility function to assert whether a comparison routine has been set on
      *  QMock namespace.
      **/
-    function checkCompare () {
+    function isCompareSet () {
       if ( !config.compare ) {
         throw new Error('Comparison routine must be set on QMock.compare with signature fn( a, b )');
       }
@@ -511,11 +511,12 @@
       },
 
      /**
-      * Receiver#namespace( id [, definition ] ) -> new Receiver
+      * Receiver#namespace( id [, desc ] ) -> new Receiver
       *  - id (String): Identifer or key for the nested namespace receiver
       *  instance on the Mock. Instance implements all Receiver klass
       *  methods.
-      *  - definition (Map) _optional_: TODO
+      *  - desc (Map) _optional_: Mock Receiver descriptor which works exactly
+      *  like those passed to the Mock constructor (see corresponding docs)
       *
       *  #### Example
       *
@@ -523,6 +524,13 @@
       *  // Create a nested namespace with a method called 'bar' on it.
       *  Mock.namespace("foo")
       *    .method("bar");
+      *
+      *  // With optinal descriptor
+      *  Mock.namespace("foo", {
+      *    "bar": {
+      *      "accepts": "baz"
+      *    }
+      *  });
       *  </code></pre>
       **/
       namespace: function ( prop, desc ) {
@@ -533,7 +541,7 @@
           };
         }
 
-        // New property on receiver + track namespaces
+        // New namespace on receiver ({})
         this.self[ prop ] = Receiver.create( desc, false );
 
         // Track namespace
@@ -593,7 +601,6 @@
         // Allows all errors to be collated and thrown as a set
         config.failslow = true;
 
-        // Verify all mock methods & nested namespaces
         iterate( this.methods.concat( this.namespaces ), function ( item ) {
           result &= item.verify();
         });
@@ -603,6 +610,7 @@
 
         // Live() || Die()
         var exceptions = this.__getExceptions();
+
         if ( !config.failslow && exceptions.length ) {
           // Pants.
           throw exceptions;
@@ -624,13 +632,11 @@
        **/
       reset: function () {
         // Reset all child mocks
-        var members = this.methods.concat( this.namespaces );
-
-        iterate( members, function ( item ) {
+        iterate( this.methods.concat( this.namespaces ), function ( item ) {
           item.reset();
         });
 
-        // Reset Properties (could have been mutated)
+        // Reset Properties (may have been mutated)
         enumerate(this.properties, function ( prop, key ) {
           this.self[ key ] = prop;
         }, this);
@@ -682,10 +688,7 @@
           delete this.self[ key ];
         }, this);
 
-        // 'excise' children
-        var members = this.methods.concat( this.namespaces );
-
-        iterate( members, function ( item ) {
+        iterate( this.methods.concat( this.namespaces ), function ( item ) {
           item.excise();
         });
       },
@@ -730,15 +733,13 @@
       proxy = receiver.self = bool ? Mock.create() : {};
 
       // Bind private state to public interface
+      // If recorder function then interface already bound
       if ( typeof proxy == "object" ) {
         bindInterface( proxy, Receiver.prototype, receiver );
       }
 
-      // Update default return state on Constuctors to themselves (for
-      // cascade-invocation-style declarations). If the return value is
-      // overidden post-instantiation then it is assumed the mock is a
-      // standalone function constuctor and not acting as a receiver object
-      // (aka namespace / class)
+      // Update default return state on mock Constuctors to themselves
+      // This facilitates chained expectation declarations
       if ( bool ) {
         proxy.chain();
       }
@@ -753,12 +754,7 @@
      *
      *  # Implement excise method to decouple collaborator interface from mock interface
      *  # Public method unit tests (aka verify/reset), with excised mock
-     *  # Refactor Expectations and Presentation Constructors, and expose.
-     *  # Change behaviour of Mock.property, Mock.method & Mock.namespace to nest instead
-     *    of return to parent for association...
      *  # Best practice to look for parent id's if set for errors
-     *  # Pull out setUp Mock stuff from createMock factory.
-     *  # createMock's duty to setup inheritance model & actual object
      *
      **/
 
@@ -771,22 +767,21 @@
      **/
 
     /* [Private]
-     * new Expectation( config )
-     *  - map ( Map ): Data properties for Expectation object, can be custom
+     * new Expectation( options )
+     *  - options (Map): Data properties for Expectation object, can be custom
      *  if required.
      **/
-    function Expectation ( config ) {
+    function Expectation ( options ) {
       if ( !(this instanceof Expectation) ) {
-        return new Expectation( config );
+        return new Expectation( options );
       }
       // augment base expectations
-      mixin( this, config );
+      mixin( this, options );
     }
 
     Expectation.prototype = {
       // Default Options
       "accepts"  : null,
-      "requires" : 0,
       "output"   : undefined,
       "chained"  : false,
       "stub"     : null,
@@ -795,7 +790,7 @@
 
     /**
      * new Mock( definition [, bool] )
-     *  - desc (Hash): Hash of Mock expectations mapped to Mock object
+     *  - desc (Map): Hash of Mock expectations mapped to Mock object
      *  API.
      *  - bool (Boolean): Designated whether receiver object itself is a
      *  stub function (a la jQuery constructor). Default for QMock is true.
@@ -856,6 +851,7 @@
       }
       // Mock interface constraints
       this.overloadable = true;
+      this.requires     = 0;
       // Default mock state
       this.expectations = [];
       this.name         = "anonymous";
@@ -920,7 +916,10 @@
         this.expectations.push( new Expectation({
           "accepts"  : args
         }));
-        this.requires = args.length;
+        // Update common requires expectation to lowest common denominator
+        if( args.length > this.requires ) {
+          this.requires = args.length;
+        }
         return this.self;
       },
 
@@ -1149,35 +1148,11 @@
        **/
       verify: function ( raise ) {
         raise = raise || new ErrorHandler( this.exceptions );
-        // If true and no calls then exclude from further interrogation
-        if ( verifyInvocations( this ) ) {
-          if ( this.called === 0 ) {
-            return true;
-          }
-        } else {
-          raise(
-            this.called,
-            this.minCalls,
-            "IncorrectNumberOfMethodCallsException",
-            this.name
-          );
+        // 1. Assert common interface expectations
+        if ( !verifyInvocations( this, raise ) ) {
           return false;
         }
-
-        // TBD: This doesn't seem to support multiple presentations to an interface?
-        // Checks 'global' _received to see if any paramters actually required, if so,
-        // verify against overloading behaviour
-        if ( this.requires && verifyOverloading( this ) ) {
-          raise(
-            this.received[ 0 ].length,
-            this.expectations.length,
-            "IncorrectNumberOfArgumentsException",
-            this.name
-          );
-          return false;
-        }
-
-        // 3. Assert all presentations to interface
+        // 2. Assert each expectation against presentations to interface
         return verifyInterface( this, raise );
       },
 
@@ -1451,7 +1426,7 @@
      **/
     var bootstrap = ( function () {
 
-      // Fn to test object definition against defined interface
+      // Test object definition against defined interface
       function getDescriptorType ( map ) {
         var isMethod = false, key;
         for( key in map ) {
@@ -1465,7 +1440,7 @@
             ? "property" : "namespace";
       }
 
-      // Function which invokes methods on an interface based on a mapping
+      // Invokes methods on an interface based on a property mapping
       function invoker ( obj, map ) {
         enumerate( map, function ( prop, key ) {
           if( is( obj[ key ], "Function" ) ) {
@@ -1491,9 +1466,9 @@
         // iterate through mock expectations and setup config for each
         enumerate( desc, function ( prop, key, obj ) {
           if ( stop ) { return; }
-          // mock type...
+          // constructor or member?
           var bool = typeof mock[ key ] == "undefined",
-              expectations = ( bool ) ? prop : obj || {},
+              expectations = bool ? prop : obj || {},
               // method || namespace || property
               type = getDescriptorType( expectations ),
               member;
@@ -1669,12 +1644,12 @@
      *  Evaluates if amount of times a mock object (method/constructor) has been
      *  invoked matches expectations
      **/
-    function verifyInvocations ( mock ) {
-      return ( mock.minCalls == null )
+    function verifyInvocations ( mock, raise ) {
+      var result = ( mock.minCalls == null )
         // No invocation expectation so result is true.
         ? true
-        // If one expression below true then return else expectations not met
-        // so false
+        // If one expression below true then return
+        // else expectations not met, so false
         : (
           // explicit call number defined
           mock.minCalls === mock.called
@@ -1685,27 +1660,47 @@
           || ( mock.minCalls < mock.called )
             && ( mock.maxCalls === Infinity )
         );
+        if ( !result ) {
+          raise(
+            this.called,
+            this.minCalls,
+            "IncorrectNumberOfMethodCallsException",
+            this.name
+          );
+        }
+        return result;
     }
 
     /* [Private]
      * QMock.verifyOverloading( mock ) -> Boolean
-     * - mock (Mock): mock instance to test
+     *  - mock (Mock): Mock object to test against
+     *  - Presentation (Array): Presentation to test
+     *  - raise (Function) _optional_: Function
      *
      *  Evaluates if number of parameters passed to mock object falls
      *  below / exceeeds expectations
      **/
-    function verifyOverloading ( mock ) {
-      return ( ( mock.overloadable )
+    function verifyOverloading ( mock, presentation, raise ) {
+      var result = ( mock.overloadable )
         // At least n Arg length checking - overloading allowed
-        ? ( mock.requires > mock.received[0].length )
+        ? ( presentation.length >= mock.requires )
         // Strict Arg length checking - no overload
-        : ( mock.requires !== mock.received[0].length )
-      );
+        : ( presentation.length === mock.requires );
+      // Record which presentations fail
+      if ( !result ) {
+        raise (
+          presentation.length,
+          mock.requires,
+          "IncorrectNumberOfArgumentsException",
+          this.name
+        );
+      }
+      return result;
     }
 
     /* [Private]
      * QMock.verifyPresentation( mock, presentation ) -> Boolean
-     *  - mock (Mock): mock object to test against
+     *  - mock (Mock): Mock object to test against
      *  - presentation (Array): Presentation made / to be made to mock object
      *  interface
      *
@@ -1713,32 +1708,27 @@
      *  expectations. Single match equals true.
      **/
     function verifyPresentation ( mock, presentation ) {
-      checkCompare();
-      var result = true, stop = false;
+      isCompareSet();
+      var result = false, stop = false;
       iterate( mock.expectations, function ( item ) {
         if ( stop ) { return; }
-        // reset so that empty presentation and empty expectation return true
-        // If no expectations then won't be reached... returns true.
-        result = false;
-
         // expectation to compare
         var expected = item.accepts;
 
         // If overloading allowed only want to check parameters passed-in
         // (otherwise will fail). Must also trim off overloaded args as no
         // expectations for them.
-        if ( mock.overloadable === true ) {
+        if ( mock.overloadable ) {
           presentation = trimCollection( presentation, expected );
-          expected  = trimCollection( expected, presentation );
+          expected = trimCollection( expected, presentation );
         }
 
-        // Else if overloading disallowed just pass through expected and
-        // actual
+        // Or just pass in expected and actual
         result |= config.compare( presentation, expected );
 
-        // If true then exit early
+        // If true, bail.
         if ( !!result ) {
-          stop =  true;
+          stop = true;
         }
       });
       return !!result;
@@ -1761,8 +1751,12 @@
       var result = true;
       // For each presentation to the interface...
       iterate( mock.received, function ( presentation ) {
-        // ...Check if a matching expectation
-        result &= verifyPresentation( mock, presentation );
+        // verify overloading where scenario of no expectations
+        verifyOverloading( mock, presentation, raise );
+        // else check for a matching expectation & behaviour
+        if ( mock.expectations.length ) {
+          result &= verifyPresentation( mock, presentation );
+        }
         // Record which presentations fail
         if ( !!!result ) {
           raise && raise(
