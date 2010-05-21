@@ -5,7 +5,7 @@ require 'vendor/pdoc/lib/pdoc'
 
 desc "Builds the documentation"
 task :build_doc do
-  source = File.expand_path(File.join(File.dirname(__FILE__), "src", "qmock.js"))
+  source = File.expand_path(File.join(File.dirname(__FILE__), "lib", "qmock.js"))
   PDoc::Runner.new(source, { :destination => 'docs' }).run
 end
 

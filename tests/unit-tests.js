@@ -3335,7 +3335,7 @@
 
 	module('QMock: Integration tests');
 
-	test('__bootstrap() private factory method', function () {
+	test("__bootstrap() private factory method", function () {
 
 	  function verifyMetaMock ( mock, type ) {
 	    // For methods we just test interaction with mock object interface by __createMock()
@@ -3517,6 +3517,69 @@
     // Verify
     verifyMetaMock(mock, "constructor");
 
+	});
+	
+	module( "QMock: Spy Function Behaviours");
+	
+	test("Spying on functions and constructors", function () {
+	  var called = false;
+
+	  // Test expected result for normal function invocation
+	  function foo ( bool ) {
+	    called = bool;
+	  }
+	  
+	  // setup
+	  var foo = Spy( foo ).calls(1).accepts(true); // or Spy(foo).calls(1);
+	  
+	  // exercise
+	  foo( true );
+	  
+	  // and verify...
+	  ok( called === true, "When the Spy 'foo' is invoked, the variable called should be set to true" );
+	  ok( foo.verify(), "foo.verify should be return true as it was invoked once" );
+	  
+	  // false positive test
+	  foo( true );
+	  try {
+	    foo.verify();
+	    fail("foo.verify() should throw an error");
+	  } catch (e) {
+	    equals( e[0].type, "IncorrectNumberOfMethodCallsException", "The Spy 'foo' should throw an IncorrectNumberOfMethodCallsException"); 
+	  }
+	  
+	  foo.reset();
+	  
+	  foo( "bar" );
+	  try {
+	    foo.verify();
+	    fail("foo.verify() should throw an error");
+	  } catch (e) {
+	    equals( e[0].type, "IncorrectParameterException", "The Spy 'foo' should throw an IncorrectNumberOfMethodCallsException"); 
+	  }
+	  	  
+	  // Test constructor-safe functionality of recorder
+	  var baz = new foo;
+	  ok ( baz instanceof foo, "baz should be an instance of the Spy foo (or rather the function being espied upon" );
+
+	  // Inspired by http://www.adequatelygood.com/2010/5/Spying-Constructors-in-JavaScript
+    // TODO: Test expected scoping for invocations and return values
+    function bar ( key, value ) {
+      this[ key ] = value;
+    }
+    
+    var obj = {};
+    
+    var bar = Spy(bar);
+
+    // exercise
+    bar.call(obj, "taz", "gaz");
+    bar.apply(obj, [ "raz", "paz" ]);
+    
+    // verify scoping
+    equals ( obj.taz, "gaz", "var obj should have a property of 'taz', with a value of 'gaz' when using .call()" );
+    equals ( obj.raz, "paz", "var obj should have a property of 'raz', with a value of 'paz' when using .apply()" );
+        
 	});
 
 })(); // Run forest, run!

@@ -46,6 +46,7 @@ PDoc.elements = {
 'Mock#method': { 'name': 'Mock#method', 'type': 'instance method', 'path': 'mock/mock/prototype/method/' },
 'Mock#__getState': { 'name': 'Mock#__getState', 'type': 'instance method', 'path': 'mock/mock/prototype/__getstate/' },
 'Mock#__getExceptions': { 'name': 'Mock#__getExceptions', 'type': 'instance method', 'path': 'mock/mock/prototype/__getexceptions/' },
+'QMock.Spy': { 'name': 'QMock.Spy', 'type': 'class method', 'path': 'qmock/qmock/spy/' },
 'QMock': { 'name': 'QMock', 'type': 'class', 'path': 'qmock/qmock/' },
 'QMock.Mock': { 'name': 'QMock.Mock', 'type': 'class method', 'path': 'qmock/qmock/mock/' },
 'QMock.utils': { 'name': 'QMock.utils', 'type': 'namespace', 'path': 'qmock/qmock/utils/' },
