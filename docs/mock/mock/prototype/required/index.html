@@ -1,0 +1,186 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+    "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <title>QMock API documentation | Mock#required</title>
+  <meta name="generator" content="PDoc" />
+  
+  <script type="text/javascript" charset="utf-8" src="../../../../javascripts/prototype.js"></script>
+  <script type="text/javascript" charset="utf-8" src="../../../../javascripts/application.js"></script>
+<script type="text/javascript" charset="utf-8" src="../../../../javascripts/tabs.js"></script>
+  <script type="text/javascript" charset="utf-8" src="../../../../javascripts/item_index.js"></script>
+  
+  <link type="text/css" rel="stylesheet" charset="utf-8" media="screen, projection" href="../../../../stylesheets/api.css" />
+<link type="text/css" rel="stylesheet" charset="utf-8" media="screen, projection" href="../../../../stylesheets/pygments.css" />
+  
+  <script type="text/javascript">
+    PDoc.pathPrefix = '../../../../';
+  </script>
+</head>
+  <body>
+
+    <div id="sidebar">
+      <ul id="sidebar_tabs" class="sidebar-tabs">
+        <li>
+          <a href="#menu_pane">Menu</a>
+        </li>
+        <li>
+          <a href="#search_pane">Search</a>
+        </li>
+      </ul> <!-- .sidebar-tabs -->
+
+      <form class="search-ribbon">
+        <label>
+          <span class="hidden">Search</span>
+          <input type="text" id="search" size="20" title="Search" />
+        </label>
+      </form>
+      
+      <div class="sidebar-pane scrollable" id="menu_pane">
+        <ul id="api_menu" class="menu-items">
+          
+            <li><div class="menu-item"><a class="section current-parent" title="Mock section (section)" href="../../../../mock/">Mock section</a></div><ul class="menu-section"><li><div class="menu-item"><a class="class current-parent" title="Mock (class)" href="../../../../mock/mock/">Mock</a></div><ul><li><div class="menu-item"><a class="constructor" title="new Mock (constructor)" href="../../../../mock/mock/new/">new</a></div></li>
+<li><div class="menu-item"><a class="instance-method" title="Mock#__getExceptions (instance method)" href="../../../../mock/mock/prototype/__getexceptions/">__getExceptions</a></div></li>
+<li><div class="menu-item"><a class="instance-method" title="Mock#__getState (instance method)" href="../../../../mock/mock/prototype/__getstate/">__getState</a></div></li>
+<li><div class="menu-item"><a class="instance-method" title="Mock#accepts (instance method)" href="../../../../mock/mock/prototype/accepts/">accepts</a></div></li>
+<li><div class="menu-item"><a class="instance-method deprecated" title="Mock#andExpects (instance method)" href="../../../../mock/mock/prototype/andexpects/">andExpects</a></div></li>
+<li><div class="menu-item"><a class="instance-method" title="Mock#async (instance method)" href="../../../../mock/mock/prototype/async/">async</a></div></li>
+<li><div class="menu-item"><a class="instance-method deprecated" title="Mock#atLeast (instance method)" href="../../../../mock/mock/prototype/atleast/">atLeast</a></div></li>
+<li><div class="menu-item"><a class="instance-method" title="Mock#calls (instance method)" href="../../../../mock/mock/prototype/calls/">calls</a></div></li>
+<li><div class="menu-item"><a class="instance-method" title="Mock#chain (instance method)" href="../../../../mock/mock/prototype/chain/">chain</a></div></li>
+<li><div class="menu-item"><a class="instance-method" title="Mock#data (instance method)" href="../../../../mock/mock/prototype/data/">data</a></div></li>
+<li><div class="menu-item"><a class="instance-method" title="Mock#end (instance method)" href="../../../../mock/mock/prototype/end/">end</a></div></li>
+<li><div class="menu-item"><a class="instance-method" title="Mock#excise (instance method)" href="../../../../mock/mock/prototype/excise/">excise</a></div></li>
+<li><div class="menu-item"><a class="instance-method deprecated" title="Mock#expects (instance method)" href="../../../../mock/mock/prototype/expects/">expects</a></div></li>
+<li><div class="menu-item"><a class="instance-method" title="Mock#id (instance method)" href="../../../../mock/mock/prototype/id/">id</a></div></li>
+<li><div class="menu-item"><a class="instance-method" title="Mock#method (instance method)" href="../../../../mock/mock/prototype/method/">method</a></div></li>
+<li><div class="menu-item"><a class="instance-method" title="Mock#namespace (instance method)" href="../../../../mock/mock/prototype/namespace/">namespace</a></div></li>
+<li><div class="menu-item"><a class="instance-method deprecated" title="Mock#noMoreThan (instance method)" href="../../../../mock/mock/prototype/nomorethan/">noMoreThan</a></div></li>
+<li><div class="menu-item"><a class="instance-method" title="Mock#overload (instance method)" href="../../../../mock/mock/prototype/overload/">overload</a></div></li>
+<li><div class="menu-item"><a class="instance-method" title="Mock#property (instance method)" href="../../../../mock/mock/prototype/property/">property</a></div></li>
+<li><div class="menu-item"><a class="instance-method" title="Mock#receives (instance method)" href="../../../../mock/mock/prototype/receives/">receives</a></div></li>
+<li><div class="menu-item"><a class="instance-method current" title="Mock#required (instance method)" href="../../../../mock/mock/prototype/required/">required</a></div></li>
+<li><div class="menu-item"><a class="instance-method" title="Mock#reset (instance method)" href="../../../../mock/mock/prototype/reset/">reset</a></div></li>
+<li><div class="menu-item"><a class="instance-method" title="Mock#returns (instance method)" href="../../../../mock/mock/prototype/returns/">returns</a></div></li>
+<li><div class="menu-item"><a class="instance-method" title="Mock#verify (instance method)" href="../../../../mock/mock/prototype/verify/">verify</a></div></li></ul></li></ul></li>
+          
+            <li><div class="menu-item"><a class="section" title="QMock section (section)" href="../../../../qmock/">QMock section</a></div><ul class="menu-section"><li><div class="menu-item"><a class="class" title="QMock (class)" href="../../../../qmock/qmock/">QMock</a></div><ul class=""><li><div class="menu-item"><a class="namespace" title="QMock.config (namespace)" href="../../../../qmock/qmock/config/">QMock.config</a></div></li>
+<li><div class="menu-item"><a class="namespace" title="QMock.utils (namespace)" href="../../../../qmock/qmock/utils/">QMock.utils</a></div></li></ul></li></ul></li>
+          
+            <li><div class="menu-item"><a class="section" title="Receiver section (section)" href="../../../../receiver/">Receiver section</a></div><ul class="menu-section"><li><div class="menu-item"><a class="class" title="Receiver (class)" href="../../../../receiver/receiver/">Receiver</a></div></li></ul></li>
+          
+        </ul> <!--- #api_menu =-->
+      </div> <!-- .sidebar-pane -->
+      <div class="sidebar-pane" id="search_pane">
+        <ul id="search_results" class="search-results menu-items scrollable"></ul>
+      </div> <!-- .sidebar-pane -->
+    </div> <!-- #sidebar -->
+
+    <div id="page">
+      
+
+      <div id="main" class="page-content">
+        
+
+
+
+
+
+<ul class="breadcrumbs clearfix">
+  <li><a href="../../../../">Home</a></li>
+  
+    <li>&rarr; <a title="Mock section (section)" href="../../../../mock/">Mock section</a></li>
+  
+    <li>&rarr; <a title="Mock (class)" href="../../../../mock/mock/">Mock</a></li>
+  
+    <li>&rarr; <a title="Mock#required (instance method)" href="../../../../mock/mock/prototype/required/">required</a></li>
+  
+</ul>
+
+<h2 class="page-title">
+  
+    <span class="type">instance method</span> Mock#required
+  
+</h2>
+
+
+<div class="section">
+  <div class="section-title">
+  </div> <!-- .section-title -->
+  <div class="section-content">
+    <div class="method-description">
+      
+        <pre class="syntax"><code class="ebnf">Mock#required( num ) &rarr; <a title="Mock (class)" href="../../../../mock/mock/">Mock</a></code></pre>
+
+  <ul class="argument-list">
+    
+      <li>
+        <code class="argument-name">num</code>
+        
+          <span class="argument-types">(<code>Number</code>)</span>
+        
+         &ndash; Number of required parameters
+
+      </li>
+    
+  </ul> <!-- .argument-list -->
+
+      
+
+      <p>A mock object interface can accept parameters, which can be either
+required or optional. By default the number of required parameters
+is set by <code>Mock.accepts</code> to the length of the expected
+parameter list, but <code>Mock.required</code> can be used to override
+this in the case where some parameters are optional.</p>
+
+<p>It is used in conjunction with <code>Mock.overload()</code> to set
+parameter expectations on a mock object interface.</p>
+
+<h4>Example</h4>
+
+<pre><code>// All parameters optional, overloading is set to true (by default)
+Mock.method('foo').accepts('bar', 'baz').required(0);</code></pre>
+
+
+<p>Verification of presentations to interface will allow 0, 1, or 2
+parameters to be passed (though will still test type/value)</p>
+
+<p><em>Note</em>: In the above example, if method overloading has been set to
+false then the verify phase would <em>only</em> allow presentations of ZERO
+parameters to the mock object interface.</p>
+
+      
+      
+
+
+      
+
+    </div>
+  </div> <!-- .section-content -->
+</div> <!-- .section -->
+
+      </div> <!-- #main -->
+      
+      <div id="footer">
+        <div class="content clearfix">
+          
+          <div class="cc clearfix">
+            <span>
+              <img src="http://creativecommons.org/images/public/somerights20.png"
+                style="border-width: 0pt;" alt="Creative Commons License"/>              
+            </span>
+            
+            <p>This work is licensed under a <a rel="license" href="http://creativecommons.org/licenses/by-sa/3.0/">Creative Commons Attribution-Share Alike 3.0 Unported License</a>.</p>
+          </div> <!-- .cc -->
+          
+          <div class="credits">
+            Generated by <a href="http://pdoc.org">PDoc</a>. Uses <a href="http://famfamfam.com/lab/icons/silk/" title="famfamfam.com: Silk Icons">Silk Icons</a> and portions of <a href="http://github.com/280north/aristo/tree/master" title="280north's aristo at master - GitHub">Aristo</a>.
+          </div> <!-- .credits -->
+          
+        </div> <!-- .content -->
+      </div> <!-- #footer -->
+
+    </div> <!-- #page -->
+  </body>
+</html>

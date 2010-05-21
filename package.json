@@ -1,0 +1,52 @@
+{
+	"name": "qmock",
+	"version": "0.4.2",
+	"description": "An 'expect-run-verify' JavaScript object mocking framework",
+	"keywords": [ "testing", "unit", "stub", "mocking", "mock", "CommonJS" ],
+	"maintainers": [
+  	{
+  		"name": "Andy Beeching",
+  		"email": "andybeeching@gmail.com",
+  		"url": "http://twitter.com/andybeeching/"
+  	}
+	],
+	"contributors" : [
+  	{
+  		"name": "Andy Beeching",
+  		"email": "andybeeching@gmail.com",
+  		"url": "http://twitter.com/andybeeching/"
+  	},
+	  {
+  		"name": "Mark Meyer",
+  		"email": "markdotmeyer@gmail.com",
+  		"url": "http://empire42.com/"
+  	},
+    {
+      "name" : "Dominic Baggott",
+      "email" : "dominic.baggott@gmail.com",
+      "web" : "http://evilstreak.co.uk"
+    },
+    {
+      "name" : "Ash Berlin",
+      "email" : "ash_github@firemirror.om",
+      "web" : "http://ashberlin.com"
+    }
+  ],
+	"repositories": [
+    {
+      "type" : "git",
+      "url" : "http://github.com/andybeeching/qmock/"
+    }
+  ],
+	"licenses" : [
+    {
+      "type" : "MIT",
+      "url" : "http://www.opensource.org/licenses/mit-license.php"
+    },
+    {
+      "type" : "GPL",
+      "url" : "http://www.gnu.org/licenses/gpl-3.0.txt"
+    }
+  ],
+	"lib": "qmock"
+}
