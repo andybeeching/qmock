@@ -105,13 +105,13 @@
       "foo": {
         "id"        : "foobarbaz",
         "accepts"   : "foo",
-        "receives"  : {"accepts": "foo", data: "stub", returns: "bar"},
+        "receives"  : {"accepts": "foo", fixture: "stub", returns: "bar"},
         "returns"   : "bar",
         "required"  : 1,
         // nested namespace on 'foo'
         "faz"       : {},
         "overload"  : true,
-        "data"      : "response",
+        "fixture"   : "response",
         "async"     : true,
         "chain"     : {},
         "calls"     : [1,2],
@@ -240,7 +240,7 @@
  	  expect(14);
     var mock = Mock()
       .method('getNumericValue', 1).returns(10).end()
-      .method('getStringValue', 1).returns('data').end()
+      .method('getStringValue', 1).returns('foo').end()
       .method('getArrayValue', 1).returns([ 1, 2, 3]).end()
       .method('getFunctionValue', 1).returns(function () { return 'function'; }).end()
       .method('getObjectValue', 1).returns({ id: 5, value: 'value' }).end()
@@ -254,9 +254,9 @@
       .method('getEmptyObjectValue', 1).returns({}).end(); // Note we call end() here to ensure mock var set to receiver!
 
       equals( mock.getNumericValue(), 10, "getNumericValue() on mock should return (Number: 10)");
-      equals( mock.getStringValue(), 'data', "getStringValue() on mock should return (String: data)");
+      equals( mock.getStringValue(), 'foo', "getStringValue() on mock should return (String: 'foo')");
       equals( mock.getArrayValue().constructor, Array, "getArrayValue() on mock should return (Array: [ 1, 2, 3 ])");
-      equals( mock.getFunctionValue()(), 'function', "getFunctionValue() on mock, when invoked, should return (String: 'function')");
+      equals( mock.getFunctionValue()(), 'function', "getFunctionValue() on mock, when invoked, should return a (Function)");
       equals( mock.getObjectValue().constructor, Object.prototype.constructor, "getObjectValue() on mock should return (Object: {id: 5, value: 'value'})");
       equals( mock.getNullValue(), null, "getNullValue() on mock should return (null)");
       equals( mock.getUndefinedValue(), undefined, "getUndefinedValue() on mock should return (undefined)");
@@ -2356,7 +2356,7 @@
 		    // Invalid callback
 		    .method('get', 1)
           .accepts('path/to/resource', function onSuccess() {})
-          .data({foo: 'bar'})
+          .fixture({foo: 'bar'})
           .end();
 
 		$.get('path/to/resource');
@@ -2377,7 +2377,7 @@
 
 		stop();
 
-		$.get('path/to/resource', function (data) { called = data.foo; });
+		$.get('path/to/resource', function (fixture) { called = fixture.foo; });
 
 		setTimeout(function() {
       // continue the test
@@ -2390,21 +2390,21 @@
 
     var success = false;
 
-    function onSuccess ( data ) {
-      success = data.foo;
+    function onSuccess ( fixture ) {
+      success = fixture.foo;
     }
 
     var fail = false;
 
-    function onFail ( data ) {
-      fail = data.baz;
+    function onFail ( fixture ) {
+      fail = fixture.baz;
     }
 
     // Suggested syntax for 'cleaner' callbacks
 		$.method('get', 1)
 		  .receives(
-		    {accepts: ['path/to/resource', onSuccess], data: {foo: true}},
-		    {accepts: ['path/to/resource', onFail], data: {baz: true}}
+		    {accepts: ['path/to/resource', onSuccess], fixture: {foo: true}},
+		    {accepts: ['path/to/resource', onFail], fixture: {baz: true}}
 		  );
 
 		// Exercise
@@ -2521,7 +2521,7 @@
 	    .accepts(".ninjas")
       .method('each', 1)
 	      .accepts(hide)
-	      .data({})
+	      .fixture({})
 	      .async(false)
 	      .end()
 	    .method('wrap', 3)
@@ -2897,7 +2897,7 @@
 	    .accepts(".ninjas")
       .method('each', 1)
         .accepts(wrap)
-        .data(this)
+        .fixture(this)
         .chain()
         .async(false)
         .end()
@@ -2970,20 +2970,20 @@
 	  var $ = (new Mock)
 	      .calls(1)
 	      .receives(
-	        {accepts: ['path/to/resource', onSuccess], data: {foo: true}},
-	        {accepts: ['path/to/resource', onFail], data: {baz: true}}
+	        {accepts: ['path/to/resource', onSuccess], fixture: {foo: true}},
+	        {accepts: ['path/to/resource', onFail], fixture: {baz: true}}
 	      );
 
     var success = false;
 
-    function onSuccess ( data ) {
-      success = data.foo;
+    function onSuccess ( fixture ) {
+      success = fixture.foo;
     }
 
     var fail = false;
 
-    function onFail ( data ) {
-      fail = data.baz;
+    function onFail ( fixture ) {
+      fail = fixture.baz;
     }
 
 		// Exercise
@@ -3285,7 +3285,7 @@
 
     // Correct Usage
     var called = false;
-    mock.get('path/to/resource', function (data) { called = data.foo });
+    mock.get('path/to/resource', function (fixture) { called = fixture.foo });
 
     stop();
 
@@ -3378,7 +3378,7 @@
         return fn
           .id("mock.receives")
           .calls(1)
-          .accepts({"accepts": "foo", data: "stub", returns: "bar"});
+          .accepts({"accepts": "foo", fixture: "stub", returns: "bar"});
       })(new Mock),
 
       "accepts": (function(fn) {
@@ -3416,9 +3416,9 @@
           .accepts(true);
       })(new Mock),
 
-      "data": (function(fn) {
+      "fixture": (function(fn) {
         return fn
-          .id("mock.data")
+          .id("mock.fixture")
           .calls(1)
           .accepts("response")
       })(new Mock),
@@ -3472,12 +3472,12 @@
       "foo": {
         "id"       : "foobarbaz",
         "accepts"  : "foo",
-        "receives" : {"accepts": "foo", data: "stub", returns: "bar"},
+        "receives" : {"accepts": "foo", fixture: "stub", returns: "bar"},
         "returns"  : "bar",
         "required" : 1,
         "faz"      : {},
         "overload" : true,
-        "data"     : "response",
+        "fixture"  : "response",
         "async"    : true,
         "chain"    : {},
         "calls"    : [1,2]
@@ -3518,9 +3518,9 @@
     verifyMetaMock(mock, "constructor");
 
 	});
-	
+
 	module( "QMock: Spy Function Behaviours");
-	
+
 	test("Spying on functions and constructors", function () {
 	  var called = false;
 
@@ -3528,36 +3528,36 @@
 	  function foo ( bool ) {
 	    called = bool;
 	  }
-	  
+
 	  // setup
 	  var foo = Spy( foo ).calls(1).accepts(true); // or Spy(foo).calls(1);
-	  
+
 	  // exercise
 	  foo( true );
-	  
+
 	  // and verify...
 	  ok( called === true, "When the Spy 'foo' is invoked, the variable called should be set to true" );
 	  ok( foo.verify(), "foo.verify should be return true as it was invoked once" );
-	  
+
 	  // false positive test
 	  foo( true );
 	  try {
 	    foo.verify();
 	    fail("foo.verify() should throw an error");
 	  } catch (e) {
-	    equals( e[0].type, "IncorrectNumberOfMethodCallsException", "The Spy 'foo' should throw an IncorrectNumberOfMethodCallsException"); 
+	    equals( e[0].type, "IncorrectNumberOfMethodCallsException", "The Spy 'foo' should throw an IncorrectNumberOfMethodCallsException");
 	  }
-	  
+
 	  foo.reset();
-	  
+
 	  foo( "bar" );
 	  try {
 	    foo.verify();
 	    fail("foo.verify() should throw an error");
 	  } catch (e) {
-	    equals( e[0].type, "IncorrectParameterException", "The Spy 'foo' should throw an IncorrectNumberOfMethodCallsException"); 
+	    equals( e[0].type, "IncorrectParameterException", "The Spy 'foo' should throw an IncorrectNumberOfMethodCallsException");
 	  }
-	  	  
+
 	  // Test constructor-safe functionality of recorder
 	  var baz = new foo;
 	  ok ( baz instanceof foo, "baz should be an instance of the Spy foo (or rather the function being espied upon" );
@@ -3567,19 +3567,19 @@
     function bar ( key, value ) {
       this[ key ] = value;
     }
-    
+
     var obj = {};
-    
+
     var bar = Spy(bar);
 
     // exercise
     bar.call(obj, "taz", "gaz");
     bar.apply(obj, [ "raz", "paz" ]);
-    
+
     // verify scoping
     equals ( obj.taz, "gaz", "var obj should have a property of 'taz', with a value of 'gaz' when using .call()" );
     equals ( obj.raz, "paz", "var obj should have a property of 'raz', with a value of 'paz' when using .apply()" );
-        
+
 	});
 
 })(); // Run forest, run!
