@@ -1,2 +1,11 @@
 .DS_Store
+
+# Generated Files #
+###################
+docs/
+*.pdoc.yaml
+
+# Dependencies #
+################
 *.gem
+
