@@ -3,15 +3,25 @@
 require 'rake'
 require 'vendor/pdoc/lib/pdoc'
 
-desc "Builds the documentation"
 task :build_doc do
-  source = File.expand_path(File.join(File.dirname(__FILE__), "src", "qmock.docs.js"))
-  PDoc::Runner.new(source, { :destination => 'docs' }).run
+  PDoc.run({
+    :source_files => [File.join(File.dirname(__FILE__), 'src', 'qmock.docs.api.js')],
+    :destination => 'docs',
+    :index_page => 'src/index.md',
+    :syntax_highlighter => :pygments,
+    :markdown_parser => :bluecloth,
+    :pretty_urls => false,
+    :bust_cache => true,
+    :name => 'QMock',
+    :version => '0.4.5',
+    :copyright_notice => 'This work is licensed under the GPLv3 and MIT Licenses.' 
+  })
 end
+
 
 desc "Empties output directory"
 task :remove_doc do
-  rm_rf Dir.glob(File.join('docs', "*"))
+  rm_rf Dir.glob(File.join('docs', '*'))
 end
 
 desc "Empties the output directory and builds the documentation."

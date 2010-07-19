@@ -513,7 +513,8 @@
    **/
 
   /** section: Mock
-   * class Mock < Receiver
+   * class Mock
+   *  includes Receiver
    *
    *  // TODO
    *  Chips
