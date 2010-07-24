@@ -86,13 +86,13 @@
    **/
 
   /**
-   * QMock.utils.enumerate( obj, fn[, scope][, bool] ) -> Object
+   * QMock.utils.enumerate( obj, callback [, context] [, bool] ) -> Object
    *  - obj (Object): Object whose properties to enumerate
-   *  - fn (Function): Callback function applied to current property. Passed
+   *  - callback (Function): Callback function applied to current property. Passed
    *  three parameters, the current property value, the property
    *  identifier (the key) it's associated by on receiver, and the object
    *  (receiver) it is bound to.
-   *  - scope (Object) _optional_: Object to set as execution context on
+   *  - context (Object) _optional_: Object to set as execution context on
    *  callback invocation (i.e. <code>this</code> binding). Defaults to the
    *  <code>obj</code> parameter value.
    *  - bool (Boolean) _optional_: Optional flag to determine enumeration
@@ -132,12 +132,14 @@
    **/
 
   /**
-   * QMock.utils.iterate( obj, fn[, scope] ) -> Array || Collection
+   * QMock.utils.iterate( obj, callback [, context] ) -> Array || Collection
    *  - obj (Collection): Collection to iterate through, can be any object
    *  with a <code>length</code> property.
-   *  - fn (Function): Callback function applied to current item. Passed
+   *  - callback (Function): Callback function applied to current item. Passed
    *  three parameters, the current item value, the current index
    *  (identifier) the item corresponds to, and the collection itself.
+   *  - context (Object) _optional_: Optional execution context to apply to the 
+   *  calback function 
    *
    *  This basically emulates <code>Array.prototype.forEach</code> but
    *  ensures the order of items is maintained when iterating through a
@@ -154,7 +156,7 @@
    *    function ( item, index, collection ) {
    *      console.log( item === collection[ index ] ); // true
    *    },
-   *    this // scope
+   *    this // context
    *  );
    *  </code></pre>
    **/
@@ -269,9 +271,9 @@
 
   /* [Private]
    *
-   * bind( fn, scope ) -> Function
+   * bind( fn, context ) -> Function
    *  - fn (Function): Function to be bound
-   *  - scope (Object): Object to bind function to (execution scope)
+   *  - context (Object): Execution context to bind function with
    *
    *  Utility function to bind a function to a specific execution context.
    *  This only partially implements Function.prototype.bind (as seen in
@@ -280,13 +282,13 @@
 
   /* [Private]
    *
-   *  bindInterface( obj, receiver, scope )
+   *  bindInterface( obj, receiver, context )
    *  - target (Object): Object to copy interface to
    *  - obj (Object): Interface to copy and bind (e.g. Mock.prototype)
-   *  - scope (Object): The execution context to bind methods to
+   *  - context (Object): The execution context to bind methods to
    *
    *  Utility function to copy a given object's interface over with bound
-   *  function calls to the receiver instance scope (e.g. bind
+   *  function calls to the receiver instance context (e.g. bind
    *  <code>this</code>).
    **/
 
@@ -974,8 +976,9 @@
   /** section: QMock
    *  QMock.Spy() -> Spy
    *
-   *  NOTE: This is exposed as <code>Spy()</code> in the containing scope
-   *  as a convenience. Please see the example code below.
+   *  NOTE: This is exposed as <code>Spy()</code> in the containing lexical
+   *  scope (default is global) as a convenience. Please see the example code 
+   *  below.
    *
    *  The Spy constructor/method allows a developer to record interactions
    *  with a given function, without having to completely stub out it's
