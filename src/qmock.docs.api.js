@@ -81,7 +81,7 @@
    *  #### Example
    *  <pre>
    *  QMock.Utils.is( "foo", "String"); // true
-   *  QMock.Utils.is( 1, "number"); // true 
+   *  QMock.Utils.is( 1, "number"); // true
    *  </pre>
    **/
 
@@ -138,8 +138,8 @@
    *  - callback (Function): Callback function applied to current item. Passed
    *  three parameters, the current item value, the current index
    *  (identifier) the item corresponds to, and the collection itself.
-   *  - context (Object) _optional_: Optional execution context to apply to the 
-   *  calback function 
+   *  - context (Object) _optional_: Optional execution context to apply to the
+   *  calback function
    *
    *  This basically emulates <code>Array.prototype.forEach</code> but
    *  ensures the order of items is maintained when iterating through a
@@ -168,8 +168,8 @@
    *  - presentation (Array): Array representing a method/constructor
    *  interface 'presentation' to test (arguments collection or parameter
    *  list)
-   *  - key (String) _optional_: Optional key used to lookup (and return) any 
-   *  property (e.g. <code>fixture</code> or <code>returns</code> ) on an 
+   *  - key (String) _optional_: Optional key used to lookup (and return) any
+   *  property (e.g. <code>fixture</code> or <code>returns</code> ) on an
    *  expectation object
    *
    *  Utility method for testing a known parameter list against a mock's
@@ -229,12 +229,12 @@
    *  - obj (Object): Object to nest in array
    *
    *  Function that determines whether an input (aka expectated prameters, or
-   *  associated properties like <code>.fixture</code>) need to be normalised 
+   *  associated properties like <code>.fixture</code>) need to be normalised
    *  into an array for the purpose of functional programming / iteration.
    *
    *  Necessary as QMock supports the setting of expected parameters (via
-   *  <code>.accepts</code> property), or callback arguments (via 
-   *  <code>.fixture</code>) without having to be serialised as arrays where 
+   *  <code>.accepts</code> property), or callback arguments (via
+   *  <code>.fixture</code>) without having to be serialised as arrays where
    *  there is only one parameter.
    *
    *  ### Examples
@@ -337,13 +337,13 @@
 
    /**
     * Receiver#method( name ) -> new Mock
-    *  - prop (String): Name of the method (and property name on associated 
+    *  - prop (String): Name of the method (and property name on associated
     *  receiver).
-    *  - min (Number) _optional_: Minimum number of calls for method to 
+    *  - min (Number) _optional_: Minimum number of calls for method to
     *  expect. Default is zero.
-    *  - max (Number) _optional_: Maximum number of calls for method to 
+    *  - max (Number) _optional_: Maximum number of calls for method to
     *  expect. Default is <code>Infinity</code>.
-    *  
+    *
     *  When <code>method()</code> is called on a receiver object it is
     *  augmented with a new method bound to the identifier <code>name</code>.
     *
@@ -507,7 +507,7 @@
    *  #### TODO
    *
    *  # Improve clarity of chaining declaration syntax
-   *  
+   *
    *  # Public method unit tests (aka verify/reset), with excised mock
    *  # Best practice to look for parent id's if set for errors
    *  # Methodization of Mock interface on public Mock constructor
@@ -606,7 +606,7 @@
      *  $.foo.id('$.foo'); // Will now output '$.foo' in error message
      *  </code></pre>
      **/
-     
+
     /**
      * Mock#accepts( parameters ) -> Mock
      *  - parameters (Object...n): Parameter list which mocked method is
@@ -718,12 +718,12 @@
 
     /**
      * Mock#fixture() -> Mock
-     *  - fixture (Array | Object): Array of values, or single Object, which 
+     *  - fixture (Array | Object): Array of values, or single Object, which
      *  is passed as arguments to a callback function set on a mock object
      *  parameter list expectation
      *
-     *  Method allows developer to declare stubbed fixtures (e.g. a web 
-     *  service response or DOM elements) to pass to callback functions 
+     *  Method allows developer to declare stubbed fixtures (e.g. a web
+     *  service response or DOM elements) to pass to callback functions
      *  defined passed to the mock object interface in an exercise phase.
      *
      *  This is most commonly done to test asynchronous operations or event
@@ -977,7 +977,7 @@
    *  QMock.Spy() -> Spy
    *
    *  NOTE: This is exposed as <code>Spy()</code> in the containing lexical
-   *  scope (default is global) as a convenience. Please see the example code 
+   *  scope (default is global) as a convenience. Please see the example code
    *  below.
    *
    *  The Spy constructor/method allows a developer to record interactions
@@ -1115,10 +1115,10 @@
    *  mocked method
    *
    *  If the presentation made to the mock object interface contains a
-   *  function object, then the presentation is tested for a matching 
+   *  function object, then the presentation is tested for a matching
    *  <code>fixture</code> expectation on the mocked method instance.
    *
-   *  If a match is found then the canned fixture parameters are passed to 
+   *  If a match is found then the canned fixture parameters are passed to
    *  what is assumed to be callback and it is then invoked.
    *
    *  This is mostly used to simulate ajax or event callbacks during an

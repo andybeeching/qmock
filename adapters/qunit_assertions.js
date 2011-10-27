@@ -13,7 +13,7 @@
 		},
 		assertObject: function assertObject(actual, expected, message) {
 			ok(Mock._assertObject(expected, actual), message)
-		},		
+		},
         fail: function fail(msg) {
             ok(false, msg);
         }
@@ -24,5 +24,5 @@
 	for (var method in extensions) {
 		_scope[method] = extensions[method]
 	}
-        
+
 })(window);
