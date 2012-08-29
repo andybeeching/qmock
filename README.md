@@ -5,7 +5,7 @@ An 'expect-run-verify' JavaScript object mocking library
 
 ## Status
 
-Not quite there yet chaps, some docs to be done (and broken out of library). Consider this a preview of 0.4 :)
+UPDATE COMING SOON. In the meantime Sinon.js is pretty smooth...
 
 ## Licensing
 
