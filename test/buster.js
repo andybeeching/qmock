@@ -7,16 +7,26 @@ config["Test Browser"] = {
   // "buster-lint": {
   //     linter: "jshint",
   //     linterOptions: {
+  //
+  //       Formatting Conventions
   //       indent: 2,
   //       maxlen: 100,
   //       white: false,
   //       onevar: false,
+  //
+  //       Syntax Conventions
   //       browser: true,
   //       eqnull: true,
   //       immed: true,
   //       undef: true,
   //       strict: true,
   //       trailing: true
+  //
+  //       Code Conventions
+  //       maxparams: 3,
+  //       maxdepth: 3,
+  //       maxstatements: 8,
+  //       maxcomplexity: 7 // Cyclomatic Complexity Score
   //     }
   // },
 
