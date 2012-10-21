@@ -221,6 +221,40 @@
  	  equals( wizard["date"].constructor, Date, "wizard mock object should have a stubbed property of 'date' with a value of (Date: new Date)");
  	  equals( wizard["custom object"].constructor, Custom, "wizard mock object should have a stubbed property of 'custom object' with a value of (Custom: new Custom)");
 
+    },
+
+    "multiple mocked methods with defined return values": function () {
+
+      var mock = Mock()
+        .method('getNumericValue', 1).returns(10).end()
+        .method('getStringValue', 1).returns('foo').end()
+        .method('getArrayValue', 1).returns([ 1, 2, 3]).end()
+        .method('getFunctionValue', 1).returns(function () { return 'function'; }).end()
+        .method('getObjectValue', 1).returns({ id: 5, value: 'value' }).end()
+        .method('getNullValue', 1).returns(null).end()
+        .method('getUndefinedValue', 1).returns(undefined).end()
+        .method('getEmptyStringValue', 1).returns("").end()
+        .method('getZeroValue', 1).returns(0).end()
+        .method('getTrueValue', 1).returns(true).end()
+        .method('getFalseValue', 1).returns(false).end()
+        .method('getEmptyArrayValue', 1).returns([]).end()
+        .method('getEmptyObjectValue', 1).returns({}).end(); // Note we call end() here to ensure mock var set to receiver!
+
+      equals( mock.getNumericValue(), 10, "getNumericValue() on mock should return (Number: 10)");
+      equals( mock.getStringValue(), 'foo', "getStringValue() on mock should return (String: 'foo')");
+      equals( mock.getArrayValue().constructor, Array, "getArrayValue() on mock should return (Array: [ 1, 2, 3 ])");
+      equals( mock.getFunctionValue()(), 'function', "getFunctionValue() on mock, when invoked, should return a (Function)");
+      equals( mock.getObjectValue().constructor, Object.prototype.constructor, "getObjectValue() on mock should return (Object: {id: 5, value: 'value'})");
+      equals( mock.getNullValue(), null, "getNullValue() on mock should return (null)");
+      equals( mock.getUndefinedValue(), undefined, "getUndefinedValue() on mock should return (undefined)");
+      equals( mock.getEmptyStringValue(), "", "getEmptyStringValue() on mock should return (String: '')");
+      equals( mock.getZeroValue(), 0, "getZeroValue() on mock should return (Number: 0)");
+      equals( mock.getTrueValue(), true, "getTrueValue() on mock should return (Boolean: true)");
+      equals( mock.getFalseValue(), false, "getFalseValue() on mock should return (Boolean: false)");
+      equals( mock.getEmptyArrayValue().constructor, Array, "getEmptyArrayValue() on mock should return (Array: [])");
+      equals( mock.getEmptyObjectValue().constructor, Object.prototype.constructor, "getEmptyObjectValue() on mock should return (Object: {})");
+      assert(mock.verify(), "verify() should be true");
+
     }
 
   });
