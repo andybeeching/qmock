@@ -1,0 +1,14 @@
+// TODO: Make mock.end() work w/o method
+// Get rid of .__getState(), leaky dude!
+
+// TODO: Implement test framework compare function, or auto-detect from popular variants (buster, qunit, jasmine, node?)
+
+// Beter semantics overall - error messages suck, naming is too generic!
+
+// Buster.assert.same compares by reference on primitives? Huh?
+
+// Double check instance and static property notation (# and .)
+
+// Change id ==> "desc"
+
+// Modify typeof checks to is() ? e.g. typeof foo == "object" - potential false positves
