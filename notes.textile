@@ -2,6 +2,7 @@
 // Get rid of .__getState(), leaky dude!
 
 // TODO: Implement test framework compare function, or auto-detect from popular variants (buster, qunit, jasmine, node?)
+// TODO: Implement assertionCount method
 
 // Beter semantics overall - error messages suck, naming is too generic!
 
@@ -12,3 +13,11 @@
 // Change id ==> "desc"
 
 // Modify typeof checks to is() ? e.g. typeof foo == "object" - potential false positves
+
+// Consider tests against shadowing API - perhaps it would be good to only accept a descriptor, and use a stratified API and/or prefix the method names to avoid potential collisions? Why should my engine prevent someone mocking out objects with the same identifier as me?
+
+Consider upgrading the test cases to something more relevant/contemporary
+
+// BUSTER THOUGHTS
+
+- Can I get better error messages, e.g. {FOO} should have been {BAR} format
