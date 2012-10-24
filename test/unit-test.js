@@ -157,7 +157,7 @@
 
     "multiple stubbed properties": function () {
 
-      debugger;
+      debuggers
       var ninja = new Mock;
       // EXERCISE - invalid property naming (shadow QMock API)
       try {
