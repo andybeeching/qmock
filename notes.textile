@@ -3,8 +3,15 @@
 
 // TODO: Implement test framework compare function, or auto-detect from popular variants (buster, qunit, jasmine, node?)
 // TODO: Implement assertionCount method
+Research why not default?
+
+// Examine why failslow wasn't working, suspect coerced equality checks
+
+// Implement or change coerced checks for QMock
 
 // Beter semantics overall - error messages suck, naming is too generic!
+
+// TODO: Fix IncorrectNumberofMethodCallsException
 
 // Buster.assert.same compares by reference on primitives? Huh?
 
@@ -21,3 +28,16 @@ Consider upgrading the test cases to something more relevant/contemporary
 // BUSTER THOUGHTS
 
 - Can I get better error messages, e.g. {FOO} should have been {BAR} format
+
+// RFACTOR THOUGHTS
+
+- Initial file was way too long
+- Lots of needless repetition
+-- Sort of point scoring - false metric of testing
+-- Undue time to run, want faster feedback loop
+- Broke Buster's convention of 1 test case per file
+- Difficult to navigate
+- Didn't lean on expressive assertions enough
+-- Thus bit of a maintenance nightmare
+- Way too many assertions per test
+-- Not granular enough - one fails, 20 fail
