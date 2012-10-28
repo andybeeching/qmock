@@ -442,158 +442,158 @@
     }
   });
 
-  buster.testCase("QMock: Mock behaviour (parameter expectations)", {
+  // buster.testCase("QMock: Mock behaviour (parameter expectations)", {
 
-    "mocked method with single strict (Number: 1) parameter expectation": function () {
+  //   "mocked method with single strict (Number: 1) parameter expectation": function () {
 
-      // Test single parameter value expectations, no return value
-      var ninja = new Mock;
-          // expectations
-          ninja
-            .expects( 1 )
-            .method( 'swing' )
-              .accepts( 1 );
+  //     // Test single parameter value expectations, no return value
+  //     var ninja = new Mock;
+  //         // expectations
+  //         ninja
+  //           .expects( 1 )
+  //           .method( 'swing' )
+  //             .accepts( 1 );
 
-      // BAD EXERCISES
+  //     // BAD EXERCISES
 
-      // Test no arguments
+  //     // Test no arguments
 
-      ninja.swing();
+  //     ninja.swing();
 
-      try {
-        ninja.verify();
-        fail("verify() should throw exception when ninja.swing() is passed NO parameters");
-      } catch (exception) {
-        // equals(exception.length, 1);
-        // equals(exception[0].type, "IncorrectNumberOfArgumentsException");
-      }
+  //     try {
+  //       ninja.verify();
+  //       fail("verify() should throw exception when ninja.swing() is passed NO parameters");
+  //     } catch (exception) {
+  //       // equals(exception.length, 1);
+  //       // equals(exception[0].type, "IncorrectNumberOfArgumentsException");
+  //     }
 
-      ninja.reset();
+  //     ninja.reset();
 
-      // Test invalid parameter type - (Function: Constructor)
+  //     // Test invalid parameter type - (Function: Constructor)
 
-      ninja.swing(Number);
+  //     ninja.swing(Number);
 
-      try {
-        ninja.verify();
-        fail(false, "verify() should throw exception when ninja.swing() passed incorrect parameter type (Number: Constructor)");
-      } catch (exception) {
-        equals(exception.length, 1);
-        equals(exception[0].type, "IncorrectParameterException");
-      }
+  //     try {
+  //       ninja.verify();
+  //       fail(false, "verify() should throw exception when ninja.swing() passed incorrect parameter type (Number: Constructor)");
+  //     } catch (exception) {
+  //       equals(exception.length, 1);
+  //       equals(exception[0].type, "IncorrectParameterException");
+  //     }
 
-      ninja.reset();
+  //     ninja.reset();
 
-      ninja.swing(Object);
+  //     ninja.swing(Object);
 
-      try {
-        ninja.verify();
-        fail("verify() should throw exception when ninja.swing() passed incorrect parameter type (Object: Constructor)");
-      } catch (exception) {
-        equals(exception.length, 1);
-        equals(exception[0].type, "IncorrectParameterException");
-      }
+  //     try {
+  //       ninja.verify();
+  //       fail("verify() should throw exception when ninja.swing() passed incorrect parameter type (Object: Constructor)");
+  //     } catch (exception) {
+  //       equals(exception.length, 1);
+  //       equals(exception[0].type, "IncorrectParameterException");
+  //     }
 
-      ninja.reset();
+  //     ninja.reset();
 
-      // Test invalid parameter type - Primitives
+  //     // Test invalid parameter type - Primitives
 
-      // ninja.swing("1");
+  //     // ninja.swing("1");
 
-      // try {
-      //   ninja.verify();
-      //   fail("verify() should throw exception when ninja.swing() passed incorrect parameter type (String: '1')");
-      // } catch (exception) {
-      //   equals(exception.length, 1);
-      //   equals(exception[0].type, "IncorrectParameterException");
-      // }
+  //     // try {
+  //     //   ninja.verify();
+  //     //   fail("verify() should throw exception when ninja.swing() passed incorrect parameter type (String: '1')");
+  //     // } catch (exception) {
+  //     //   equals(exception.length, 1);
+  //     //   equals(exception[0].type, "IncorrectParameterException");
+  //     // }
 
-      ninja.reset();
+  //     ninja.reset();
 
-      ninja.swing(false);
+  //     ninja.swing(false);
 
-      try {
-        ninja.verify();
-        fail("verify() should throw exception when ninja.swing() passed incorrect parameter type (Boolean: false)");
-      } catch (exception) {
-        equals(exception.length, 1);
-        equals(exception[0].type, "IncorrectParameterException");
-      }
+  //     try {
+  //       ninja.verify();
+  //       fail("verify() should throw exception when ninja.swing() passed incorrect parameter type (Boolean: false)");
+  //     } catch (exception) {
+  //       equals(exception.length, 1);
+  //       equals(exception[0].type, "IncorrectParameterException");
+  //     }
 
-      ninja.reset();
+  //     ninja.reset();
 
-      ninja.swing({});
+  //     ninja.swing({});
 
-      try {
-        ninja.verify();
-        fail("verify() should throw exception when ninja.swing() passed incorrect parameter type (Object: {})");
-      } catch (exception) {
-        equals(exception.length, 1);
-        equals(exception[0].type, "IncorrectParameterException");
-      }
+  //     try {
+  //       ninja.verify();
+  //       fail("verify() should throw exception when ninja.swing() passed incorrect parameter type (Object: {})");
+  //     } catch (exception) {
+  //       equals(exception.length, 1);
+  //       equals(exception[0].type, "IncorrectParameterException");
+  //     }
 
-      ninja.reset();
+  //     ninja.reset();
 
-      // Test invalid values
+  //     // Test invalid values
 
-      ninja.swing(0);
+  //     ninja.swing(0);
 
-      try {
-        ninja.verify();
-        fail("verify() should throw exception when ninja.swing() passed incorrect parameter value (Number: 0)");
-      } catch (exception) {
-        equals(exception.length, 1);
-        equals(exception[0].type, "IncorrectParameterException");
-      }
+  //     try {
+  //       ninja.verify();
+  //       fail("verify() should throw exception when ninja.swing() passed incorrect parameter value (Number: 0)");
+  //     } catch (exception) {
+  //       equals(exception.length, 1);
+  //       equals(exception[0].type, "IncorrectParameterException");
+  //     }
 
-      ninja.reset();
+  //     ninja.reset();
 
-      ninja.swing(2);
+  //     ninja.swing(2);
 
-      try {
-        ninja.verify();
-        fail("verify() should throw exception when ninja.swing() passed incorrect parameter value (Number: 2)");
-      } catch (exception) {
-        equals(exception.length, 1);
-        equals(exception[0].type, "IncorrectParameterException");
-      }
+  //     try {
+  //       ninja.verify();
+  //       fail("verify() should throw exception when ninja.swing() passed incorrect parameter value (Number: 2)");
+  //     } catch (exception) {
+  //       equals(exception.length, 1);
+  //       equals(exception[0].type, "IncorrectParameterException");
+  //     }
 
-      ninja.reset();
+  //     ninja.reset();
 
-      ninja.swing(Infinity);
+  //     ninja.swing(Infinity);
 
-      try {
-        ninja.verify();
-        fail("verify() should throw exception when ninja.swing() passed incorrect parameter value (Number: Infinity)");
-      } catch (exception) {
-        equals(exception.length, 1);
-        equals(exception[0].type, "IncorrectParameterException");
-      }
+  //     try {
+  //       ninja.verify();
+  //       fail("verify() should throw exception when ninja.swing() passed incorrect parameter value (Number: Infinity)");
+  //     } catch (exception) {
+  //       equals(exception.length, 1);
+  //       equals(exception[0].type, "IncorrectParameterException");
+  //     }
 
-      ninja.reset();
+  //     ninja.reset();
 
-      ninja.swing(NaN);
+  //     ninja.swing(NaN);
 
-      try {
-        ninja.verify();
-        fail("verify() should throw exception when ninja.swing() passed incorrect parameter value (Number: NaN)");
-      } catch (exception) {
-        equals(exception.length, 1);
-        equals(exception[0].type, "IncorrectParameterException");
-      }
+  //     try {
+  //       ninja.verify();
+  //       fail("verify() should throw exception when ninja.swing() passed incorrect parameter value (Number: NaN)");
+  //     } catch (exception) {
+  //       equals(exception.length, 1);
+  //       equals(exception[0].type, "IncorrectParameterException");
+  //     }
 
-      ninja.reset();
+  //     ninja.reset();
 
-      // GOOD Exercises
+  //     // GOOD Exercises
 
-      // Test same parameter type AND expected value
+  //     // Test same parameter type AND expected value
 
-      ninja.swing(1);
-      assert( ninja.verify() );
+  //     ninja.swing(1);
+  //     assert( ninja.verify() );
 
-    }
+  //   }
 
-  });
+  // });
 
   buster.testCase("QMock overloading behaviour", {
 
