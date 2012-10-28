@@ -304,7 +304,7 @@
 
         if (/* !config.failslow &&*/ exceptions.length ) {
           // Pants.
-          throw exceptions;
+          throw exceptions[0];
         } else {
         // WIN. \o/
           return (!!result) && (exceptions.length === 0);
@@ -780,7 +780,7 @@
     function createException ( actual, expected, exceptionType, identifier ) {
 
       var e = {
-          type : exceptionType
+          name: exceptionType
         },
         fn = "'" + identifier + "'";
 
@@ -850,7 +850,7 @@
           presentation.length,
           mock.requires,
           "IncorrectNumberOfArgumentsException",
-          this.name
+          mock.name
         );
       }
       return result;
