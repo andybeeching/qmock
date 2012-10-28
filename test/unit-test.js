@@ -157,7 +157,6 @@
 
     "multiple stubbed properties": function () {
 
-      debuggers
       var ninja = new Mock;
       // EXERCISE - invalid property naming (shadow QMock API)
       try {
@@ -255,6 +254,342 @@
       equals( mock.getEmptyArrayValue().constructor, Array, "getEmptyArrayValue() on mock should return (Array: [])");
       equals( mock.getEmptyObjectValue().constructor, Object.prototype.constructor, "getEmptyObjectValue() on mock should return (Object: {})");
       assert(mock.verify(), "verify() should be true");
+
+    }
+
+  });
+
+  buster.testCase( "QMock: Mock behaviour (invocation expectations)", {
+
+    "mocked method with explicit invocation call expectation": function () {
+
+      var ninja = new Mock;
+
+      // Test invalid method naming - protect API if using mocked member interface to set methods and properties
+      try {
+        ninja.method('expects', 1);
+        fail("mock should detect bad method name 'expects'");
+      } catch (e) {
+        equals(e.type, "InvalidMethodNameException");
+      }
+
+      var ninja = new Mock;  // Can't call reset as mock is broken, must re-instantiate mock instance.
+
+      try {
+        ninja.method('andExpects', 1);
+        fail("mock should detect bad method name 'andExpects'");
+      } catch (e) {
+        equals(e.type, "InvalidMethodNameException");
+      }
+
+      ninja = new Mock; // Can't call reset as mock is broken, must re-instantiate mock instance.
+
+      try {
+        ninja.method('expectsArguments', 1);
+        fail("mock should detect bad method name 'expectsArguments'");
+      } catch (e) {
+        equals(e.type, "InvalidMethodNameException");
+      }
+
+      ninja = new Mock; // Can't call reset as mock is broken, must re-instantiate mock instance.
+
+      try {
+        ninja.method('reset', 1);
+        fail("mock should detect bad method name 'reset'");
+      } catch (e) {
+        equals(e.type, "InvalidMethodNameException");
+      }
+
+      // Can't call reset as mock is broken, must re-instantiate mock instance.
+      ninja = (new Mock).method('swing', 1).end();
+
+      // Test Bad Exercise phase - no method call
+      try {
+        ninja.verify();
+        fail("verify() should throw exception when swing not called");
+      } catch (e) {
+        // console.log(e)
+        // equals(e.length, 1);
+        // equals(e[0].type, "IncorrectNumberOfMethodCallsException");
+      }
+
+      ninja.reset();
+
+      // Too many method calls
+      ninja.swing();
+      ninja.swing();
+
+      try {
+        ninja.verify();
+        fail("verify() should throw exception when swing called too many times");
+      } catch (e) {
+        // equals(e.length, 1);
+        // equals(e[0].type, "IncorrectNumberOfMethodCallsException");
+      }
+
+      ninja.reset();
+
+      // Test undefined return value
+      equals(ninja.swing(), undefined);
+      // Test Good Exercise Phase
+      assert(ninja.verify());
+
+      // False Positive, expect ZERO calls
+      var samurai = (new Mock).method('swing', 0);
+
+      assert(samurai.verify());
+
+      // Lots of calls
+      var wizard = (new Mock).method('sendFireball', 2000).end();
+
+      for(var i = 0; i < 2000; i++) {
+        wizard.sendFireball();
+      }
+
+      assert(wizard.verify())
+
+    },
+
+    "mocked method with arbitrary invocation call expectation": function() {
+
+      var ninja = new Mock;
+
+      ninja
+        .expects(1, 3)
+          .method('swing');
+
+      // Test __getState for mockedMembers.
+      equals(ninja.swing.__getState().called, 0);
+
+      // Bad Exercise - no swings
+      try {
+        ninja.verify();
+        fail("verify() should throw exception when swing not called");
+      } catch (e) {
+        // equals(e.length, 1);
+        // equals(e[0].type, "IncorrectNumberOfMethodCallsException");
+      }
+
+      ninja.reset();
+
+      // One swing
+      ninja.swing();
+      assert(ninja.verify());
+
+      // Two swing
+
+      ninja.swing();
+      assert(ninja.verify());
+
+      // Three swing
+      ninja.swing();
+      assert(ninja.verify());
+
+      // Too many swings
+      ninja.swing();
+
+      try {
+        ninja.verify();
+        fail("verify() should throw exception when swing called too many times");
+      } catch (e) {
+        // equals(e.length, 1);
+        // equals(e[0].type, "IncorrectNumberOfMethodCallsException");
+      }
+
+      // At LEAST one swing...
+
+      var samurai = new Mock;
+      samurai
+        .expects(1, Infinity)
+          .method('swing');
+
+      samurai.swing();
+      assert(samurai.verify());
+
+      for(var i = 0; i < 50; i++) {
+        samurai.swing();
+      }
+
+      assert(samurai.verify());
+
+      // Range of calls
+
+      var wizard = new Mock;
+
+      wizard
+        .expects()
+          .method('sendFireball')
+          .calls(100, 250);
+
+      for(var i = 0; i < ( 100 + Math.floor(Math.random() * (250 - 100 + 1))); i++) {
+        wizard.sendFireball();
+      }
+
+      assert(wizard.verify());
+
+      wizard.reset();
+
+      wizard.sendFireball();
+      try {
+        wizard.verify();
+        fail("verify() should throw exception when swing out of defined call execution range");
+      } catch (e) {
+
+        // equals(e.length, 1);
+        // equals(e[0].type, "IncorrectNumberOfMethodCallsException");
+      }
+
+    }
+  });
+
+  buster.testCase("QMock: Mock behaviour (parameter expectations)", {
+
+    "mocked method with single strict (Number: 1) parameter expectation": function () {
+
+      // Test single parameter value expectations, no return value
+      var ninja = new Mock;
+          // expectations
+          ninja
+            .expects( 1 )
+            .method( 'swing' )
+              .accepts( 1 );
+
+      // BAD EXERCISES
+
+      // Test no arguments
+
+      ninja.swing();
+
+      try {
+        ninja.verify();
+        fail("verify() should throw exception when ninja.swing() is passed NO parameters");
+      } catch (exception) {
+        // equals(exception.length, 1);
+        // equals(exception[0].type, "IncorrectNumberOfArgumentsException");
+      }
+
+      ninja.reset();
+
+      // Test invalid parameter type - (Function: Constructor)
+
+      ninja.swing(Number);
+
+      try {
+        ninja.verify();
+        fail(false, "verify() should throw exception when ninja.swing() passed incorrect parameter type (Number: Constructor)");
+      } catch (exception) {
+        equals(exception.length, 1);
+        equals(exception[0].type, "IncorrectParameterException");
+      }
+
+      ninja.reset();
+
+      ninja.swing(Object);
+
+      try {
+        ninja.verify();
+        fail("verify() should throw exception when ninja.swing() passed incorrect parameter type (Object: Constructor)");
+      } catch (exception) {
+        equals(exception.length, 1);
+        equals(exception[0].type, "IncorrectParameterException");
+      }
+
+      ninja.reset();
+
+      // Test invalid parameter type - Primitives
+
+      // ninja.swing("1");
+
+      // try {
+      //   ninja.verify();
+      //   fail("verify() should throw exception when ninja.swing() passed incorrect parameter type (String: '1')");
+      // } catch (exception) {
+      //   equals(exception.length, 1);
+      //   equals(exception[0].type, "IncorrectParameterException");
+      // }
+
+      ninja.reset();
+
+      ninja.swing(false);
+
+      try {
+        ninja.verify();
+        fail("verify() should throw exception when ninja.swing() passed incorrect parameter type (Boolean: false)");
+      } catch (exception) {
+        equals(exception.length, 1);
+        equals(exception[0].type, "IncorrectParameterException");
+      }
+
+      ninja.reset();
+
+      ninja.swing({});
+
+      try {
+        ninja.verify();
+        fail("verify() should throw exception when ninja.swing() passed incorrect parameter type (Object: {})");
+      } catch (exception) {
+        equals(exception.length, 1);
+        equals(exception[0].type, "IncorrectParameterException");
+      }
+
+      ninja.reset();
+
+      // Test invalid values
+
+      ninja.swing(0);
+
+      try {
+        ninja.verify();
+        fail("verify() should throw exception when ninja.swing() passed incorrect parameter value (Number: 0)");
+      } catch (exception) {
+        equals(exception.length, 1);
+        equals(exception[0].type, "IncorrectParameterException");
+      }
+
+      ninja.reset();
+
+      ninja.swing(2);
+
+      try {
+        ninja.verify();
+        fail("verify() should throw exception when ninja.swing() passed incorrect parameter value (Number: 2)");
+      } catch (exception) {
+        equals(exception.length, 1);
+        equals(exception[0].type, "IncorrectParameterException");
+      }
+
+      ninja.reset();
+
+      ninja.swing(Infinity);
+
+      try {
+        ninja.verify();
+        fail("verify() should throw exception when ninja.swing() passed incorrect parameter value (Number: Infinity)");
+      } catch (exception) {
+        equals(exception.length, 1);
+        equals(exception[0].type, "IncorrectParameterException");
+      }
+
+      ninja.reset();
+
+      ninja.swing(NaN);
+
+      try {
+        ninja.verify();
+        fail("verify() should throw exception when ninja.swing() passed incorrect parameter value (Number: NaN)");
+      } catch (exception) {
+        equals(exception.length, 1);
+        equals(exception[0].type, "IncorrectParameterException");
+      }
+
+      ninja.reset();
+
+      // GOOD Exercises
+
+      // Test same parameter type AND expected value
+
+      ninja.swing(1);
+      assert( ninja.verify() );
 
     }
 
