@@ -595,4 +595,56 @@
 
   });
 
+  buster.testCase("QMock overloading behaviour", {
+
+    "Test overloading mock guard": function () {
+
+      // SETUP
+      var ninja = (new Mock)
+          .method("testMultipleParameters", 1)
+            .accepts(1, "foo", true)
+            .required(3)  // Default behaviour
+            .overload(false)
+            .end();
+
+      // TC: True Negative - underloaded method (no args)
+      // EXERCISE & VERIFY
+      ninja.testMultipleParameters();
+      assert.exception(ninja.verify, "IncorrectNumberOfArgumentsException");
+
+      // TC: True Negative - underloaded method (too few args)
+      // SETUP
+      ninja.reset();
+
+      // EXERCISE & VERIFY
+      ninja.testMultipleParameters(1, "foo");
+      assert.exception(ninja.verify, "IncorrectNumberOfArgumentsException");
+
+      // TC: True Negative - overloaded method (too many args)
+      // SETUP
+      ninja.reset();
+
+      // EXERCISE & VERIFY
+      ninja.testMultipleParameters(1, "foo", true, null);
+      assert.exception(ninja.verify, "IncorrectNumberOfArgumentsException");
+
+      // TC: True Negative - Incorrect arguments
+      // SETUP
+      ninja.reset();
+
+      // EXERCISE & VERIFY
+      ninja.testMultipleParameters("foo", 1, true);
+      assert.exception(ninja.verify, "IncorrectParameterException");
+
+      // TC: True Positive
+      // SETUP
+      ninja.reset();
+
+      // EXERCISE & VERIFY
+      ninja.testMultipleParameters(1, "foo", true);
+      assert(ninja.verify());
+
+    }
+  });
+
 }(this));
