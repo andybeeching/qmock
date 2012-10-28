@@ -302,7 +302,7 @@
         // Live() || Die()
         var exceptions = this.__getExceptions();
 
-        if ( !config.failslow && exceptions.length ) {
+        if (/* !config.failslow &&*/ exceptions.length ) {
           // Pants.
           throw exceptions;
         } else {
