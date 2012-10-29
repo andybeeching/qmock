@@ -218,18 +218,18 @@
         .method('getEmptyObjectValue', 1).returns({}).end(); // Note we call end() here to ensure mock var set to receiver!
 
       // Can return truthy values
-      isNumber(mock.getNumericValue());
-      isString( mock.getStringValue(), 'foo');
-      isArray(mock.getArrayValue());
-      isFunction(mock.getFunctionValue());
-      isObject(mock.getObjectValue());
-      isNull(mock.getNullValue());
+      assert.isNumber(mock.getNumericValue());
+      assert.isString( mock.getStringValue(), 'foo');
+      assert.isArray(mock.getArrayValue());
+      assert.isFunction(mock.getFunctionValue());
+      assert.isObject(mock.getObjectValue());
+      assert.isNull(mock.getNullValue());
 
       // Can return falsy values
       equals(mock.getUndefinedValue(), undefined);
       equals(mock.getEmptyStringValue(), "");
       equals(mock.getZeroValue(), 0);
-      isFalse(mock.getFalseValue());
+      assert.isFalse(mock.getFalseValue());
 
     }
 
@@ -242,88 +242,36 @@
       // SETUP
       var ninja = new Mock;
 
-      // Test invalid method naming - protect API if using mocked member interface to set methods and properties
-      try {
-        ninja.method('expects', 1);
-        fail("mock should detect bad method name 'expects'");
-      } catch (e) {
-        equals(e.type, "InvalidMethodNameException");
-      }
+      // TC: Negative - protect shadowing QMock API
+      assert.exception(function () {
+        ninja.method('expects', "foo");
+      }, "InvalidMethodNameException");
 
-      var ninja = new Mock;  // Can't call reset as mock is broken, must re-instantiate mock instance.
-
-      try {
-        ninja.method('andExpects', 1);
-        fail("mock should detect bad method name 'andExpects'");
-      } catch (e) {
-        equals(e.type, "InvalidMethodNameException");
-      }
-
-      ninja = new Mock; // Can't call reset as mock is broken, must re-instantiate mock instance.
-
-      try {
-        ninja.method('expectsArguments', 1);
-        fail("mock should detect bad method name 'expectsArguments'");
-      } catch (e) {
-        equals(e.type, "InvalidMethodNameException");
-      }
-
-      ninja = new Mock; // Can't call reset as mock is broken, must re-instantiate mock instance.
-
-      try {
-        ninja.method('reset', 1);
-        fail("mock should detect bad method name 'reset'");
-      } catch (e) {
-        equals(e.type, "InvalidMethodNameException");
-      }
-
-      // Can't call reset as mock is broken, must re-instantiate mock instance.
+      // TC: Negative - no method call when expected
+      // SETUP & VERIFY
       ninja = (new Mock).method('swing', 1).end();
+      assert.exception(ninja.verify, "IncorrectNumberOfMethodCallsException");
 
-      // Test Bad Exercise phase - no method call
-      try {
-        ninja.verify();
-        fail("verify() should throw exception when swing not called");
-      } catch (e) {
-        // console.log(e)
-        // equals(e.length, 1);
-        // equals(e[0].type, "IncorrectNumberOfMethodCallsException");
-      }
+      // TC: Negative - too many method calls than expected
+      // SETUP, EXERCISE & VERIFY
+      ninja.reset();
+      ninja.swing();
+      ninja.swing();
+      assert.exception(ninja.verify, "IncorrectNumberOfMethodCallsException");
 
       ninja.reset();
 
-      // Too many method calls
-      ninja.swing();
-      ninja.swing();
-
-      try {
-        ninja.verify();
-        fail("verify() should throw exception when swing called too many times");
-      } catch (e) {
-        // equals(e.length, 1);
-        // equals(e[0].type, "IncorrectNumberOfMethodCallsException");
-      }
-
-      ninja.reset();
-
-      // Test undefined return value
-      equals(ninja.swing(), undefined);
-      // Test Good Exercise Phase
+      // TC: Positive - Assert expected exercise phase
+      //  - undefined is return value (default behaviour)
+      //  - expectation should pass when swing only executed once
+      // TODO: WHERE DOES THIS BELONG??
+      equals(ninja.swing(), undefined); // default behaviour
       assert(ninja.verify());
 
-      // False Positive, expect ZERO calls
+      // TC: Positive - Expect ZERO calls
+      // SETUP & VERIFY
       var samurai = (new Mock).method('swing', 0);
-
       assert(samurai.verify());
-
-      // Lots of calls
-      var wizard = (new Mock).method('sendFireball', 2000).end();
-
-      for(var i = 0; i < 2000; i++) {
-        wizard.sendFireball();
-      }
-
-      assert(wizard.verify())
 
     },
 
