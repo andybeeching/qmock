@@ -827,10 +827,10 @@
         );
         if ( !result ) {
           raise(
-            this.called,
-            this.minCalls,
+            mock.called,
+            mock.minCalls,
             "IncorrectNumberOfMethodCallsException",
-            this.name
+            mock.name
           );
         }
         return result;
