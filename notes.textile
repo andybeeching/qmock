@@ -5,6 +5,8 @@
 // TODO: Implement assertionCount method
 Research why not default?
 
+TODO: Rename ninja/wizard etc to sut?
+
 // Examine why failslow wasn't working, suspect coerced equality checks
 
 // Implement or change coerced checks for QMock
@@ -12,6 +14,8 @@ Research why not default?
 // Beter semantics overall - error messages suck, naming is too generic!
 
 // TODO: Fix IncorrectNumberofMethodCallsException
+
+// THOUGHT: Should even have parameter testing in QMock test suite, since functionality is delegated to runner comparator function?
 
 // Buster.assert.same compares by reference on primitives? Huh?
 
