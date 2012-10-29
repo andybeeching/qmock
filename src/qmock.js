@@ -240,7 +240,7 @@
       property: function ( prop, value ) {
         if ( hasOwnProperty.call( this.self, prop ) ) {
           throw {
-            type: "InvalidPropertyNameException",
+            name: "InvalidPropertyNameException",
             msg: "Qmock expects a unique key for each stubbed property"
           };
         }
