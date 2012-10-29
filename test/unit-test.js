@@ -350,94 +350,82 @@
 
     },
 
-    "mocked method with arbitrary invocation call expectation": function() {
+    "mocked method with arbitrary invocation call expectation": function () {
 
-      var ninja = new Mock;
-
+      // SETUP
+      var ninja = (new Mock);
       ninja
         .expects(1, 3)
-          .method('swing');
+        .method('swing');
 
-      // Test __getState for mockedMembers.
-      equals(ninja.swing.__getState().called, 0);
-
-      // Bad Exercise - no swings
-      try {
-        ninja.verify();
-        fail("verify() should throw exception when swing not called");
-      } catch (e) {
-        // equals(e.length, 1);
-        // equals(e[0].type, "IncorrectNumberOfMethodCallsException");
-      }
+      // TC: Negative - No swings
+      assert.exception(ninja.verify, "IncorrectNumberOfMethodCallsException");
 
       ninja.reset();
 
-      // One swing
+      // TC: True Positive - One exercise
+      // EXERCISE & VERIFY
       ninja.swing();
       assert(ninja.verify());
 
-      // Two swing
-
+      // TC: True Positive - Two exercises
+      // EXERCISE & VERIFY
       ninja.swing();
       assert(ninja.verify());
 
-      // Three swing
+      // TC: True Positive - Three exercises
+      // EXERCISE & VERIFY
       ninja.swing();
       assert(ninja.verify());
 
-      // Too many swings
+      // TC: True Negative - Four exercises
+      // EXERCISE & VERIFY
       ninja.swing();
+      assert.exception(ninja.verify, "IncorrectNumberOfMethodCallsException")
 
-      try {
-        ninja.verify();
-        fail("verify() should throw exception when swing called too many times");
-      } catch (e) {
-        // equals(e.length, 1);
-        // equals(e[0].type, "IncorrectNumberOfMethodCallsException");
-      }
-
-      // At LEAST one swing...
-
+      // SETUP
       var samurai = new Mock;
       samurai
         .expects(1, Infinity)
           .method('swing');
 
+      // TC: True Positive - One..N exercises
+      // EXERCISE & VERIFY
       samurai.swing();
       assert(samurai.verify());
 
-      for(var i = 0; i < 50; i++) {
-        samurai.swing();
-      }
-
+      samurai.swing();
       assert(samurai.verify());
 
-      // Range of calls
-
+      // SETUP
       var wizard = new Mock;
-
       wizard
-        .expects()
-          .method('sendFireball')
-          .calls(100, 250);
+        .expects(2, 3)
+        .method('swing');
 
-      for(var i = 0; i < ( 100 + Math.floor(Math.random() * (250 - 100 + 1))); i++) {
-        wizard.sendFireball();
-      }
-
-      assert(wizard.verify());
+      // TC: Negative - No swings
+      assert.exception(wizard.verify, "IncorrectNumberOfMethodCallsException");
 
       wizard.reset();
 
-      wizard.sendFireball();
-      try {
-        wizard.verify();
-        fail("verify() should throw exception when swing out of defined call execution range");
-      } catch (e) {
+      // TC: Negative - One swing
+      wizard.swing();
+      assert.exception(wizard.verify, "IncorrectNumberOfMethodCallsException");
 
-        // equals(e.length, 1);
-        // equals(e[0].type, "IncorrectNumberOfMethodCallsException");
-      }
+      wizard.reset();
+
+      // TC: True Positive - Two & Three exercise
+      // EXERCISE & VERIFY
+      wizard.swing();
+      wizard.swing();
+      assert(wizard.verify());
+      wizard.swing();
+      assert(wizard.verify());
+
+      // TC: True Negative - Four exercise
+      // EXERCISE & VERIFY
+      wizard.swing();
+      assert.exception(wizard.verify, "IncorrectNumberOfMethodCallsException");
 
     }
   });
