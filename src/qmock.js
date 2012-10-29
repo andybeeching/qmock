@@ -213,7 +213,7 @@
       method: function ( prop, min, max ) {
         if ( hasOwnProperty.call( this.self, prop ) ) {
           throw {
-            type: "InvalidMethodNameException",
+            name: "InvalidMethodNameException",
             msg: "Qmock expects a unique identifier for each mocked method"
           };
         }
