@@ -1,5 +1,5 @@
 /*global buster, assert*/
-(function (global) {
+(function (global, undefined) {
 
   "use strict";
 
@@ -34,6 +34,7 @@
           foo  = mock.namespace("foo");
 
       // Check doesn't implement mock interface via duck typing
+      // Could use a pass-through for in check?
       assert( typeof foo.accepts === "undefined" );
       assert( typeof foo.calls === "undefined" );
 
@@ -157,69 +158,41 @@
 
     "multiple stubbed properties": function () {
 
+      // SETUP
       var ninja = new Mock;
-      // EXERCISE - invalid property naming (shadow QMock API)
-      try {
-        ninja.property('expects');
-        fail("Expected 'InvalidPropertyNameException'");
-      } catch (e) {
-        equals(e.type, "InvalidPropertyNameException");
-      }
 
-      var ninja = (new Mock)
-                    .property("rank", "apprentice");
+      // TC: Negative - invalid property naming (shadow QMock API)
+      // EXERCISE & VERIFY
+      ninja.property('expects');
+      assert.exception(ninja.verify, "InvalidPropertyNameException")
 
-      equals( ninja.rank, "apprentice" )
+      // TC: Positive - Test all object types can be stored
+      // SETUP
+      function Custom () {}; /* stub constructor fn */
 
-      ninja = (new Mock) // with 'new' keyword
-                .property("rank", "apprentice")
-                .property("master", "The Chrome");
+      var wizard = (new Mock)
+        .property("number", 1)
+        .property("boolean", true)
+        .property("string", "foo")
+        .property("null", null)
+        .property("undefined", undefined)
+        .property("function", function stubbedFunction () {})
+        .property("object", {})
+        .property("array", [])
+        .property("regExp", /RegExp/)
+        .property("date", new Date(1970))
+        .property("custom object", new Custom);
 
-      equals(ninja.rank, "apprentice");
-      equals(ninja.master, "The Chrome");
-
-    // Composite
-    var samurai = Mock() // without new
-                    .property("rank", "apprentice")
-                    .method("swing")
-                  .end()
-                    .property("master", "The Chrome");
-
-    // EXERCISE
-    samurai.swing();
-
-    // VERIFY
-    assert( samurai.verify() );
-    equals(ninja.rank, "apprentice");
-    equals(ninja.master, "The Chrome");
-
- 	  // Test all object types can be stored on property
-
- 	  function Custom () {};
-
- 	  var wizard = (new Mock)
-      .property("number", 1)
-      .property("boolean", true)
-      .property("string", "foo")
-      .property("null", null)
-      .property("undefined", undefined)
-      .property("function", function stubbedFunction () {})
-      .property("object", {})
-      .property("array", [])
-      .property("regExp", /RegExp/)
-      .property("date", new Date(1970))
-      .property("custom object", new Custom);
-
- 	  // No need to exercise - all stubs
- 	  equals( wizard["number"], 1, "wizard mock object should have a stubbed property of 'number' with a value of (Number: 1)");
- 	  equals( wizard["boolean"], true, "wizard mock object should have a stubbed property of 'number' with a value of (Boolean: true)");
- 	  equals( wizard["null"], null, "wizard mock object should have a stubbed property of 'null' with a value of (null)");
- 	  equals( typeof wizard["function"], "function", "wizard mock object should have a stubbed property of 'function' with a value of (Function: function stubbedFunction () {})");
- 	  equals( typeof wizard["object"], "object", "wizard mock object should have a stubbed property of 'object' with a value of (Object: {})");
- 	  equals( wizard["array"].constructor, Array, "wizard mock object should have a stubbed property of 'array' with a value of (Array: [])");
- 	  equals( wizard["regExp"].constructor, RegExp, "wizard mock object should have a stubbed property of 'regExp' with a value of (RegExp: /RegExp/)");
- 	  equals( wizard["date"].constructor, Date, "wizard mock object should have a stubbed property of 'date' with a value of (Date: new Date)");
- 	  equals( wizard["custom object"].constructor, Custom, "wizard mock object should have a stubbed property of 'custom object' with a value of (Custom: new Custom)");
+      // VERIFY
+      isNumber(wizard["number"]);
+      isBoolean(wizard["boolean"]);
+      isNull(wizard["null"]);
+      isFunction(wizard["function"]);
+      isObject(wizard["object"]);
+      isArray(wizard["array"]);
+      equals( wizard["regExp"].constructor, RegExp);
+      equals( wizard["date"].constructor, Date);
+      equals( wizard["custom object"].constructor, Custom);
 
     },
 
@@ -263,6 +236,7 @@
 
     "mocked method with explicit invocation call expectation": function () {
 
+      // SETUP
       var ninja = new Mock;
 
       // Test invalid method naming - protect API if using mocked member interface to set methods and properties
@@ -633,6 +607,166 @@
       assert(ninja.verify());
 
     }
+  });
+
+  buster.testCase("Parameter Expectations", {
+
+    "mocked method with single strict parameter - multiple (Number: 3 | 9) expected presentations": function () {
+
+      expect(22);
+
+      var ninja = (new Mock)
+          .method('swing', 1)
+            .receives({accepts: 3}, {accepts: 9})
+            .end();
+
+      // BAD EXERCISES
+
+      // Test no arguments
+
+      ninja.swing();
+
+      try {
+        ninja.verify();
+        ok(false, "verify() should throw exception when ninja.swing() is passed NO parameters");
+      } catch (exception) {
+        equals(exception.length, 1, "verify() should return 1 exception when ninja.swing() passed NO parameters");
+        equals(exception[0].type, "IncorrectNumberOfArgumentsException", "verify() exception type should be IncorrectNumberOfArgumentsException for NO parameters");
+      }
+
+      ninja.reset();
+
+      // Test invalid parameter type - (Function: Constructor)
+
+      ninja.swing(Number);
+
+      try {
+        ninja.verify();
+        ok(false, "verify() should throw exception when ninja.swing() passed incorrect parameter type (Number: Constructor)");
+      } catch (exception) {
+        equals(exception.length, 1, "verify() should return 1 exception when swing() passed incorrect parameter (Number: Constructor)");
+        equals(exception[0].type, "IncorrectParameterException", "verify() exception type should be IncorrectParameterException for (Number: Constructor)");
+      }
+
+      ninja.reset();
+
+      ninja.swing(Object);
+
+      try {
+        ninja.verify();
+        ok(false, "verify() should throw exception when ninja.swing() passed incorrect parameter type (Object: Constructor)");
+      } catch (exception) {
+        equals(exception.length, 1, "verify() should return 1 exception when swing() passed incorrect parameter (Object: Constructor)");
+        equals(exception[0].type, "IncorrectParameterException", "verify() exception type should be IncorrectParameterException for (Object: Constructor)");
+      }
+
+      ninja.reset();
+
+      // Test invalid parameter type - Primitives
+
+      ninja.swing('foo');
+
+      try {
+        ninja.verify();
+        ok(false, "verify() should throw exception when ninja.swing() passed incorrect parameter type (String: 'foo')");
+      } catch (exception) {
+        equals(exception.length, 1, "verify() should return 1 exception when swing() passed incorrect parameter type (String: 'foo')");
+        equals(exception[0].type, "IncorrectParameterException", "verify() exception type should be IncorrectParameterException for (String: 'foo')");
+      }
+
+      ninja.reset();
+
+      ninja.swing(true);
+
+      try {
+        ninja.verify();
+        ok(false, "verify() should throw exception when ninja.swing() passed incorrect parameter type (Boolean: true)");
+      } catch (exception) {
+        equals(exception.length, 1, "verify() should return 1 exception when swing() passed incorrect parameter type (Boolean: true)");
+        equals(exception[0].type, "IncorrectParameterException", "verify() exception type should be IncorrectParameterException for (Boolean: true)");
+      }
+
+      ninja.reset();
+
+      ninja.swing({});
+
+      try {
+        ninja.verify();
+        ok(false, "verify() should throw exception when ninja.swing() passed incorrect parameter type (Object: {})");
+      } catch (exception) {
+        equals(exception.length, 1, "verify() should return 1 exception when swing() passed incorrect parameter type (Object: {})");
+        equals(exception[0].type, "IncorrectParameterException", "verify() exception type should be IncorrectParameterException for (Object: {})");
+      }
+
+      ninja.reset();
+
+      // Test invalid values
+
+      ninja.swing(0);
+
+      try {
+        ninja.verify();
+        ok(false, "verify() should throw exception when ninja.swing() passed incorrect parameter value (Number: 0)");
+      } catch (exception) {
+        equals(exception.length, 1, "verify() should return 1 exception when swing() passed incorrect parameter value (Number: 0)");
+        equals(exception[0].type, "IncorrectParameterException", "verify() exception type should be IncorrectParameterException for (Number: 0)");
+      }
+
+      ninja.reset();
+
+      ninja.swing(2);
+
+      try {
+        ninja.verify();
+        ok(false, "verify() should throw exception when ninja.swing() passed incorrect parameter value (Number: 2)");
+      } catch (exception) {
+        equals(exception.length, 1, "verify() should return 1 exception when swing() passed incorrect parameter value (Number: 2)");
+        equals(exception[0].type, "IncorrectParameterException", "verify() exception type should be IncorrectParameterException for (Number: 2)");
+      }
+
+      ninja.reset();
+
+      ninja.swing(Infinity);
+
+      try {
+        ninja.verify();
+        ok(false, "verify() should throw exception when ninja.swing() passed incorrect parameter value (Number: NaN)");
+      } catch (exception) {
+        equals(exception.length, 1, "verify() should return 1 exception when swing() passed incorrect parameter value (Number: NaN)");
+        equals(exception[0].type, "IncorrectParameterException", "verify() exception type should be IncorrectParameterException for (Number: NaN)");
+      }
+
+      ninja.reset();
+
+
+      ninja.swing(NaN);
+
+      try {
+        ninja.verify();
+        ok(false, "verify() should throw exception when ninja.swing() passed incorrect parameter value (Number: Infinity)");
+      } catch (exception) {
+        equals(exception.length, 1, "verify() should return 1 exception when swing() passed incorrect parameter value (Number: Infinity)");
+        equals(exception[0].type, "IncorrectParameterException", "verify() exception type should be IncorrectParameterException for (Number: Infinity)");
+      }
+
+      ninja.reset();
+
+      // GOOD Exercises
+
+      // Test same parameter type AND expected value [1]
+
+      ninja.swing(3);
+      ok( ninja.verify(), "verify() should pass after ninja.swing() passed [1] *correct* parameter (Number: 3)" );
+
+      ninja.reset();
+
+      // Test same parameter type AND expected value [2]
+
+      ninja.swing(9);
+      ok( ninja.verify(), "verify() should pass after ninja.swing() passed [2] *correct* parameter (Number: 9)" );
+
+    }
+
   });
 
 }(this));
