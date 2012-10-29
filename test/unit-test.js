@@ -163,8 +163,12 @@
 
       // TC: Negative - invalid property naming (shadow QMock API)
       // EXERCISE & VERIFY
-      ninja.property('expects');
-      assert.exception(ninja.verify, "InvalidPropertyNameException")
+      function callback () {
+        ninja.property('expects')
+      }
+      assert.exception(function () {
+        ninja.property('expects');
+      }, "InvalidPropertyNameException");
 
       // TC: Positive - Test all object types can be stored
       // SETUP
@@ -184,15 +188,15 @@
         .property("custom object", new Custom);
 
       // VERIFY
-      isNumber(wizard["number"]);
-      isBoolean(wizard["boolean"]);
-      isNull(wizard["null"]);
-      isFunction(wizard["function"]);
-      isObject(wizard["object"]);
-      isArray(wizard["array"]);
-      equals( wizard["regExp"].constructor, RegExp);
-      equals( wizard["date"].constructor, Date);
-      equals( wizard["custom object"].constructor, Custom);
+      assert.isNumber(wizard["number"]);
+      assert.isBoolean(wizard["boolean"]);
+      assert.isNull(wizard["null"]);
+      assert.isFunction(wizard["function"]);
+      assert.isObject(wizard["object"]);
+      assert.isArray(wizard["array"]);
+      equals(wizard["regExp"].constructor, RegExp);
+      equals(wizard["date"].constructor, Date);
+      equals(wizard["custom object"].constructor, Custom);
 
     },
 
@@ -213,20 +217,19 @@
         .method('getEmptyArrayValue', 1).returns([]).end()
         .method('getEmptyObjectValue', 1).returns({}).end(); // Note we call end() here to ensure mock var set to receiver!
 
-      equals( mock.getNumericValue(), 10, "getNumericValue() on mock should return (Number: 10)");
-      equals( mock.getStringValue(), 'foo', "getStringValue() on mock should return (String: 'foo')");
-      equals( mock.getArrayValue().constructor, Array, "getArrayValue() on mock should return (Array: [ 1, 2, 3 ])");
-      equals( mock.getFunctionValue()(), 'function', "getFunctionValue() on mock, when invoked, should return a (Function)");
-      equals( mock.getObjectValue().constructor, Object.prototype.constructor, "getObjectValue() on mock should return (Object: {id: 5, value: 'value'})");
-      equals( mock.getNullValue(), null, "getNullValue() on mock should return (null)");
-      equals( mock.getUndefinedValue(), undefined, "getUndefinedValue() on mock should return (undefined)");
-      equals( mock.getEmptyStringValue(), "", "getEmptyStringValue() on mock should return (String: '')");
-      equals( mock.getZeroValue(), 0, "getZeroValue() on mock should return (Number: 0)");
-      equals( mock.getTrueValue(), true, "getTrueValue() on mock should return (Boolean: true)");
-      equals( mock.getFalseValue(), false, "getFalseValue() on mock should return (Boolean: false)");
-      equals( mock.getEmptyArrayValue().constructor, Array, "getEmptyArrayValue() on mock should return (Array: [])");
-      equals( mock.getEmptyObjectValue().constructor, Object.prototype.constructor, "getEmptyObjectValue() on mock should return (Object: {})");
-      assert(mock.verify(), "verify() should be true");
+      // Can return truthy values
+      isNumber(mock.getNumericValue());
+      isString( mock.getStringValue(), 'foo');
+      isArray(mock.getArrayValue());
+      isFunction(mock.getFunctionValue());
+      isObject(mock.getObjectValue());
+      isNull(mock.getNullValue());
+
+      // Can return falsy values
+      equals(mock.getUndefinedValue(), undefined);
+      equals(mock.getEmptyStringValue(), "");
+      equals(mock.getZeroValue(), 0);
+      isFalse(mock.getFalseValue());
 
     }
 
