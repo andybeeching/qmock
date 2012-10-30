@@ -622,4 +622,77 @@
 
   });
 
+  buster.testCase("QMock: Mock behaviour (return values)", {
+
+    "strict parameter mapping and paired return value": function () {
+
+      var ninja = (new Mock)
+          .method("swing", 1)
+            .receives({accepts: 'foo', returns: 'bar'}) // Presentation [1]
+            .required(0)
+            .end();
+
+      // TC: Positive - No required args returns undefined (default behaviour)
+      // EXERCISE & VERIFY
+      equals( ninja.swing(), undefined);
+
+      // TC: Negative - IF param passed has strict expectations of "foo"
+      //                Test incorrect param value
+      // SETUP, EXERCISE & VERIFY
+      ninja.reset();
+      ninja.swing("baz");
+      assert.exception(ninja.verify, "IncorrectParameterException");
+
+      // TC: Positive - Pass expected value and receive mapped return value
+      // SETUP, EXERCISE & VERIFY
+      ninja.reset();
+      equals(ninja.swing("foo") , "bar");
+      assert(ninja.verify());
+
+    }
+
+  });
+
+	// test("mocked method with multiple strict parameter (String: 'foo' | 'far' ) and paired return value (String: 'bar' | 'baz' )", function () {
+
+
+	//   var ninja = (new Mock)
+	//       .method("swing",1)
+  	      // .receives(
+  	      //   {accepts: 'foo', returns: 'bar'}, // Presentation [1]
+  	      //   {accepts: 'far', returns: 'baz'} // Presentation [1]
+  	      // )
+  	      // .required(0)
+  	      // .end();
+
+	//   // Bad Exercises
+
+	//   // No argument type - should just return 'global' / default undefined
+	//   equals( ninja.swing(), undefined, "ninja.swing() should return 'undefined' when called with NO parameter");
+
+	//   ninja.reset();
+
+	//   // Argument of right type but wrong value
+	//   ninja.swing("baz");
+	//   try {
+	// 	  ninja.verify();
+	// 	  ok(false, "verify() should throw exception when passed parameter (String: 'baz')");
+	// 	} catch (e) {
+	// 	  equals(e.length, 1, "verify() should return an array of 1 exceptions with Parameter (String: 'baz')");
+	// 	  equals(e[0].type, "IncorrectParameterException", "verify() exception type should be IncorrectParameterException");
+	// 	}
+
+	//   ninja.reset();
+
+	//   // Argument of right type and matching value [1]
+	//   equals( ninja.swing("foo") , "bar", "ninja.swing() should return (String: 'bar') when passed parameter (String: 'foo')");
+	//   ok(ninja.verify(), "verify() should be true");
+
+	//   ninja.reset();
+	//   // Argument of right type and matching value [2]
+	//   equals( ninja.swing("far") , "baz", "ninja.swing() should return (String: 'baz') when passed parameter (String: 'far')");
+	//   ok(ninja.verify(), "verify() should be true");
+
+	// });
+
 }(this));
