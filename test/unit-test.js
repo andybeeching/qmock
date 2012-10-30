@@ -562,6 +562,32 @@
 
   buster.testCase("Parameter Expectations", {
 
+    "test single parameter expectations": function () {
+
+      var ninja = (new Mock)
+          .method('swing', 1)
+            .accepts("foo")
+            .end();
+
+      // TC: Negative - No arguments
+      // EXERCISE & VERIFY
+      ninja.swing();
+      assert.exception(ninja.verify, "IncorrectNumberOfArgumentsException");
+
+      // TC: Negative - Invalid argument
+      // SETUP, EXERCISE & VERIFY
+      ninja.reset();
+      ninja.swing(0);
+      assert.exception(ninja.verify, "IncorrectParameterException");
+
+      // TC: Positive - Pass expected value (3)
+      // SETUP, EXERCISE & VERIFY
+      ninja.reset();
+      ninja.swing("foo");
+      assert(ninja.verify());
+
+    },
+
     "test multiple parameter expectations": function () {
 
       var ninja = (new Mock)
@@ -577,7 +603,6 @@
       // TC: Negative - Invalid argument
       // SETUP, EXERCISE & VERIFY
       ninja.reset();
-      // debugger;
       ninja.swing(0);
       assert.exception(ninja.verify, "IncorrectParameterException");
 
