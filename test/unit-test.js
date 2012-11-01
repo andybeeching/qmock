@@ -689,4 +689,75 @@
 
   });
 
+  buster.testCase("QMock: Mock behaviour (ajax)", {
+
+    "setUp": function() {
+      this.clock = this.useFakeTimers();
+    },
+
+    "mocked method with callback arguments": function () {
+
+      var $ = (new Mock)
+          // Invalid callback
+          .method('get', 1)
+            .accepts('path/to/resource', function onSuccess() {})
+            .fixture({foo: 'bar'})
+            .end();
+
+      // TC: Positive - Callback is executed with stub data
+      // SETUP
+      var called = false;
+
+      // EXERCISE
+      $.get('path/to/resource', function (fixture) { called = fixture.foo; });
+
+      // VERIFY (pause the runner for an appropriate amount of time)
+      this.clock.tick(QMock.config.delay);
+      equals(called, 'bar');
+
+      // TC: Positive - multiple expected callbacks
+      // SETUP
+      var $ = new Mock;
+
+      var success = false;
+      function onSuccess ( fixture ) {
+        success = fixture.foo;
+      }
+
+      var fail = false;
+      function onFail ( fixture ) {
+        fail = fixture.baz;
+      }
+
+      // Suggested syntax for 'cleaner' callbacks
+      $.method('get', 1)
+        .receives(
+          {accepts: ['path/to/resource', onSuccess], fixture: {foo: true}},
+          {accepts: ['path/to/resource', onFail], fixture: {baz: true}}
+        );
+
+      var called = false;
+
+      // EXERCISE
+      $.get('path/to/resource', onSuccess);
+
+      // VERIFY (pause the runner for an appropriate amount of time)
+      this.clock.tick(QMock.config.delay);
+      assert(success);
+
+      // EXERCISE
+      $.get('path/to/resource', onFail);
+
+      // VERIFY (pause the runner for an appropriate amount of time)
+      this.clock.tick(QMock.config.delay);
+      assert(fail);
+
+    },
+
+    "tearDown": function () {
+      this.clock.restore();
+    }
+
+  });
+
 }(this));
