@@ -884,4 +884,55 @@
     //   equals(mock.foo.__getExceptions()[0].type, "IncorrectNumberOfMethodCallsException", "mock.verify() should have raised an 'IncorrectNumberOfMethodCallsException' object");
   });
 
+  buster.testCase("QMock: Spy Function Behaviours", {
+
+    "Spying on functions and constructors": function () {
+
+      var called = false;
+
+      function foo ( bool ) {
+        called = bool;
+      }
+
+      // First do some normal exercise and verification runs
+      // Demonstrates Spy has no 'observer effect' on ops
+
+      // TC: Positive
+      // SETUP, EXERCISE & VERIFY
+      var foo = Spy(foo).calls(1).accepts(true); // accepts optional
+      foo(true);
+      assert(called);
+      assert(foo.verify());
+
+      // TC: Negative - false positive test
+      // EXERCISE & VERIFY
+      foo(true);
+      assert.exception(foo.verify, "IncorrectNumberOfMethodCallsException");
+
+      // TC: Positive - Assert Spy is constructor-safe
+      var baz = new foo;
+      assert(baz instanceof foo);
+
+      // Inspired by http://www.adequatelygood.com/2010/5/Spying-Constructors-in-JavaScript
+      // TODO: Test expected scoping for invocations and return values
+      // TC: Positive - Assert recorder captures
+      // SETUP
+      var obj = {};
+      function fn ( key, value ) {
+        this[ key ] = value;
+      }
+
+      var bar = Spy(fn);
+
+      // EXERCISE
+      bar.call(obj, "taz", "gaz");
+      bar.apply(obj, [ "raz", "paz" ]);
+
+      // VERIFY
+      equals(obj.taz, "gaz");
+      equals(obj.raz, "paz");
+
+    }
+
+  });
 }(this));
