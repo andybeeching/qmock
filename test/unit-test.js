@@ -760,4 +760,98 @@
 
   });
 
+  buster.testCase("Mocked constructors", {
+
+    "mocked constructor with explicit invocation call expectation": function () {
+      var ninja = (new Mock).calls(1);
+
+      // TC: Negative - no method call
+      // VERIFY
+      assert.exception(ninja.verify, "IncorrectNumberOfMethodCallsException");
+
+      // TC: Negative - too many calls
+      // SETUP, EXERCISE & VERIFY
+      ninja.reset();
+      ninja();
+      ninja();
+      assert.exception(ninja.verify, "IncorrectNumberOfMethodCallsException");
+
+      // TC: Positive - expect ZERO calls
+      // SETUP & VERIFY
+      var samurai = (new Mock).calls(0);
+      assert(samurai.verify());
+
+    }
+
+  });
+
+  buster.testCase("Public API", {
+
+    "QMock.config.compare setting": function () {
+
+      // TC: Positive - Try setting the compare function
+      // SETUP
+      function stub () {}
+      var app = QMock.create();
+
+      // EXERCISE & VERIFY
+      app.config.compare = stub;
+      equals(app.config.compare, stub);
+
+    },
+
+    "QMock.create() factory method": function () {
+
+      // TC: Test creation of standalone instances
+      // SETUP
+      var a = QMock.create(),
+          b = QMock.create();
+
+      // Mutate the state for asserting
+      a.isA = true;
+      b.isB = true;
+
+      // VERIFY
+      assert((a !== b));
+      assert((typeof a.isB === "undefined"));
+      assert((typeof b.isA === "undefined"));
+
+    },
+
+    "QMock.utils.is() utility method": function () {
+
+      var is = QMock.utils.is;
+
+      // TC: Negative - false positives
+      refute( is("1", "Number") );
+      refute( is("", "Boolean") );
+      refute( is(0, "Boolean") );
+
+      // TC: Positive
+      assert( is(1, "Number") );
+      assert( is("foo", "String") );
+      assert( is(true, "Boolean") );
+      assert( is([], "Array") );
+      assert( is({}, "Object") );
+      assert( is(new Date, "Date") );
+      assert( is(new RegExp, "RegExp") );
+      assert( is(function () {}, "Function") );
+
+    }
+
+    // "QMock.config.failslow setting": function () {
+    //   // SETUP - create a standalone QMock instance (independent from SUT)
+    //   // By default QMock instance is set to 'fail slow'
+    //   var app = QMock.create(),
+    //       mock = new app.Mock;
+
+    //   // Prep dummy expectations
+    //   mock.method('foo',1).end();
+    //   // No exercise, just verify, should error
+    //   equals(mock.verify(), false, "mock.verify should return 'false', and NOT throw an error when in 'fail slow' mode");
+
+    //   // Check exception was actually thrown but suppressed for debugging
+    //   equals(mock.foo.__getExceptions()[0].type, "IncorrectNumberOfMethodCallsException", "mock.verify() should have raised an 'IncorrectNumberOfMethodCallsException' object");
+  });
+
 }(this));
