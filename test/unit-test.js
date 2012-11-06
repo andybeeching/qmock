@@ -837,6 +837,36 @@
       assert( is(new RegExp, "RegExp") );
       assert( is(function () {}, "Function") );
 
+    },
+
+    "QMock.Utils.verify() utility method": function () {
+
+      var mock = new Mock,
+          verify = QMock.utils.verify;
+
+      // TC: Negative - expect IncorrectNumberOfArguments Ex
+      // SETUP, EXERCISE & VERIFY
+      mock.accepts("foo").calls(1);
+      mock();
+      assert.exception(function() {
+        verify(mock);
+      },"IncorrectNumberOfArgumentsException");
+
+      // TC: Positive
+      // SETUP, EXERCISE, VERIFY
+      mock.reset();
+      mock("foo");
+      assert(verify(mock));
+
+      // TC: Negative - expect IncorrectNumberOfMethodCalls Ex
+      // SETUP, EXERCISE, VERIFY
+      mock.reset();
+      mock("foo");
+      mock("foo");
+      assert.exception(function () {
+        verify(mock);
+      },"IncorrectNumberOfMethodCallsException")
+
     }
 
     // "QMock.config.failslow setting": function () {
