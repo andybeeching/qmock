@@ -92,7 +92,7 @@
         "foo": {
           "id"        : "foobarbaz",
           "accepts"   : "foo",
-          "receives"  : {"accepts": "foo", fixture: "stub", returns: "bar"},
+          "receives"  : {"accepts": "foo", fixture: "stub", returns: "bar"}
           "returns"   : "bar",
           "required"  : 1,
           // nested namespace "faz"
