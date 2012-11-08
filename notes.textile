@@ -1,47 +1,68 @@
-// TODO: Make mock.end() work w/o method
-// Get rid of .__getState(), leaky dude!
+h2. QMock refactor Notes
 
-// TODO: Implement test framework compare function, or auto-detect from popular variants (buster, qunit, jasmine, node?)
-// TODO: Implement assertionCount method
-Research why not default?
+h3. QMock
 
-TODO: Rename ninja/wizard etc to sut?
+h4. Code
 
-// Examine why failslow wasn't working, suspect coerced equality checks
+* QUESTION: Any way to use a global 'use strict' pragma?
 
-// Implement or change coerced checks for QMock
+h4. General Approach/Features
 
-// Beter semantics overall - error messages suck, naming is too generic!
+* Better semantics overall - error messages suck, naming is too generic!
+* THOUGHT: Should even have parameter testing in QMock test suite, since functionality is delegated to runner comparator function?
+* Double check instance and static property notation (# and .)
+* THOUGHT: Consider tests against shadowing API
+** Perhaps it would be good to only accept a descriptor, and use a stratified API and/or prefix the method names to avoid potential collisions?
+** Why should my engine prevent someone mocking out objects with the same identifier as me?
 
-// TODO: Fix IncorrectNumberofMethodCallsException
+h4. API
 
-// THOUGHT: Should even have parameter testing in QMock test suite, since functionality is delegated to runner comparator function?
+* Alter multiple expectations (on one param) to be more atomic
+** Descriptor syntax is too complex: e.g. foo.receives(1).receives(9)
+** Ability to use ranges here? Make it more... fuzzy?
+* THOUGHT: Not convinced with failslow - what is the use case again?
+** Perhaps remote testing? Surely the testrunner should be responsible for collating errors into a report and not crashing any remote process...
 
-// Buster.assert.same compares by reference on primitives? Huh?
+h5. Exceptions
 
-// Double check instance and static property notation (# and .)
+* Improve Exception implementation and flow - it's horrible atm
 
-// Change id ==> "desc"
+h4. Tests
 
-// Modify typeof checks to is() ? e.g. typeof foo == "object" - potential false positves
+* Rename ninja/wizard etc to sut?
+* Support typed mappings to return values / interface guards out of the box.
+** e.g. foo expects String returns "bar"
+* TODO: Modify typeof checks to is() ? e.g. typeof foo == "object" - potential false positves
 
-// Consider tests against shadowing API - perhaps it would be good to only accept a descriptor, and use a stratified API and/or prefix the method names to avoid potential collisions? Why should my engine prevent someone mocking out objects with the same identifier as me?
+h4. TODO
 
-Consider upgrading the test cases to something more relevant/contemporary
+* Make mock.end() work w/o method
+* Get rid of .__getState(), leaky dude!
+* Implement test framework compare function, or auto-detect from popular variants (buster, qunit, jasmine, node?)
+* Implement assertionCount method
+* Examine why failslow wasn't working, suspect coerced equality checks
+* Implement or change coerced checks for QMock
+* Fix IncorrectNumberofMethodCallsException
+* Change id ==> "desc"
 
-// BUSTER THOUGHTS
+h3. Buster
 
-- Can I get better error messages, e.g. {FOO} should have been {BAR} format
+* TODO: Fix named method tests with square brackets in
+* QUESTION: Why does buster not include a line number when assert.exception fails?
+* TODO: Upgrade JsHint (?), or buster lint to latest JSHint?
+* QUESTION: Can I get better error messages, e.g. {FOO} should have been {BAR} format
+* This Async format is hidden 'way' down in the docs - promote it up a bit? Improve clarity (still confused!)
+** -- /Users/admin/src/buster-dev-tools/buster-docs/_build/html/modules/buster-test/test-case.html
 
-// RFACTOR THOUGHTS
+h3. Refactor Thoughts
 
-- Initial file was way too long
-- Lots of needless repetition
--- Sort of point scoring - false metric of testing
--- Undue time to run, want faster feedback loop
-- Broke Buster's convention of 1 test case per file
-- Difficult to navigate
-- Didn't lean on expressive assertions enough
--- Thus bit of a maintenance nightmare
-- Way too many assertions per test
--- Not granular enough - one fails, 20 fail
+* Initial file was way too long
+* Lots of needless repetition
+** Sort of point scoring - false metric of testing
+** Undue time to run, want faster feedback loop
+* Broke Buster's convention of 1 test case per file
+* Difficult to navigate
+* Didn't lean on expressive assertions enough
+** Thus bit of a maintenance nightmare
+* Way too many assertions per test
+** Not granular enough - one fails, 20 fail
