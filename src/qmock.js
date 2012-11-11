@@ -17,13 +17,13 @@
 
 ;(function ( container ) {
 
-  "use strict"
+  "use strict";
 
   // Trap original methods & reduce lookups in a protected context
-  var obj            = {}
-    , slice          = [].slice
-    , toString       = obj.toString
-    , hasOwnProperty = obj.hasOwnProperty
+  var obj      = {}
+    , slice    = [].slice
+    , toString = obj.toString
+    , isOwn    = obj.hasOwnProperty
     , undefined;
 
   // DOCS: QMock.create() -> QMock instance
@@ -58,7 +58,7 @@
     // DOCS: QMock.utils.enumerate( obj, fn[, thisObject][, bool] ) -> Object
     function enumerate ( obj, fn, thisObject, bool ) {
       for ( var key in obj ) {
-        if ( ( bool || hasOwnProperty.call( obj, key) )
+        if ( ( bool || isOwn.call( obj, key) )
           || key === "toString"
           || key === "valueOf" ) {
             fn.call( thisObject || obj, obj[ key ], key, obj );
@@ -105,7 +105,7 @@
     // DOCS: isCompareSet() -> Boolean | Error
     function isCompareSet () {
       if ( !config.compare ) {
-        throw new Error('Comparison routine must be set on QMock.compare with signature fn( a, b )');
+        throw new Error('Comparison routine not set on QMock.compare');
       }
       return true;
     }
@@ -122,13 +122,13 @@
     function mixin ( target, obj, re ) {
       enumerate( obj, function( prop, key ) {
         // Handle overriding
-        target[ key ] = re && re.test( key ) && (typeof prop == "function")
+        target[ key ] = re && re.test( key ) && (typeof prop === "function")
           ? (function ( zuper, nue ) {
               return function () {
                 zuper.apply(this, arguments);
                 return nue.apply(this, arguments);
               };
-            })( target[ key ], prop ) // mitigate pesky multiples
+            }( target[ key ], prop )) // mitigate pesky multiples
           : prop;
       });
       return true;
@@ -147,7 +147,7 @@
     // DOCS: bindInterface( obj, receiver, thisObject )
     function bindInterface ( target, obj, thisObject ) {
       enumerate(obj, function( prop, key ) {
-        if ( typeof prop == "function" ) {
+        if ( typeof prop === "function" ) {
           target[ key ] = bind( prop, thisObject );
         }
       });
@@ -157,20 +157,21 @@
     // TODO: Works whether 'excised' from statemachine or not.
     // TODO: Write docs (and, er.. implement)
     // DOCS: getState() -> Mock | Receiver | Spy
-    function getState ( obj ) {
-      if ( obj instanceof Expectation ) { return obj; }
-      if ( is( obj, "function") ) {
-        if ( obj.__getState ) {
-          return obj.__getState();
-        }
-        // TODO: Add central repository of *all* mocks to search for cached __getState method
-      }
-      return false;
-    }
+    // function getState ( obj ) {
+    //   if ( obj instanceof Expectation ) { return obj; }
+    //   if ( is( obj, "function") ) {
+    //     if ( obj.__getState ) {
+    //       return obj.__getState();
+    //     }
+    //     // TODO: Add central repository of *all* mocks to search for cached __getState method
+    //   }
+    //   return false;
+    // }
 
     // Create a new recorder bound to a specified statemachine
     // DOCS: createRecorder ( mock, bool ) -> Function
     function createRecorder ( mock, fn ) {
+
       function recorder () {
         var args = slice.call( arguments );
         // Mutate state
@@ -178,7 +179,8 @@
         mock.received.push( args );
         // exercise
         return fn ? fn.apply( this, args ) : exerciseMock( mock, args );
-      };
+      }
+
       if ( fn ) {
         // constructor-safe spying (cheers Ben Cherry)
         recorder.prototype = fn.prototype;
@@ -211,7 +213,7 @@
       // Creates a new method on receiver
       // DOCS: Receiver#method( prop, min, max ) -> new Mock
       method: function ( prop, min, max ) {
-        if ( hasOwnProperty.call( this.self, prop ) ) {
+        if ( isOwn.call( this.self, prop ) ) {
           throw {
             name: "InvalidMethodNameException",
             msg: "Qmock expects a unique identifier for each mocked method"
@@ -238,7 +240,7 @@
       // post-excercise)
       // DOCS: Receiver#property( prop, val ) -> Receiver | Mock
       property: function ( prop, value ) {
-        if ( hasOwnProperty.call( this.self, prop ) ) {
+        if ( isOwn.call( this.self, prop ) ) {
           throw {
             name: "InvalidPropertyNameException",
             msg: "Qmock expects a unique key for each stubbed property"
@@ -255,7 +257,7 @@
       // Creates a new namespace on a receiver, essentially a nested Receiver
       // DOCS: Receiver#namespace( id [, desc ] ) -> new Receiver
       namespace: function ( prop, desc ) {
-        if ( hasOwnProperty.call( this.self, prop ) ) {
+        if ( isOwn.call( this.self, prop ) ) {
           throw {
             type: "InvalidNamespaceIdentiferException",
             msg: "Qmock expects a unique key for a namespace identifer"
@@ -371,7 +373,7 @@
 
       // Bind private state to public interface
       // If recorder function then interface already bound
-      if ( typeof proxy == "object" ) {
+      if ( typeof proxy === "object" ) {
         bindInterface( proxy, Receiver.prototype, receiver );
       }
 
@@ -464,7 +466,7 @@
         // Check for valid input to parameterList
         var args = arguments;
         iterate( args, function ( obj ) {
-          if ( !"accepts" in (obj || {}) ) {
+          if ( !( "accepts" in (obj || {}) ) ) {
             throw {
               type: "MissingAcceptsPropertyException",
               msg: "Qmock requires an 'accepts' property for each interface Expectation"
@@ -694,7 +696,7 @@
         enumerate( desc, function ( prop, key, obj ) {
           if ( stop ) { return; }
           // constructor or member?
-          var bool  = typeof mock[ key ] == "undefined",
+          var bool  = typeof mock[ key ] === "undefined",
               entry = bool ? prop : obj || {},
               // method || namespace || property
               type  = getDescriptorType( entry ),
@@ -716,7 +718,7 @@
         // Sweet.
         return mock;
       };
-    })();
+    }());
 
     // Constructor for new ErrorHandlers
     // DOCS: new ErrorHandler( mock ) -> Function
@@ -756,7 +758,7 @@
                 return function () {
                   callback.apply( null, toArray( params ) );
                 }
-              })( item, fixture ), config.delay);
+              }( item, fixture )), config.delay);
             } else {
               item.apply( null, toArray( fixture ) );
             }
@@ -936,11 +938,11 @@
           }
         },
         is: is,
-        eumerate: enumerate,
-        test: function () {
-          arguments[0] = getState( arguments[0] );
-          return comparePresentation.apply( null, arguments );
-        }
+        eumerate: enumerate
+        // test: function () {
+        //   arguments[0] = getState( arguments[0] );
+        //   return comparePresentation.apply( null, arguments );
+        // }
       },
       // only exposed for integration tests
       __bootstrap: bootstrap
@@ -959,4 +961,4 @@
   return true;
 
 // if exports available assume CommonJS
-})( (typeof exports !== "undefined") ? exports : this );
+}( (typeof exports !== "undefined") ? exports : this ));

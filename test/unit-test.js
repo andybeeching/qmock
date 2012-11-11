@@ -1,4 +1,4 @@
-/*global buster, assert*/
+/*global buster, assert, refute, Mock, Spy*/
 (function (global, undefined) {
 
   "use strict";
@@ -73,20 +73,22 @@
     },
 
     "Mock#excise [utility] method": function () {
+      // TC: Positive - Mock can be excised from QMock
+      // SETUP & EXERCISE
       var mock = new Mock(null, false); // plain namespace/receiver
-
-      // EXERCISE
       mock.excise();
 
       // VERIFY: Plain object (i.e. a namespace, not a fn obj)
       var result = true;
       for (var i in mock) {
-        result = false; break;
+        if (mock.hasOwnProperty(i)) {
+          result = false; break;
+        }
       }
-      assert(result, "excised mock shouldn't have any properties on itself");
+      assert(result);
 
-      // SETUP - Custom Properties
-      // Object with a method 'foo', property 'bar', and namespace 'buz'
+      // TC: Positive - Can excise child mocks
+      // SETUP - Obj w/ method 'foo', property 'bar', and namespace 'buz'
       mock = new Mock({
         // method foo()
         "foo": {
@@ -120,7 +122,7 @@
         }
       }, false);
 
-      // excise all mocks
+      // EXERCISE
       mock.excise();
 
       function verifyMock ( obj, keys ) {
@@ -134,11 +136,11 @@
         return result;
       }
 
-      // verify
-      assert(typeof mock == "object", "The mock should be a plain receiver and not a function.");
-      assert(verifyMock( mock, /foo|bar|buz|/ ), "The parent mock receiver should only have the properties ('foo', 'bar', 'buz') set upon it.");
-      assert(verifyMock( mock.foo, /faz|key/ ), "The mock function 'mock.foo()' should only have the properties ('faz', 'key') set upon it.");
-      assert(verifyMock( mock.buz, /baz|daz|gaz/ ), "The mock receiver 'mock.buz' should only have the properties ('baz', 'daz', 'gaz') set upon it.");
+      // VERIFY
+      equals(typeof mock, "object");
+      assert(verifyMock( mock, /foo|bar|buz|/ ));
+      assert(verifyMock( mock.foo, /faz|key/ ));
+      assert(verifyMock( mock.buz, /baz|daz|gaz/ ));
 
     }
 
@@ -172,7 +174,7 @@
 
       // TC: Positive - Test all object types can be stored
       // SETUP
-      function Custom () {}; /* stub constructor fn */
+      function Custom () {} /* stub constructor fn */
 
       var wizard = (new Mock)
         .property("number", 1)
@@ -202,7 +204,7 @@
 
     "multiple mocked methods with defined return values": function () {
 
-      var mock = Mock()
+      var mock = new Mock()
         .method('getNumericValue', 1).returns(10).end()
         .method('getStringValue', 1).returns('foo').end()
         .method('getArrayValue', 1).returns([ 1, 2, 3]).end()
@@ -215,7 +217,8 @@
         .method('getTrueValue', 1).returns(true).end()
         .method('getFalseValue', 1).returns(false).end()
         .method('getEmptyArrayValue', 1).returns([]).end()
-        .method('getEmptyObjectValue', 1).returns({}).end(); // Note we call end() here to ensure mock var set to receiver!
+        // Note we call end() here to ensure mock var set to receiver!
+        .method('getEmptyObjectValue', 1).returns({}).end();
 
       // Can return truthy values
       assert.isNumber(mock.getNumericValue());
@@ -354,159 +357,6 @@
 
     }
   });
-
-  // buster.testCase("QMock: Mock behaviour (parameter expectations)", {
-
-  //   "mocked method with single strict (Number: 1) parameter expectation": function () {
-
-  //     // Test single parameter value expectations, no return value
-  //     var ninja = new Mock;
-  //         // expectations
-  //         ninja
-  //           .expects( 1 )
-  //           .method( 'swing' )
-  //             .accepts( 1 );
-
-  //     // BAD EXERCISES
-
-  //     // Test no arguments
-
-  //     ninja.swing();
-
-  //     try {
-  //       ninja.verify();
-  //       fail("verify() should throw exception when ninja.swing() is passed NO parameters");
-  //     } catch (exception) {
-  //       // equals(exception.length, 1);
-  //       // equals(exception[0].type, "IncorrectNumberOfArgumentsException");
-  //     }
-
-  //     ninja.reset();
-
-  //     // Test invalid parameter type - (Function: Constructor)
-
-  //     ninja.swing(Number);
-
-  //     try {
-  //       ninja.verify();
-  //       fail(false, "verify() should throw exception when ninja.swing() passed incorrect parameter type (Number: Constructor)");
-  //     } catch (exception) {
-  //       equals(exception.length, 1);
-  //       equals(exception[0].type, "IncorrectParameterException");
-  //     }
-
-  //     ninja.reset();
-
-  //     ninja.swing(Object);
-
-  //     try {
-  //       ninja.verify();
-  //       fail("verify() should throw exception when ninja.swing() passed incorrect parameter type (Object: Constructor)");
-  //     } catch (exception) {
-  //       equals(exception.length, 1);
-  //       equals(exception[0].type, "IncorrectParameterException");
-  //     }
-
-  //     ninja.reset();
-
-  //     // Test invalid parameter type - Primitives
-
-  //     // ninja.swing("1");
-
-  //     // try {
-  //     //   ninja.verify();
-  //     //   fail("verify() should throw exception when ninja.swing() passed incorrect parameter type (String: '1')");
-  //     // } catch (exception) {
-  //     //   equals(exception.length, 1);
-  //     //   equals(exception[0].type, "IncorrectParameterException");
-  //     // }
-
-  //     ninja.reset();
-
-  //     ninja.swing(false);
-
-  //     try {
-  //       ninja.verify();
-  //       fail("verify() should throw exception when ninja.swing() passed incorrect parameter type (Boolean: false)");
-  //     } catch (exception) {
-  //       equals(exception.length, 1);
-  //       equals(exception[0].type, "IncorrectParameterException");
-  //     }
-
-  //     ninja.reset();
-
-  //     ninja.swing({});
-
-  //     try {
-  //       ninja.verify();
-  //       fail("verify() should throw exception when ninja.swing() passed incorrect parameter type (Object: {})");
-  //     } catch (exception) {
-  //       equals(exception.length, 1);
-  //       equals(exception[0].type, "IncorrectParameterException");
-  //     }
-
-  //     ninja.reset();
-
-  //     // Test invalid values
-
-  //     ninja.swing(0);
-
-  //     try {
-  //       ninja.verify();
-  //       fail("verify() should throw exception when ninja.swing() passed incorrect parameter value (Number: 0)");
-  //     } catch (exception) {
-  //       equals(exception.length, 1);
-  //       equals(exception[0].type, "IncorrectParameterException");
-  //     }
-
-  //     ninja.reset();
-
-  //     ninja.swing(2);
-
-  //     try {
-  //       ninja.verify();
-  //       fail("verify() should throw exception when ninja.swing() passed incorrect parameter value (Number: 2)");
-  //     } catch (exception) {
-  //       equals(exception.length, 1);
-  //       equals(exception[0].type, "IncorrectParameterException");
-  //     }
-
-  //     ninja.reset();
-
-  //     ninja.swing(Infinity);
-
-  //     try {
-  //       ninja.verify();
-  //       fail("verify() should throw exception when ninja.swing() passed incorrect parameter value (Number: Infinity)");
-  //     } catch (exception) {
-  //       equals(exception.length, 1);
-  //       equals(exception[0].type, "IncorrectParameterException");
-  //     }
-
-  //     ninja.reset();
-
-  //     ninja.swing(NaN);
-
-  //     try {
-  //       ninja.verify();
-  //       fail("verify() should throw exception when ninja.swing() passed incorrect parameter value (Number: NaN)");
-  //     } catch (exception) {
-  //       equals(exception.length, 1);
-  //       equals(exception[0].type, "IncorrectParameterException");
-  //     }
-
-  //     ninja.reset();
-
-  //     // GOOD Exercises
-
-  //     // Test same parameter type AND expected value
-
-  //     ninja.swing(1);
-  //     assert( ninja.verify() );
-
-  //   }
-
-  // });
 
   buster.testCase("QMock overloading behaviour", {
 
@@ -869,19 +719,6 @@
 
     }
 
-    // "QMock.config.failslow setting": function () {
-    //   // SETUP - create a standalone QMock instance (independent from SUT)
-    //   // By default QMock instance is set to 'fail slow'
-    //   var app = QMock.create(),
-    //       mock = new app.Mock;
-
-    //   // Prep dummy expectations
-    //   mock.method('foo',1).end();
-    //   // No exercise, just verify, should error
-    //   equals(mock.verify(), false, "mock.verify should return 'false', and NOT throw an error when in 'fail slow' mode");
-
-    //   // Check exception was actually thrown but suppressed for debugging
-    //   equals(mock.foo.__getExceptions()[0].type, "IncorrectNumberOfMethodCallsException", "mock.verify() should have raised an 'IncorrectNumberOfMethodCallsException' object");
   });
 
   buster.testCase("QMock: Spy Function Behaviours", {
@@ -899,7 +736,7 @@
 
       // TC: Positive
       // SETUP, EXERCISE & VERIFY
-      var foo = Spy(foo).calls(1).accepts(true); // accepts optional
+      var foo = new Spy(foo).calls(1).accepts(true); // accepts optional
       foo(true);
       assert(called);
       assert(foo.verify());
@@ -910,8 +747,9 @@
       assert.exception(foo.verify, "IncorrectNumberOfMethodCallsException");
 
       // TC: Positive - Assert Spy is constructor-safe
-      var baz = new foo;
-      assert(baz instanceof foo);
+      var Foo = foo;
+      var baz = new Foo;
+      assert(baz instanceof Foo);
 
       // Inspired by http://www.adequatelygood.com/2010/5/Spying-Constructors-in-JavaScript
       // TODO: Test expected scoping for invocations and return values
@@ -922,7 +760,7 @@
         this[ key ] = value;
       }
 
-      var bar = Spy(fn);
+      var bar = new Spy(fn);
 
       // EXERCISE
       bar.call(obj, "taz", "gaz");

@@ -26,6 +26,9 @@ h4. API
 h5. Exceptions
 
 * Improve Exception implementation and flow - it's horrible atm
+* Look at exception data structure in JSHint
+* Better exception for compare function
+* Self-invoked expression linting option (bracket outside?)
 
 h4. Tests
 
@@ -44,6 +47,11 @@ h4. TODO
 * Implement or change coerced checks for QMock
 * Fix IncorrectNumberofMethodCallsException
 * Change id ==> "desc"
+
+h4. Linting 'Fixes''
+
+* jshint needs a typof comparison mode (with ==)
+* option for plusplus?
 
 h3. Buster
 
@@ -66,3 +74,6 @@ h3. Refactor Thoughts
 ** Thus bit of a maintenance nightmare
 * Way too many assertions per test
 ** Not granular enough - one fails, 20 fail
+* THOUGHT: Use nested test cases to make test sets more modular
+** Good granularity on both fails, and to work with
+** Can run parent test to see all group pass
