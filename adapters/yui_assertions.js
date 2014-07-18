@@ -1,7 +1,7 @@
 (function() {
-    
+
     var extensions = {
-	
+
         assert: function assert (a, msg) {
             YAHOO.util.Assert.isTrue(a, msg);
         },
@@ -13,9 +13,9 @@
         }
 
     };
-    
+
     for(var fn in extensions) {
         this[fn] = this[fn] || extensions[fn];// this === global scope
     }
-        
+
 })();

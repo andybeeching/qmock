@@ -1,13 +1,13 @@
-/* 
+/*
 
-// Test Case Template 
+// Test Case Template
 
 YAHOO.qMock.unitTests.singleMethod = new YAHOO.tool.TestCase({
 
 	name: "title of testcase",
 
 	setUp: function() {
-	
+
 	},
 	tearDown: function() {
 
@@ -21,23 +21,23 @@ YAHOO.qMock.unitTests.singleMethod = new YAHOO.tool.TestCase({
 	    error: {
 	        testGenericError: true, // any error
 	        testStringError: "I'm a specific error message.", // error msg
-	        testObjectError: new TypeError("Number expected."), // error obj            
+	        testObjectError: new TypeError("Number expected."), // error obj
 	    }
 	},
 	// All test methods must start with 'test'
 	testName: function() {
-		
+
 	}
 });
 
 */
-	
+
 YAHOO.namespace("qMock.unitTests");
-   
+
    	YAHOO.qMock.unitTests.singleMethod = new YAHOO.tool.TestCase({
 
 	    name: "mock with single parameterless method (explicit execution call total, no return value)",
-    
+
 		setUp: function() {
 			// Setup expectations
 			this.ninja = new Mock();
@@ -89,24 +89,24 @@ YAHOO.namespace("qMock.unitTests");
 			this.ninja.swing();
 		    assert(this.ninja.verify(), "verify() should pass after swing called");
 		}
-	}); 
-	
+	});
+
 	YAHOO.qMock.unitTests.singleMethodMultipleExpectations = new YAHOO.tool.TestCase({
 
 	    name: "mock with single parameterless method (arbitrary execution call range, no return value)",
-    
-		setUp: function() { 
+
+		setUp: function() {
 			// Setup expectations
 			this.ninja = new Mock();
 			this.ninja
 				.expects(1,3)
 					.method('swing');
-			
+
 			this.samurai = new Mock();
 			this.samurai
 				.expects(1, Infinity)// Can use any string, inifinity symbol used here.
 					.method('swing');
-					
+
 			this.wizard = new Mock();
 			this.wizard
 				.expects()
@@ -179,11 +179,11 @@ YAHOO.namespace("qMock.unitTests");
 		    }
 		}
 	});
-	
+
 	YAHOO.qMock.unitTests.multipleParamterlessMethods = new YAHOO.tool.TestCase({
 
 	    name: "mock with multiple paramterless methods",
-    
+
 		setUp: function() {
 			// Setup expectations
 			this.ninja = Mock();
@@ -211,11 +211,11 @@ YAHOO.namespace("qMock.unitTests");
 			assert(this.ninja.verify(), "verify() should return true once swing, run and block called");
 		}
 	});
-	
+
 	YAHOO.qMock.unitTests.stubbedProperties = new YAHOO.tool.TestCase({
 
 	    name: "mock with stubbed properties",
-    
+
 		setUp: function() {
 			// Setup expectations
 			this.ninja = new Mock();
@@ -226,7 +226,7 @@ YAHOO.namespace("qMock.unitTests");
 				.andExpects()
 					.property("master")
 					.withValue("The Chrome");
-					
+
 			this.samurai = new Mock();
 
 			this.samurai
@@ -237,8 +237,8 @@ YAHOO.namespace("qMock.unitTests");
 					.method("swing")
 				.andExpects()
 					.property("master")
-					.withValue("The Chrome");					
-			
+					.withValue("The Chrome");
+
 		},
 		testBadExercisePhase: function() {
 			 // Test invalid property naming
@@ -260,7 +260,7 @@ YAHOO.namespace("qMock.unitTests");
 			assert( ( (this.samurai.rank === "apprentice") && (this.samurai.master === "The Chrome") ) , "ninja mock object should have a two properties set correctly")
 		}
 	});
-	
+
 	YAHOO.qMock.unitTests.returnValues = new YAHOO.tool.TestCase({
 
 		name: "mock with no parameters, return values",
@@ -312,40 +312,40 @@ YAHOO.namespace("qMock.unitTests");
 		    assert(this.mock.verify(), "verify() should be true");
 		}
 	});
-	
+
 	YAHOO.qMock.unitTests.primitiveArguments = new YAHOO.tool.TestCase({
 
 		name: "mock with primitive argument types",
 
 		setUp: function() {
-			
+
 			this.ninja = new Mock();
 			this.ninja
 				.expects(1)
 					.method('swing')
 					.withArguments(1);
-			
+
 			this.samurai = new Mock();
 			this.samurai
 				.expects(1)
 					.method('run')
 					.withArguments('fast');
-		
+
 			this.wizard = new Mock();
 			this.wizard
 				.expects(1)
 					.method('fireball')
 					.withArguments(true);
-					
+
 		},
 		testBadArgumentType: function() {
 
 			this.ninja.swing("one");
 
 			try {
-			   this.ninja.verify();	
+			   this.ninja.verify();
 			    fail("verify() should throw exception when swing called with incorrect argument type");
-			} catch (e) {	
+			} catch (e) {
 			    assertEquals(e.length, 1, "verify() should return an array of 1 errors");
 			    assertEquals(e[0].type, "IncorrectArgumentException", "verify() error type should be IncorrectArgumentException");
 			}
@@ -356,16 +356,16 @@ YAHOO.namespace("qMock.unitTests");
 			this.ninja.swing(2);
 
 			try {
-			   this.ninja.verify();	
+			   this.ninja.verify();
 			    fail("verify() should throw exception when swing called with incorrect argument type");
-			} catch (e) {	
+			} catch (e) {
 			    assertEquals(e.length, 1, "verify() should return an array of 1 errors");
 			    assertEquals(e[0].type, "IncorrectArgumentException", "verify() error type should be IncorrectArgumentException");
 			}
 
 		},
 		testGoodArguments: function() {
-		
+
 			this.ninja.swing(1);
 			assert( this.ninja.verify(), "verify() should pass after swing was called once with number primitive type" );
 
@@ -374,10 +374,10 @@ YAHOO.namespace("qMock.unitTests");
 
 			this.wizard.fireball(true);
 			assert( this.wizard.verify(), "verify() should pass after fireball was called once with boolean primitive type" );
-			
+
 		}
 	});
-	
+
 	YAHOO.qMock.unitTests.falseyArguments = new YAHOO.tool.TestCase({
 
 		name: "mock with falsey (null & undefined) argument types",
@@ -389,7 +389,7 @@ YAHOO.namespace("qMock.unitTests");
 			.expects(1)
 				.method('giveUp')
 				.withArguments(null);
-		
+
 		this.samurai = new Mock();
 		this.samurai
 			.expects(1)
@@ -399,7 +399,7 @@ YAHOO.namespace("qMock.unitTests");
 		},
 		// All test methods must start with 'test'
 		testTruthyArgument: function() {
-		
+
 			this.ninja.giveUp("ok");
 
 			try {
@@ -409,7 +409,7 @@ YAHOO.namespace("qMock.unitTests");
 			    assertEquals(e.length, 1, "verify() should return an array of 1 errors");
 			    assertEquals(e[0].type, "IncorrectArgumentException", "verify() error type should be IncorrectArgumentException");
 			}
-			
+
 			this.samurai.fear('everything');
 
 			try {
@@ -419,19 +419,19 @@ YAHOO.namespace("qMock.unitTests");
 			    assertEquals(e.length, 1, "verify() should return an array of 1 errors");
 			    assertEquals(e[0].type, "IncorrectArgumentException", "verify() error type should be IncorrectArgumentException");
 			}
-			
+
 		},
 		testFalseyArguments: function() {
-			
+
 			this.ninja.giveUp(null);
 			assert( this.ninja.verify(), "verify() should pass after giveUp was called once with null" );
 
 			this.samurai.fear(undefined);
 			assert( this.samurai.verify(), "verify() should pass after giveUp was called once with undefined" );
-			
+
 		}
 	});
- 
+
 	YAHOO.util.Event.onDOMReady(function runTests(){
 	    //create the logger
 	    var logger = new YAHOO.tool.TestLogger("testLogger");
@@ -442,7 +442,7 @@ YAHOO.namespace("qMock.unitTests");
 	    YAHOO.tool.TestRunner.add(YAHOO.qMock.unitTests.returnValues);
 	    YAHOO.tool.TestRunner.add(YAHOO.qMock.unitTests.primitiveArguments);
 	    YAHOO.tool.TestRunner.add(YAHOO.qMock.unitTests.falseyArguments);
-		
+
 	    //run the tests
 	    YAHOO.tool.TestRunner.run();
 	});

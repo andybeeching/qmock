@@ -14,7 +14,7 @@ task :build_doc do
     :bust_cache => true,
     :name => 'QMock',
     :version => '0.4.5',
-    :copyright_notice => 'This work is licensed under the GPLv3 and MIT Licenses.' 
+    :copyright_notice => 'This work is licensed under the GPLv3 and MIT Licenses.'
   })
 end
 

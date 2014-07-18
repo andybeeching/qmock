@@ -10,15 +10,15 @@
       <script type="text/javascript" src="../../lib/qmock.js"></script>
 		  <!-- configure QMock -->
       <script type="text/javascript">
-			
+
 			// Set QUnit.equiv as comparison routine
 			// You would normally do this inside of the unit-tests.js file
 			// But in this instance it is common so as to test compatibility with many testrunners
 			QMock.config.compare = QUnit.equiv;
-			
+
 			// Set to 'fail fast' to test error creation
 			QMock.config.failslow = false;
-			
+
 		  </script>
     	<!-- qMock Unit Tests -->
       <script type="text/javascript" src="../unit-tests.js"></script>
